@@ -1,0 +1,18 @@
+{
+	"name": "wporg-pattern-directory",
+	"version": "0.0.0",
+	"description": "wordpress.org/pattern-directory website",
+	"author": "WordPress.org",
+	"license": "GPL-2.0-or-later",
+	"private": true,
+	"dependencies": {
+		"@wordpress/env": "^1.6.0"
+	},
+	"scripts": {
+		"install:env": "./bin/index.sh",
+		"create": "composer install && npm run install:env",
+		"wp-env": "wp-env",
+		"lint:php": "composer run lint",
+		"format:php": "composer run format"
+	}
+}
