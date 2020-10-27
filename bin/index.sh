@@ -14,6 +14,7 @@ yarn wp-env run cli wp config set JETPACK_DEV_DEBUG true
 yarn wp-env run cli wp config set WPORG_SANDBOXED true
 
 # Activate plugins
+yarn wp-env run cli wp plugin activate gutenberg
 yarn wp-env run cli wp plugin activate pattern-directory/bootstrap.php
 
 # Activate theme
