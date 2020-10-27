@@ -13,9 +13,9 @@
 	},
 	"extra": {
 		"installer-paths": {
-			"wp-content/mu-plugins/{$name}/": ["type:wordpress-muplugin"],
-			"wp-content/plugins/{$name}/": ["type:wordpress-plugin"],
-			"wp-content/themes/pub/{$name}/": ["type:wordpress-theme"]
+			"public_html/wp-content/mu-plugins/{$name}/": ["type:wordpress-muplugin"],
+			"public_html/wp-content/plugins/{$name}/": ["type:wordpress-plugin"],
+			"public_html/wp-content/themes/pub/{$name}/": ["type:wordpress-theme"]
 		}
 	},
 	"repositories": [
@@ -25,11 +25,7 @@
 		}
 	],
 	"require": {
-		"composer/installers": "~1.0",
-		"wpackagist-plugin/edit-flow": "*",
-		"wpackagist-plugin/jetpack": "*",
-		"wpackagist-plugin/sensei-lms": "*",
-		"wpackagist-plugin/wordpress-importer": "*"
+		"composer/installers": "~1.0"
 	},
 	"require-dev": {
 		"dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
