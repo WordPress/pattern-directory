@@ -1,6 +1,7 @@
 /**/.DS_STORE
 /**/node_modules
 /vendor
+/**/build
 
 # Allow local environment overrides.
 .wp-env.override.json

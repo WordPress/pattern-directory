@@ -6,7 +6,8 @@
 	"license": "GPL-2.0-or-later",
 	"private": true,
 	"dependencies": {
-		"@wordpress/env": "^1.6.0"
+		"@wordpress/env": "2.1.0",
+		"@wordpress/scripts": "12.4.0"
 	},
 	"scripts": {
 		"create": "composer install && ./bin/index.sh",
@@ -14,5 +15,7 @@
 		"lint:php": "composer run lint",
 		"format:php": "composer run format"
 	},
-	"workspaces": []
+	"workspaces": [
+		"public_html/wp-content/plugins/pattern-creator"
+	]
 }
