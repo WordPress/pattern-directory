@@ -14,5 +14,6 @@
 		"wp-env": "wp-env",
 		"lint:php": "composer run lint",
 		"format:php": "composer run format"
-	}
+	},
+	"workspaces": []
 }
