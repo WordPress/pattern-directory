@@ -2,4 +2,16 @@
 /**/node_modules
 /vendor
 
+# Allow local environment overrides.
 .wp-env.override.json
+
+# Ignore the parent content directories…
+public_html/wp-content/mu-plugins
+public_html/wp-content/plugins
+public_html/wp-content/themes
+public_html/wp-content/uploads
+
+# And specifically include our plugins & themes.
+!public_html/wp-content/plugins/pattern-creator
+!public_html/wp-content/plugins/pattern-directory
+!public_html/wp-content/themes/pattern-directory
