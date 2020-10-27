@@ -3,21 +3,21 @@
 # Exit if any command fails.
 set -e
 
-# Setup the environment
-npm run wp-env start
-
-# Update wp configs
-npm run wp-env run cli wp config set JETPACK_DEV_DEBUG true
-npm run wp-env run cli wp config set WPORG_SANDBOXED true
-
-# Activate plugins
-npm run wp-env run cli wp plugin activate pattern-directory/bootstrap.php
-
-# Activate theme
-npm run wp-env run cli wp theme activate pattern-directory
-
 # Install dependencies
 yarn
 
+# Setup the environment
+yarn wp-env start
+
+# Update wp configs
+yarn wp-env run cli wp config set JETPACK_DEV_DEBUG true
+yarn wp-env run cli wp config set WPORG_SANDBOXED true
+
+# Activate plugins
+yarn wp-env run cli wp plugin activate pattern-directory/bootstrap.php
+
+# Activate theme
+yarn wp-env run cli wp theme activate pattern-directory
+
 # Change permalinks
-npm run wp-env run cli wp rewrite structure '/%postname%/'
+yarn wp-env run cli wp rewrite structure '/%postname%/'

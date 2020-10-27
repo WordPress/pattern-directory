@@ -9,8 +9,7 @@
 		"@wordpress/env": "^1.6.0"
 	},
 	"scripts": {
-		"install:env": "./bin/index.sh",
-		"create": "composer install && npm run install:env",
+		"create": "composer install && ./bin/index.sh",
 		"wp-env": "wp-env",
 		"lint:php": "composer run lint",
 		"format:php": "composer run format"
