@@ -1,0 +1,6 @@
+.block-pattern-creator__editor-loading {
+	height: 10em;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}

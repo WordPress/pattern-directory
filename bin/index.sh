@@ -6,6 +6,9 @@ set -e
 # Install dependencies
 yarn
 
+# Build the project
+yarn workspaces run build
+
 # Setup the environment
 yarn wp-env start
 
@@ -16,6 +19,7 @@ yarn wp-env run cli wp config set WPORG_SANDBOXED true
 # Activate plugins
 yarn wp-env run cli wp plugin activate gutenberg
 yarn wp-env run cli wp plugin activate pattern-directory/bootstrap.php
+yarn wp-env run cli wp plugin activate pattern-creator
 
 # Activate theme
 yarn wp-env run cli wp theme activate pattern-directory
