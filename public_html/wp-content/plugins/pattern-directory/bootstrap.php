@@ -7,3 +7,5 @@
  */
 
 namespace WordPressdotorg\Pattern_Directory;
+
+require_once __DIR__ . '/includes/pattern-post-type.php';
