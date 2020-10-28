@@ -61,9 +61,11 @@ function enqueue_assets() {
 	wp_add_inline_script(
 		'wporg-pattern-creator-script',
 		sprintf(
-			'const wporgBlockPattern = {"settings": %1$s, "postId": %2$s}',
-			wp_json_encode( $settings ),
-			wp_json_encode( get_the_ID() )
+			'var wporgBlockPattern = JSON.parse( decodeURIComponent( \'%s\' ) );',
+			rawurlencode( wp_json_encode( array(
+				'settings' => $settings,
+				'postId'   => get_the_ID(),
+			) ) )
 		),
 		'before'
 	);
