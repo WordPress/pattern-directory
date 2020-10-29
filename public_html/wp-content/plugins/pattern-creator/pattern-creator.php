@@ -101,3 +101,18 @@ function inject_editor_template( $template ) {
 	return __DIR__ . '/view/editor.php';
 }
 add_filter( 'template_include', __NAMESPACE__ . '\inject_editor_template' );
+
+/**
+ * Registers block editor 'wp_template_part' post type.
+ */
+function register_post_type() {
+	\register_post_type(
+		'wp-pattern',
+		array(
+			'public'        => true,
+			'label'         => 'Block Pattern',
+			'show_in_rest'  => true,
+		)
+	);
+}
+add_action( 'init', __NAMESPACE__ . '\register_post_type' );
