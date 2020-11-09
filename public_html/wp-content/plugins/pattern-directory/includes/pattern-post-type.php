@@ -21,7 +21,7 @@ function register_post_type_data() {
 			'public'       => true,
 			'show_in_rest' => true,
 			'rewrite'      => array( 'slug' => 'pattern' ),
-			'supports'     => array( 'title', 'editor', 'author', 'custom-fields', ),
+			'supports'     => array( 'title', 'editor', 'author', 'custom-fields' ),
 		)
 	);
 
@@ -99,17 +99,29 @@ function embed_extra_fields_in_search_endpoint( $schema ) {
 
 /**
  * Enqueue scripts for the block editor.
+ *
+ * @throws \Error If the build files don't exist.
  */
 function enqueue_editor_assets() {
 	if ( POST_TYPE !== get_current_screen()->id ) {
 		return;
 	}
 
+	$dir = dirname( dirname( __FILE__ ) );
+
+	$script_asset_path = "$dir/build/pattern-post-type.asset.php";
+	if ( ! file_exists( $script_asset_path ) ) {
+		throw new \Error( 'You need to run `yarn start` or `yarn build` for the Pattern Directory.' );
+	}
+
+	$script_asset = require( $script_asset_path );
 	wp_enqueue_script(
-		'pattern-post-type',
-		trailingslashit( plugin_dir_url( __DIR__ ) ) . '/javascript/pattern-post-type.js',
-		array( 'wp-element', 'wp-data', 'wp-components', 'wp-plugins', 'wp-edit-post' ),
-		filemtime( dirname( __DIR__ ) . '/javascript/pattern-post-type.js' ),
+		'wporg-pattern-post-type',
+		plugins_url( 'build/pattern-post-type.js', dirname( __FILE__ ) ),
+		$script_asset['dependencies'],
+		$script_asset['version'],
 		true
 	);
+
+	wp_set_script_translations( 'wporg-pattern-post-type', 'wporg-patterns' );
 }
