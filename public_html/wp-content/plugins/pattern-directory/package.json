@@ -1,0 +1,24 @@
+{
+	"name": "wporg-pattern-directory",
+	"version": "1.0.0",
+	"description": "Creates a directory to manage block patterns.",
+	"author": "The WordPress Meta Team",
+	"license": "GPL-2.0-or-later",
+	"scripts": {
+		"build": "wp-scripts build pattern-post-type=./src/pattern-post-type.js",
+		"format:js": "wp-scripts format-js",
+		"lint:css": "echo \"No CSS.\"",
+		"lint:js": "wp-scripts lint-js",
+		"start": "wp-scripts start pattern-post-type=./src/pattern-post-type.jst"
+	},
+	"dependencies": {
+		"@wordpress/scripts": "12.5.0"
+	},
+	"eslintConfig": {
+		"extends": "../../../../.eslintrc.js"
+	},
+	"prettier": "../../../../.prettierrc.js",
+	"stylelint": {
+		"extends": "../../../../.stylelintrc"
+	}
+}

@@ -16,6 +16,7 @@
 		"format:php": "composer run format"
 	},
 	"workspaces": [
-		"public_html/wp-content/plugins/pattern-creator"
+		"public_html/wp-content/plugins/pattern-creator",
+		"public_html/wp-content/plugins/pattern-directory"
 	]
 }
