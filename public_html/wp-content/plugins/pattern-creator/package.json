@@ -13,7 +13,7 @@
 	},
 	"dependencies": {
 		"@wordpress/icons": "2.8.0",
-		"@wordpress/scripts": "12.4.0"
+		"@wordpress/scripts": "12.5.0"
 	},
 	"eslintConfig": {
 		"extends": "../../../../.eslintrc.js",
