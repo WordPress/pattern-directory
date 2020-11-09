@@ -17,6 +17,6 @@ Theme
 
 See the [root Readme for dev environment info.](../../../readme.md)
 
-Create some Block Patterns in wp-admin, `/wp-admin/post-new.php?post_type=wp-pattern`.
+Create some Block Patterns in wp-admin, `/wp-admin/post-new.php?post_type=wporg-pattern`.
 
 View a published pattern, if you're logged in you should see the pattern editor. Play around & save your pattern.

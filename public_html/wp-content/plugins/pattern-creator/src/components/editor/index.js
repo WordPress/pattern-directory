@@ -8,6 +8,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import { POST_TYPE } from '../../store/utils';
 import './style.css';
 
 export default function Editor() {
@@ -15,7 +16,7 @@ export default function Editor() {
 		const { isResolving } = select( 'core/data' );
 		const { getEditingBlockPatternId } = select( 'wporg/block-pattern-creator' );
 		const patternId = getEditingBlockPatternId();
-		return isResolving( 'core', 'getEntityRecord', [ 'postType', 'wp-pattern', patternId ] );
+		return isResolving( 'core', 'getEntityRecord', [ 'postType', POST_TYPE, patternId ] );
 	} );
 
 	return (

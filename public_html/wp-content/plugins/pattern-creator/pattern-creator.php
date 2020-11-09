@@ -11,6 +11,7 @@
  */
 
 namespace WordPressdotorg\Pattern_Creator;
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 /**
  * Check the conditions of the page to determine if the editor should load.
@@ -20,7 +21,7 @@ namespace WordPressdotorg\Pattern_Creator;
 function should_load_creator() {
 	return (
 		function_exists( 'gutenberg_experimental_global_styles_get_merged_origins' ) &&
-		\is_singular( 'wp-pattern' )
+		\is_singular( POST_TYPE )
 	);
 }
 
@@ -101,18 +102,3 @@ function inject_editor_template( $template ) {
 	return __DIR__ . '/view/editor.php';
 }
 add_filter( 'template_include', __NAMESPACE__ . '\inject_editor_template' );
-
-/**
- * Registers block editor 'wp_template_part' post type.
- */
-function register_post_type() {
-	\register_post_type(
-		'wp-pattern',
-		array(
-			'public'        => true,
-			'label'         => 'Block Pattern',
-			'show_in_rest'  => true,
-		)
-	);
-}
-add_action( 'init', __NAMESPACE__ . '\register_post_type' );

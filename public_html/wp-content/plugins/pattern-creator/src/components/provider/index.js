@@ -7,8 +7,13 @@ import { useDispatch } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
 import { useEntityBlockEditor } from '@wordpress/core-data';
 
+/**
+ * Internal dependencies
+ */
+import { POST_TYPE } from '../../store/utils';
+
 export default function Provider( { blockEditorSettings, patternId, ...props } ) {
-	const [ blocks, onInput, onChange ] = useEntityBlockEditor( 'postType', 'wp-pattern', { id: patternId } );
+	const [ blocks, onInput, onChange ] = useEntityBlockEditor( 'postType', POST_TYPE, { id: patternId } );
 	const { editBlockPattern } = useDispatch( 'wporg/block-pattern-creator' );
 	useEffect( () => {
 		editBlockPattern( patternId );
