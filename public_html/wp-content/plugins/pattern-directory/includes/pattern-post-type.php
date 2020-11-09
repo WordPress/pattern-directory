@@ -21,7 +21,7 @@ function register_post_type_data() {
 			'public'       => true,
 			'show_in_rest' => true,
 			'rewrite'      => array( 'slug' => 'pattern' ),
-			'supports'     => array( 'title', 'editor', 'author', 'custom-fields', ),
+			'supports'     => array( 'title', 'editor', 'author', 'custom-fields' ),
 		)
 	);
 
