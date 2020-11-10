@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { dispatch, select } from '@wordpress/data-controls';
+import { dispatch, select } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -16,8 +16,8 @@ export function editBlockPattern( patternId ) {
  * Save a block pattern.
  */
 export function* saveBlockPattern() {
-	const patternId = yield select( MODULE_KEY, 'getEditingBlockPatternId' );
+	const patternId = yield select( MODULE_KEY ).getEditingBlockPatternId();
 
 	// @todo maybe check for errors?
-	yield dispatch( 'core', 'saveEditedEntityRecord', KIND, POST_TYPE, patternId );
+	yield dispatch( 'core' ).saveEditedEntityRecord( KIND, POST_TYPE, patternId );
 }
