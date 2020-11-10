@@ -19,6 +19,21 @@ export function editBlockPatternId( patternId ) {
 }
 
 /**
+ * Set the ID of the block pattern which is being edited.
+ * Helper layer over `editEntityRecord`.
+ *
+ * @param {Object} edits   The edits.
+ * @param {Object} options Options for the edit.
+ * @param {boolean} options.undoIgnore Whether to ignore the edit in undo history or not.
+ * @yield {Object} Action object
+ */
+export function* editBlockPattern( edits, options = {} ) {
+	const patternId = yield select( MODULE_KEY ).getEditingBlockPatternId();
+
+	yield dispatch( 'core' ).editEntityRecord( KIND, POST_TYPE, patternId, edits, options );
+}
+
+/**
  * Save a block pattern.
  *
  * @yield {Object} Action object

@@ -6,7 +6,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { KIND, MODULE_KEY, POST_TYPE } from '../utils';
+import { MODULE_KEY } from '../utils';
 
 /**
  * A hook to get and set a post meta value.
@@ -20,16 +20,16 @@ export default function usePostMeta( key, defaultValue = '' ) {
 	const patternId = useSelect( ( select ) => select( MODULE_KEY ).getEditingBlockPatternId() );
 
 	const metaValue = useSelect( ( select ) => {
-		const { meta = {} } = select( 'core' ).getEditedEntityRecord( KIND, POST_TYPE, patternId );
+		const { meta = {} } = select( MODULE_KEY ).getEditedBlockPattern( patternId );
 		if ( ! meta ) {
 			return defaultValue;
 		}
 		return meta[ key ] || defaultValue;
 	} );
 
-	const { editEntityRecord } = useDispatch( 'core' );
+	const { editBlockPattern } = useDispatch( MODULE_KEY );
 	const setMetaValue = ( value ) => {
-		editEntityRecord( KIND, POST_TYPE, patternId, {
+		editBlockPattern( {
 			meta: {
 				[ key ]: value,
 			},
