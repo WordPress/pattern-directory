@@ -7,12 +7,22 @@ import { PanelBody, PanelRow, SelectControl, TextControl, TextareaControl } from
  * Internal dependencies
  */
 import usePostMeta from '../../store/hooks/use-post-meta';
+import usePostTaxonomy from '../../store/hooks/use-post-taxonomy';
+
+// Map the terms from WordPress into options supported by SelectControl.
+const termList = Object.entries( wporgBlockPattern.categories ).map( ( [ value, label ] ) => ( {
+	value: Number( value ),
+	label: label,
+} ) );
 
 export default function Settings() {
 	const title = '';
 	const onChange = () => {};
 	const [ description, setDescription ] = usePostMeta( 'wpop_description', '' );
 	const [ viewportWidth, setViewportWidth ] = usePostMeta( 'wpop_viewport_width', '' );
+	// Double-destructured because the terms default to an array, but we will only have one category.
+	// Note: This slug should be the "REST base", not the taxonomy slug.
+	const [ [ term ], setTerms ] = usePostTaxonomy( 'pattern-categories' );
 
 	return (
 		<>
@@ -28,7 +38,12 @@ export default function Settings() {
 					<TextareaControl label="Description" value={ description } onChange={ setDescription } />
 				</PanelRow>
 				<PanelRow>
-					<SelectControl label="Categories" value={ '' } onChange={ onChange } />
+					<SelectControl
+						label="Pattern Categories"
+						value={ term }
+						options={ termList }
+						onChange={ setTerms }
+					/>
 				</PanelRow>
 				<PanelRow>
 					<SelectControl label="Preview width" value={ viewportWidth } onChange={ setViewportWidth } />
