@@ -3,13 +3,16 @@
  */
 import { PanelBody, PanelRow, SelectControl, TextControl, TextareaControl } from '@wordpress/components';
 
+/**
+ * Internal dependencies
+ */
+import usePostMeta from '../../store/hooks/use-post-meta';
+
 export default function Settings() {
 	const title = '';
-	const description = '';
-	const categories = '';
-	// const keywords = '';
-	// const viewportWidth = '';
 	const onChange = () => {};
+	const [ description, setDescription ] = usePostMeta( 'wpop_description', '' );
+	const [ viewportWidth, setViewportWidth ] = usePostMeta( 'wpop_viewport_width', '' );
 
 	return (
 		<>
@@ -22,10 +25,13 @@ export default function Settings() {
 					<TextControl label="Pattern Name" value={ title } onChange={ onChange } />
 				</PanelRow>
 				<PanelRow>
-					<TextareaControl label="Description" value={ description } onChange={ onChange } />
+					<TextareaControl label="Description" value={ description } onChange={ setDescription } />
 				</PanelRow>
 				<PanelRow>
-					<SelectControl label="Categories" value={ categories } onChange={ onChange } />
+					<SelectControl label="Categories" value={ '' } onChange={ onChange } />
+				</PanelRow>
+				<PanelRow>
+					<SelectControl label="Preview width" value={ viewportWidth } onChange={ setViewportWidth } />
 				</PanelRow>
 			</PanelBody>
 		</>
