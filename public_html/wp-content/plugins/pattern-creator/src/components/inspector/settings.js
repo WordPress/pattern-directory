@@ -39,7 +39,16 @@ export default function Settings() {
 					options={ termList }
 					onChange={ setTerms }
 				/>
-				<SelectControl label="Preview width" value={ viewportWidth } onChange={ setViewportWidth } />
+				<SelectControl
+					label="Preview Width"
+					value={ viewportWidth }
+					onChange={ setViewportWidth }
+					options={ [
+						{ value: 800, label: 'Normal' },
+						{ value: 1100, label: 'Wide' },
+						{ value: 1400, label: 'Extra Wide' },
+					] }
+				/>
 			</PanelBody>
 		</>
 	);
