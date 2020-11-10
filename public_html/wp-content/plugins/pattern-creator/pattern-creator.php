@@ -64,8 +64,15 @@ function enqueue_assets() {
 		sprintf(
 			'var wporgBlockPattern = JSON.parse( decodeURIComponent( \'%s\' ) );',
 			rawurlencode( wp_json_encode( array(
-				'settings' => $settings,
-				'postId'   => get_the_ID(),
+				'settings'   => $settings,
+				'postId'     => get_the_ID(),
+				'categories' => get_terms(
+					'wporg-pattern-category',
+					array(
+						'hide_empty' => false,
+						'fields' => 'id=>name',
+					)
+				),
 			) ) )
 		),
 		'before'
