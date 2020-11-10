@@ -14,9 +14,9 @@ import { POST_TYPE } from '../../store/utils';
 
 export default function Provider( { blockEditorSettings, patternId, ...props } ) {
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor( 'postType', POST_TYPE, { id: patternId } );
-	const { editBlockPattern } = useDispatch( 'wporg/block-pattern-creator' );
+	const { editBlockPatternId } = useDispatch( 'wporg/block-pattern-creator' );
 	useEffect( () => {
-		editBlockPattern( patternId );
+		editBlockPatternId( patternId );
 	}, [ patternId ] );
 
 	return (

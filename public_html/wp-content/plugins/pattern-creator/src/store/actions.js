@@ -8,12 +8,20 @@ import { dispatch, select } from '@wordpress/data';
  */
 import { KIND, MODULE_KEY, POST_TYPE } from './utils';
 
-export function editBlockPattern( patternId ) {
+/**
+ * Set the ID of the block pattern which is being edited.
+ *
+ * @param {number} patternId
+ * @return {Object} Action object
+ */
+export function editBlockPatternId( patternId ) {
 	return { type: 'EDIT_BLOCK_PATTERN', value: patternId };
 }
 
 /**
  * Save a block pattern.
+ *
+ * @yield {Object} Action object
  */
 export function* saveBlockPattern() {
 	const patternId = yield select( MODULE_KEY ).getEditingBlockPatternId();
