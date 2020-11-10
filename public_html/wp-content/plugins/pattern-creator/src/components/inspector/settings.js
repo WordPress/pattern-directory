@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { PanelBody, PanelRow, SelectControl, TextControl, TextareaControl } from '@wordpress/components';
+import { PanelBody, SelectControl, TextControl, TextareaControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -31,23 +31,15 @@ export default function Settings() {
 				<span>Info about saving a block pattern.</span>
 			</div>
 			<PanelBody title="My Block Settings" initialOpen={ true }>
-				<PanelRow>
-					<TextControl label="Pattern Name" value={ title } onChange={ onChange } />
-				</PanelRow>
-				<PanelRow>
-					<TextareaControl label="Description" value={ description } onChange={ setDescription } />
-				</PanelRow>
-				<PanelRow>
-					<SelectControl
-						label="Pattern Categories"
-						value={ term }
-						options={ termList }
-						onChange={ setTerms }
-					/>
-				</PanelRow>
-				<PanelRow>
-					<SelectControl label="Preview width" value={ viewportWidth } onChange={ setViewportWidth } />
-				</PanelRow>
+				<TextControl label="Pattern Name" value={ title } onChange={ onChange } />
+				<TextareaControl label="Description" value={ description } onChange={ setDescription } />
+				<SelectControl
+					label="Pattern Categories"
+					value={ term }
+					options={ termList }
+					onChange={ setTerms }
+				/>
+				<SelectControl label="Preview width" value={ viewportWidth } onChange={ setViewportWidth } />
 			</PanelBody>
 		</>
 	);
