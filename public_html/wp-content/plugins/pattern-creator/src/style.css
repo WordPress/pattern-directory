@@ -1,5 +1,6 @@
 :root {
 	--default-font: sans-serif;
+	--default-line-height: 1.4;
 	--editor-font: sans-serif;
 	--default-font-size: 14px;
 	--editor-font-size: 18px;
