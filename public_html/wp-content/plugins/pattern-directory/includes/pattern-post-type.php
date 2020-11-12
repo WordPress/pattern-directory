@@ -32,7 +32,7 @@ function register_post_type_data() {
 			'public'        => true,
 			'hierarchical'  => true,
 			'show_in_rest'  => true,
-			'rest_base'     => 'category',
+			'rest_base'     => 'pattern-categories',
 		)
 	);
 
