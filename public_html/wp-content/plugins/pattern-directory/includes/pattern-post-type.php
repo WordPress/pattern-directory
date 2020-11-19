@@ -92,7 +92,7 @@ function embed_extra_fields_in_search_endpoint( $schema ) {
 	$schema['properties']['content']['context'][]                           = 'embed';
 	$schema['properties']['content']['properties']['rendered']['context'][] = 'embed';
 	$schema['properties']['meta']['context'][]                              = 'embed';
-	$schema['properties']['category']['context'][]                          = 'embed';
+	$schema['properties']['pattern-categories']['context'][]                = 'embed';
 
 	return $schema;
 }
