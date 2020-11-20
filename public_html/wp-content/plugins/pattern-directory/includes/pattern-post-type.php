@@ -103,7 +103,7 @@ function embed_extra_fields_in_search_endpoint( $schema ) {
  * @throws \Error If the build files don't exist.
  */
 function enqueue_editor_assets() {
-	if ( POST_TYPE !== get_current_screen()->id ) {
+	if ( function_exists( 'get_current_screen' ) && POST_TYPE !== get_current_screen()->id ) {
 		return;
 	}
 

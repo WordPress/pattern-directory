@@ -1,20 +1,29 @@
 /**
  * External dependencies
  */
-import { render } from '@wordpress/element';
-import { registerCoreBlocks } from '@wordpress/block-library';
+import apiFetch from '@wordpress/api-fetch';
+import domReady from '@wordpress/dom-ready';
+import { initializeEditor } from '@wordpress/edit-post';
+import { unregisterBlockType } from '@wordpress/blocks';
 import '@wordpress/format-library';
 
 /**
  * Internal dependencies
  */
-import Layout from './components/layout';
-import './store';
+import { filterEndpoints, interceptUploads } from './api-middleware';
 import './style.css';
 
-registerCoreBlocks();
+// Set up API middleware.
+apiFetch.use( filterEndpoints );
+apiFetch.use( interceptUploads );
 
-render(
-	<Layout settings={ wporgBlockPattern.settings } postId={ wporgBlockPattern.postId } />,
-	document.getElementById( 'block-pattern-creator' )
-);
+new Promise( ( resolve ) => {
+	domReady( () => {
+		resolve(
+			initializeEditor( 'block-pattern-creator', 'wporg-pattern', wporgBlockPattern.postId, wporgBlockPattern.settings, {} )
+		);
+	} );
+} ).then( () => {
+	// After the editor is initialized, we can set up any block customizations.
+	unregisterBlockType( 'core/shortcode' );
+} );
