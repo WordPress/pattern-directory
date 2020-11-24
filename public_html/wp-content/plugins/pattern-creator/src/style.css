@@ -1,4 +1,14 @@
-/* No sidebar. */
+#block-pattern-creator {
+	position: relative;
+	height: 90vh;
+}
+
 .interface-interface-skeleton {
+	position: absolute;
+	height: unset;
 	left: 0;
+}
+
+.interface-interface-skeleton__footer {
+	position: absolute;
 }
