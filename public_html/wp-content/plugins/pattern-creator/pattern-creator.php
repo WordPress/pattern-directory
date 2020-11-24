@@ -98,14 +98,12 @@ function enqueue_assets() {
 	}
 
 	$settings = array(
-		// 'alignWide'                            => $align_wide,
-		// 'availableTemplates'                   => $available_templates,
+		'alignWide'                            => true,
 		'allowedBlockTypes'                    => true,
 		'disableCustomColors'                  => get_theme_support( 'disable-custom-colors' ),
 		'disableCustomFontSizes'               => get_theme_support( 'disable-custom-font-sizes' ),
 		'disableCustomGradients'               => get_theme_support( 'disable-custom-gradients' ),
 		'disablePostFormats'                   => ! current_theme_supports( 'post-formats' ),
-		/** This filter is documented in wp-admin/edit-form-advanced.php */
 		'titlePlaceholder'                     => __( 'Create Pattern', 'wporg-patterns' ),
 		'bodyPlaceholder'                      => __( 'Start writing or type / to choose a block', 'wporg-patterns' ),
 		'isRTL'                                => is_rtl(),
