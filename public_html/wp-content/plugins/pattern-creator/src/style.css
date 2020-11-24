@@ -12,3 +12,18 @@
 .interface-interface-skeleton__footer {
 	position: absolute;
 }
+
+/* Prevent title placeholder from appearing at page load. */
+.edit-post-visual-editor__post-title-wrapper {
+	display: none;
+}
+
+/* Hide the preview dropdown. */
+.block-editor-post-preview__dropdown {
+	display: none;
+}
+
+/* Hide the revisions UI. */
+.edit-post-last-revision__panel {
+	display: none;
+}

@@ -54,12 +54,6 @@ function enqueue_assets() {
 
 	wp_set_script_translations( 'wporg-pattern-creator-script', 'wporg-pattern-creator' );
 
-	// Media settings.
-	$max_upload_size = wp_max_upload_size();
-	if ( ! $max_upload_size ) {
-		$max_upload_size = 0;
-	}
-
 	// Editor Styles.
 	$styles = array(
 		array(
@@ -69,59 +63,26 @@ function enqueue_assets() {
 		),
 	);
 
-	/** This filter is documented in wp-admin/includes/media.php */
-	$image_size_names = apply_filters(
-		'image_size_names_choose',
-		array(
-			'thumbnail' => __( 'Thumbnail' ),
-			'medium'    => __( 'Medium' ),
-			'large'     => __( 'Large' ),
-			'full'      => __( 'Full Size' ),
-		)
-	);
-
-	$available_image_sizes = array();
-	foreach ( $image_size_names as $image_size_slug => $image_size_name ) {
-		$available_image_sizes[] = array(
-			'slug' => $image_size_slug,
-			'name' => $image_size_name,
-		);
-	}
-
-	$image_dimensions = array();
-	$all_sizes        = wp_get_registered_image_subsizes();
-	foreach ( $available_image_sizes as $size ) {
-		$key = $size['slug'];
-		if ( isset( $all_sizes[ $key ] ) ) {
-			$image_dimensions[ $key ] = $all_sizes[ $key ];
-		}
-	}
-
 	$settings = array(
-		'alignWide'                            => true,
-		'allowedBlockTypes'                    => true,
-		'disableCustomColors'                  => get_theme_support( 'disable-custom-colors' ),
-		'disableCustomFontSizes'               => get_theme_support( 'disable-custom-font-sizes' ),
-		'disableCustomGradients'               => get_theme_support( 'disable-custom-gradients' ),
-		'disablePostFormats'                   => ! current_theme_supports( 'post-formats' ),
-		'titlePlaceholder'                     => __( 'Create Pattern', 'wporg-patterns' ),
+		'alignWide'                            => true, // Support wide patterns.
+		'allowedBlockTypes'                    => true, // All block types.
+		'disablePostFormats'                   => true,
+		'enableCustomFields'                   => false,
 		'bodyPlaceholder'                      => __( 'Start writing or type / to choose a block', 'wporg-patterns' ),
 		'isRTL'                                => is_rtl(),
 		'autosaveInterval'                     => AUTOSAVE_INTERVAL,
-		'maxUploadFileSize'                    => $max_upload_size,
-		'allowedMimeTypes'                     => get_allowed_mime_types(),
+		'maxUploadFileSize'                    => 0,
 		'styles'                               => $styles,
-		'imageSizes'                           => $available_image_sizes,
-		'imageDimensions'                      => $image_dimensions,
 		'richEditingEnabled'                   => user_can_richedit(),
 		'__experimentalBlockPatterns'          => array(),
 		'__experimentalBlockPatternCategories' => array(),
 
-		// Whether or not to load the 'postcustom' meta box is stored as a user meta
-		// field so that we're not always loading its assets.
-		'enableCustomFields'                   => (bool) get_user_meta( get_current_user_id(), 'enable_custom_fields', true ),
-		'enableCustomLineHeight'               => get_theme_support( 'custom-line-height' ),
-		'enableCustomUnits'                    => get_theme_support( 'custom-units' ),
+		// Editor features -  @todo Re-enable later?
+		'disableCustomColors'                  => true,
+		'disableCustomFontSizes'               => true,
+		'disableCustomGradients'               => true,
+		'enableCustomLineHeight'               => false,
+		'enableCustomUnits'                    => false,
 	);
 
 	wp_add_inline_script(

@@ -11,6 +11,8 @@ import '@wordpress/format-library';
  * Internal dependencies
  */
 import { filterEndpoints, interceptUploads } from './api-middleware';
+import './plugins/main-dashboard-button';
+import './plugins/preview-button';
 import './style.css';
 
 // Set up API middleware.
@@ -27,3 +29,4 @@ new Promise( ( resolve ) => {
 	// After the editor is initialized, we can set up any block customizations.
 	unregisterBlockType( 'core/shortcode' );
 } );
+

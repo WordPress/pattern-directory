@@ -7,6 +7,7 @@
 	"private": true,
 	"dependencies": {
 		"@wordpress/env": "2.1.0",
+		"@wordpress/interface": "0.10.4",
 		"@wordpress/scripts": "12.5.0"
 	},
 	"scripts": {
