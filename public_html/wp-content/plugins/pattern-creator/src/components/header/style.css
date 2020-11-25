@@ -9,7 +9,6 @@
 	margin: 0;
 	font-size: 23px;
 	font-weight: 400;
-	line-height: var(--default-line-height);
 }
 
 .block-pattern-creator__header-actions {

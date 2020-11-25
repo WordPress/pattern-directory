@@ -1,41 +1,87 @@
 /**
  * External dependencies
  */
-import { BlockList, ObserveTyping, WritingFlow } from '@wordpress/block-editor';
-import { Popover, Spinner } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
+import {
+	AutosaveMonitor,
+	EditorProvider,
+	ErrorBoundary,
+	LocalAutosaveMonitor,
+	UnsavedChangesWarning,
+} from '@wordpress/editor';
+import { DropZoneProvider, FocusReturnProvider, Popover, SlotFillProvider } from '@wordpress/components';
+import { StrictMode, useEffect } from '@wordpress/element';
+import { useDispatch, useSelect } from '@wordpress/data';
+
+/**
+ * Edit-Post dependencies
+ */
+import EditorInitialization from '@wordpress/edit-post/build/components/editor-initialization';
+import SettingsSidebar from '@wordpress/edit-post/build/components/sidebar/settings-sidebar';
 
 /**
  * Internal dependencies
  */
-import { POST_TYPE } from '../../store/utils';
-import './style.css';
+import Layout from '../layout';
 
-export default function Editor() {
-	const isRequesting = useSelect( ( select ) => {
-		const { isResolving } = select( 'core/data' );
-		const { getEditingBlockPatternId } = select( 'wporg/block-pattern-creator' );
-		const patternId = getEditingBlockPatternId();
-		return isResolving( 'core', 'getEntityRecord', [ 'postType', POST_TYPE, patternId ] );
+export default function Provider( { settings, onError, postId, postType, initialEdits, ...props } ) {
+	const post = useSelect( ( select ) => select( 'core' ).getEntityRecord( 'postType', postType, postId ) );
+	const { editBlockPatternId } = useDispatch( 'wporg/block-pattern-creator' );
+	// Track the currently-editing pattern ID.
+	useEffect( () => {
+		editBlockPatternId( postId );
+	}, [ postId ] );
+
+	// Get editor settings.
+	const { keepCaretInsideBlock } = useSelect( ( select ) => {
+		const { isFeatureActive } = select( 'core/edit-post' );
+		return {
+			keepCaretInsideBlock: isFeatureActive( 'keepCaretInsideBlock' ),
+		};
 	} );
+	const { setIsInserterOpened } = useDispatch( 'core/edit-post' );
+
+	// Bail early if no post yet, eventually this could be a loading state.
+	if ( ! post ) {
+		return null;
+	}
+
+	const editorSettings = {
+		...settings,
+		hasFixedToolbar: false,
+		focusMode: false,
+		hasReducedUI: false,
+		__experimentalLocalAutosaveInterval: 30,
+
+		// This is marked as experimental to give time for the quick inserter to mature.
+		__experimentalSetIsInserterOpened: setIsInserterOpened,
+		keepCaretInsideBlock: keepCaretInsideBlock,
+	};
 
 	return (
-		<div className="block-pattern-creator__editor editor-styles-wrapper">
-			{ isRequesting ? (
-				<div className="block-pattern-creator__editor-loading">
-					<Spinner />
-				</div>
-			) : (
-				<>
-					<Popover.Slot name="block-toolbar" />
-					<WritingFlow>
-						<ObserveTyping>
-							<BlockList />
-						</ObserveTyping>
-					</WritingFlow>
-					<Popover.Slot />
-				</>
-			) }
-		</div>
+		<StrictMode>
+			<SlotFillProvider>
+				<DropZoneProvider>
+					<EditorProvider
+						settings={ editorSettings }
+						post={ post }
+						initialEdits={ initialEdits }
+						useSubRegistry={ false }
+						{ ...props }
+					>
+						<ErrorBoundary onError={ onError }>
+							<EditorInitialization postId={ postId } />
+							<UnsavedChangesWarning />
+							<AutosaveMonitor />
+							<LocalAutosaveMonitor />
+							<SettingsSidebar />
+							<FocusReturnProvider>
+								<Layout />
+								<Popover.Slot />
+							</FocusReturnProvider>
+						</ErrorBoundary>
+					</EditorProvider>
+				</DropZoneProvider>
+			</SlotFillProvider>
+		</StrictMode>
 	);
 }
