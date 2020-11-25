@@ -12,7 +12,10 @@
 		"start": "wp-scripts start"
 	},
 	"dependencies": {
+		"classnames": "2.2.6",
+		"@wordpress/edit-post": "3.25.3",
 		"@wordpress/icons": "2.8.0",
+		"@wordpress/interface": "0.10.4",
 		"@wordpress/scripts": "12.5.0"
 	},
 	"eslintConfig": {
