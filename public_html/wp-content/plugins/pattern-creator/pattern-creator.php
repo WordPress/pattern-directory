@@ -19,10 +19,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
  * @return boolean
  */
 function should_load_creator() {
-	return (
-		function_exists( 'gutenberg_experimental_global_styles_get_merged_origins' ) &&
-		\is_singular( POST_TYPE )
-	);
+	return \is_singular( POST_TYPE );
 }
 
 /**
@@ -53,11 +50,8 @@ function enqueue_assets() {
 
 	wp_set_script_translations( 'wporg-pattern-creator-script', 'wporg-pattern-creator' );
 
-	$merged = gutenberg_experimental_global_styles_get_merged_origins();
 	$settings = array(
 		'isRTL' => is_rtl(),
-		'__experimentalFeatures' => gutenberg_experimental_global_styles_get_editor_settings( $merged ),
-		'__experimentalGlobalStylesBaseStyles' => gutenberg_experimental_global_styles_get_core(),
 	);
 	wp_add_inline_script(
 		'wporg-pattern-creator-script',
