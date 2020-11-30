@@ -33,6 +33,10 @@ jobs:
       with:
         node-version: 12.x
 
+    - name: composer install
+      run: |
+        composer install
+
     - name: yarn install and build
       run: |
         yarn
@@ -42,10 +46,6 @@ jobs:
       run: |
         yarn workspaces run lint:js
         yarn workspaces run lint:css
-
-    - name: composer install
-      run: |
-        composer install
 
     - name: Lint PHP
       run: |
