@@ -1,15 +1,14 @@
-/* global module:false, require:function, process:object */
 module.exports = function( grunt ) {
-	var isChild = 'wporg' !== grunt.file.readJSON( 'package.json' ).name;
+	const isChild = 'wporg' !== grunt.file.readJSON( 'package.json' ).name;
 
 	const getSassFiles = () => {
 		const files = {};
-		const paths = [ 'settings', 'tools', 'generic', 'base', 'objects', 'components', 'utilities' ];
+		const components = [ 'settings', 'tools', 'generic', 'base', 'objects', 'components', 'utilities' ];
 
-		paths.forEach( function( component ) {
-			var paths = [
+		components.forEach( function( component ) {
+			const paths = [
 				'../wporg/css/' + component + '/**/*.scss',
-				'!../wporg/css/' + component + '/_' + component + '.scss'
+				'!../wporg/css/' + component + '/_' + component + '.scss',
 			];
 
 			if ( isChild ) {
@@ -23,23 +22,23 @@ module.exports = function( grunt ) {
 		return files;
 	};
 
-	grunt.initConfig({
+	grunt.initConfig( {
 		postcss: {
 			options: {
-				map: 'build' !== process.argv[2],
+				map: 'build' !== process.argv[ 2 ],
 				processors: [
 					require( 'autoprefixer' )( {
-						cascade: false
+						cascade: false,
 					} ),
 					require( 'pixrem' ),
-					require('cssnano')( {
-						mergeRules: false
-					} )
-				]
+					require( 'cssnano' )( {
+						mergeRules: false,
+					} ),
+				],
 			},
 			dist: {
-				src: 'css/style.css'
-			}
+				src: 'css/style.css',
+			},
 		},
 
 		sass: {
@@ -47,33 +46,33 @@ module.exports = function( grunt ) {
 				implementation: require( 'node-sass' ),
 				sourceMap: true,
 				// Don't add source map URL in built version.
-				omitSourceMapUrl: 'build' === process.argv[2],
-				outputStyle: 'expanded'
+				omitSourceMapUrl: 'build' === process.argv[ 2 ],
+				outputStyle: 'expanded',
 			},
 			dist: {
 				files: {
 					'css/style.css': 'css/style.scss',
-				}
-			}
+				},
+			},
 		},
 
 		sass_globbing: {
 			itcss: {
 				files: getSassFiles(),
 			},
-			options: { signature: false }
+			options: { signature: false },
 		},
 
 		watch: {
 			css: {
-				files: ['**/*.scss', '../wporg/css/**/*scss'],
-				tasks: ['css']
-			}
-		}
-	});
+				files: [ '**/*.scss', '../wporg/css/**/*scss' ],
+				tasks: [ 'css' ],
+			},
+		},
+	} );
 
-	if ( 'build' === process.argv[2] ) {
-		grunt.config.merge( { postcss: { options : { processors: [ require( 'cssnano' ) ] } } } );
+	if ( 'build' === process.argv[ 2 ] ) {
+		grunt.config.merge( { postcss: { options: { processors: [ require( 'cssnano' ) ] } } } );
 	}
 
 	grunt.loadNpmTasks( 'grunt-sass' );
