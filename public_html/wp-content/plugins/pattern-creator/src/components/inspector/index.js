@@ -12,7 +12,7 @@ import './style.css';
 
 export default function Inspector() {
 	return (
-		<div className="block-pattern-creator__inspector">
+		<div className="block-pattern-creator__inspector interface-complementary-area">
 			<TabPanel
 				className="block-pattern-creator__inspector-tab-panel"
 				tabs={ [
