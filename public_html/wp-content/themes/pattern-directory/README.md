@@ -1,17 +1,22 @@
 # WordPress.org Pattern Directory Theme
 
 
-### Getting Started
+## Getting Started
 
-* Run `npm install` in this directory
-* If you're running this locally, then install the `wporg` parent theme:
+* In the project root, run `composer install` or `composer update` to install the wporg parent theme
+* Run `yarn workspaces build` to build all 3 projects
+* Optionally, make sure the theme is active: `yarn wp-env run cli "theme activate pattern-directory"`
 
-    ```sh
-    svn co https://meta.svn.wordpress.org/sites/trunk/wordpress.org/public_html/wp-content/themes/pub/wporg path/to/wp-content/themes/wporg`
-    ```
 
-### Development
+To install the wporg parent theme without composer:
 
-Run `npm run start` while editing SASS files, and they'll be compiled to vanilla CSS in `css/style.css`.
+```sh
+svn co https://meta.svn.wordpress.org/sites/trunk/wordpress.org/public_html/wp-content/themes/pub/wporg path/to/wp-content/themes/wporg
+```
 
-Run `npm run build` before committing, so the production file is small.
+
+## Development
+
+To build the CSS files, run `yarn start` in this directory, or `yarn workspaces wporg-pattern-directory-theme start` anywhere in the project. This triggers a watch script so your files will build as you work, with sourcemapping.
+
+Run `yarn workspaces build` before committing to subversion, to generate the production-ready build files of each project. Make sure not to commit the *.css.map files.
