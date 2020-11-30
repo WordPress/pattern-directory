@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "22326da5b3282d19ce3b0838a91346b2",
+    "content-hash": "f73568cba098c7aaabe1da01f14ec973",
     "packages": [
         {
             "name": "composer/installers",
@@ -144,16 +144,26 @@
             "time": "2020-04-07T06:57:05+00:00"
         },
         {
+            "name": "wordpress-meta/wporg",
+            "version": "1",
+            "source": {
+                "type": "svn",
+                "url": "https://meta.svn.wordpress.org/sites/",
+                "reference": "trunk/wordpress.org/public_html/wp-content/themes/pub/wporg/"
+            },
+            "type": "wordpress-theme"
+        },
+        {
             "name": "wpackagist-plugin/gutenberg",
-            "version": "9.3.0",
+            "version": "9.4.1",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/gutenberg/",
-                "reference": "tags/9.3.0"
+                "reference": "tags/9.4.1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/gutenberg.9.3.0.zip"
+                "url": "https://downloads.wordpress.org/plugin/gutenberg.9.4.1.zip"
             },
             "require": {
                 "composer/installers": "~1.0"

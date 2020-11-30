@@ -22,11 +22,27 @@
 		{
 			"type": "composer",
 			"url": "https://wpackagist.org/"
+		},
+		{
+			"type": "package",
+			"package": [
+				{
+					"name": "wordpress-meta/wporg",
+					"type": "wordpress-theme",
+					"version": "1",
+					"source": {
+						"type": "svn",
+						"url": "https://meta.svn.wordpress.org/sites/",
+						"reference": "trunk/wordpress.org/public_html/wp-content/themes/pub/wporg/"
+					}
+				}
+			]
 		}
 	],
 	"require": {
 		"composer/installers": "~1.0",
-		"wpackagist-plugin/gutenberg": "*"
+		"wpackagist-plugin/gutenberg": "*",
+		"wordpress-meta/wporg": "1"
 	},
 	"require-dev": {
 		"dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
