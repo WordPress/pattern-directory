@@ -12,6 +12,5 @@
 }
 
 .block-pattern-creator__header-actions {
-	align-items: center;
-	display: flex;
+	border: none;
 }

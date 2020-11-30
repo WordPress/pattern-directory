@@ -1,25 +1,18 @@
 <?php
 /**
- * Template canvas file to render the current 'wp_template'.
+ * Pattern Creator template.
  */
 
+namespace WordPressdotorg\Theme;
+
+get_header();
 ?>
-<!DOCTYPE html>
-<html <?php language_attributes(); ?>>
-<head>
-	<meta charset="<?php bloginfo( 'charset' ); ?>" />
-	<?php wp_head(); ?>
-</head>
 
-<body <?php body_class(); ?>>
-<?php wp_body_open(); ?>
+	<main id="main" class="site-main col-12" role="main">
 
-<h1>WordPress.org Header</h1>
+		<div id="block-pattern-creator"></div>
 
-<div id="block-pattern-creator"></div>
+	</main><!-- #main -->
 
-<p>WordPress.org Footer</p>
-
-<?php wp_footer(); ?>
-</body>
-</html>
+<?php
+get_footer();

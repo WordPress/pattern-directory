@@ -28,7 +28,7 @@ export default function Settings() {
 		<>
 			<div className="block-pattern-creator__settings-header">
 				<h2>Block Pattern Settings</h2>
-				<span>Info about saving a block pattern.</span>
+				<p>Info about saving a block pattern.</p>
 			</div>
 			<PanelBody title="My Block Settings" initialOpen={ true }>
 				<TextControl label="Pattern Name" value={ title } onChange={ onChange } />

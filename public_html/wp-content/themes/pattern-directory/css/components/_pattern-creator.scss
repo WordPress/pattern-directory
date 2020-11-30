@@ -1,0 +1,10 @@
+body.single-wporg-pattern {
+	box-sizing: border-box;
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 1.2;
+
+	.site-content {
+		max-width: $size__wide-width;
+	}
+}

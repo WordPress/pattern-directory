@@ -1,9 +1,10 @@
-.block-pattern-creator__inspector {
-	border-left: 1px solid var(--border-color);
+.block-pattern-creator__inspector .components-tab-panel__tabs {
+	border-bottom: 1px solid var(--border-color);
 }
 
 .block-pattern-creator__settings-header {
 	padding: var(--grid-unit);
+	font-size: 13px;
 }
 
 .block-pattern-creator__settings-header h2 {

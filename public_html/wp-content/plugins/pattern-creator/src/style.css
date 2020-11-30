@@ -1,40 +1,43 @@
 :root {
 	--grid-unit: 16px;
+	--border-color: #e0e0e0;
 }
 
-/* todo, move these styles to the theme. */
-html,
-body {
-	margin: 0;
-	padding: 0;
-	font-family: sans-serif;
-	font-size: 14px;
-	box-sizing: border-box;
-	height: 100%;
-	font-weight: 400;
-	-webkit-font-smoothing: antialiased;
+#block-pattern-creator {
+	position: relative;
+	height: 80vh;
+	margin-top: 2rem;
+	border: 1px solid var(--border-color);
 }
 
-a {
-	color: #3858e9;
-}
-
-*,
-*::before,
-*::after {
+#block-pattern-creator *,
+#block-pattern-creator *::before,
+#block-pattern-creator *::after {
 	box-sizing: inherit;
 }
 
-/* Start of plugin-specific styles. */
-#block-pattern-creator {
-	position: relative;
-	height: 90vh;
+#block-pattern-creator a {
+	color: #3858e9;
+}
+
+#block-pattern-creator fieldset {
+	border: 0;
+	padding: 0;
+	margin: 0;
+}
+
+#block-pattern-creator button,
+#block-pattern-creator input,
+#block-pattern-creator select,
+#block-pattern-creator textarea {
+	line-height: 1.2;
 }
 
 .interface-interface-skeleton {
 	position: absolute;
 	height: unset;
 	left: 0;
+	top: 0;
 }
 
 .interface-interface-skeleton__footer {
