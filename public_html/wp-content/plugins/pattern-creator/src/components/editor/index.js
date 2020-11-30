@@ -16,7 +16,6 @@ import { useDispatch, useSelect } from '@wordpress/data';
  * Edit-Post dependencies
  */
 import EditorInitialization from '@wordpress/edit-post/build/components/editor-initialization';
-import SettingsSidebar from '@wordpress/edit-post/build/components/sidebar/settings-sidebar';
 
 /**
  * Internal dependencies
@@ -73,7 +72,6 @@ export default function Provider( { settings, onError, postId, postType, initial
 							<UnsavedChangesWarning />
 							<AutosaveMonitor />
 							<LocalAutosaveMonitor />
-							<SettingsSidebar />
 							<FocusReturnProvider>
 								<Layout />
 								<Popover.Slot />
