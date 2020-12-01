@@ -1,13 +1,15 @@
 /**
  * External dependencies
  */
-import { PanelBody, SelectControl, TextControl, TextareaControl } from '@wordpress/components';
+import { Button, PanelBody, SelectControl, TextControl, TextareaControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
+import SaveButton from './save-button';
 import usePostMeta from '../../store/hooks/use-post-meta';
 import usePostTaxonomy from '../../store/hooks/use-post-taxonomy';
+import './style.css';
 
 // Map the terms from WordPress into options supported by SelectControl.
 const termList = Object.entries( wporgBlockPattern.categories ).map( ( [ value, label ] ) => ( {
@@ -15,7 +17,7 @@ const termList = Object.entries( wporgBlockPattern.categories ).map( ( [ value, 
 	label: label,
 } ) );
 
-export default function Settings() {
+export default function Settings( { closeSidebar } ) {
 	const title = '';
 	const onChange = () => {};
 	const [ description, setDescription ] = usePostMeta( 'wpop_description', '' );
@@ -27,18 +29,36 @@ export default function Settings() {
 	return (
 		<>
 			<div className="block-pattern-creator__settings-header">
-				<h2>Block Pattern Settings</h2>
-				<p>Info about saving a block pattern.</p>
+				<SaveButton />
+				<Button isSecondary onClick={ closeSidebar }>
+					Cancel
+				</Button>
 			</div>
-			<PanelBody title="My Block Settings" initialOpen={ true }>
+			<div className="block-pattern-creator__settings-details">
+				<p>
+					<strong>Are you ready to publish?</strong>
+				</p>
+				<p>Name your pattern and write a short description before submitting.</p>
+			</div>
+			<PanelBody title="Details" initialOpen>
 				<TextControl label="Pattern Name" value={ title } onChange={ onChange } />
-				<TextareaControl label="Description" value={ description } onChange={ setDescription } />
+				<TextareaControl
+					label="Description"
+					help="What is this pattern for?"
+					value={ description }
+					onChange={ setDescription }
+				/>
+			</PanelBody>
+			<PanelBody title="Add tags">
 				<SelectControl
 					label="Pattern Categories"
 					value={ term }
 					options={ termList }
 					onChange={ setTerms }
 				/>
+			</PanelBody>
+			<PanelBody title="Pattern preview">
+				<p>Other details we could use for wp.org display…</p>
 				<SelectControl
 					label="Preview Width"
 					value={ viewportWidth }

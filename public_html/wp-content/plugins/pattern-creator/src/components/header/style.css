@@ -1,7 +1,7 @@
 .block-pattern-creator__header {
-	padding: var(--grid-unit);
-	background: #f1f1f1;
 	display: flex;
+	height: 60px;
+	align-items: center;
 }
 
 .block-pattern-creator__header-title {
@@ -13,4 +13,14 @@
 
 .block-pattern-creator__header-actions {
 	border: none;
+	align-items: center;
+	display: flex;
+	padding-right: calc(var(--grid-unit) / 2);
+	gap: calc(var(--grid-unit) / 2);
+}
+
+@media (min-width: 600px) {
+	.block-pattern-creator__header-actions {
+		padding-right: calc(var(--grid-unit) * 1.5);
+	}
 }

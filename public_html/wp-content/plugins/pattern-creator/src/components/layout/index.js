@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { BlockBreadcrumb, __experimentalLibrary as Library } from '@wordpress/block-editor';
+import { BlockBreadcrumb, BlockInspector, __experimentalLibrary as Library } from '@wordpress/block-editor';
 import { Button, ScrollLock } from '@wordpress/components';
 import classnames from 'classnames';
 import { close } from '@wordpress/icons';
@@ -21,39 +21,55 @@ import VisualEditor from '@wordpress/edit-post/build/components/visual-editor';
  * Internal dependencies
  */
 import Header from '../header';
-import Inspector from '../inspector';
+import Settings from '../settings';
+import './style.css';
 
 export default function Layout() {
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const isHugeViewport = useViewportMatch( 'huge', '>=' );
-	const { openGeneralSidebar, closeGeneralSidebar, setIsInserterOpened } = useDispatch( 'core/edit-post' );
-	const { sidebarIsOpened, hasBlockSelected, isInserterOpened } = useSelect( ( select ) => {
+	const {
+		openGeneralSidebar,
+		closeGeneralSidebar,
+		setIsInserterOpened,
+		closePublishSidebar,
+		openPublishSidebar,
+	} = useDispatch( 'core/edit-post' );
+	const { isGeneralSidebarOpened, isPublishSidebarOpened, isInserterOpened } = useSelect( ( select ) => {
 		return {
-			sidebarIsOpened: !! (
-				select( 'core/interface' ).getActiveComplementaryArea( 'core/edit-post' ) ||
-				select( 'core/edit-post' ).isPublishSidebarOpened()
-			),
-			isFullscreenActive: select( 'core/edit-post' ).isFeatureActive( 'fullscreenMode' ),
+			isGeneralSidebarOpened: !! select( 'core/interface' ).getActiveComplementaryArea( 'core/edit-post' ),
+			isPublishSidebarOpened: select( 'core/edit-post' ).isPublishSidebarOpened(),
 			isInserterOpened: select( 'core/edit-post' ).isInserterOpened(),
 		};
 	}, [] );
+	const isSidebarOpened = isGeneralSidebarOpened || isPublishSidebarOpened;
 	const className = classnames( 'edit-wporg-pattern-layout', 'edit-post-layout', 'is-mode-visual', {
-		'is-sidebar-opened': sidebarIsOpened,
+		'is-sidebar-opened': isSidebarOpened,
 	} );
-	const openSidebarPanel = () =>
-		openGeneralSidebar( hasBlockSelected ? 'edit-post/block' : 'edit-post/document' );
+	const openSidebarPanel = () => openGeneralSidebar( 'edit-post/block' );
 
-	// Inserter and Sidebars are mutually exclusive
+	// Inserter and Sidebars are mutually exclusive, except in "huge" screens.
 	useEffect( () => {
-		if ( sidebarIsOpened && ! isHugeViewport ) {
+		if ( isSidebarOpened && ! isHugeViewport ) {
 			setIsInserterOpened( false );
 		}
-	}, [ sidebarIsOpened, isHugeViewport ] );
+	}, [ isSidebarOpened, isHugeViewport ] );
 	useEffect( () => {
 		if ( isInserterOpened && ! isHugeViewport ) {
 			closeGeneralSidebar();
+			closePublishSidebar();
 		}
 	}, [ isInserterOpened, isHugeViewport ] );
+	// General & Publish sidebars are also mutually exclusive, regardless of viewport size.
+	useEffect( () => {
+		if ( isGeneralSidebarOpened ) {
+			closePublishSidebar();
+		}
+	}, [ isGeneralSidebarOpened ] );
+	useEffect( () => {
+		if ( isPublishSidebarOpened ) {
+			closeGeneralSidebar();
+		}
+	}, [ isPublishSidebarOpened ] );
 
 	return (
 		<>
@@ -61,11 +77,12 @@ export default function Layout() {
 				className={ className }
 				header={
 					<Header
-						isInserterOpened={ isInserterOpened }
-						setIsInserterOpened={ setIsInserterOpened }
-						isInspectorOpened={ sidebarIsOpened }
-						openInspector={ openSidebarPanel }
-						closeInspector={ closeGeneralSidebar }
+						isSidebarOpened={ isGeneralSidebarOpened }
+						openSidebar={ openSidebarPanel }
+						closeSidebar={ closeGeneralSidebar }
+						isPublishSidebarOpened={ isPublishSidebarOpened }
+						openPublishSidebar={ openPublishSidebar }
+						closePublishSidebar={ closePublishSidebar }
 					/>
 				}
 				leftSidebar={
@@ -91,12 +108,32 @@ export default function Layout() {
 						</PopoverWrapper>
 					)
 				}
-				sidebar={ sidebarIsOpened && <Inspector /> }
+				sidebar={
+					isGeneralSidebarOpened && (
+						<div className="block-pattern-creator__sidebar interface-complementary-area">
+							<div className="block-pattern-creator__sidebar-header">
+								<Button
+									icon={ close }
+									onClick={ closeGeneralSidebar }
+									label="Close block settings"
+								/>
+							</div>
+							<BlockInspector />
+						</div>
+					)
+				}
+				actions={
+					isPublishSidebarOpened && (
+						<div className="block-pattern-creator__sidebar interface-complementary-area">
+							<Settings closeSidebar={ closePublishSidebar } />
+						</div>
+					)
+				}
 				content={
 					<div className="block-pattern-creator__editor editor-styles-wrapper">
 						<EditorNotices />
 						<VisualEditor />
-						{ isMobileViewport && sidebarIsOpened && <ScrollLock /> }
+						{ isMobileViewport && isSidebarOpened && <ScrollLock /> }
 					</div>
 				}
 				footer={

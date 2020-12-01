@@ -16,6 +16,10 @@
 	box-sizing: inherit;
 }
 
+#block-pattern-creator div {
+	outline: none;
+}
+
 #block-pattern-creator a {
 	color: #3858e9;
 }
@@ -31,6 +35,10 @@
 #block-pattern-creator select,
 #block-pattern-creator textarea {
 	line-height: 1.2;
+}
+
+html.interface-interface-skeleton__html-container {
+	position: static;
 }
 
 .interface-interface-skeleton {
