@@ -9,7 +9,7 @@ const config = {
 		),
 		new DependencyExtractionWebpackPlugin( {
 			injectPolyfill: true,
-			requestToExternal: function ( request ) {
+			requestToExternal: function( request ) {
 				// Skip anything with extra folders in path.
 				if ( /@wordpress\/[a-z-]+\/[a-z-]+/.test( request ) ) {
 					return null;
