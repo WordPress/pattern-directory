@@ -86,6 +86,7 @@ function enqueue_assets() {
 		filemtime( "$dir/build/style-index.css" )
 	);
 
+	wp_enqueue_style( 'wp-edit-post' );
 	wp_enqueue_style( 'wporg-pattern-creator-style' );
 
 	// @todo this will need to be adapted to whatever theme we use for wp.org

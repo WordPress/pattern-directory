@@ -6,15 +6,32 @@ import { registerCoreBlocks } from '@wordpress/block-library';
 import '@wordpress/format-library';
 
 /**
+ * Edit-Post dependencies
+ */
+import '@wordpress/edit-post/build/store';
+
+/**
  * Internal dependencies
  */
-import Layout from './components/layout';
+import Editor from './components/editor';
+import { POST_TYPE } from './store/utils';
 import './store';
 import './style.css';
 
 registerCoreBlocks();
 
+const reboot = () => {
+	console.error( 'todo— Reboot editor on error' ); // eslint-disable-line no-console
+};
+
 render(
-	<Layout settings={ wporgBlockPattern.settings } postId={ wporgBlockPattern.postId } />,
+	<Editor
+		settings={ wporgBlockPattern.settings }
+		onError={ reboot }
+		postId={ wporgBlockPattern.postId }
+		postType={ POST_TYPE }
+		initialEdits={ {} }
+	/>,
 	document.getElementById( 'block-pattern-creator' )
 );
+
