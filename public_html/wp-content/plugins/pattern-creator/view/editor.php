@@ -3,8 +3,6 @@
  * Pattern Creator template.
  */
 
-namespace WordPressdotorg\Theme;
-
 get_header();
 ?>
 
