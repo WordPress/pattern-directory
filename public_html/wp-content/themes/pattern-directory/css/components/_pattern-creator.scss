@@ -5,6 +5,12 @@ body.single-wporg-pattern {
 	line-height: 1.2;
 
 	.site-content {
+		margin: auto;
+		max-width: none;
+		padding: 0;
+	}
+
+	.site-main {
 		max-width: $size__wide-width;
 	}
 }
