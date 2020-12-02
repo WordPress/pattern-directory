@@ -22,6 +22,8 @@ import EditorInitialization from '@wordpress/edit-post/build/components/editor-i
  */
 import Layout from '../layout';
 
+const AUTOSAVE_INTERVAL = 30;
+
 export default function Provider( { settings, onError, postId, postType, initialEdits, ...props } ) {
 	const post = useSelect( ( select ) => select( 'core' ).getEntityRecord( 'postType', postType, postId ) );
 	const { editBlockPatternId } = useDispatch( 'wporg/block-pattern-creator' );
@@ -49,7 +51,7 @@ export default function Provider( { settings, onError, postId, postType, initial
 		hasFixedToolbar: false,
 		focusMode: false,
 		hasReducedUI: false,
-		__experimentalLocalAutosaveInterval: 30,
+		__experimentalLocalAutosaveInterval: AUTOSAVE_INTERVAL,
 
 		// This is marked as experimental to give time for the quick inserter to mature.
 		__experimentalSetIsInserterOpened: setIsInserterOpened,
@@ -70,7 +72,7 @@ export default function Provider( { settings, onError, postId, postType, initial
 						<ErrorBoundary onError={ onError }>
 							<EditorInitialization postId={ postId } />
 							<UnsavedChangesWarning />
-							<AutosaveMonitor />
+							<AutosaveMonitor interval={ AUTOSAVE_INTERVAL } />
 							<LocalAutosaveMonitor />
 							<FocusReturnProvider>
 								<Layout />
