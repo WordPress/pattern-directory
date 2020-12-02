@@ -20,8 +20,13 @@ export const hasEditsBlockPattern = createRegistrySelector( ( select ) => ( stat
 	return select( 'core' ).hasEditsForEntityRecord( KIND, POST_TYPE, patternId );
 } );
 
+export const isAutosavingBlockPattern = createRegistrySelector( ( select ) => ( state, patternId ) => {
+	return select( 'core' ).isAutosavingEntityRecord( KIND, POST_TYPE, patternId );
+} );
+
 export const isSavingBlockPattern = createRegistrySelector( ( select ) => ( state, patternId ) => {
 	const isSaving = select( 'core' ).isSavingEntityRecord( KIND, POST_TYPE, patternId );
+	const isAutosaving = select( 'core' ).isAutosavingEntityRecord( KIND, POST_TYPE, patternId );
 
-	return isSaving;
+	return isSaving && ! isAutosaving;
 } );

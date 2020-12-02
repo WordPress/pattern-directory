@@ -1,6 +1,7 @@
 /**
  * WordPress dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { cog } from '@wordpress/icons';
 
@@ -12,6 +13,7 @@ import HeaderToolbar from '@wordpress/edit-post/build/components/header/header-t
 /**
  * Internal dependencies
  */
+import SubmitButton from './submit-button';
 import './style.css';
 
 export default function Header( {
@@ -28,13 +30,9 @@ export default function Header( {
 				<HeaderToolbar />
 			</div>
 			<div className="block-pattern-creator__header-actions">
-				<Button>Preview</Button>
-				<Button
-					isPrimary
+				<Button>{ __( 'Preview', 'wporg-patterns' ) }</Button>
+				<SubmitButton
 					isPressed={ isPublishSidebarOpened }
-					onMouseDown={ ( event ) => {
-						event.preventDefault();
-					} }
 					onClick={ () => {
 						if ( isPublishSidebarOpened ) {
 							closePublishSidebar();
@@ -42,9 +40,7 @@ export default function Header( {
 							openPublishSidebar();
 						}
 					} }
-				>
-					Submit
-				</Button>
+				/>
 				<Button
 					isPressed={ isSidebarOpened }
 					onMouseDown={ ( event ) => {
@@ -58,7 +54,7 @@ export default function Header( {
 						}
 					} }
 					icon={ cog }
-					label="Open Inspector"
+					label={ __( 'Open Inspector', 'wporg-patterns' ) }
 				/>
 			</div>
 		</div>
