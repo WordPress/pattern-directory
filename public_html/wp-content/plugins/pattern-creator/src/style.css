@@ -1,6 +1,7 @@
 :root {
 	--grid-unit: 16px;
 	--border-color: #e0e0e0;
+	--sidebar-width: 280px;
 }
 
 #block-pattern-creator {

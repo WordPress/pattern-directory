@@ -5,7 +5,7 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 
-function SaveButton() {
+function SaveButton( { isUnpublished } ) {
 	const { hasEdits, isAutosaving, isSaving } = useSelect( ( select ) => {
 		const {
 			getEditingBlockPatternId,
@@ -22,7 +22,7 @@ function SaveButton() {
 	} );
 	const { saveBlockPattern } = useDispatch( 'wporg/block-pattern-creator' );
 
-	let label = __( 'Update', 'wporg-patterns' );
+	let label = isUnpublished ? __( 'Publish', 'wporg-patterns' ) : __( 'Update', 'wporg-patterns' );
 	if ( isSaving ) {
 		label = __( 'Saving…', 'wporg-patterns' );
 	} else if ( isAutosaving ) {

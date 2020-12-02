@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { Button, PanelBody, SelectControl, TextControl, TextareaControl } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 
@@ -31,46 +32,63 @@ export default function Settings( { closeSidebar } ) {
 		return getEditedBlockPattern( patternId );
 	} );
 	const { editBlockPattern } = useDispatch( MODULE_KEY );
+	// @todo Maybe change these statii depending on any custom statuses in the process.
+	// See https://github.com/WordPress/pattern-directory/issues/16#issuecomment-725845843
+	const isUnpublished = [ 'publish', 'private' ].indexOf( post.status ) === -1;
 
 	return (
 		<>
 			<div className="block-pattern-creator__settings-header">
-				<SaveButton />
+				<SaveButton isUnpublished={ isUnpublished } />
 				<Button isSecondary onClick={ closeSidebar }>
-					Cancel
+					{ __( 'Cancel', 'wporg-patterns' ) }
 				</Button>
 			</div>
 			<div className="block-pattern-creator__settings-details">
-				<p>
-					<strong>Are you ready to publish?</strong>
-				</p>
-				<p>Name your pattern and write a short description before submitting.</p>
+				{ isUnpublished ? (
+					<>
+						<h2>{ __( 'Are you ready to publish?', 'wporg-patterns' ) }</h2>
+						<p>
+							{ __(
+								'Name your pattern and write a short description before submitting.',
+								'wporg-patterns'
+							) }
+						</p>
+					</>
+				) : (
+					<>
+						<h2>{ __( 'Update your published pattern.', 'wporg-patterns' ) }</h2>
+						<p>{ __( 'Change your pattern details [copy tbd].', 'wporg-patterns' ) }</p>
+					</>
+				) }
 			</div>
-			<PanelBody title="Details" initialOpen>
+			<PanelBody title={ __( 'Details', 'wporg-patterns' ) } initialOpen>
 				<TextControl
-					label="Pattern Name"
+					label={ __( 'Pattern Name', 'wporg-patterns' ) }
 					value={ post.title || '' }
 					onChange={ ( title ) => editBlockPattern( { title } ) }
+					disabled={ ! isUnpublished }
 				/>
 				<TextareaControl
-					label="Description"
-					help="What is this pattern for?"
+					label={ __( 'Description', 'wporg-patterns' ) }
+					help={ __( 'What is this pattern for?', 'wporg-patterns' ) }
 					value={ description }
 					onChange={ setDescription }
 				/>
-			</PanelBody>
-			<PanelBody title="Add tags">
 				<SelectControl
-					label="Pattern Categories"
+					label={ __( 'Pattern Category', 'wporg-patterns' ) }
 					value={ term }
 					options={ termList }
 					onChange={ setTerms }
 				/>
 			</PanelBody>
-			<PanelBody title="Pattern preview">
-				<p>Other details we could use for wp.org display…</p>
+			<PanelBody title={ __( 'Add tags', 'wporg-patterns' ) }>
+				<p>{ __( 'If we want to add tags for sorting on wp.org?', 'wporg-patterns' ) }</p>
+			</PanelBody>
+			<PanelBody title={ __( 'Pattern preview', 'wporg-patterns' ) }>
+				<p>{ __( 'Other details we could use for wp.org display…', 'wporg-patterns' ) }</p>
 				<SelectControl
-					label="Preview Width"
+					label={ __( 'Preview Width', 'wporg-patterns' ) }
 					value={ viewportWidth }
 					onChange={ setViewportWidth }
 					options={ [
