@@ -109,9 +109,6 @@ function enqueue_assets() {
 
 	wp_enqueue_style( 'wp-edit-post' );
 	wp_enqueue_style( 'wporg-pattern-creator-style' );
-
-	// @todo this will need to be adapted to whatever theme we use for wp.org
-	remove_action( 'wp_enqueue_scripts', 'twentytwenty_register_styles' );
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
 
