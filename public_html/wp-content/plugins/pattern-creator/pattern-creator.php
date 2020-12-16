@@ -13,14 +13,35 @@
 namespace WordPressdotorg\Pattern_Creator;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
+const QUERY_VAR = 'edit-pattern';
+
 /**
  * Check the conditions of the page to determine if the editor should load.
+ * - It should be a single pattern page.
+ * - The current user can edit it.
+ * - The query variable is present.
  *
  * @return boolean
  */
 function should_load_creator() {
-	return \is_singular( POST_TYPE );
+	global $wp_query;
+	return $wp_query->is_singular( POST_TYPE ) &&
+		// @todo Permissions TBD, see https://github.com/WordPress/pattern-directory/issues/30.
+		current_user_can( 'edit_post', get_the_ID() ) &&
+		false !== $wp_query->get( QUERY_VAR, false );
 }
+
+/**
+ * Add our custom parameter to the list of public query variables.
+ *
+ * @param string[] $query_vars The array of allowed query variable names.
+ * @return stringp[] New query vars.
+ */
+function add_query_var( $query_vars ) {
+	$query_vars[] = QUERY_VAR;
+	return $query_vars;
+}
+add_filter( 'query_vars', __NAMESPACE__ . '\add_query_var' );
 
 /**
  * Register & load the assets.
