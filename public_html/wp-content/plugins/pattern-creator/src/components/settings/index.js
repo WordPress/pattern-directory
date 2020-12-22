@@ -8,6 +8,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import PublishHeader from './publish-header';
 import SaveButton from './save-button';
 import usePostMeta from '../../store/hooks/use-post-meta';
 import usePostTaxonomy from '../../store/hooks/use-post-taxonomy';
@@ -26,10 +27,14 @@ export default function Settings( { closeSidebar } ) {
 	// Double-destructured because the terms default to an array, but we will only have one category.
 	// Note: This slug should be the "REST base", not the taxonomy slug.
 	const [ [ term ], setTerms ] = usePostTaxonomy( 'pattern-categories' );
-	const post = useSelect( ( select ) => {
-		const { getEditingBlockPatternId, getEditedBlockPattern } = select( MODULE_KEY );
+	// Get the post as is currently saved (not edited).
+	const { hasEdits, post } = useSelect( ( select ) => {
+		const { getEditingBlockPatternId, getEditedBlockPattern, hasEditsBlockPattern } = select( MODULE_KEY );
 		const patternId = getEditingBlockPatternId();
-		return getEditedBlockPattern( patternId );
+		return {
+			hasEdits: hasEditsBlockPattern( patternId ),
+			post: getEditedBlockPattern( patternId ),
+		};
 	} );
 	const { editBlockPattern } = useDispatch( MODULE_KEY );
 	// @todo Maybe change these statii depending on any custom statuses in the process.
@@ -45,22 +50,7 @@ export default function Settings( { closeSidebar } ) {
 				</Button>
 			</div>
 			<div className="block-pattern-creator__settings-details">
-				{ isUnpublished ? (
-					<>
-						<h2>{ __( 'Are you ready to publish?', 'wporg-patterns' ) }</h2>
-						<p>
-							{ __(
-								'Name your pattern and write a short description before submitting.',
-								'wporg-patterns'
-							) }
-						</p>
-					</>
-				) : (
-					<>
-						<h2>{ __( 'Update your published pattern.', 'wporg-patterns' ) }</h2>
-						<p>{ __( 'Change your pattern details [copy tbd].', 'wporg-patterns' ) }</p>
-					</>
-				) }
+				<PublishHeader hasEdits={ hasEdits } />
 			</div>
 			<PanelBody title={ __( 'Details', 'wporg-patterns' ) } initialOpen>
 				<TextControl
