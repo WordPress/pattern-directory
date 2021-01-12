@@ -1,11 +1,11 @@
 <?php
 
 namespace WordPressdotorg\Pattern_Directory\Pattern_Post_Type;
+use Error;
 
 const POST_TYPE = 'wporg-pattern';
 
 add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
-add_filter( 'rest_' . POST_TYPE . '_item_schema', __NAMESPACE__ . '\embed_extra_fields_in_search_endpoint' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
 
 
@@ -82,25 +82,9 @@ function can_edit_this_pattern( $allowed, $meta_key, $pattern_id ) {
 }
 
 /**
- * Add extra fields to the post type when it's embedded in the search results endpoint.
- *
- * @param array $schema
- *
- * @return array
- */
-function embed_extra_fields_in_search_endpoint( $schema ) {
-	$schema['properties']['content']['context'][]                           = 'embed';
-	$schema['properties']['content']['properties']['rendered']['context'][] = 'embed';
-	$schema['properties']['meta']['context'][]                              = 'embed';
-	$schema['properties']['pattern-categories']['context'][]                = 'embed';
-
-	return $schema;
-}
-
-/**
  * Enqueue scripts for the block editor.
  *
- * @throws \Error If the build files don't exist.
+ * @throws Error If the build files don't exist.
  */
 function enqueue_editor_assets() {
 	if ( POST_TYPE !== get_current_screen()->id ) {
@@ -111,7 +95,7 @@ function enqueue_editor_assets() {
 
 	$script_asset_path = "$dir/build/pattern-post-type.asset.php";
 	if ( ! file_exists( $script_asset_path ) ) {
-		throw new \Error( 'You need to run `yarn start` or `yarn build` for the Pattern Directory.' );
+		throw new Error( 'You need to run `yarn start` or `yarn build` for the Pattern Directory.' );
 	}
 
 	$script_asset = require( $script_asset_path );
