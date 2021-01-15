@@ -97,6 +97,67 @@ function register_post_type_data() {
 			'show_in_rest'      => true,
 		)
 	);
+
+	/*
+	 * Provide category and keyword slugs via meta.
+	 *
+	 * Normally API clients would request these via `_embed` parameters, but that would returning the entire
+	 * object, and Core only needs the slugs. We'd also have to include the `_links` field, because of a Core bug.
+	 *
+	 * @see https://core.trac.wordpress.org/ticket/49538
+	 * @see https://core.trac.wordpress.org/ticket/49985
+	 *
+	 * Adding it here is faster for the server to generate, and for the client to download. It also makes the
+	 * output easier for a human to visually parse.
+	 */
+	register_post_meta(
+		POST_TYPE,
+		'wpop_category_slugs',
+		array(
+			'type'          => 'array',
+			'single'        => true,
+			'auth_callback' => '__return_false', // Generated dynamically, should not be stored in database.
+
+			'show_in_rest' => array(
+				'schema' => array(
+					'items' => array(
+						'type' => 'string',
+					),
+				),
+
+				'prepare_callback' => function() {
+					$slugs = wp_list_pluck( wp_get_object_terms( get_the_ID(), 'wporg-pattern-category' ), 'slug' );
+
+					return array_map( 'sanitize_title', $slugs );
+				},
+			),
+		)
+	);
+
+	// See `wpop_category_slugs` registration for details.
+	register_post_meta(
+		POST_TYPE,
+		'wpop_keyword_slugs',
+		array(
+			'type'          => 'array',
+			'single'        => true,
+			'auth_callback' => '__return_false', // Generated dynamically, should not be stored in database.
+
+			'show_in_rest' => array(
+				'schema' => array(
+					'items' => array(
+						'type' => 'string',
+					),
+				),
+
+				'prepare_callback' => function() {
+					$slugs = wp_list_pluck( wp_get_object_terms( get_the_ID(), 'wporg-pattern-keyword' ), 'slug' );
+
+					return array_map( 'sanitize_title', $slugs );
+				},
+			),
+		)
+	);
 }
 
 /**
