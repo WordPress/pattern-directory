@@ -36,6 +36,40 @@ function register_post_type_data() {
 		)
 	);
 
+	register_taxonomy(
+		'wporg-pattern-keyword',
+		POST_TYPE,
+		array(
+			'public'        => true,
+			'hierarchical'  => false,
+			'show_in_rest'  => true,
+			'rest_base'     => 'pattern-keywords',
+
+			'labels' => array(
+				'name'                       => _x( 'Keywords', 'taxonomy general name' ),
+				'singular_name'              => _x( 'Keyword', 'taxonomy singular name' ),
+				'search_items'               => __( 'Search Keywords' ),
+				'popular_items'              => __( 'Popular Keywords' ),
+				'all_items'                  => __( 'All Keywords' ),
+				'edit_item'                  => __( 'Edit Keyword' ),
+				'view_item'                  => __( 'View Keyword' ),
+				'update_item'                => __( 'Update Keyword' ),
+				'add_new_item'               => __( 'Add New Keyword' ),
+				'new_item_name'              => __( 'New Keyword Name' ),
+				'separate_items_with_commas' => __( 'Separate keywords with commas' ),
+				'add_or_remove_items'        => __( 'Add or remove keywords' ),
+				'choose_from_most_used'      => __( 'Choose from the most used keywords' ),
+				'not_found'                  => __( 'No keywords found.' ),
+				'no_terms'                   => __( 'No keywords' ),
+				'items_list_navigation'      => __( 'Keywords list navigation' ),
+				'items_list'                 => __( 'Keywords list' ),
+				/* translators: Tab heading when selecting from the most used terms. */
+				'most_used'                  => _x( 'Most Used', 'keywords' ),
+				'back_to_items'              => __( '&larr; Go to Keywords' ),
+			),
+		)
+	);
+
 	register_post_meta(
 		POST_TYPE,
 		'wpop_description',
