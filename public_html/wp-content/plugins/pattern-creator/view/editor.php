@@ -10,7 +10,7 @@ get_header();
 
 // @todo Permissions TBD, see https://github.com/WordPress/pattern-directory/issues/30.
 
-$post_type = get_post_type_object( POST_TYPE );
+$post_type_obj = get_post_type_object( POST_TYPE );
 
 if ( is_singular( POST_TYPE ) ) {
 	$page_title   = __( 'Update a Block Pattern', 'wporg-patterns' );
@@ -27,7 +27,7 @@ if ( is_singular( POST_TYPE ) ) {
 
 	<main id="main" class="site-main col-12" role="main">
 
-		<?php if ( ( is_singular( POST_TYPE ) && current_user_can( 'edit_post', get_the_ID() ) ) || current_user_can( $post_type->cap->create_posts ) ) : ?>
+		<?php if ( ( is_singular( POST_TYPE ) && current_user_can( 'edit_post', get_the_ID() ) ) || current_user_can( $post_type_obj->cap->create_posts ) ) : ?>
 			<div id="block-pattern-creator"></div>
 		<?php else : ?>
 			<section class="no-results not-found">
