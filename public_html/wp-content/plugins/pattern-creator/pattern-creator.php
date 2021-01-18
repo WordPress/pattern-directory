@@ -25,10 +25,10 @@ const QUERY_VAR = 'edit-pattern';
  */
 function should_load_creator() {
 	global $wp_query;
-	return $wp_query->is_singular( POST_TYPE ) &&
-		// @todo Permissions TBD, see https://github.com/WordPress/pattern-directory/issues/30.
-		current_user_can( 'edit_post', get_the_ID() ) &&
-		false !== $wp_query->get( QUERY_VAR, false );
+	$is_editor = $wp_query->is_singular( POST_TYPE ) && false !== $wp_query->get( QUERY_VAR, false );
+	// @todo Should this be a page template? Something else?
+	$is_new = is_page( 'new-pattern' );
+	return $is_editor || $is_new;
 }
 
 /**
@@ -53,6 +53,9 @@ function enqueue_assets() {
 		return;
 	}
 
+	/** Load in admin post functions for `get_default_post_to_edit`. */
+	require_once ABSPATH . 'wp-admin/includes/post.php';
+
 	$dir = dirname( __FILE__ );
 
 	$script_asset_path = "$dir/build/index.asset.php";
@@ -74,13 +77,21 @@ function enqueue_assets() {
 	$settings = array(
 		'isRTL' => is_rtl(),
 	);
+
+	if ( is_singular( POST_TYPE ) ) {
+		$post_id = get_the_ID();
+	} else {
+		$post    = get_default_post_to_edit( POST_TYPE, true );
+		$post_id = $post->ID;
+	}
+
 	wp_add_inline_script(
 		'wporg-pattern-creator-script',
 		sprintf(
 			'var wporgBlockPattern = JSON.parse( decodeURIComponent( \'%s\' ) );',
 			rawurlencode( wp_json_encode( array(
 				'settings'   => $settings,
-				'postId'     => get_the_ID(),
+				'postId'     => $post_id,
 				'categories' => get_terms(
 					'wporg-pattern-category',
 					array(
@@ -116,9 +127,9 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
  * Bypass WordPress template system to load only our editor app.
  */
 function inject_editor_template( $template ) {
-	if ( ! should_load_creator() ) {
-		return $template;
+	if ( should_load_creator() ) {
+		return __DIR__ . '/view/editor.php';
 	}
-	return __DIR__ . '/view/editor.php';
+	return $template;
 }
 add_filter( 'template_include', __NAMESPACE__ . '\inject_editor_template' );
