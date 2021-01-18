@@ -3,7 +3,7 @@
 namespace WordPressdotorg\Pattern_Directory\Theme;
 
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\wporg_learn_scripts' );
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
 
 
 /**
@@ -22,24 +22,16 @@ function setup() {
 }
 
 /**
- * Enqueue the CSS styles & scripts.
+ * Enqueue styles & scripts.
  *
- * The wporg theme does this with a static version, so we have to have it here too with our own cache-busting version.
- * The version is set to the last modified time during development.
+ * The wporg theme registers these with static versions, so we need to override with dynamic versions for
+ * cache-busting. The version is set to the last modified time during development.
  */
-function wporg_learn_scripts() {
+function enqueue_assets() {
 	wp_enqueue_style(
 		'wporg-style',
 		get_theme_file_uri( '/css/style.css' ),
 		array( 'dashicons', 'open-sans' ),
 		filemtime( __DIR__ . '/css/style.css' )
-	);
-
-	wp_enqueue_script(
-		'wporg-navigation',
-		get_template_directory_uri() . '/js/navigation.js',
-		array(),
-		filemtime( get_template_directory() . '/js/navigation.js' ),
-		true
 	);
 }
