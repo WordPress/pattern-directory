@@ -12,6 +12,10 @@ export function getEditingBlockPatternId( state ) {
 	return state.currentPatternId;
 }
 
+export const getBlockPattern = createRegistrySelector( ( select ) => ( state, patternId ) => {
+	return select( 'core' ).getEntityRecord( KIND, POST_TYPE, patternId );
+} );
+
 export const getEditedBlockPattern = createRegistrySelector( ( select ) => ( state, patternId ) => {
 	return select( 'core' ).getEditedEntityRecord( KIND, POST_TYPE, patternId );
 } );
