@@ -6,6 +6,7 @@ use Error;
 const POST_TYPE = 'wporg-pattern';
 
 add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
+add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
 
 
@@ -32,7 +33,7 @@ function register_post_type_data() {
 			'public'        => true,
 			'hierarchical'  => true,
 			'show_in_rest'  => true,
-			'rest_base'     => 'pattern-categories',
+			'rest_base'     => 'pattern_categories',
 		)
 	);
 
@@ -43,7 +44,7 @@ function register_post_type_data() {
 			'public'        => true,
 			'hierarchical'  => false,
 			'show_in_rest'  => true,
-			'rest_base'     => 'pattern-keywords',
+			'rest_base'     => 'pattern_keywords',
 
 			'labels' => array(
 				'name'                       => _x( 'Keywords', 'taxonomy general name' ),
@@ -97,9 +98,14 @@ function register_post_type_data() {
 			'show_in_rest'      => true,
 		)
 	);
+}
 
+/**
+ * Adds extra fields to REST API responses.
+ */
+function register_rest_fields() {
 	/*
-	 * Provide category and keyword slugs via meta.
+	 * Provide category and keyword slugs without embedding.
 	 *
 	 * Normally API clients would request these via `_embed` parameters, but that would returning the entire
 	 * object, and Core only needs the slugs. We'd also have to include the `_links` field, because of a Core bug.
@@ -110,51 +116,41 @@ function register_post_type_data() {
 	 * Adding it here is faster for the server to generate, and for the client to download. It also makes the
 	 * output easier for a human to visually parse.
 	 */
-	register_post_meta(
+	register_rest_field(
 		POST_TYPE,
-		'wpop_category_slugs',
+		'category_slugs',
 		array(
-			'type'          => 'array',
-			'single'        => true,
-			'auth_callback' => '__return_false', // Generated dynamically, should not be stored in database.
+			'get_callback' => function() {
+				$slugs = wp_list_pluck( wp_get_object_terms( get_the_ID(), 'wporg-pattern-category' ), 'slug' );
 
-			'show_in_rest' => array(
-				'schema' => array(
-					'items' => array(
-						'type' => 'string',
-					),
+				return array_map( 'sanitize_title', $slugs );
+			},
+
+			'schema' => array(
+				'type'  => 'array',
+				'items' => array(
+					'type' => 'string',
 				),
-
-				'prepare_callback' => function() {
-					$slugs = wp_list_pluck( wp_get_object_terms( get_the_ID(), 'wporg-pattern-category' ), 'slug' );
-
-					return array_map( 'sanitize_title', $slugs );
-				},
 			),
 		)
 	);
 
-	// See `wpop_category_slugs` registration for details.
-	register_post_meta(
+	// See `category_slugs` registration for details.
+	register_rest_field(
 		POST_TYPE,
-		'wpop_keyword_slugs',
+		'keyword_slugs',
 		array(
-			'type'          => 'array',
-			'single'        => true,
-			'auth_callback' => '__return_false', // Generated dynamically, should not be stored in database.
+			'get_callback' => function() {
+				$slugs = wp_list_pluck( wp_get_object_terms( get_the_ID(), 'wporg-pattern-keyword' ), 'slug' );
 
-			'show_in_rest' => array(
-				'schema' => array(
-					'items' => array(
-						'type' => 'string',
-					),
+				return array_map( 'sanitize_title', $slugs );
+			},
+
+			'schema' => array(
+				'type'  => 'array',
+				'items' => array(
+					'type' => 'string',
 				),
-
-				'prepare_callback' => function() {
-					$slugs = wp_list_pluck( wp_get_object_terms( get_the_ID(), 'wporg-pattern-keyword' ), 'slug' );
-
-					return array_map( 'sanitize_title', $slugs );
-				},
 			),
 		)
 	);
