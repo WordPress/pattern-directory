@@ -33,7 +33,7 @@ function register_post_type_data() {
 			'public'        => true,
 			'hierarchical'  => true,
 			'show_in_rest'  => true,
-			'rest_base'     => 'pattern_categories',
+			'rest_base'     => 'pattern-categories',
 		)
 	);
 
@@ -44,7 +44,7 @@ function register_post_type_data() {
 			'public'        => true,
 			'hierarchical'  => false,
 			'show_in_rest'  => true,
-			'rest_base'     => 'pattern_keywords',
+			'rest_base'     => 'pattern-keywords',
 
 			'labels' => array(
 				'name'                       => _x( 'Keywords', 'taxonomy general name', 'wporg-patterns' ),
