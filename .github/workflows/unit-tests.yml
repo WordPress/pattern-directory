@@ -1,0 +1,49 @@
+name: Unit Tests
+
+# Run on any changes in public_html
+on:
+  pull_request:
+    paths:
+    - public_html/**
+  push:
+    branches: [trunk]
+    paths:
+    - public_html/**
+
+
+jobs:
+  unit-php:
+    name: PHP
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Cache node modules
+      uses: actions/cache@v2
+      id: yarn-cache
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+
+    - name: Use Node.js 14.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14.x
+
+    - name: yarn install and build
+      run: |
+        yarn
+        yarn workspaces run build
+
+    - name: Install WordPress
+      run: |
+        chmod -R 767 ./ # TODO: Possibly integrate in wp-env
+        yarn wp-env start
+
+    - name: Running multisite unit tests
+      run: yarn test:php
+      if: ${{ success() || failure() }}

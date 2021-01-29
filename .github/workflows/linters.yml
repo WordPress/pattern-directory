@@ -37,10 +37,9 @@ jobs:
       run: |
         composer install
 
-    - name: yarn install and build
+    - name: yarn install
       run: |
         yarn
-        yarn workspaces run build
 
     - name: Lint JavaScript and Styles
       run: |
