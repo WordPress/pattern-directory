@@ -8,7 +8,7 @@ import {
 	LocalAutosaveMonitor,
 	UnsavedChangesWarning,
 } from '@wordpress/editor';
-import { DropZoneProvider, FocusReturnProvider, Popover, SlotFillProvider } from '@wordpress/components';
+import { DropZoneProvider, Popover, SlotFillProvider } from '@wordpress/components';
 import { StrictMode, useEffect } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 
@@ -74,10 +74,8 @@ export default function Provider( { settings, onError, postId, postType, initial
 							<UnsavedChangesWarning />
 							<AutosaveMonitor interval={ AUTOSAVE_INTERVAL } />
 							<LocalAutosaveMonitor />
-							<FocusReturnProvider>
-								<Layout />
-								<Popover.Slot />
-							</FocusReturnProvider>
+							<Layout />
+							<Popover.Slot />
 						</ErrorBoundary>
 					</EditorProvider>
 				</DropZoneProvider>
