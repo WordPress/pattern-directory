@@ -215,5 +215,18 @@ class Pattern_Validation_Test extends WP_UnitTestCase {
 		$data = $response->get_data();
 		$this->assertSame( 'rest_pattern_empty_blocks', $data['code'] );
 	}
+
+	/**
+	 * Test invalid block content: an empty media & text block.
+	 */
+	public function test_invalid_fake_block() {
+		wp_set_current_user( self::$user );
+		$response = $this->save_block_content(
+			"<!-- wp:plugin/fake -->\n<p>This is some content.</p>\n<!-- /wp:plugin/fake -->"
+		);
+		$this->assertTrue( $response->is_error() );
+		$data = $response->get_data();
+		$this->assertSame( 'rest_pattern_invalid_blocks', $data['code'] );
+	}
 }
 

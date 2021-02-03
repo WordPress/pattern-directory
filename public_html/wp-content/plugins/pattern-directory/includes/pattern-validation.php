@@ -19,11 +19,13 @@ function validate_content( $prepared_post, $request ) {
 	}
 
 	$blocks = parse_blocks( $content );
+	$registry = \WP_Block_Type_Registry::get_instance();
 
 	// $blocks contains a list of the blocks in the content. By default it will always have one item, even if it's
 	// not valid block content. Instead, we should check that each block in the list has a blockName.
-	$invalid_blocks = array_filter( $blocks, function( $block ) {
-		return is_null( $block['blockName'] );
+	$invalid_blocks = array_filter( $blocks, function( $block ) use ( $registry ) {
+		$block_type = $registry->get_registered( $block['blockName'] );
+		return is_null( $block['blockName'] ) || is_null( $block_type );
 	} );
 	if ( count( $invalid_blocks ) ) {
 		return new \WP_Error(
@@ -32,8 +34,6 @@ function validate_content( $prepared_post, $request ) {
 			array( 'status' => 400 )
 		);
 	}
-
-	$registry = \WP_Block_Type_Registry::get_instance();
 
 	// Next, we should check that we have at least one non-empty block.
 	$real_blocks = array_filter( $blocks, function( $block ) use ( $registry ) {
