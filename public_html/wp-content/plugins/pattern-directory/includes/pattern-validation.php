@@ -18,6 +18,8 @@ function validate_content( $prepared_post, $request ) {
 		);
 	}
 
+	// The editor adds in linebreaks between blocks, but parse_blocks thinks those are invalid blocks.
+	$content = str_replace( "\n\n", '', $content );
 	$blocks = parse_blocks( $content );
 	$registry = \WP_Block_Type_Registry::get_instance();
 
