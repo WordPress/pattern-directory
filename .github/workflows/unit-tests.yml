@@ -43,6 +43,10 @@ jobs:
         yarn
         yarn workspaces run build
 
+    - name: composer install
+      run: |
+        composer install
+
     - name: Install WordPress
       run: |
         chmod -R 767 ./ # TODO: Possibly integrate in wp-env

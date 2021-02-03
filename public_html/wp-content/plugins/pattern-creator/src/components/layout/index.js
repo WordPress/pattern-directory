@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+// eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK.
 import { BlockBreadcrumb, BlockInspector, __experimentalLibrary as Library } from '@wordpress/block-editor';
 import { Button, ScrollLock } from '@wordpress/components';
 import classnames from 'classnames';
