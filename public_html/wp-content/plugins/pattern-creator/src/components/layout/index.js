@@ -10,12 +10,12 @@ import { InterfaceSkeleton } from '@wordpress/interface';
 import { EditorNotices } from '@wordpress/editor';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
-import { useViewportMatch } from '@wordpress/compose';
+// eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK.
+import { __experimentalUseDialog as useDialog, useViewportMatch } from '@wordpress/compose';
 
 /**
  * Edit-Post dependencies
  */
-import PopoverWrapper from '@wordpress/edit-post/build/components/layout/popover-wrapper';
 import VisualEditor from '@wordpress/edit-post/build/components/visual-editor';
 
 /**
@@ -35,6 +35,9 @@ export default function Layout() {
 		closePublishSidebar,
 		openPublishSidebar,
 	} = useDispatch( 'core/edit-post' );
+	const [ inserterDialogRef, inserterDialogProps ] = useDialog( {
+		onClose: () => setIsInserterOpened( false ),
+	} );
 	const { isGeneralSidebarOpened, isPublishSidebarOpened, isInserterOpened } = useSelect( ( select ) => {
 		return {
 			isGeneralSidebarOpened: !! select( 'core/interface' ).getActiveComplementaryArea( 'core/edit-post' ),
@@ -86,11 +89,12 @@ export default function Layout() {
 						closePublishSidebar={ closePublishSidebar }
 					/>
 				}
-				leftSidebar={
+				secondarySidebar={
 					isInserterOpened && (
-						<PopoverWrapper
+						<div
+							ref={ inserterDialogRef }
+							{ ...inserterDialogProps }
 							className="edit-post-layout__inserter-panel-popover-wrapper"
-							onClose={ () => setIsInserterOpened( false ) }
 						>
 							<div className="edit-post-layout__inserter-panel">
 								<div className="edit-post-layout__inserter-panel-header">
@@ -106,7 +110,7 @@ export default function Layout() {
 									/>
 								</div>
 							</div>
-						</PopoverWrapper>
+						</div>
 					)
 				}
 				sidebar={
