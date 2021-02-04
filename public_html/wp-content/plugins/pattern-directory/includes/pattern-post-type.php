@@ -9,6 +9,7 @@ add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
 add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
 add_filter( 'allowed_block_types', __NAMESPACE__ . '\remove_disallowed_blocks', 10, 2 );
+add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
 
 
 /**
@@ -229,4 +230,17 @@ function remove_disallowed_blocks( $allowed_block_types, $post ) {
 		return array_values( array_diff( $allowed_block_types, $disallowed_block_types ) );
 	}
 	return $allowed_block_types;
+}
+
+/**
+ * Disable the block directory in wp-admin for patterns.
+ *
+ * The block directory file isn't loaded on the frontend, so this is only needed for site admins who can open
+ * the pattern in the "real" wp-admin editor.
+ */
+function disable_block_directory() {
+	if ( is_admin() && POST_TYPE === get_post_type() ) {
+		remove_action( 'enqueue_block_editor_assets', 'wp_enqueue_editor_block_directory_assets' );
+		remove_action( 'enqueue_block_editor_assets', 'gutenberg_enqueue_block_editor_assets_block_directory' );
+	}
 }
