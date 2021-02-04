@@ -74,16 +74,18 @@ function enqueue_assets() {
 
 	wp_set_script_translations( 'wporg-pattern-creator-script', 'wporg-pattern-creator' );
 
-	$settings = array(
-		'isRTL' => is_rtl(),
-	);
-
 	if ( is_singular( POST_TYPE ) ) {
 		$post_id = get_the_ID();
+		$post    = get_post( $post_id );
 	} else {
 		$post    = get_default_post_to_edit( POST_TYPE, true );
 		$post_id = $post->ID;
 	}
+
+	$settings = array(
+		'isRTL' => is_rtl(),
+		'allowedBlockTypes' => apply_filters( 'allowed_block_types', true, $post ),
+	);
 
 	wp_add_inline_script(
 		'wporg-pattern-creator-script',

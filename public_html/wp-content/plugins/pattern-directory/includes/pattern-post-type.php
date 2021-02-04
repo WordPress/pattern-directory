@@ -1,13 +1,14 @@
 <?php
 
 namespace WordPressdotorg\Pattern_Directory\Pattern_Post_Type;
-use Error;
+use Error, WP_Block_Type_Registry;
 
 const POST_TYPE = 'wporg-pattern';
 
 add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
 add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
+add_filter( 'allowed_block_types', __NAMESPACE__ . '\remove_disallowed_blocks', 10, 2 );
 
 
 /**
@@ -199,4 +200,33 @@ function enqueue_editor_assets() {
 	);
 
 	wp_set_script_translations( 'wporg-pattern-post-type', 'wporg-patterns' );
+}
+
+/**
+ * Restrict the set of blocks allowed in block patterns.
+ *
+ * @param bool|array $allowed_block_types Array of block type slugs, or boolean to enable/disable all.
+ * @param WP_Post    $post                The post resource data.
+ *
+ * @return bool|array A (possibly) filtered list of block types.
+ */
+function remove_disallowed_blocks( $allowed_block_types, $post ) {
+	$disallowed_block_types = array(
+		// Remove blocks that don't make sense in Block Patterns
+		'core/freeform', // Classic block
+		'core/legacy-widget',
+		'core/more',
+		'core/nextpage',
+		'core/block', // Reusable blocks
+		'core/shortcode',
+	);
+	if ( POST_TYPE === $post->post_type ) {
+		// This can be true if all block types are allowed, so to filter them we
+		// need to get the list of all registered blocks first.
+		if ( true === $allowed_block_types ) {
+			$allowed_block_types = array_keys( WP_Block_Type_Registry::get_instance()->get_all_registered() );
+		}
+		return array_values( array_diff( $allowed_block_types, $disallowed_block_types ) );
+	}
+	return $allowed_block_types;
 }
