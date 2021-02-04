@@ -8,7 +8,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 /**
  * Test pattern validation.
  */
-class Pattern_Validation_Test extends WP_UnitTestCase {
+class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	protected static $pattern_id;
 	protected static $user;
 
