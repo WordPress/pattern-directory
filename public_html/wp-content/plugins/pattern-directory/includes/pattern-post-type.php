@@ -156,6 +156,27 @@ function register_rest_fields() {
 			),
 		)
 	);
+
+	/*
+	 * Provide the raw content without requring the `edit` context.
+	 *
+	 * We need the raw content because it contains the source code for blocks (the comment delimiters). The rendered
+	 * content is considered a "classic block", since it lacks these. The `edit` context would return both raw and
+	 * rendered, but it requires more permissions and potentially exposes more content than we need.
+	 */
+	register_rest_field(
+		POST_TYPE,
+		'pattern_content',
+		array(
+			'get_callback' => function() {
+				return wp_kses_post( get_the_content() );
+			},
+
+			'schema' => array(
+				'type'  => 'string',
+			),
+		)
+	);
 }
 
 /**
