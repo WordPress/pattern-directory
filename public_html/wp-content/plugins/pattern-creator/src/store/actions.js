@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { dispatch, select } from '@wordpress/data';
+import { store as editorStore } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -39,8 +40,5 @@ export function* editBlockPattern( edits, options = {} ) {
  * @yield {Object} Action object
  */
 export function* saveBlockPattern() {
-	const patternId = yield select( MODULE_KEY ).getEditingBlockPatternId();
-
-	// @todo maybe check for errors?
-	yield dispatch( 'core' ).saveEditedEntityRecord( KIND, POST_TYPE, patternId );
+	yield dispatch( editorStore ).savePost();
 }
