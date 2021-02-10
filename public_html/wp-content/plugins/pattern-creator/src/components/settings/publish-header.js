@@ -32,14 +32,19 @@ export default function PublishHeader( { hasEdits } ) {
 		return (
 			<>
 				<h2>{ __( 'Update your published pattern.', 'wporg-patterns' ) }</h2>
-				<p>{ __( 'Change your pattern details [copy tbd].', 'wporg-patterns' ) }</p>
+				<p>{ __( 'Edit the information here to help people find your pattern.', 'wporg-patterns' ) }</p>
 			</>
 		);
 	}
 	return (
 		<>
-			<h2>{ __( 'Pattern Updated!', 'wporg-patterns' ) }</h2>
-			<p>{ __( 'Find your pattern on wp.org…', 'wporg-patterns' ) }</p>
+			<h2>{ __( 'Pattern', 'wporg-patterns' ) }</h2>
+			<p>
+				{ __(
+					'Your pattern is published and can be found when searching in the WordPress editor.',
+					'wporg-patterns'
+				) }
+			</p>
 		</>
 	);
 }

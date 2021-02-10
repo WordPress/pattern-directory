@@ -57,7 +57,6 @@ export default function Settings( { closeSidebar } ) {
 					label={ __( 'Pattern Name', 'wporg-patterns' ) }
 					value={ post.title || '' }
 					onChange={ ( title ) => editBlockPattern( { title } ) }
-					disabled={ ! isUnpublished }
 				/>
 				<TextareaControl
 					label={ __( 'Description', 'wporg-patterns' ) }
@@ -72,11 +71,7 @@ export default function Settings( { closeSidebar } ) {
 					onChange={ setTerms }
 				/>
 			</PanelBody>
-			<PanelBody title={ __( 'Add tags', 'wporg-patterns' ) }>
-				<p>{ __( 'If we want to add tags for sorting on wp.org?', 'wporg-patterns' ) }</p>
-			</PanelBody>
 			<PanelBody title={ __( 'Pattern preview', 'wporg-patterns' ) }>
-				<p>{ __( 'Other details we could use for wp.org display…', 'wporg-patterns' ) }</p>
 				<SelectControl
 					label={ __( 'Preview Width', 'wporg-patterns' ) }
 					value={ viewportWidth }
