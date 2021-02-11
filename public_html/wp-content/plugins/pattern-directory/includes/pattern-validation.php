@@ -4,6 +4,7 @@ namespace WordPressdotorg\Pattern_Directory\Pattern_Validation;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content', 10, 2 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
 
 /**
  * Validate the pattern content.
@@ -65,6 +66,42 @@ function validate_content( $prepared_post, $request ) {
 		return new \WP_Error(
 			'rest_pattern_empty_blocks',
 			__( 'Pattern content contains only empty blocks.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	return $prepared_post;
+}
+
+/**
+ * Validate the pattern title.
+ */
+function validate_title( $prepared_post, $request ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	$status = isset( $request['status'] ) ? $request['status'] : get_post_status( $prepared_post->ID );
+	// Bypass this validation for drafts.
+	if ( 'draft' === $status || 'auto-draft' === $status ) {
+		return $prepared_post;
+	}
+
+	// A title exists, but is empty -- invalid.
+	if ( isset( $request['title'] ) && empty( trim( $request['title'] ) ) ) {
+		return new \WP_Error(
+			'rest_pattern_empty_title',
+			__( 'A pattern title is required.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	// The existing pattern doesn't have a title, and none is set -- invalid.
+	$post_title = get_the_title( $prepared_post->ID );
+	if ( empty( $post_title ) && ! isset( $request['title'] ) ) {
+		return new \WP_Error(
+			'rest_pattern_empty_title',
+			__( 'A pattern title is required.', 'wporg-patterns' ),
 			array( 'status' => 400 )
 		);
 	}
