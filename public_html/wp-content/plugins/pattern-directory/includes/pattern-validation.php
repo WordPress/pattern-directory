@@ -10,6 +10,10 @@ add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 1
  * Validate the pattern content.
  */
 function validate_content( $prepared_post, $request ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
 	$content = $prepared_post->post_content;
 	if ( ! $content ) {
 		return new \WP_Error(
