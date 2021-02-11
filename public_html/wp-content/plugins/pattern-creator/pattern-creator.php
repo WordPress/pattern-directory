@@ -120,6 +120,15 @@ function enqueue_assets() {
 		filemtime( "$dir/build/style-index.css" )
 	);
 
+	// Postbox is only registered if `is_admin`, so we need to intentionally add it.
+	wp_enqueue_script(
+		'postbox',
+		admin_url( 'js/postbox.min.js' ),
+		array( 'jquery-ui-sortable', 'wp-a11y' ),
+		get_bloginfo( 'version' ),
+		true
+	);
+
 	wp_enqueue_style( 'wp-edit-post' );
 	wp_enqueue_style( 'wporg-pattern-creator-style' );
 }

@@ -6,23 +6,20 @@ import { BlockBreadcrumb, BlockInspector, __experimentalLibrary as Library } fro
 import { Button, ScrollLock } from '@wordpress/components';
 import classnames from 'classnames';
 import { close } from '@wordpress/icons';
-import { InterfaceSkeleton } from '@wordpress/interface';
+import { InterfaceSkeleton, store as interfaceStore } from '@wordpress/interface';
 import { EditorNotices } from '@wordpress/editor';
+import { store as editPostStore } from '@wordpress/edit-post';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
 // eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK.
 import { __experimentalUseDialog as useDialog, useViewportMatch } from '@wordpress/compose';
 
 /**
- * Edit-Post dependencies
- */
-import VisualEditor from '@wordpress/edit-post/build/components/visual-editor';
-
-/**
  * Internal dependencies
  */
 import Header from '../header';
 import Settings from '../settings';
+import VisualEditor from '../visual-editor';
 import './style.css';
 
 export default function Layout() {
@@ -34,17 +31,23 @@ export default function Layout() {
 		setIsInserterOpened,
 		closePublishSidebar,
 		openPublishSidebar,
-	} = useDispatch( 'core/edit-post' );
+	} = useDispatch( editPostStore );
 	const [ inserterDialogRef, inserterDialogProps ] = useDialog( {
 		onClose: () => setIsInserterOpened( false ),
 	} );
-	const { isGeneralSidebarOpened, isPublishSidebarOpened, isInserterOpened } = useSelect( ( select ) => {
-		return {
-			isGeneralSidebarOpened: !! select( 'core/interface' ).getActiveComplementaryArea( 'core/edit-post' ),
-			isPublishSidebarOpened: select( 'core/edit-post' ).isPublishSidebarOpened(),
-			isInserterOpened: select( 'core/edit-post' ).isInserterOpened(),
-		};
-	}, [] );
+	const { defaultEditorStyles, isGeneralSidebarOpened, isPublishSidebarOpened, isInserterOpened } = useSelect(
+		( select ) => {
+			return {
+				defaultEditorStyles: select( 'core/editor' ).getEditorSettings().defaultEditorStyles,
+				isGeneralSidebarOpened: !! select( interfaceStore ).getActiveComplementaryArea(
+					editPostStore.name
+				),
+				isPublishSidebarOpened: select( editPostStore ).isPublishSidebarOpened(),
+				isInserterOpened: select( editPostStore ).isInserterOpened(),
+			};
+		},
+		[]
+	);
 	const isSidebarOpened = isGeneralSidebarOpened || isPublishSidebarOpened;
 	const className = classnames( 'edit-wporg-pattern-layout', 'edit-post-layout', 'is-mode-visual', {
 		'is-sidebar-opened': isSidebarOpened,
@@ -135,11 +138,11 @@ export default function Layout() {
 					)
 				}
 				content={
-					<div className="block-pattern-creator__editor editor-styles-wrapper">
+					<>
 						<EditorNotices />
-						<VisualEditor />
+						<VisualEditor styles={ defaultEditorStyles } />
 						{ isMobileViewport && isSidebarOpened && <ScrollLock /> }
-					</div>
+					</>
 				}
 				footer={
 					! isMobileViewport && (

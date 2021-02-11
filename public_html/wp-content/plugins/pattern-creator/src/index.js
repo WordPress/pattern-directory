@@ -6,11 +6,6 @@ import { registerCoreBlocks } from '@wordpress/block-library';
 import '@wordpress/format-library';
 
 /**
- * Edit-Post dependencies
- */
-import '@wordpress/edit-post/build/store';
-
-/**
  * Internal dependencies
  */
 import Editor from './components/editor';
@@ -34,4 +29,3 @@ render(
 	/>,
 	document.getElementById( 'block-pattern-creator' )
 );
-

@@ -52,8 +52,3 @@ html.interface-interface-skeleton__html-container {
 .interface-interface-skeleton__footer {
 	position: absolute;
 }
-
-/* Hide title input, pattern title is set in the sidebar. */
-.edit-post-visual-editor__post-title-wrapper {
-	display: none;
-}

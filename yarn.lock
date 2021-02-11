@@ -2678,7 +2678,7 @@
     "@webassemblyjs/wast-parser" "1.9.0"
     "@xtuc/long" "4.2.2"
 
-"@wordpress/a11y@^2.13.0", "@wordpress/a11y@^2.14.3":
+"@wordpress/a11y@2.14.3", "@wordpress/a11y@^2.13.0", "@wordpress/a11y@^2.14.3":
   version "2.14.3"
   resolved "https://registry.yarnpkg.com/@wordpress/a11y/-/a11y-2.14.3.tgz#9bd07b8ac4fc0c70f333f08f6776c2fd7074b39a"
   integrity sha512-5K/wyI8c9VhW+3sk54SPOwLLBF4rkj8gqUCH4NWI4TgsFMwPcMcIOf0o+vwKG9CkRKqzMs29apzJEbkiQf4TqA==
@@ -9333,6 +9333,11 @@ lodash.uniq@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
   integrity sha1-0CJTc662Uq3BvILklFM5qEJ1R3M=
+
+lodash@4.17.19:
+  version "4.17.19"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.19.tgz#e48ddedbe30b3321783c5b4301fbd353bc1e4a4b"
+  integrity sha512-JNvd8XER9GQX0v2qJgsaN/mzFCNA5BRe/j8JN9d+tWyGLSodKQHKFicdwNYzWwI3wjRnaKPsGj1XkBjx/F96DQ==
 
 lodash@^4.1.1, lodash@^4.15.0, lodash@^4.17.10, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.19, lodash@^4.17.20, lodash@~4.17.10, lodash@~4.17.19, lodash@~4.17.20:
   version "4.17.20"

@@ -9,6 +9,7 @@ import {
 	UnsavedChangesWarning,
 } from '@wordpress/editor';
 import { DropZoneProvider, Popover, SlotFillProvider } from '@wordpress/components';
+import { store as editPostStore } from '@wordpress/edit-post';
 import { StrictMode, useEffect } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 
@@ -34,12 +35,12 @@ export default function Provider( { settings, onError, postId, postType, initial
 
 	// Get editor settings.
 	const { keepCaretInsideBlock } = useSelect( ( select ) => {
-		const { isFeatureActive } = select( 'core/edit-post' );
+		const { isFeatureActive } = select( editPostStore );
 		return {
 			keepCaretInsideBlock: isFeatureActive( 'keepCaretInsideBlock' ),
 		};
 	} );
-	const { setIsInserterOpened } = useDispatch( 'core/edit-post' );
+	const { setIsInserterOpened } = useDispatch( editPostStore );
 
 	// Bail early if no post yet, eventually this could be a loading state.
 	if ( ! post ) {
