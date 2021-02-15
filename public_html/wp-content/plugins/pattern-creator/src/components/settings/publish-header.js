@@ -10,13 +10,25 @@ import { useSelect } from '@wordpress/data';
 import { MODULE_KEY } from '../../store/utils';
 
 export default function PublishHeader( { hasEdits } ) {
-	const isUnpublished = useSelect( ( select ) => {
+	const { isUnpublished, isPending } = useSelect( ( select ) => {
 		const { getEditingBlockPatternId, getBlockPattern } = select( MODULE_KEY );
 		const post = getBlockPattern( getEditingBlockPatternId() );
-		return [ 'publish', 'private' ].indexOf( post.status ) === -1;
+		return {
+			isUnpublished: [ 'publish', 'private' ].indexOf( post.status ) === -1,
+			isPending: 'pending' === post.status,
+		};
 	} );
 
-	if ( isUnpublished ) {
+	if ( isPending ) {
+		return (
+			<>
+				<h2>{ __( 'Pending manual review.', 'wporg-patterns' ) }</h2>
+				<p>
+					{ __( 'Your pattern has been submitted, and is awaiting manual review.', 'wporg-patterns' ) }
+				</p>
+			</>
+		);
+	} else if ( isUnpublished ) {
 		return (
 			<>
 				<h2>{ __( 'Are you ready to publish?', 'wporg-patterns' ) }</h2>
@@ -38,10 +50,10 @@ export default function PublishHeader( { hasEdits } ) {
 	}
 	return (
 		<>
-			<h2>{ __( 'Pattern', 'wporg-patterns' ) }</h2>
+			<h2>{ __( 'Your pattern is now live.', 'wporg-patterns' ) }</h2>
 			<p>
 				{ __(
-					'Your pattern is published and can be found when searching in the WordPress editor.',
+					'Your pattern is published and can be found when searching in the WordPress editor. Thanks for sharing your creation!',
 					'wporg-patterns'
 				) }
 			</p>
