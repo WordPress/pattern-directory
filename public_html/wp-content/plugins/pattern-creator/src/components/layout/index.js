@@ -2,7 +2,7 @@
  * External dependencies
  */
 // eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK.
-import { BlockBreadcrumb, BlockInspector, __experimentalLibrary as Library } from '@wordpress/block-editor';
+import { BlockBreadcrumb, __experimentalLibrary as Library } from '@wordpress/block-editor';
 import { Button, ScrollLock } from '@wordpress/components';
 import classnames from 'classnames';
 import { close } from '@wordpress/icons';
@@ -19,6 +19,7 @@ import { __experimentalUseDialog as useDialog, useViewportMatch } from '@wordpre
  */
 import Header from '../header';
 import Settings from '../settings';
+import Sidebar from './sidebar';
 import VisualEditor from '../visual-editor';
 import './style.css';
 
@@ -34,6 +35,9 @@ export default function Layout() {
 	} = useDispatch( editPostStore );
 	const [ inserterDialogRef, inserterDialogProps ] = useDialog( {
 		onClose: () => setIsInserterOpened( false ),
+	} );
+	const [ publishSidebarDialogRef, publishSidebarDialogProps ] = useDialog( {
+		onClose: () => closePublishSidebar(),
 	} );
 	const { defaultEditorStyles, isGeneralSidebarOpened, isPublishSidebarOpened, isInserterOpened } = useSelect(
 		( select ) => {
@@ -119,20 +123,17 @@ export default function Layout() {
 				sidebar={
 					isGeneralSidebarOpened && (
 						<div className="block-pattern-creator__sidebar interface-complementary-area">
-							<div className="block-pattern-creator__sidebar-header">
-								<Button
-									icon={ close }
-									onClick={ closeGeneralSidebar }
-									label="Close block settings"
-								/>
-							</div>
-							<BlockInspector />
+							<Sidebar onClose={ closeGeneralSidebar } />
 						</div>
 					)
 				}
 				actions={
 					isPublishSidebarOpened && (
-						<div className="block-pattern-creator__sidebar interface-complementary-area">
+						<div
+							ref={ publishSidebarDialogRef }
+							{ ...publishSidebarDialogProps }
+							className="block-pattern-creator__sidebar interface-complementary-area"
+						>
 							<Settings closeSidebar={ closePublishSidebar } />
 						</div>
 					)
