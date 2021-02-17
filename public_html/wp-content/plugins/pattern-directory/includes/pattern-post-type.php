@@ -108,7 +108,12 @@ function register_post_type_data() {
 			'default'           => '',
 			'sanitize_callback' => 'sanitize_text_field',
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
-			'show_in_rest'      => true,
+			'show_in_rest'      => array(
+				'schema' => array(
+					'maxLength' => 360,
+					'required'  => true,
+				),
+			),
 		)
 	);
 
@@ -119,10 +124,15 @@ function register_post_type_data() {
 			'type'              => 'number',
 			'description'       => 'The width of the pattern in the block inserter.',
 			'single'            => true,
-			'default'           => 0,
+			'default'           => 1200,
 			'sanitize_callback' => 'absint',
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
-			'show_in_rest'      => true,
+			'show_in_rest'      => array(
+				'schema' => array(
+					'minimum' => 400,
+					'maximum' => 2000,
+				),
+			),
 		)
 	);
 }
