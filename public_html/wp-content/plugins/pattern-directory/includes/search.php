@@ -9,7 +9,7 @@ add_filter( 'jetpack_sync_post_meta_whitelist', __NAMESPACE__ . '\sync_pattern_m
 /**
  * Tell Jetpack to sync pattern meta, so it can be indexed by ElasticSearch.
  *
- * @param $post_meta_safelist
+ * @param array $post_meta_safelist
  *
  * @return mixed
  */
