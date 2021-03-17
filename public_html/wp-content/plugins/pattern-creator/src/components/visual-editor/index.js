@@ -11,7 +11,6 @@ import {
 	__unstableUseCanvasClickRedirect as useCanvasClickRedirect,
 	__unstableUseClipboardHandler as useClipboardHandler,
 	__experimentalUseResizeCanvas as useResizeCanvas,
-	__unstableUseScrollMultiSelectionIntoView as useScrollMultiSelectionIntoView,
 	__unstableUseTypewriter as useTypewriter,
 	__unstableUseTypingObserver as useTypingObserver,
 	/* eslint-enable */
@@ -20,6 +19,7 @@ import { Popover } from '@wordpress/components';
 import { store as editPostStore } from '@wordpress/edit-post';
 import { useRef } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
+import { useMergeRefs } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -29,7 +29,7 @@ import './style.css';
 
 /**
  * This is a copy of packages/edit-post/src/components/visual-editor/index.js
- * Copied from Gutenberg@9.9.1
+ * Copied from Gutenberg@10.2.0
  */
 
 export default function VisualEditor( { styles } ) {
@@ -48,19 +48,21 @@ export default function VisualEditor( { styles } ) {
 	};
 	const resizedCanvasStyles = useResizeCanvas( deviceType );
 
-	useScrollMultiSelectionIntoView( ref );
-	useBlockSelectionClearer( ref );
-	useTypewriter( ref );
-	useClipboardHandler( ref );
-	useTypingObserver( ref );
-	useCanvasClickRedirect( ref );
+	const mergedRefs = useMergeRefs( [
+		ref,
+		useClipboardHandler(),
+		useCanvasClickRedirect(),
+		useTypewriter(),
+		useBlockSelectionClearer(),
+		useTypingObserver(),
+	] );
 
 	return (
 		<div className="block-pattern-creator__editor">
 			<EditorStyles styles={ styles } />
 			<Popover.Slot name="block-toolbar" />
 			<div
-				ref={ ref }
+				ref={ mergedRefs }
 				className="editor-styles-wrapper"
 				style={ resizedCanvasStyles || desktopCanvasStyles }
 			>
