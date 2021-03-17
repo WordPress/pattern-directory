@@ -6,8 +6,8 @@
 	"license": "GPL-2.0-or-later",
 	"private": true,
 	"dependencies": {
-		"@wordpress/env": "^3.0.2",
-		"@wordpress/scripts": "^13.0.2",
+		"@wordpress/env": "4.0.0",
+		"@wordpress/scripts": "14.0.0",
 		"@wordpress/stylelint-config": "19.0.1"
 	},
 	"scripts": {
