@@ -21,4 +21,34 @@ body.single-wporg-pattern {
 			line-height: 1.2;
 		}
 	}
+
+	.pattern-actions {
+		display: flex;
+		align-items: stretch;
+
+		button + button {
+			margin-left: 2em;
+		}
+	}
+
+	.entry-content {
+		max-width: $size__site-main;
+		margin-left: auto;
+		margin-right: auto;
+	}
+}
+
+#wporg-pattern-container {
+	position: relative;
+
+	&::before {
+		content: "";
+		background: $color-gray-light-200; //$color-white;
+		position: absolute;
+		z-index: -1;
+		top: 0;
+		bottom: 0;
+		left: calc(50% - 50vw);
+		width: 100vw;
+	}
 }
