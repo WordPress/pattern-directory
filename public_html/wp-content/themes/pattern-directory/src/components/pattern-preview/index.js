@@ -40,8 +40,13 @@ function PatternPreview( { blockContent } ) {
 				<Canvas html={ blockContent } />
 				<DragHandle label="Right" className="is-right" onDragChange={ onRightDragChange } />
 			</div>
-			<div className="pattern-preview__categories">
-				Categories: <a href="#">Ecommerce,</a> <a href="#">Columns,</a> <a href="#">Marketing</a>
+			<div className="pattern-preview__meta">
+				<div className="pattern-preview__categories">
+					Categories: <a href="#">Ecommerce,</a> <a href="#">Columns,</a> <a href="#">Marketing</a>
+				</div>
+				<div className="pattern-preview__report">
+					<button className="button">Report this pattern</button>
+				</div>
 			</div>
 		</>
 	);

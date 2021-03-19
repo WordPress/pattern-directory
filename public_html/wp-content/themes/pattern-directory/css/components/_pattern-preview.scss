@@ -62,8 +62,14 @@
 	}
 }
 
-.pattern-preview__categories {
+.pattern-preview__meta {
 	max-width: $size__site-main;
 	margin-left: auto;
 	margin-right: auto;
+	display: flex;
+	justify-content: space-between;
+
+	.pattern-preview__report {
+		text-align: right;
+	}
 }
