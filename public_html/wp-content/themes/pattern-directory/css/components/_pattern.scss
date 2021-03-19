@@ -10,7 +10,15 @@ body.single-wporg-pattern {
 		padding: 0;
 	}
 
-	.site-main {
-		max-width: $size__wide-width;
+	.entry-header {
+		max-width: $size__site-main;
+		padding: 2rem 0;
+		margin-left: auto;
+		margin-right: auto;
+
+		.entry-title {
+			margin-top: 0;
+			line-height: 1.2;
+		}
 	}
 }
