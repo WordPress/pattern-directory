@@ -29,10 +29,11 @@ get_header();
 					</div>
 				</header><!-- .entry-header -->
 
+				<div id="wporg-pattern-container" hidden>
+					<?php echo rawurlencode( wp_json_encode( get_the_content() ) ); ?>
+				</div>
+
 				<div class="entry-content">
-					<div id="wporg-pattern-container" hidden>
-						<?php echo rawurlencode( wp_json_encode( get_the_content() ) ); ?>
-					</div>
 					<h2>More from this designer</h2>
 					<div class="pattern-grid">
 						<ul>

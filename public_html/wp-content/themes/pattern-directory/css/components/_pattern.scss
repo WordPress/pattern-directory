@@ -37,18 +37,3 @@ body.single-wporg-pattern {
 		margin-right: auto;
 	}
 }
-
-#wporg-pattern-container {
-	position: relative;
-
-	&::before {
-		content: "";
-		background: $color-gray-light-200; //$color-white;
-		position: absolute;
-		z-index: -1;
-		top: 0;
-		bottom: 0;
-		left: calc(50% - 50vw);
-		width: 100vw;
-	}
-}
