@@ -15,6 +15,8 @@ function Canvas( { html } ) {
 		overflowY: 'auto',
 	};
 	const iframeBodyStyle =
+		// @todo - Should we keep the TT1 style? Load css from a local file?
+		'<link rel="stylesheet" id="twenty-twenty-one-style-css" href="https://wp-themes.com/wp-content/themes/twentytwentyone/style.css?ver=1.2" media="all" />' +
 		'<style>body{display: flex;align-items: center;justify-content: center;min-height: 100vh;}</style>';
 
 	return (
