@@ -23,7 +23,7 @@
 	],
 	"devDependencies": {
 		"@wordpress/browserslist-config": "3.0.1",
-		"@wordpress/scripts": "14.0.0",
+		"@wordpress/scripts": "14.0.1",
 		"autoprefixer": "9.8.6",
 		"cssnano": "4.1.10",
 		"grunt": "1.3.0",

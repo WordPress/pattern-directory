@@ -6,15 +6,15 @@
 	"license": "GPL-2.0-or-later",
 	"scripts": {
 		"build": "wp-scripts build",
-		"format:js": "wp-scripts format-js",
-		"lint:css": "wp-scripts lint-style",
-		"lint:js": "wp-scripts lint-js",
+		"format:js": "wp-scripts format-js src",
+		"lint:css": "wp-scripts lint-style style.css src",
+		"lint:js": "wp-scripts lint-js src",
 		"start": "wp-scripts start"
 	},
 	"devDependencies": {
 		"autoprefixer": "9.8.6",
 		"postcss-custom-properties": "10.0.0",
-		"@wordpress/scripts": "14.0.0"
+		"@wordpress/scripts": "14.0.1"
 	},
 	"dependencies": {
 		"classnames": "2.2.6",

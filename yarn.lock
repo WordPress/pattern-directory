@@ -3313,10 +3313,10 @@
   dependencies:
     "@babel/runtime" "^7.12.5"
 
-"@wordpress/eslint-plugin@^9.0.0":
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/@wordpress/eslint-plugin/-/eslint-plugin-9.0.0.tgz#bd3f006661abcc2b67083a6196a1ef839031607a"
-  integrity sha512-dnlN+/ZYA72w2TY0gvfDePJZBw9zNQZW6ckEtuUop8YfUEqbVHQKwbqVfyeD8E/oSVXp0kGlSMJX4A6FsUmhCw==
+"@wordpress/eslint-plugin@^9.0.1":
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/@wordpress/eslint-plugin/-/eslint-plugin-9.0.1.tgz#bbae2dc758340f11cf8b24117f4844a1288ed62e"
+  integrity sha512-fB2r0a/VlolejWQGceLdYhUWhVDat/j4ydYJaUBql8TlNZAsxrqj4m/Nl3SATdJHk4nHjvUtrSSY179HwWdxgA==
   dependencies:
     "@typescript-eslint/eslint-plugin" "^4.15.0"
     "@typescript-eslint/parser" "^4.15.0"
@@ -3584,15 +3584,15 @@
     memize "^1.1.0"
     rememo "^3.0.0"
 
-"@wordpress/scripts@14.0.0":
-  version "14.0.0"
-  resolved "https://registry.yarnpkg.com/@wordpress/scripts/-/scripts-14.0.0.tgz#ba35f3ec8acde79e91b109d35c6b7ed0f6905854"
-  integrity sha512-DbwHedUcrmoHkDdwldKm5tPd7rNOuzl1Om5r8UO+lGV3GP0vE1ZtY7vKP5h67XTfe3Icyp+eZ8CAcX4EgBG55g==
+"@wordpress/scripts@14.0.1":
+  version "14.0.1"
+  resolved "https://registry.yarnpkg.com/@wordpress/scripts/-/scripts-14.0.1.tgz#2d858dfb52940fdaf1b26f6a717fa48d9783d663"
+  integrity sha512-oGzJSbrkLdR+RMb3Pmn2PMXzhSBlFzbBryOPuvn/2/kH8ycPTrmcWrM1Mw3OvZ5S/M1hwCz04ZQLLw6t6ES+6g==
   dependencies:
     "@svgr/webpack" "^5.2.0"
     "@wordpress/babel-preset-default" "^5.1.0"
     "@wordpress/dependency-extraction-webpack-plugin" "^3.1.0"
-    "@wordpress/eslint-plugin" "^9.0.0"
+    "@wordpress/eslint-plugin" "^9.0.1"
     "@wordpress/jest-preset-default" "^7.0.1"
     "@wordpress/npm-package-json-lint-config" "^4.0.1"
     "@wordpress/postcss-plugins-preset" "^2.1.0"
