@@ -2,9 +2,10 @@
 
 namespace WordPressdotorg\Pattern_Directory\Theme;
 
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
-
 
 /**
  * Sets up theme defaults and registers support for various WordPress features.
@@ -34,4 +35,18 @@ function enqueue_assets() {
 		array( 'dashicons', 'open-sans' ),
 		filemtime( __DIR__ . '/css/style.css' )
 	);
+
+	$script_asset_path = dirname( __FILE__ ) . '/build/index.asset.php';
+	if ( is_singular( POST_TYPE ) && file_exists( $script_asset_path ) ) {
+		$script_asset = require( $script_asset_path );
+		wp_enqueue_script(
+			'wporg-pattern-script',
+			get_theme_file_uri( '/build/index.js' ),
+			$script_asset['dependencies'],
+			$script_asset['version'],
+			true
+		);
+
+		wp_set_script_translations( 'wporg-pattern-script', 'wporg-patterns' );
+	}
 }
