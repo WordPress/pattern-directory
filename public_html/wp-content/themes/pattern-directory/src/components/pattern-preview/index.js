@@ -1,7 +1,9 @@
 /**
  * WordPress dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { useCallback, useState } from '@wordpress/element';
+import { VisuallyHidden } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -25,9 +27,24 @@ function PatternPreview( { blockContent } ) {
 	return (
 		<>
 			<div className="pattern-preview__viewport" style={ { width } }>
-				<DragHandle label="Left" className="is-left" onDragChange={ onDragChange } direction="left" />
+				<DragHandle
+					label={ __( 'Drag to resize', 'wporg-patterns' ) }
+					className="is-left"
+					onDragChange={ onDragChange }
+					direction="left"
+					aria-describedby="pattern-preview__resize-help"
+				/>
 				<Canvas html={ blockContent } />
-				<DragHandle label="Right" className="is-right" onDragChange={ onDragChange } direction="right" />
+				<DragHandle
+					label={ __( 'Drag to resize', 'wporg-patterns' ) }
+					className="is-right"
+					onDragChange={ onDragChange }
+					direction="right"
+					aria-describedby="pattern-preview__resize-help"
+				/>
+				<VisuallyHidden id="pattern-preview__resize-help">
+					{ __( 'Use left and right arrow keys to resize the preview.', 'wporg-patterns' ) }
+				</VisuallyHidden>
 			</div>
 			<div className="pattern-preview__meta">
 				<div className="pattern-preview__categories">

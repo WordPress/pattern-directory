@@ -48,6 +48,8 @@ function enqueue_assets() {
 			true
 		);
 
+		wp_enqueue_style( 'wp-components' );
+
 		wp_set_script_translations( 'wporg-pattern-script', 'wporg-patterns' );
 	}
 }
