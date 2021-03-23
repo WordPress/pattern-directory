@@ -1,31 +1,14 @@
 /**
- * WordPress dependencies
+ * External dependencies
  */
-import { useCallback, useState } from '@wordpress/element';
-/* eslint-disable-next-line -- @wordpress/no-unsafe-wp-apis -- Experimental is OK. */
-import { __experimentalUseDragging as useDragging } from '@wordpress/compose';
+import { useDrag } from 'react-use-gesture';
 
-function DragHandle( { label, className, onDragChange } ) {
-	const [ position, setPosition ] = useState( null );
-
-	const changePosition = useCallback(
-		( event ) => {
-			if ( null !== position ) {
-				const delta = position - event.clientX;
-				onDragChange( delta );
-			}
-
-			if ( event.clientX >= 1 && event.clientX <= window.innerWidth ) {
-				setPosition( event.clientX );
-			}
-		},
-		[ onDragChange, position, setPosition ]
-	);
-
-	const { startDrag } = useDragging( {
-		onDragStart: useCallback( ( event ) => setPosition( event.clientX ), [ setPosition ] ),
-		onDragMove: changePosition,
-		onDragEnd: useCallback( () => setPosition( null ), [ setPosition ] ),
+function DragHandle( { label, className, onDragChange, direction = 'left' } ) {
+	const dragGestures = useDrag( ( { delta, dragging } ) => {
+		const multiplier = direction === 'left' ? 2 : -2;
+		if ( dragging ) {
+			onDragChange( delta[ 0 ] * multiplier );
+		}
 	} );
 
 	return (
@@ -33,7 +16,7 @@ function DragHandle( { label, className, onDragChange } ) {
 			<button
 				className="pattern-preview__drag-handle-button"
 				aria-label={ label }
-				onMouseDown={ startDrag }
+				{ ...dragGestures() }
 			/>
 		</div>
 	);

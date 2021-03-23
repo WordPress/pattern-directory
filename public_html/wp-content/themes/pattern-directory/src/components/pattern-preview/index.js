@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -13,32 +13,19 @@ import DragHandle from './drag-handle';
 
 function PatternPreview( { blockContent } ) {
 	const [ width, setWidth ] = useState( 800 );
-	const onLeftDragChange = useCallback(
+	const onDragChange = useCallback(
 		( delta ) => {
-			setWidth( ( value ) => value + ( delta * 2 ) ); // prettier-ignore
+			setWidth( ( value ) => value + delta );
 		},
 		[ setWidth ]
 	);
-	const onRightDragChange = useCallback(
-		( delta ) => {
-			setWidth( ( value ) => value - ( delta * 2 ) ); // prettier-ignore
-		},
-		[ setWidth ]
-	);
-	useEffect( () => {
-		if ( width > window.innerWidth ) {
-			setWidth( window.innerWidth );
-		} else if ( width < 320 ) {
-			setWidth( 320 );
-		}
-	}, [ width ] );
 
 	return (
 		<>
 			<div className="pattern-preview__viewport" style={ { width } }>
-				<DragHandle label="Left" className="is-left" onDragChange={ onLeftDragChange } />
+				<DragHandle label="Left" className="is-left" onDragChange={ onDragChange } direction="left" />
 				<Canvas html={ blockContent } />
-				<DragHandle label="Right" className="is-right" onDragChange={ onRightDragChange } />
+				<DragHandle label="Right" className="is-right" onDragChange={ onDragChange } direction="right" />
 			</div>
 			<div className="pattern-preview__meta">
 				<div className="pattern-preview__categories">
