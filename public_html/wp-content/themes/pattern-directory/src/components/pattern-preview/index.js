@@ -11,8 +11,10 @@ import DragHandle from './drag-handle';
 
 /* eslint-disable jsx-a11y/anchor-is-valid -- These are just placeholders. */
 
+const INITIAL_WIDTH = 1200;
+
 function PatternPreview( { blockContent } ) {
-	const [ width, setWidth ] = useState( 800 );
+	const [ width, setWidth ] = useState( window.innerWidth < INITIAL_WIDTH ? window.innerWidth : INITIAL_WIDTH );
 	const onDragChange = useCallback(
 		( delta ) => {
 			setWidth( ( value ) => value + delta );
