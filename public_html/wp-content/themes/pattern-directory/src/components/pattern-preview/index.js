@@ -46,14 +46,6 @@ function PatternPreview( { blockContent } ) {
 					{ __( 'Use left and right arrow keys to resize the preview.', 'wporg-patterns' ) }
 				</VisuallyHidden>
 			</div>
-			<div className="pattern-preview__meta">
-				<div className="pattern-preview__categories">
-					Categories: <a href="#">Ecommerce,</a> <a href="#">Columns,</a> <a href="#">Marketing</a>
-				</div>
-				<div className="pattern-preview__report">
-					<button className="button">Report this pattern</button>
-				</div>
-			</div>
 		</>
 	);
 }

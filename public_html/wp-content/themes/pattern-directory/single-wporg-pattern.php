@@ -33,6 +33,23 @@ get_header();
 					<?php echo rawurlencode( wp_json_encode( get_the_content() ) ); ?>
 				</div>
 
+				<div class="pattern__meta">
+					<div>
+						<div class="pattern__categories">
+							<?php
+							$categories_list = get_the_term_list( get_the_ID(), 'wporg-pattern-category', '', ', ' );
+							if ( $categories_list ) {
+								/* translators: 1: list of pattern categories. */
+								printf( esc_html__( 'Categories: %1$s', 'wporg-patterns' ), $categories_list ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							}
+							?>
+						</div>
+						<div class="pattern__report">
+							<button class="button">Report this pattern</button>
+						</div>
+					</div>
+				</div>
+
 				<div class="entry-content">
 					<h2>More from this designer</h2>
 					<div class="pattern-grid">

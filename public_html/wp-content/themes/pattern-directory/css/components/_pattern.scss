@@ -36,4 +36,22 @@ body.single-wporg-pattern {
 		margin-left: auto;
 		margin-right: auto;
 	}
+
+	.pattern__meta {
+		padding: 2rem 0;
+		background: $color-gray-light-200;
+
+		> div {
+			max-width: $size__site-main;
+			margin-left: auto;
+			margin-right: auto;
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.pattern-preview__report {
+			text-align: right;
+		}
+	}
+
 }
