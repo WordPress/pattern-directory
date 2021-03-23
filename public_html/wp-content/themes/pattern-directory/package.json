@@ -12,10 +12,13 @@
 	"scripts": {
 		"start": "grunt watch",
 		"build": "grunt build",
+		"build:css": "grunt css",
+		"build:js": "grunt js",
 		"dev": "grunt",
 		"format:js": "echo \"No JS.\"",
 		"lint:css": "wp-scripts lint-style css",
-		"lint:js": "echo \"No JS.\"",
+		"lint:js": "wp-scripts lint-js src",
+		"format:js": "wp-scripts format-js src",
 		"packages-update": "wp-scripts packages-update"
 	},
 	"browserslist": [
@@ -31,9 +34,17 @@
 		"grunt-postcss": "0.9.0",
 		"grunt-sass": "3.1.0",
 		"grunt-sass-globbing": "1.5.1",
+		"grunt-webpack": "4.0.2",
 		"sass": "1.32.8",
 		"pixrem": "5.0.0"
 	},
+	"eslintConfig": {
+		"extends": "../../../../.eslintrc.js",
+		"globals": {
+			"wporgBlockPattern": "readonly"
+		}
+	},
+	"prettier": "../../../../.prettierrc.js",
 	"stylelint": {
 		"extends": "../../../../.stylelintrc",
 		"ignoreFiles": ["**/*.css", "**/*.css.map"]
