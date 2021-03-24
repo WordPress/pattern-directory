@@ -61,6 +61,9 @@ function register_post_type_data() {
 			'hierarchical'  => true,
 			'show_in_rest'  => true,
 			'rest_base'     => 'pattern-categories',
+			'rewrite'       => array(
+				'slug' => 'pattern-categories',
+			),
 		)
 	);
 
@@ -72,6 +75,9 @@ function register_post_type_data() {
 			'hierarchical'  => false,
 			'show_in_rest'  => true,
 			'rest_base'     => 'pattern-keywords',
+			'rewrite'       => array(
+				'slug' => 'pattern-keywords',
+			),
 
 			'labels' => array(
 				'name'                       => _x( 'Keywords', 'taxonomy general name', 'wporg-patterns' ),
