@@ -3450,7 +3450,7 @@
     lodash "^4.17.19"
     rememo "^3.0.0"
 
-"@wordpress/keycodes@^2.19.0":
+"@wordpress/keycodes@2.19.0", "@wordpress/keycodes@^2.19.0":
   version "2.19.0"
   resolved "https://registry.yarnpkg.com/@wordpress/keycodes/-/keycodes-2.19.0.tgz#696fc060d9ead2f3cc38bfaa0d4d5ad1e05a1f7f"
   integrity sha512-nHUh6IQoljY0ojbDCgjcZDFThAj013nFDk4JF25N+MMhEc98sPj9EItJnpGB0cU1M4C1POmm1bHnrMgPywlEqw==

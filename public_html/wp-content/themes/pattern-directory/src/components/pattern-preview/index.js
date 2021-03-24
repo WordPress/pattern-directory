@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useCallback, useState } from '@wordpress/element';
+import { useInstanceId } from '@wordpress/compose';
 import { VisuallyHidden } from '@wordpress/components';
 
 /**
@@ -16,6 +17,7 @@ import DragHandle from './drag-handle';
 const INITIAL_WIDTH = 1200;
 
 function PatternPreview( { blockContent } ) {
+	const instanceId = useInstanceId( PatternPreview );
 	const [ width, setWidth ] = useState( window.innerWidth < INITIAL_WIDTH ? window.innerWidth : INITIAL_WIDTH );
 	const onDragChange = useCallback(
 		( delta ) => {
@@ -32,7 +34,7 @@ function PatternPreview( { blockContent } ) {
 					className="is-left"
 					onDragChange={ onDragChange }
 					direction="left"
-					aria-describedby="pattern-preview__resize-help"
+					aria-describedby={ `pattern-preview__resize-help-${ instanceId }` }
 				/>
 				<Canvas html={ blockContent } />
 				<DragHandle
@@ -40,9 +42,12 @@ function PatternPreview( { blockContent } ) {
 					className="is-right"
 					onDragChange={ onDragChange }
 					direction="right"
-					aria-describedby="pattern-preview__resize-help"
+					aria-describedby={ `pattern-preview__resize-help-${ instanceId }` }
 				/>
-				<VisuallyHidden id="pattern-preview__resize-help">
+				<VisuallyHidden
+					id={ `pattern-preview__resize-help-${ instanceId }` }
+					className="pattern-preview__resize-help"
+				>
 					{ __( 'Use left and right arrow keys to resize the preview.', 'wporg-patterns' ) }
 				</VisuallyHidden>
 			</div>
