@@ -38,14 +38,14 @@ jobs:
       with:
         node-version: 14.x
 
+    - name: composer install
+      run: |
+        composer install
+
     - name: yarn install and build
       run: |
         yarn
         yarn workspaces run build
-
-    - name: composer install
-      run: |
-        composer install
 
     - name: Install WordPress
       run: |
