@@ -1,0 +1,56 @@
+body.home {
+	.site-header {
+		padding: 3.75rem 1rem;
+		text-align: left;
+	}
+
+	.site-branding {
+		display: grid;
+		grid-template-areas:
+			"title   callout"
+			"tagline callout";
+		grid-template-rows: auto 1fr;
+		grid-template-columns: 1fr 18rem;
+		gap: 0 4rem;
+		justify-content: center;
+		align-items: center;
+	}
+
+	// Duplicate class for specifity override.
+	.site-title.site-title {
+		grid-area: title;
+		margin-top: 0;
+		text-align: left;
+		font-size: 3rem;
+		line-height: $type__header--line-height;
+	}
+
+	.site-description {
+		grid-area: tagline;
+		margin: 0;
+		font-size: 1.25rem;
+		line-height: $type__line-height;
+		text-align: left;
+		color: $color-white;
+	}
+
+	.site-callout {
+		grid-area: callout;
+		padding: 1.125rem 1.5rem 1.5rem;
+		font-size: 0.875rem;
+		line-height: $type__line-height;
+		background: $color-white;
+		box-shadow: 0.75rem 0.75rem 0 rgba($color-black, 0.15);
+
+		h2 {
+			margin-top: 0;
+			font-size: 1.125rem;
+			line-height: $type__header--line-height;
+			font-weight: 600;
+		}
+
+		p:last-child {
+			margin-bottom: 0;
+		}
+	}
+}

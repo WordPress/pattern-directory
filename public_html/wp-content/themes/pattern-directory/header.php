@@ -27,9 +27,14 @@ get_template_part( 'header', 'wporg' );
 				<?php if ( is_home() ) : ?>
 					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Pattern Directory', 'Site title', 'wporg-patterns' ); ?></a></h1>
 
-					<p class="site-description"><?php esc_html_e( 'Extend your WordPress experience with block patterns.', 'wporg-patterns' ); ?></p>
+					<p class="site-description"><?php esc_html_e( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ); ?></p>
 
-					<?php get_search_form(); ?>
+					<div class="site-callout">
+						<?php /* Logged in actions are different */ ?>
+						<h2><?php esc_html_e( 'Create and share patterns', 'wporg-patterns' ); ?></h2>
+						<p><?php esc_html_e( 'Build your own patterns and share them with the WordPress world.', 'wporg-patterns' ); ?></p>
+						<p><a href="/create"><?php esc_html_e( 'Learn more about patterns.', 'wporg-patterns' ); ?></a></p>
+					</div>
 				<?php else : ?>
 					<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Pattern Directory', 'Site title', 'wporg-patterns' ); ?></a></p>
 
