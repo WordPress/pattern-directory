@@ -29,7 +29,7 @@ get_header();
 					</div>
 				</header><!-- .entry-header -->
 
-				<div id="wporg-pattern-container" hidden>
+				<div class="pattern-preview__container" hidden>
 					<?php echo rawurlencode( wp_json_encode( get_the_content() ) ); ?>
 				</div>
 
