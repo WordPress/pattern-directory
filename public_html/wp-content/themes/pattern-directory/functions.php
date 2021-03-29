@@ -31,6 +31,9 @@ function setup() {
  * cache-busting. The version is set to the last modified time during development.
  */
 function enqueue_assets() {
+	$script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
+	$suffix       = $script_debug ? '' : '.min';
+
 	wp_enqueue_style(
 		'wporg-style',
 		get_theme_file_uri( '/css/style.css' ),
@@ -53,6 +56,8 @@ function enqueue_assets() {
 
 		wp_set_script_translations( 'wporg-pattern-script', 'wporg-patterns' );
 	}
+
+	wp_enqueue_script( 'wporg-navigation', get_template_directory_uri() . "/js/navigation$suffix.js", array(), '20151215', true );
 }
 
 /**
