@@ -15,10 +15,9 @@
 		"build:css": "grunt css",
 		"build:js": "grunt js",
 		"dev": "grunt",
-		"format:js": "echo \"No JS.\"",
+		"format:js": "wp-scripts format-js src",
 		"lint:css": "wp-scripts lint-style css",
 		"lint:js": "wp-scripts lint-js src",
-		"format:js": "wp-scripts format-js src",
 		"packages-update": "wp-scripts packages-update"
 	},
 	"browserslist": [
@@ -54,6 +53,13 @@
 	"prettier": "../../../../.prettierrc.js",
 	"stylelint": {
 		"extends": "../../../../.stylelintrc",
-		"ignoreFiles": ["**/*.css", "**/*.css.map"]
+		"ignoreFiles": [
+			"**/*.css",
+			"**/*.css.map"
+		]
+	},
+	"dependencies": {
+		"@wordpress/data": "^4.27.0",
+		"@wordpress/viewport": "^2.26.0"
 	}
 }
