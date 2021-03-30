@@ -1,0 +1,43 @@
+$font-size: 13px;
+$grid-unit: 16px; 
+$border-radius: 2px;
+
+.active-filter__bar {
+	background: $color-gray-light-300;
+	border-radius: $border-radius;
+	font-size: $font-size;
+
+	ul {
+		margin: 0;
+		padding: 0;
+		display: flex;
+		justify-content: space-between;
+
+		li {
+			list-style: none;
+			font-size: $font-size;
+
+			a {
+				display: block;
+				padding: $grid-unit $grid-unit / 2;
+				text-decoration: none;
+			}
+
+			&:last-child a {
+				padding-right: $grid-unit;
+			}
+		}
+	}
+
+	&__copy {
+		padding: $grid-unit;
+	}
+
+	&__title {
+		margin: 0;
+		padding-right: $grid-unit;
+		color: $color__text;
+		font-size: $font-size - 1;
+		text-transform: uppercase;
+	}
+}
