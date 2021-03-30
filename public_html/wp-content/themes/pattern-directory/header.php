@@ -24,18 +24,18 @@ get_template_part( 'header', 'wporg' );
 	<div id="content" class="site-content">
 		<header id="masthead" class="site-header <?php echo is_home() ? 'home' : ''; ?>" role="banner">
 			<div class="site-branding row">
-				<div class="col col-6 col-offset-2">
-					<?php if ( is_home() ) : ?>
+				<?php if ( is_home() ) : ?>
+					<div class="col col-6 col-offset-2">
 						<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'WordPress Patterns', 'Site title', 'wporg-patterns' ); ?></a></h1>
 
 						<p class="site-description"><?php esc_html_e( 'Add a beautiful designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ); ?></p>
+					</div>
+				<?php else : ?>
+					<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Pattern Directory', 'Site title', 'wporg-patterns' ); ?></a></p>
 
-					<?php else : ?>
-						<p class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Pattern Directory', 'Site title', 'wporg-patterns' ); ?></a></p>
-
-						<!-- <nav id="site-navigation" class="main-navigation" role="navigation" /> -->
-					<?php endif; ?>
-				</div>
+					<!-- <nav id="site-navigation" class="main-navigation" role="navigation" /> -->
+				<?php endif; ?>
+				<?php if ( is_home() ) : ?>
 				<div class="col col-4 offset-2">
 					<div class="highlight-card">
 						<h2 class="highlight-card__title"><?php echo esc_html_e( 'Create and share patterns', 'wporg-patterns' ); ?></h2>
@@ -43,5 +43,6 @@ get_template_part( 'header', 'wporg' );
 						<a href="#"><?php esc_html_e( 'Learn more', 'wporg-patterns' ); ?></a>
 					</div>
 				</div>
+				<?php endif; ?>
 			</div><!-- .site-branding -->
 		</header><!-- #masthead -->
