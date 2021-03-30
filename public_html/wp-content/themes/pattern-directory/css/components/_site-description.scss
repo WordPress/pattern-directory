@@ -1,0 +1,5 @@
+.site-description { 
+	@include breakpoint( $ms-breakpoint ) {
+		text-align: left;
+	}
+}

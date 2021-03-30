@@ -1,4 +1,10 @@
 .site-title {
+	margin: 0 !important;
+
+	@include breakpoint( $ms-breakpoint ) {
+		text-align: left;
+	}
+
 	a {
 		text-decoration: none;
 
@@ -8,4 +14,9 @@
 			color: #fff;
 		}
 	}
+}
+
+.home .site-title {
+	font-size: 48px !important;
+	margin-bottom: 16px !important;
 }
