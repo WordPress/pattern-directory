@@ -22,9 +22,10 @@ const DefaultMenu = ( { path, options, onClick } ) => {
 			return;
 		}
 
-		const rect = activeRef.current.getBoundingClientRect();
-
-		updateIndicatorLocation( containerRef.current, rect );
+		updateIndicatorLocation( containerRef.current, {
+			left: activeRef.current.offsetLeft,
+			width: activeRef.current.offsetWidth,
+		} );
 	}, [ containerRef, activeRef, path ] );
 
 	return (
