@@ -1,19 +1,33 @@
 .pattern-grid {
 	max-width: 960px;
-	margin: 1.5rem auto;
-	display: grid;
-	grid-template-columns: repeat(3, 1fr);
-	gap: 1.5rem;
-	align-items: baseline;
+	margin: 1.5rem;
+
+	@include breakpoint( $breakpoint-small ) {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 1.5rem;
+		align-items: baseline;
+	}
+
+	@include breakpoint( $breakpoint-large ) {
+		margin-left: auto;
+		margin-right: auto;
+		grid-template-columns: repeat(3, 1fr);
+	}
 }
 
 .pattern-grid__pattern {
 	position: relative;
-	display: inline-block;
+	margin: 0 0 1.5rem;
 	border: 1px solid $color-gray-light-600;
 	border-radius: 2px;
 	transition: all 0.075s ease-in-out;
 	overflow: hidden;
+
+	@include breakpoint( $breakpoint-small ) {
+		display: inline-block;
+		margin: 0;
+	}
 
 	.pattern-grid__preview {
 		background: $color-gray-light-300;

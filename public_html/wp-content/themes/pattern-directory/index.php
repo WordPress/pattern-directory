@@ -17,7 +17,7 @@ namespace WordPressdotorg\Theme;
 get_header();
 ?>
 
-	<main id="main" class="site-main col-9" role="main">
+	<main id="main" class="site-main" role="main">
 
 		<!-- Filter placeholder -->
 		<header style="background:whitesmoke;padding:24px;text-align:center;margin:0 0 24px;">
