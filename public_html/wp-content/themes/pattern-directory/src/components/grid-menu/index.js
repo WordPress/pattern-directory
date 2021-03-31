@@ -2,11 +2,13 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
+import { Flex, FlexItem } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import CategoryMenu from '../category-menu';
+import CategorySearch from '../category-search';
 
 const options = [
 	{
@@ -29,19 +31,34 @@ const options = [
 		value: '#gallery',
 		label: 'Gallery',
 	},
+	{
+		value: '#blog',
+		label: 'Blog',
+	},
+	{
+		value: '#media',
+		label: 'Media',
+	},
 ];
 
 const GridMenu = () => {
 	const [ path, setPath ] = useState( '#all' ); // This should look at the url and select the right href
 
 	return (
-		<CategoryMenu
-			path={ path }
-			options={ options }
-			onClick={ ( path ) => {
-				setPath( path );
-			} }
-		/>
+		<Flex style={ { maxWidth: '960px', margin: '0 auto' } }>
+			<FlexItem>
+				<CategoryMenu
+					path={ path }
+					options={ options }
+					onClick={ ( path ) => {
+						setPath( path );
+					} }
+				/>
+			</FlexItem>
+			<FlexItem>
+				<CategorySearch />
+			</FlexItem>
+		</Flex>
 	);
 };
 
