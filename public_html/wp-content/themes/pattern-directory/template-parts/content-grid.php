@@ -10,9 +10,13 @@ namespace WordPressdotorg\Theme;
 ?>
 
 <div id="post-<?php the_ID(); ?>" <?php post_class( 'pattern-grid__pattern' ); ?>>
-	<div class="pattern-grid__preview" style="height:<?php echo esc_attr( rand( 100, 300 ) ); ?>px">
-		Pattern ID: <?php the_ID(); ?>
-	</div>
+	<?php /* This link only wraps the "preview" container to avoid nesting the buttons inside the link. */ ?>
+	<a href="<?php echo esc_url( get_permalink() ); ?>" rel="bookmark">
+		<?php the_title( '<span class="screen-reader-text">', '</span>' ); ?>
+		<div class="pattern-grid__preview" style="height:<?php echo esc_attr( rand( 100, 300 ) ); ?>px">
+			Pattern ID: <?php the_ID(); ?>
+		</div>
+	</a>
 	<div class="pattern-grid__actions">
 		<?php the_title( '<h2 class="pattern-grid__title">', '</h2>' ); ?>
 		<button class="button button-link pattern__favorite-button <?php echo 58 === get_the_ID() ? 'is-favorited' : ''; ?>">
