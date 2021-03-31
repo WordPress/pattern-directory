@@ -1,0 +1,31 @@
+$grid-unit: 16px;
+
+.category-menu {
+	margin: 0;
+	padding: 0;
+	position: relative;
+
+	background: linear-gradient(
+		180deg
+		,hsla(0,0%,100%,0) 96%,$color__wp-blue 0);
+	background-repeat: no-repeat;
+	background-size: 0;
+	background-position-x: 20px;
+	transition: all 75ms ease-out;
+
+	li {
+		display: inline-block;
+		list-style: none;
+
+		a {
+			display: block;
+			padding: $grid-unit;
+			color: $color-black;
+			text-decoration: none;
+		}
+	}
+
+	// &--is-active-fallback {
+	// 	box-shadow: 0 1px red;
+	// }
+}
