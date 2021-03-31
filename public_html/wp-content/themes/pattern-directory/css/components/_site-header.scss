@@ -6,14 +6,12 @@ body.home {
 
 	.site-branding {
 		display: grid;
-		grid-template-areas:
-			"title   callout"
-			"tagline callout";
 		grid-template-rows: auto 1fr;
-		grid-template-columns: 1fr 18rem;
-		gap: 0 4rem;
-		justify-content: center;
-		align-items: center;
+		grid-template-columns: 1fr 22rem;
+
+		> * {
+			align-self: center;
+		}
 
 		@include breakpoint( 0, $ms-breakpoint - 1 ) {
 			display: block;
@@ -22,7 +20,8 @@ body.home {
 
 	// Duplicate class for specifity override.
 	.site-title.site-title {
-		grid-area: title;
+		grid-column-start: 1;
+		grid-row-start: 1;
 		margin-top: 0;
 		text-align: left;
 		font-size: 3rem;
@@ -30,7 +29,8 @@ body.home {
 	}
 
 	.site-description {
-		grid-area: tagline;
+		grid-column-start: 1;
+		grid-row-start: 2;
 		margin: 0;
 		font-size: 1.25rem;
 		line-height: $type__line-height;
@@ -39,7 +39,10 @@ body.home {
 	}
 
 	.site-callout {
-		grid-area: callout;
+		grid-column-start: 2;
+		grid-row-start: 1;
+		grid-row-end: span 2;
+		margin-left: 4rem;
 		padding: 1.125rem 1.5rem 1.5rem;
 		font-size: 0.875rem;
 		line-height: $type__line-height;

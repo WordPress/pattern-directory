@@ -1,6 +1,6 @@
 .main-navigation {
 	float: none;
-	position: initial;
+	position: static;
 	width: auto;
 
 	a {
@@ -19,7 +19,7 @@
 }
 
 .menu-toggle {
-	position: initial;
+	position: static;
 	height: auto;
 	width: auto;
 	font-size: 1.5625rem;
