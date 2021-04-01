@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState, useEffect, useRef } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { Flex, FlexItem } from '@wordpress/components';
 
 function CategoryContextBar( { children, actionsTitle, actions, isVisible } ) {

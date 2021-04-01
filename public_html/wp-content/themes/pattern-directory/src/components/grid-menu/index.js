@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useState, useEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { Flex, FlexItem } from '@wordpress/components';
 
 /**
