@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import { __ } from '@wprd[ress/i18n';
+import { __ } from '@wordpress/i18n';
 import { Icon, search } from '@wordpress/icons';
 
 const CategorySearch = () => {
 	return (
 		<form method="get" action="/" className="category-search">
-			<label for="pattern-search" className="screen-reader-text">
+			<label htmlFor="pattern-search" className="screen-reader-text">
 				{ __( 'Search for:', 'wporg-patterns' ) }
 			</label>
 			<input id="pattern-search" type="search" placeholder={ __( 'Search patterns', 'wporg-patterns' ) } />
