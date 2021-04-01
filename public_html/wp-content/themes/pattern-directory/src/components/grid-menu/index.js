@@ -106,12 +106,8 @@ const GridMenu = () => {
 				</FlexItem>
 			</Flex>
 			<CategoryContextBar
-				isVisible={ categoryContext !== undefined }
-				actionsTitle={ categoryContext && categoryContext.title }
-				actions={ categoryContext && categoryContext.links }
-			>
-				{ categoryContext && categoryContext.message }
-			</CategoryContextBar>
+				{ ...categoryContext }
+			/>
 		</div>
 	);
 };
