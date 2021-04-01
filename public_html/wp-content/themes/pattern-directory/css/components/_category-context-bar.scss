@@ -31,6 +31,10 @@ $border-radius: 2px;
 
 	&__copy {
 		padding: $grid-unit;
+
+		> p {
+			margin: 0;
+		}
 	}
 
 	&__title {
@@ -42,9 +46,11 @@ $border-radius: 2px;
 	}
 
 	&__actions {
+
 		@media only screen and (max-width: $breakpoint-mobile) {
 			display: none;
 		}
+
 		display: block;
 	}
 }
