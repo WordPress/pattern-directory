@@ -23,6 +23,12 @@ $font-weight: 500;
 		padding: $grid-unit / 2;
 		color: $color-gray-600;
 		text-decoration: none;
+
+		&:hover,
+		&:active,
+		&:focus {
+			color: $color-black;
+		}
 	}
 
 	li &--is-active {
