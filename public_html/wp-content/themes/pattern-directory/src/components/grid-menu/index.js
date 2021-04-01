@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useEffect, useState } from '@wordpress/element';
-import { Flex, FlexItem } from '@wordpress/components';
 import { getPath } from '@wordpress/url';
 
 /**
@@ -97,8 +96,8 @@ const GridMenu = () => {
 
 	return (
 		<div className="grid-menu">
-			<Flex>
-				<FlexItem>
+			<div className="grid-menu__actions">
+				<div>
 					<CategoryMenu
 						path={ path }
 						options={ options }
@@ -106,11 +105,11 @@ const GridMenu = () => {
 							setPath( _path );
 						} }
 					/>
-				</FlexItem>
-				<FlexItem>
+				</div>
+				<div>
 					<CategorySearch />
-				</FlexItem>
-			</Flex>
+				</div>
+			</div>
 			<CategoryContextBar
 				{ ...categoryContext }
 			/>
