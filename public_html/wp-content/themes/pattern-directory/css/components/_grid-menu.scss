@@ -1,4 +1,10 @@
 .grid-menu {
 	margin: 0 auto;
 	max-width: 960px;
+
+	// This is a style that is applied on the gutenberg component side.
+	// We don't want it.
+	.components-base-control__field {
+		margin-bottom: 0;
+	}
 }
