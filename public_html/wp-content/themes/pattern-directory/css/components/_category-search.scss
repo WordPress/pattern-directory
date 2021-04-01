@@ -1,0 +1,25 @@
+$border-radius: 2px;
+$font-size: 13px;
+
+.category-search {
+	display: flex;
+	align-items: center;
+	background: $color-white;
+	border: 1px solid $color__text-lighter;
+	border-radius: $border-radius;
+
+	input[type="search"] {
+		margin: 0;
+		padding: 0.25rem 0.5rem;
+		border: none;
+		box-shadow: none;
+		font-size: $font-size;
+	}
+
+	&__button {
+		display: flex;
+		background: transparent;
+		border: none;
+		color: $color__text-lighter;
+	}
+}
