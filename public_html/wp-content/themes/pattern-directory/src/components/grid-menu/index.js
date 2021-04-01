@@ -45,7 +45,7 @@ const GridMenu = () => {
 	const [ path, setPath ] = useState( '#all' ); // This should look at the url and select the right href
 
 	return (
-		<Flex style={ { maxWidth: '960px', margin: '0 auto' } }>
+		<Flex>
 			<FlexItem>
 				<CategoryMenu
 					path={ path }
