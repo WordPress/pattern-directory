@@ -34,6 +34,7 @@
 		"@wordpress/icons": "^2.10.0",
 		"@wordpress/keycodes": "2.19.0",
 		"@wordpress/scripts": "14.0.1",
+		"@wordpress/url": "^2.22.0",
 		"@wordpress/viewport": "^2.26.0",
 		"autoprefixer": "9.8.6",
 		"cssnano": "4.1.10",

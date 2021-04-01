@@ -3,6 +3,7 @@
  */
 import { useEffect, useState } from '@wordpress/element';
 import { Flex, FlexItem } from '@wordpress/components';
+import { getPath } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -82,8 +83,13 @@ const contextMessages = {
 };
 
 const GridMenu = () => {
-	const [ path, setPath ] = useState( options[ 1 ].value ); // This should look at the url and select the right href
+	const [ path, setPath ] = useState();
 	const [ categoryContext, setCategoryContext ] = useState( undefined );
+
+	useEffect( () => {
+		const pathOnLoad = getPath( window.location.href );
+		setPath( pathOnLoad );
+	}, [] );
 
 	useEffect( () => {
 		setCategoryContext( contextMessages[ path ] );
