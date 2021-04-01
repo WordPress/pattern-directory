@@ -96,8 +96,8 @@ const GridMenu = () => {
 					<CategoryMenu
 						path={ path }
 						options={ options }
-						onClick={ ( path ) => {
-							setPath( path );
+						onClick={ ( _path ) => {
+							setPath( _path );
 						} }
 					/>
 				</FlexItem>
@@ -106,7 +106,7 @@ const GridMenu = () => {
 				</FlexItem>
 			</Flex>
 			<CategoryContextBar
-				isVisible={ categoryContext != undefined }
+				isVisible={ categoryContext !== undefined }
 				actionsTitle={ categoryContext && categoryContext.title }
 				actions={ categoryContext && categoryContext.links }
 			>
