@@ -15,11 +15,8 @@ for ( let i = 0; i < previewContainers.length; i++ ) {
 	const blockContent = JSON.parse( decodeURIComponent( container.innerText ) );
 	// Use `wp.blocks.parse` to convert HTML to block objects (for use in editor), if needed.
 
-	render( <PatternPreview blockContent={ blockContent } />,
-		container,
-		() => {
-			// This callback is called after the render to unhide the container.
-			container.hidden = false;
-		}
-	);
+	render( <PatternPreview blockContent={ blockContent } />, container, () => {
+		// This callback is called after the render to unhide the container.
+		container.hidden = false;
+	} );
 }
