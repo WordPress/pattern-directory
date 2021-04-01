@@ -2,7 +2,7 @@ $font-size: 13px;
 $grid-unit: 16px;
 $border-radius: 2px;
 
-.active-filter__bar {
+.category-context__bar {
 	background: $color-gray-light-300;
 	border-radius: $border-radius;
 	font-size: $font-size;
@@ -39,5 +39,12 @@ $border-radius: 2px;
 		color: $color__text;
 		font-size: $font-size - 1;
 		text-transform: uppercase;
+	}
+
+	&__actions {
+		@media only screen and (max-width: $breakpoint-mobile) {
+			display: none;
+		}
+		display: block;
 	}
 }
