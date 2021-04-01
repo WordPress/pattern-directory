@@ -33,6 +33,7 @@ const DefaultMenu = ( { path, options, onClick } ) => {
 			{ options.map( ( i ) => (
 				<li key={ i.value }>
 					<a
+						className={ path === i.value ? 'category-menu--is-active' : '' }
 						href={ i.value }
 						ref={ path === i.value ? activeRef : null }
 						onClick={ ( { target } ) => onClick( target.hash ) }

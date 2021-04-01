@@ -1,13 +1,12 @@
 $grid-unit: 16px;
+$font-weight: 500;
 
 .category-menu {
 	margin: 0;
 	padding: 0;
 	position: relative;
 
-	background: linear-gradient(
-		180deg
-		,hsla(0,0%,100%,0) 96%,$color__wp-blue 0);
+	background: linear-gradient(180deg, hsla(0, 0%, 100%, 0) 94%, $color__wp-blue 0);
 	background-repeat: no-repeat;
 	background-size: 0;
 	background-position-x: 20px;
@@ -15,17 +14,18 @@ $grid-unit: 16px;
 
 	li {
 		display: inline-block;
+		margin: 0 $grid-unit / 4;
 		list-style: none;
-
-		a {
-			display: block;
-			padding: $grid-unit;
-			color: $color-black;
-			text-decoration: none;
-		}
 	}
 
-	// &--is-active-fallback {
-	// 	box-shadow: 0 1px red;
-	// }
+	a {
+		display: block;
+		padding: $grid-unit / 2;
+		color: $color-gray-600;
+		text-decoration: none;
+	}
+
+	li &--is-active {
+		color: $color-black;
+	}
 }
