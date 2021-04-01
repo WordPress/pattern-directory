@@ -3,9 +3,12 @@ $grid-unit: 16px;
 $border-radius: 2px;
 
 .category-context__bar {
+	margin-top: $grid-unit;
 	background: $color-gray-light-300;
 	border-radius: $border-radius;
 	font-size: $font-size;
+	overflow: auto;
+	transition: all 50ms ease-out;
 
 	ul {
 		margin: 0;
@@ -19,7 +22,7 @@ $border-radius: 2px;
 
 			a {
 				display: block;
-				padding: $grid-unit $grid-unit / 2;
+				padding: $grid-unit * 0.75 $grid-unit / 2;
 				text-decoration: none;
 			}
 
@@ -30,7 +33,7 @@ $border-radius: 2px;
 	}
 
 	&__copy {
-		padding: $grid-unit;
+		padding: $grid-unit * 0.75 $grid-unit;
 
 		> p {
 			margin: 0;
@@ -52,5 +55,10 @@ $border-radius: 2px;
 		}
 
 		display: block;
+	}
+
+	&--is-hidden {
+		height: 0;
+		overflow: hidden;
 	}
 }

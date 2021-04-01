@@ -64,7 +64,7 @@ const contextMessages = {
 	[ options[ 3 ].value ]: {
 		message: (
 			<p>
-				23 <b>Footer</b> patterns
+				23 <b>Footer</b> patterns that is a very long sentence to check for something.
 			</p>
 		),
 		title: 'Related Categories',
@@ -105,13 +105,13 @@ const GridMenu = () => {
 					<CategorySearch />
 				</FlexItem>
 			</Flex>
-			{ categoryContext && (
-				<div className="grid-menu__context_bar">
-					<CategoryContextBar actionsTitle={ categoryContext.title } actions={ categoryContext.links }>
-						{ categoryContext.message }
-					</CategoryContextBar>
-				</div>
-			) }
+			<CategoryContextBar
+				isVisible={ categoryContext != undefined }
+				actionsTitle={ categoryContext && categoryContext.title }
+				actions={ categoryContext && categoryContext.links }
+			>
+				{ categoryContext && categoryContext.message }
+			</CategoryContextBar>
 		</div>
 	);
 };
