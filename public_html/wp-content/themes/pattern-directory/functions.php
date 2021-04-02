@@ -9,6 +9,9 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
 add_action( 'wp_head', __NAMESPACE__ . '\generate_block_editor_styles_html' );
 add_action( 'pre_get_posts', __NAMESPACE__ . '\pre_get_posts' );
 
+add_filter( 'search_template', __NAMESPACE__ . '\use_index_php_as_template' );
+add_filter( 'archive_template', __NAMESPACE__ . '\use_index_php_as_template' );
+
 /**
  * Sets up theme defaults and registers support for various WordPress features.
  *
@@ -124,4 +127,10 @@ function pre_get_posts( $wp_query ) {
 		$wp_query->query_vars['post_type']   = array( POST_TYPE );
 		$wp_query->query_vars['post_status'] = array( 'publish' );
 	}
+}
+/**
+ * Use the index.php template for various WordPress views that would otherwise be handled by the parent theme.
+ */
+function use_index_php_as_template() {
+	return __DIR__ . '/index.php';
 }
