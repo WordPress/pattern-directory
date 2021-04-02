@@ -55,6 +55,11 @@
 			pointer-events: none;
 		}
 
+		.pattern__favorite-button,
+		.pattern__copy-button {
+			flex-shrink: 0;
+		}
+
 		.button + .button {
 			margin-left: 0.375rem;
 		}
