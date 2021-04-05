@@ -27,8 +27,13 @@ $font-size: 13px;
 	&--is-loading {
 		display: block;
 		height: 24px;
-		width: 256px;
+		min-width: 100%;
 		background: $color-gray-light-200;
 		border-radius: 4px;
+
+		@media only screen and (min-width: $breakpoint-mobile) {
+			width: 224px;
+		}
+
 	}
 }
