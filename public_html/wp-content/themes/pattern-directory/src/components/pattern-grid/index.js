@@ -2,19 +2,18 @@
  * WordPress dependencies
  */
 import { Spinner } from '@wordpress/components';
-import { store as coreStore } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import PatternThumbnail from '../pattern-thumbnail';
+import { store as patternStore } from '../../store';
 
 function PatternGrid() {
 	const posts = useSelect( ( select ) => {
-		// @todo This only works for logged in users, we'll need to create our own store for general use.
-		const { getEntityRecords } = select( coreStore );
-		return getEntityRecords( 'postType', 'wporg-pattern' );
+		const { getPatternsByQuery } = select( patternStore );
+		return getPatternsByQuery( {} );
 	} );
 	// `posts` will be null while the fetch happens.
 	const isLoading = ! Array.isArray( posts );
