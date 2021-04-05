@@ -55,3 +55,37 @@ jobs:
     - name: Running multisite unit tests
       run: yarn test:php
       if: ${{ success() || failure() }}
+
+  unit-js:
+    name: JS
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+
+    - name: Cache node modules
+      uses: actions/cache@v2
+      id: yarn-cache
+      with:
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+
+    - name: Use Node.js 14.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14.x
+
+    - name: yarn install and build
+      run: |
+        yarn
+        yarn workspaces run build
+
+    - name: Run unit tests on theme data store
+      run:  yarn workspace wporg-pattern-directory-theme test:unit
