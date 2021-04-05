@@ -23,4 +23,12 @@ $font-size: 13px;
 		border: none;
 		color: $color__text-lighter;
 	}
+
+	&--is-loading {
+		display: block;
+		height: 24px;
+		width: 256px;
+		background: $color-gray-light-200;
+		border-radius: 4px;
+	}
 }

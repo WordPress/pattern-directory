@@ -1,6 +1,8 @@
 /**
  * External dependencies
  */
+import { store as coreStore } from '@wordpress/core-data';
+import { useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import { getPath } from '@wordpress/url';
 
@@ -10,80 +12,21 @@ import { getPath } from '@wordpress/url';
 import CategoryMenu from '../category-menu';
 import CategorySearch from '../category-search';
 import CategoryContextBar from '../category-context-bar';
+import contextMessaging from './messaging';
 
-const options = [
-	{
-		value: '#/pattern-categories',
-		label: 'All',
-	},
-	{
-		value: '#/pattern-categories/header',
-		label: 'Header',
-	},
-	{
-		value: '#/pattern-categories/sidebar',
-		label: 'Sidebar',
-	},
-	{
-		value: '#/pattern-categories/footer',
-		label: 'Footer',
-	},
-	{
-		value: '#/pattern-categories/gallery',
-		label: 'Gallery',
-	},
-	{
-		value: '#/pattern-categories/blog',
-		label: 'Blog',
-	},
-	{
-		value: '#/pattern-categories/media',
-		label: 'Media',
-	},
-];
-
-const contextMessages = {
-	[ options[ 1 ].value ]: {
-		message: (
-			<p>
-				45 <b>Header</b> patterns
-			</p>
-		),
-		title: 'Related Categories',
-		links: [
-			{
-				href: '/pattern-categories/media',
-				label: 'Media',
-			},
-			{
-				href: '/pattern-categories/blog',
-				label: 'blog',
-			},
-		],
-	},
-	[ options[ 3 ].value ]: {
-		message: (
-			<p>
-				23 <b>Footer</b> patterns that is a very long sentence to check for something.
-			</p>
-		),
-		title: 'Related Categories',
-		links: [
-			{
-				href: '/pattern-categories/media',
-				label: 'Media',
-			},
-			{
-				href: '/pattern-categories/blog',
-				label: 'blog',
-			},
-		],
-	},
-};
+/**
+ * Module constants
+ */
+const PATTERN_TAXONOMY = 'wporg-pattern-category';
 
 const GridMenu = () => {
+	// Show loading state
+	const [ showLoading, setShowLoading ] = useState( true );
+	const [ isFetching, setIsFetching ] = useState( false );
 	const [ path, setPath ] = useState();
 	const [ categoryContext, setCategoryContext ] = useState( undefined );
+
+	const categories = useSelect( ( select ) => select( coreStore ).getEntityRecords( 'taxonomy', PATTERN_TAXONOMY ) );
 
 	useEffect( () => {
 		const pathOnLoad = getPath( window.location.href );
@@ -91,7 +34,19 @@ const GridMenu = () => {
 	}, [] );
 
 	useEffect( () => {
-		setCategoryContext( contextMessages[ path ] );
+		// Since categories starts as an [] then switches to null
+		if ( showLoading && categories === null ) {
+			setIsFetching( true );
+		}
+
+		if ( isFetching && Array.isArray( categories ) ) {
+			setShowLoading( false );
+			setIsFetching( false );
+		}
+	}, [ isFetching, categories ] );
+
+	useEffect( () => {
+		setCategoryContext( contextMessaging[ path ] );
 	}, [ path ] );
 
 	return (
@@ -100,19 +55,26 @@ const GridMenu = () => {
 				<div>
 					<CategoryMenu
 						path={ path }
-						options={ options }
-						onClick={ ( _path ) => {
-							setPath( _path );
-						} }
+						options={
+							categories
+								? categories.map( ( record ) => {
+									return {
+										// TODO: This url is temporary and won't use the # symbol
+										value: `#/pattern-categories/${ record.slug }`,
+										label: record.name,
+									};
+								} )
+								: []
+						}
+						onClick={ ( _path ) => setPath( _path ) }
+						isLoading={ showLoading }
 					/>
 				</div>
 				<div>
-					<CategorySearch />
+					<CategorySearch isLoading={ showLoading } />
 				</div>
 			</div>
-			<CategoryContextBar
-				{ ...categoryContext }
-			/>
+			<CategoryContextBar { ...categoryContext } />
 		</div>
 	);
 };

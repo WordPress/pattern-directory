@@ -4,7 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, search } from '@wordpress/icons';
 
-const CategorySearch = () => {
+const CategorySearch = ( { isLoading } ) => {
+	if ( isLoading ) {
+		return <span className="category-search--is-loading" />;
+	}
+
 	return (
 		<form method="get" action="/" className="category-search">
 			<label htmlFor="pattern-search" className="screen-reader-text">

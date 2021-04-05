@@ -13,7 +13,7 @@ const updateIndicatorLocation = ( container, { left, width } ) => {
 	container.style.backgroundSize = `${ width }px 100%`;
 };
 
-const DefaultMenu = ( { path, options, onClick } ) => {
+const DefaultMenu = ( { path, options, onClick, isLoading } ) => {
 	const containerRef = useRef( null );
 	const activeRef = useRef( null );
 
@@ -29,7 +29,7 @@ const DefaultMenu = ( { path, options, onClick } ) => {
 	}, [ containerRef, activeRef, path ] );
 
 	return (
-		<ul className="category-menu" ref={ containerRef }>
+		<ul className={ `category-menu ${ isLoading ? 'category-menu--is-loading' : '' } ` } ref={ containerRef }>
 			{ options.map( ( i ) => (
 				<li key={ i.value }>
 					<a
