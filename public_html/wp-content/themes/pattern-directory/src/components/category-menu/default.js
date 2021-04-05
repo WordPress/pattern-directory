@@ -28,6 +28,10 @@ const DefaultMenu = ( { path, options, onClick, isLoading } ) => {
 		} );
 	}, [ containerRef, activeRef, path ] );
 
+	if ( ! isLoading && ! options.length ) {
+		return null;
+	}
+
 	return (
 		<ul className={ `category-menu ${ isLoading ? 'category-menu--is-loading' : '' } ` } ref={ containerRef }>
 			{ options.map( ( i ) => (
