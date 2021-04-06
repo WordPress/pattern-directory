@@ -25,9 +25,15 @@ body.single-wporg-pattern {
 	.pattern-actions {
 		display: flex;
 		align-items: stretch;
+		flex-wrap: wrap;
 
 		button + button {
 			margin-left: 2em;
+		}
+
+		&__notice {
+			margin: 1.5rem 0 0;
+			flex-basis: 100%;
 		}
 	}
 
