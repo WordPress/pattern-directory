@@ -4,13 +4,13 @@
 import { useEffect, useRef } from '@wordpress/element';
 import { ifViewportMatches } from '@wordpress/viewport';
 
-const updateIndicatorLocation = ( container, { left, width } ) => {
+const updateIndicatorLocation = ( container, { top, left, width, height } ) => {
 	if ( ! container ) {
 		return;
 	}
 
 	container.style.backgroundPositionX = `${ left }px`;
-	container.style.backgroundSize = `${ width }px 100%`;
+	container.style.backgroundSize = `${ width }px ${ top + height }px`;
 };
 
 const DefaultMenu = ( { path, options, onClick, isLoading } ) => {
@@ -23,8 +23,10 @@ const DefaultMenu = ( { path, options, onClick, isLoading } ) => {
 		}
 
 		updateIndicatorLocation( containerRef.current, {
+			top: activeRef.current.offsetTop,
 			left: activeRef.current.offsetLeft,
 			width: activeRef.current.offsetWidth,
+			height: activeRef.current.offsetHeight,
 		} );
 	}, [ containerRef, activeRef, path ] );
 
