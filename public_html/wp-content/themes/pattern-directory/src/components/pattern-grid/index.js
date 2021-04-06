@@ -8,7 +8,7 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import PatternThumbnail from '../pattern-thumbnail';
-import GridMenu from '../grid-menu';
+import PatternGridMenu from '../pattern-grid-menu';
 import { store as patternStore } from '../../store';
 
 function PatternGrid() {
@@ -22,7 +22,7 @@ function PatternGrid() {
 	return (
 		<>
 			<header>
-				<GridMenu />
+				<PatternGridMenu />
 			</header>
 
 			<div className="pattern-grid">

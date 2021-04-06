@@ -19,7 +19,7 @@ import contextMessaging from './messaging';
  */
 const PATTERN_TAXONOMY = 'wporg-pattern-category';
 
-const GridMenu = () => {
+const PatternGridMenu = () => {
 	// Show loading state
 	const [ showLoading, setShowLoading ] = useState( true );
 	const [ isFetching, setIsFetching ] = useState( false );
@@ -50,8 +50,8 @@ const GridMenu = () => {
 	}, [ path ] );
 
 	return (
-		<div className="grid-menu">
-			<div className="grid-menu__actions">
+		<div className="pattern-grid-menu">
+			<div className="pattern-grid-menu__actions">
 				<div>
 					<CategoryMenu
 						path={ path }
@@ -79,4 +79,4 @@ const GridMenu = () => {
 	);
 };
 
-export default GridMenu;
+export default PatternGridMenu;
