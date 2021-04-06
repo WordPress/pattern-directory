@@ -1,5 +1,6 @@
-$grid-unit: 16px;
+$grid-unit: 1.5rem;
 $font-weight: 500;
+$font-size: 14px;
 
 .category-menu {
 	margin: 0;
@@ -22,6 +23,7 @@ $font-weight: 500;
 		display: block;
 		padding: $grid-unit / 2;
 		color: $color-gray-600;
+		font-size: $font-size;
 		text-decoration: none;
 
 		&:hover,
@@ -39,22 +41,34 @@ $font-weight: 500;
 		ul {
 			margin: 0;
 			padding: 0;
+			background: $color-dark-gray;
 		}
 
 		li {
 			list-style: none;
+			border-top: 1px solid $color-gray-700;
 
 			a {
 				display: block;
-				padding: $grid-unit 0;
-				border-top: 1px solid $color-gray-light-300;
+				padding: $grid-unit / 1.5 $grid-unit;
+				font-size: $font-size;
 				text-decoration: none;
-			}
-
-			&:first-child a {
-				border-top: none;
+				color: $color-gray-light-700;
 			}
 		}
+
+		// Gutenberg overwrites
+		padding: 0 !important;
+		border-top: none !important;
+
+		> .components-panel__body-title {
+			margin: 0 !important;
+
+			> button {
+				padding: $grid-unit;
+			}
+		}
+		// End
 	}
 
 	&--is-loading {

@@ -1,14 +1,22 @@
 $font-size: 13px;
-$grid-unit: 16px;
+$grid-unit: 1.5rem;
 $border-radius: 2px;
 
 .category-context__bar {
-	margin-top: $grid-unit;
+	margin: 0 $grid-unit;
 	background: $color-gray-light-300;
 	border-radius: $border-radius;
 	font-size: $font-size;
 	overflow: auto;
 	transition: all 50ms ease-out;
+
+	@media only screen and (min-width: $breakpoint-medium) {
+		margin: 0 $grid-unit;
+	}
+
+	@media only screen and (min-width: $breakpoint-large) {
+		margin: 0;
+	}
 
 	ul {
 		margin: 0;
@@ -50,7 +58,7 @@ $border-radius: 2px;
 
 	&__links {
 
-		@media only screen and (max-width: $breakpoint-mobile) {
+		@media only screen and (max-width: $breakpoint-medium) {
 			display: none;
 		}
 

@@ -8,6 +8,7 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import PatternThumbnail from '../pattern-thumbnail';
+import GridMenu from '../grid-menu';
 import { store as patternStore } from '../../store';
 
 function PatternGrid() {
@@ -20,10 +21,8 @@ function PatternGrid() {
 
 	return (
 		<>
-			<header
-				style={ { background: 'whitesmoke', padding: '24px', textAlign: 'center', margin: '0 0 24px' } }
-			>
-				Section filters
+			<header>
+				<GridMenu />
 			</header>
 
 			<div className="pattern-grid">

@@ -1,4 +1,4 @@
-$grid-unit: 16px;
+$grid-unit: 1.5rem;
 
 .grid-menu {
 	margin: 0 auto;
@@ -10,30 +10,28 @@ $grid-unit: 16px;
 		justify-content: space-between;
 		align-items: center;
 
-		> div:first-child {
-			order: 2;
+		> div:first-child,
+		> div:last-child {
 			width: 100%;
 		}
 
 		> div:last-child {
-			order: 1;
-			margin-bottom: $grid-unit;
-			width: 100%;
-			max-width: 384px;
+			padding: $grid-unit;
 		}
 
 		@media only screen and (min-width: $breakpoint-medium) {
+			margin: $grid-unit;
 			flex-direction: row;
 
-			div:first-child {
-				order: 1;
-			}
-
 			div:last-child {
-				order: 3;
+				padding: 0;
 				margin-bottom: 0;
 				width: inherit;
 			}
+		}
+
+		@media only screen and (min-width: $breakpoint-large) {
+			margin: $grid-unit 0;
 		}
 	}
 
