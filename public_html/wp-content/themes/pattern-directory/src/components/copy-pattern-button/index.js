@@ -3,11 +3,23 @@
  */
 import { __ } from '@wordpress/i18n';
 
-const copyToClipboard = ( value ) => {
+/**
+ * Uses a hidden textarea that is added and removed from the DOM in order to copy to clipboard via the Browser.
+ *
+ * @param {string} stringToCopy A string that will be copied to the clipboard
+ * @return {boolean} Whether the copy function succeeded
+ */
+const copyToClipboard = ( stringToCopy ) => {
 	const element = document.createElement( 'textarea' );
+
+	// We don't want the text area to be visible since it's temporary.
+	element.style.position = 'absolute';
+	element.style.left = '-9999px';
+
+	element.value = stringToCopy;
+
+	// We don't want the text area to be selected since it's temporary.
 	element.setAttribute( 'readonly', '' );
-	element.style = { position: 'absolute', left: '-9999px' };
-	element.value = value;
 
 	document.body.appendChild( element );
 	element.select();
@@ -20,6 +32,7 @@ const copyToClipboard = ( value ) => {
 
 const CopyPatternButton = ( { onSuccess } ) => {
 	const handleClick = () => {
+		// Grab the pattern markup from hidden input
 		const blockData = document.getElementById( 'block-data' );
 		const blockPattern = JSON.parse( decodeURIComponent( blockData.value ) );
 
