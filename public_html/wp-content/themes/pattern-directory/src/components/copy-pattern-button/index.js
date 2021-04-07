@@ -33,8 +33,6 @@ const copyToClipboard = ( stringToCopy ) => {
 
 const CopyPatternButton = ( { onSuccess } ) => {
 	const handleClick = ( { target } ) => {
-		onSuccess();
-
 		// Grab the pattern markup from hidden input
 		const blockData = document.getElementById( 'block-data' );
 		const blockPattern = JSON.parse( decodeURIComponent( blockData.value ) );
