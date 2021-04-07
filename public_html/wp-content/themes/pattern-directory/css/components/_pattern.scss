@@ -41,9 +41,23 @@ body.single-wporg-pattern {
 			// @wordpress/components/notice wraps content
 			> * {
 				display: flex;
-				margin: 0;
+				flex-direction: column; // stack on mobile
 				justify-content: space-between;
-				align-items: center;
+				align-items: flex-start;
+				margin: 0;
+
+				button {
+					margin-top: 0.75rem;
+				}
+
+				@media only screen and (min-width: $breakpoint-small) {
+					align-items: center;
+					flex-direction: row;
+
+					button {
+						margin-top: 0;
+					}
+				}
 			}
 
 			&--is-hidden {
