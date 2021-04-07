@@ -13,14 +13,14 @@ import { Button } from '@wordpress/components';
 const copyToClipboard = ( stringToCopy ) => {
 	const element = document.createElement( 'textarea' );
 
+	// We don't want the text area to be selected since it's temporary.
+	element.setAttribute( 'readonly', '' );
+
 	// We don't want the text area to be visible since it's temporary.
 	element.style.position = 'absolute';
 	element.style.left = '-9999px';
 
 	element.value = stringToCopy;
-
-	// We don't want the text area to be selected since it's temporary.
-	element.setAttribute( 'readonly', '' );
 
 	document.body.appendChild( element );
 	element.select();
@@ -32,12 +32,17 @@ const copyToClipboard = ( stringToCopy ) => {
 };
 
 const CopyPatternButton = ( { onSuccess } ) => {
-	const handleClick = () => {
+	const handleClick = ( { target } ) => {
+		onSuccess();
+
 		// Grab the pattern markup from hidden input
 		const blockData = document.getElementById( 'block-data' );
 		const blockPattern = JSON.parse( decodeURIComponent( blockData.value ) );
 
 		const success = copyToClipboard( blockPattern );
+
+		// Make sure we reset focus in case it was lost in the 'copy' command.
+		target.focus();
 
 		if ( success ) {
 			onSuccess();

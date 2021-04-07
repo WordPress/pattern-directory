@@ -14,7 +14,7 @@ const SuccessMessage = ( { showMessage, onClick } ) => (
 			<b>{ __( 'Pattern copied!', 'wporg-patterns' ) }</b>
 			{ __( ' Now you can paste it into any WordPress post or page.', 'wporg-patterns' ) }
 		</div>
-		<Button onClick={ onClick } isSecondary>
+		<Button onClick={ onClick } isSecondary tabIndex={ showMessage ? '0' : '-1' }>
 			{ __( 'Learn More', 'wporg-patterns' ) }
 		</Button>
 	</Notice>
