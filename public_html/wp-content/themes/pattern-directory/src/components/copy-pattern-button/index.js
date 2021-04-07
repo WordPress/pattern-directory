@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
 
 /**
  * Uses a hidden textarea that is added and removed from the DOM in order to copy to clipboard via the Browser.
@@ -46,9 +47,9 @@ const CopyPatternButton = ( { onSuccess } ) => {
 	};
 
 	return (
-		<button className="button button-primary" onClick={ handleClick }>
+		<Button isPrimary onClick={ handleClick }>
 			{ __( 'Copy Pattern', 'wporg-patterns' ) }
-		</button>
+		</Button>
 	);
 };
 
