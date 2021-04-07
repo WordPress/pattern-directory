@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Animate, Guide } from '@wordpress/components';
+import { createInterpolateElement } from '@wordpress/element';
 
 const CopyPasteImage = () => (
 	// Wrap the image to avoid the UI shift after the GIF loads
@@ -55,9 +56,14 @@ const CopyGuide = ( { onFinish } ) => {
 										</li>
 										<li>
 											<p>
-												{ __(
-													'Paste the contents of your clipboard by pressing both the ⌘ and v keys, or right-clicking and choose "Paste" from the menu.',
-													'wporg-patterns'
+												{ createInterpolateElement(
+													__(
+														'Paste the contents of your clipboard by pressing both the <span>⌘</span> and <span>v</span> keys, or right-clicking and choose "Paste" from the menu.',
+														'wporg-patterns'
+													),
+													{
+														span: <span className="pattern-actions__guide-shortcut" />,
+													}
 												) }
 											</p>
 										</li>

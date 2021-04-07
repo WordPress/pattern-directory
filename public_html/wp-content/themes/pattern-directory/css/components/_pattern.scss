@@ -62,10 +62,22 @@ body.single-wporg-pattern {
 
 			&-content {
 				padding: 1.5rem;
+				line-height: 1.5;
 			}
 
 			&-title {
 				margin: 0;
+			}
+
+			&-shortcut {
+				background: $color-gray-light-300;
+				box-shadow: 0 0 0 1px $color-gray-light-700;
+				padding: 1px;
+				font-weight: 600;
+				min-width: 20px;
+				display: inline-block;
+				text-align: center;
+				border-radius: 2px;
 			}
 		}
 	}
