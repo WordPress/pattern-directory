@@ -38,7 +38,7 @@ body.single-wporg-pattern {
 			transform: translateY(0);
 			transition: transform 0.15s ease-in-out;
 
-			// Gutenberg wraps content
+			// @wordpress/components/notice wraps content
 			> * {
 				display: flex;
 				margin: 0;
@@ -50,6 +50,22 @@ body.single-wporg-pattern {
 				margin: 0;
 				flex-basis: auto;
 				transform: translateY(60px);
+			}
+		}
+
+		&__guide {
+			max-width: $breakpoint-mobile / 1.25;
+
+			// @wordpress/components/guide overrides
+			height: auto;
+			max-height: none;
+
+			&-content {
+				padding: 1.5rem;
+			}
+
+			&-title {
+				margin: 0;
 			}
 		}
 	}
