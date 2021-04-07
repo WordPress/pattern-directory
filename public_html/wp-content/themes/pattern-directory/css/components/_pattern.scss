@@ -26,6 +26,7 @@ body.single-wporg-pattern {
 		display: flex;
 		align-items: stretch;
 		flex-wrap: wrap;
+		overflow: hidden;
 
 		button + button {
 			margin-left: 2em;
@@ -34,6 +35,22 @@ body.single-wporg-pattern {
 		&__notice {
 			margin: 1.5rem 0 0;
 			flex-basis: 100%;
+			transform: translateY(0);
+			transition: transform 0.15s ease-in-out;
+
+			// Gutenberg wraps content
+			> * {
+				display: flex;
+				margin: 0;
+				justify-content: space-between;
+				align-items: center;
+			}
+
+			&--is-hidden {
+				margin: 0;
+				flex-basis: auto;
+				transform: translateY(60px);
+			}
 		}
 	}
 
