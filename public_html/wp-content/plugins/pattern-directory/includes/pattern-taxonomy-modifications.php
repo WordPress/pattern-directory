@@ -23,6 +23,7 @@ function add_ordering_form_field() {
 		<div class="form-field">
 			<label for="display-order">Display Order</label>
 			<input type="number" min="1" name="display-order" id="display-order" />
+			<p>This is used to order the categories in the pattern grid navigation.</p>
 		</div>
 	';
 }
@@ -44,6 +45,7 @@ function edit_ordering_form_field( $term ) {
 			</th>
 			<td>
 				<input name="display-order" min="1" id="display-order" type="number" value="' . esc_attr( $value ) . '" />
+				<p class="description">This is used to order the categories in the pattern grid navigation.</p>
 			</td>
 		</tr>
 	';
