@@ -25,7 +25,7 @@ function PatternThumbnail( { pattern } ) {
 				</Disabled>
 			</a>
 			<div className="pattern-grid__actions">
-				<h2 className="pattern-grid__title">{ pattern.title.raw }</h2>
+				<h2 className="pattern-grid__title">{ pattern.title.rendered }</h2>
 				<Tooltip
 					text={
 						isFavorite
