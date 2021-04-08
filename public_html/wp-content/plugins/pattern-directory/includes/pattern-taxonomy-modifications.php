@@ -21,7 +21,7 @@ add_filter( "rest_prepare_{$CATEGORY_TAXONOMY}", __NAMESPACE__ . '\rest_prepare_
 function add_ordering_form_field() {
 	echo '
 		<div class="form-field">
-			<label for="category-order">Order</label>
+			<label for="category-order">Display Order</label>
 			<input type="number" min="1" name="category-order" id="category-order" />
 		</div>
 	';
@@ -40,7 +40,7 @@ function edit_ordering_form_field( $term ) {
 	echo '
 		<tr class="form-field">
 			<th>
-				<label for="category-order">Order</label>
+				<label for="category-order">Display Order</label>
 			</th>
 			<td>
 				<input name="category-order" min="1" id="category-order" type="number" value="' . esc_attr( $value ) . '" />
@@ -76,7 +76,7 @@ function save_term_field( $term_id ) {
  */
 function add_order_table_heading( $columns ) {
 	// Our our custom column heading
-	$columns[ CATEGORY_TAXONOMY_ID ] = __( 'Order' );
+	$columns[ CATEGORY_TAXONOMY_ID ] = __( 'Display Order' );
 
 	return $columns;
 }
