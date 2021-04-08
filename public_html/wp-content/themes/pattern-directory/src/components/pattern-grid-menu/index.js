@@ -26,7 +26,9 @@ const PatternGridMenu = () => {
 	const [ path, setPath ] = useState();
 	const [ categoryContext, setCategoryContext ] = useState( undefined );
 
-	const categories = useSelect( ( select ) => select( coreStore ).getEntityRecords( 'taxonomy', PATTERN_TAXONOMY ) );
+	const categories = useSelect( ( select ) =>
+		select( coreStore ).getEntityRecords( 'taxonomy', PATTERN_TAXONOMY )
+	);
 
 	useEffect( () => {
 		const pathOnLoad = getPath( window.location.href );
@@ -50,32 +52,28 @@ const PatternGridMenu = () => {
 	}, [ path ] );
 
 	return (
-		<div className="pattern-grid-menu">
-			<div className="pattern-grid-menu__actions">
-				<div>
-					<CategoryMenu
-						path={ path }
-						options={
-							categories
-								? categories.map( ( record ) => {
-									return {
-										// TODO: This url is temporary and won't use the # symbol
-										value: `#/pattern-categories/${ record.slug }`,
-										label: record.name,
-									};
-								} )
-								: []
-						}
-						onClick={ ( _path ) => setPath( _path ) }
-						isLoading={ showLoading }
-					/>
-				</div>
-				<div>
-					<CategorySearch isLoading={ showLoading } />
-				</div>
+		<>
+			<div className="pattern-grid-menu">
+				<CategoryMenu
+					path={ path }
+					options={
+						categories
+							? categories.map( ( record ) => {
+								return {
+									// TODO: This url is temporary and won't use the # symbol
+									value: `#/pattern-categories/${ record.slug }`,
+									label: record.name,
+								};
+							} )
+							: []
+					}
+					onClick={ ( _path ) => setPath( _path ) }
+					isLoading={ showLoading }
+				/>
+				<CategorySearch isLoading={ showLoading } />
 			</div>
 			<CategoryContextBar { ...categoryContext } />
-		</div>
+		</>
 	);
 };
 

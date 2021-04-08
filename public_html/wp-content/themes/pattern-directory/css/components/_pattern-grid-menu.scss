@@ -1,41 +1,32 @@
 .pattern-grid-menu {
 	margin: 0 auto;
-	max-width: 960px;
+	max-width: $size__site-main;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
 
-	&__actions {
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		align-items: center;
+	> *:first-child,
+	> *:last-child {
+		width: 100%;
+	}
 
-		> div:first-child,
-		> div:last-child {
-			width: 100%;
-		}
+	> *:last-child {
+		margin: $gutter-default;
+		width: calc(100% - #{$gutter-default * 2});
+	}
 
-		> div:last-child {
-			padding: $gutter-default;
-		}
+	@media only screen and ( min-width: $breakpoint-medium ) {
+		margin: $gutter-default;
+		flex-direction: row;
 
-		@media only screen and (min-width: $breakpoint-medium) {
-			margin: $gutter-default;
-			flex-direction: row;
-
-			div:last-child {
-				padding: 0;
-				margin-bottom: 0;
-				width: inherit;
-			}
-		}
-
-		@media only screen and (min-width: $breakpoint-large) {
-			margin: $gutter-default 0;
+		> *:last-child {
+			margin: 0;
+			width: auto;
 		}
 	}
 
-	// This is a style that is applied on the gutenberg component side.
-	// We don't want it.
-	.components-base-control__field {
-		margin-bottom: 0;
+	@media only screen and ( min-width: $breakpoint-large ) {
+		margin: $gutter-default auto;
 	}
 }
