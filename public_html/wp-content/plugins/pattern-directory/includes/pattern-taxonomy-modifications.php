@@ -60,10 +60,11 @@ function edit_ordering_form_field( $term ) {
  * @param integer $term_id Term id.
  */
 function save_term_field( $term_id ) {
+	/* phpcs:disable WordPress.Security.NonceVerification.Missing */
 	update_term_meta(
 		$term_id,
 		CATEGORY_TAXONOMY_ID,
-		sanitize_text_field( $_POST[ CATEGORY_TAXONOMY_ID ] )
+		absint( wp_unslash( $_POST[ CATEGORY_TAXONOMY_ID ] ) )
 	);
 }
 
