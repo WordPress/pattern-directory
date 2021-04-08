@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import DefaultMenu from './default';
 import MobileMenu from './mobile';
 
