@@ -21,9 +21,7 @@ function PatternGrid() {
 
 	return (
 		<>
-			<header>
-				<PatternGridMenu />
-			</header>
+			<PatternGridMenu />
 
 			<div className="pattern-grid">
 				{ isLoading ? (

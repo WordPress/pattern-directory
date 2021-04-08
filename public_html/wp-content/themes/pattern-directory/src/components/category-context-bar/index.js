@@ -17,7 +17,7 @@ function CategoryContextBar( { message, title, links } ) {
 	}, [ message ] );
 
 	return (
-		<div className="category-context__bar" style={ { height: `${ height }px` } }>
+		<header className="category-context__bar" style={ { height: `${ height }px` } }>
 			<Flex align="center" ref={ innerRef }>
 				<FlexItem className="category-context__bar__copy">{ message }</FlexItem>
 				{ links && links.length > 0 && (
@@ -40,7 +40,7 @@ function CategoryContextBar( { message, title, links } ) {
 					</FlexItem>
 				) }
 			</Flex>
-		</div>
+		</header>
 	);
 }
 
