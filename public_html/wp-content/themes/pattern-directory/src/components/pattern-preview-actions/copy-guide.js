@@ -9,7 +9,7 @@ const CopyPasteImage = () => (
 	// Wrap the image to avoid the UI shift after the GIF loads
 	<div style={ { height: '220px' } }>
 		<img
-			src="https://shaunandrews.com/wp-content/uploads/2021/03/pattern-paste-demo-2.gif"
+			src="/wp-content/themes/pattern-directory/images/copy-paste-demo.gif"
 			alt={ __( 'GIF of copy and pasting.', 'wporg-patterns' ) }
 		/>
 	</div>
