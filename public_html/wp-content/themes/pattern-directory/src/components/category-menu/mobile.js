@@ -33,4 +33,5 @@ const MobileMenu = ( { onClick, options } ) => {
 	);
 };
 
+// Will only render if the viewport is < medium
 export default ifViewportMatches( '< medium' )( MobileMenu );

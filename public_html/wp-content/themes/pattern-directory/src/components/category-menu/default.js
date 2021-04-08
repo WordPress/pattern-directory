@@ -52,4 +52,5 @@ const DefaultMenu = ( { path, options, onClick, isLoading } ) => {
 	);
 };
 
+// Will only render if the viewport is >= medium
 export default ifViewportMatches( '>= medium' )( DefaultMenu );
