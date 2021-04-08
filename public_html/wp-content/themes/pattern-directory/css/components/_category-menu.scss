@@ -1,5 +1,3 @@
-$grid-unit: 1.5rem;
-$font-weight: 500;
 $font-size: 14px;
 
 .category-menu {
@@ -21,7 +19,7 @@ $font-size: 14px;
 
 	a {
 		display: block;
-		padding: $grid-unit / 2;
+		padding: $gutter-default / 2;
 		color: $color-gray-600;
 		font-size: $font-size;
 		text-decoration: none;
@@ -50,7 +48,7 @@ $font-size: 14px;
 
 			a {
 				display: block;
-				padding: $grid-unit / 1.5 $grid-unit;
+				padding: $gutter-default / 1.5 $gutter-default;
 				font-size: $font-size;
 				text-decoration: none;
 				color: $color-gray-light-700;
@@ -65,7 +63,7 @@ $font-size: 14px;
 			margin: 0 !important;
 
 			> button {
-				padding: $grid-unit;
+				padding: $gutter-default;
 			}
 		}
 		// End
