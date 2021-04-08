@@ -3,7 +3,7 @@
 namespace WordPressdotorg\Pattern_Directory\Pattern_Taxonomy_Modifications;
 
 $CATEGORY_TAXONOMY = 'wporg-pattern-category';
-const CATEGORY_TAXONOMY_ID = 'category-order';
+const CATEGORY_TAXONOMY_ID = 'display-order';
 
 add_action( "{$CATEGORY_TAXONOMY}_add_form_fields", __NAMESPACE__ . '\add_ordering_form_field', 0 );
 add_action( "{$CATEGORY_TAXONOMY}_edit_form_fields", __NAMESPACE__ . '\edit_ordering_form_field', 10, 2 );
@@ -21,8 +21,8 @@ add_filter( "rest_prepare_{$CATEGORY_TAXONOMY}", __NAMESPACE__ . '\rest_prepare_
 function add_ordering_form_field() {
 	echo '
 		<div class="form-field">
-			<label for="category-order">Display Order</label>
-			<input type="number" min="1" name="category-order" id="category-order" />
+			<label for="display-order">Display Order</label>
+			<input type="number" min="1" name="display-order" id="display-order" />
 		</div>
 	';
 }
@@ -40,10 +40,10 @@ function edit_ordering_form_field( $term ) {
 	echo '
 		<tr class="form-field">
 			<th>
-				<label for="category-order">Display Order</label>
+				<label for="display-order">Display Order</label>
 			</th>
 			<td>
-				<input name="category-order" min="1" id="category-order" type="number" value="' . esc_attr( $value ) . '" />
+				<input name="display-order" min="1" id="display-order" type="number" value="' . esc_attr( $value ) . '" />
 			</td>
 		</tr>
 	';
