@@ -101,7 +101,7 @@ function add_category_order_column_content( $content, $column, $term_id ) {
 }
 
 /**
- * Modifies rest response to include "displayOrder" for pattern-categories.
+ * Modifies rest response to include "display_order" for pattern-categories.
  *
  * This is a callback for the `rest_prepare_{$taxonomy}` filter, and it's used to modify rest responses.
  *
@@ -118,7 +118,7 @@ function rest_prepare_category_response( $response, $term ) {
 		$orderNum = 9999;
 	}
 
-	$response->data['displayOrder'] = (int) $orderNum;
+	$response->data['display_order'] = (int) $orderNum;
 
 	return $response;
 }
