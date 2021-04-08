@@ -53,7 +53,7 @@ const PatternGridMenu = () => {
 
 	return (
 		<>
-			<div className="pattern-grid-menu">
+			<nav className="pattern-grid-menu">
 				<CategoryMenu
 					path={ path }
 					options={
@@ -71,7 +71,7 @@ const PatternGridMenu = () => {
 					isLoading={ showLoading }
 				/>
 				<CategorySearch isLoading={ showLoading } />
-			</div>
+			</nav>
 			<CategoryContextBar { ...categoryContext } />
 		</>
 	);
