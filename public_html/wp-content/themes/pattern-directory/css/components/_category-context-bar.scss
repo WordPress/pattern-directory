@@ -9,6 +9,12 @@ $border-radius: 2px;
 	overflow: auto;
 	transition: all 50ms ease-out;
 
+	> div {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+
 	@media only screen and (min-width: $breakpoint-medium) {
 		margin: 0 $gutter-default;
 	}
@@ -41,11 +47,10 @@ $border-radius: 2px;
 	}
 
 	&__copy {
+		margin: 0;
 		padding: $gutter-default * 0.75 $gutter-default;
-
-		> p {
-			margin: 0;
-		}
+		font-size: $font-size;
+		font-weight: 400;
 	}
 
 	&__title {
@@ -58,12 +63,12 @@ $border-radius: 2px;
 	}
 
 	&__links {
+		display: flex;
+		align-items: center;
 
 		@media only screen and (max-width: $breakpoint-medium) {
 			display: none;
 		}
-
-		display: block;
 	}
 
 	&--is-hidden {

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useEffect, useRef, useState } from '@wordpress/element';
-import { Flex, FlexItem } from '@wordpress/components';
 
 function CategoryContextBar( { message, title, links } ) {
 	const [ height, setHeight ] = useState( 0 );
@@ -18,28 +17,22 @@ function CategoryContextBar( { message, title, links } ) {
 
 	return (
 		<header className="category-context__bar" style={ { height: `${ height }px` } }>
-			<Flex align="center" ref={ innerRef }>
-				<FlexItem className="category-context__bar__copy">{ message }</FlexItem>
+			<div ref={ innerRef }>
+				<h2 className="category-context__bar__copy">{ message }</h2>
 				{ links && links.length > 0 && (
-					<FlexItem className="category-context__bar__links">
-						<Flex gap={ 0 }>
-							<FlexItem>
-								<h2 className="category-context__bar__title">{ title } </h2>
-							</FlexItem>
+					<div className="category-context__bar__links">
+						<h3 className="category-context__bar__title">{ title }</h3>
 
-							<FlexItem>
-								<ul>
-									{ links.map( ( i ) => (
-										<li key={ i.href }>
-											<a href={ i.href }>{ i.label }</a>
-										</li>
-									) ) }
-								</ul>
-							</FlexItem>
-						</Flex>
-					</FlexItem>
+						<ul>
+							{ links.map( ( i ) => (
+								<li key={ i.href }>
+									<a href={ i.href }>{ i.label }</a>
+								</li>
+							) ) }
+						</ul>
+					</div>
 				) }
-			</Flex>
+			</div>
 		</header>
 	);
 }
