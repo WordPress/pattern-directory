@@ -24,7 +24,7 @@ function CategoryContextBar( { message, title, links } ) {
 					<FlexItem className="category-context__bar__links">
 						<Flex gap={ 0 }>
 							<FlexItem>
-								<h3 className="category-context__bar__title">{ title } </h3>
+								<h2 className="category-context__bar__title">{ title } </h2>
 							</FlexItem>
 
 							<FlexItem>
