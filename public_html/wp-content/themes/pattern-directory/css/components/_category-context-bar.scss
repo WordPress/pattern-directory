@@ -1,4 +1,4 @@
-$font-size: 13px;
+$font-size: 0.8125rem;
 $border-radius: 2px;
 
 .category-context__bar {
@@ -51,7 +51,7 @@ $border-radius: 2px;
 		margin: 0;
 		padding-right: $gutter-default;
 		color: $color__text;
-		font-size: $font-size - 1;
+		font-size: 0.75rem;
 		text-transform: uppercase;
 	}
 
