@@ -45,8 +45,8 @@ function register_post_type_data() {
 			'show_in_menu'          => 'edit.php?post_type=wporg-pattern',
 			'show_in_admin_bar'     => false,
 			'show_in_rest'          => true,
-			'rest_controller_class' => '', // TODO
-			'supports'              => array( 'editor', 'author', 'excerpt' ),
+			'rest_controller_class' => '\\WordPressdotorg\\Pattern_Directory\\REST_Flags_Controller',
+			'supports'              => array( 'author', 'excerpt' ),
 			'can_export'            => false,
 			'delete_with_user'      => false,
 		)

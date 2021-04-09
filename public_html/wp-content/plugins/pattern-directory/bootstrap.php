@@ -8,6 +8,7 @@
 
 namespace WordPressdotorg\Pattern_Directory;
 
+require_once __DIR__ . '/includes/class-rest-flags-controller.php';
 require_once __DIR__ . '/includes/pattern-post-type.php';
 require_once __DIR__ . '/includes/pattern-flag-post-type.php';
 require_once __DIR__ . '/includes/pattern-validation.php';
