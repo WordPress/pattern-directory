@@ -21,9 +21,6 @@ get_header();
 
 		<div id="pattern-grid__container">
 			<!-- Filter placeholder -->
-			<header style="background:whitesmoke;padding:24px;text-align:center;margin:0 0 24px;">
-				Section filters
-			</header>
 
 			<div class="pattern-grid">
 				<?php
