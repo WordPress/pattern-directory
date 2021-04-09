@@ -1,12 +1,9 @@
-$border-radius: 2px;
-$font-size: 0.8125rem;
-
 .category-search {
 	display: flex;
 	align-items: center;
 	background: $color-white;
 	border: 1px solid $color__text-lighter;
-	border-radius: $border-radius;
+	border-radius: 2px;
 
 	input[type="search"] {
 		flex-grow: 1;
@@ -14,7 +11,7 @@ $font-size: 0.8125rem;
 		padding: 0.25rem 0.5rem;
 		border: none;
 		box-shadow: none;
-		font-size: $font-size;
+		font-size: 0.8125rem;
 	}
 
 	&__button {
