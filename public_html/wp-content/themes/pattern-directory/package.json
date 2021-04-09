@@ -15,9 +15,10 @@
 		"build:css": "grunt css",
 		"build:js": "grunt js",
 		"dev": "grunt",
-		"format:js": "wp-scripts format-js src",
 		"lint:css": "wp-scripts lint-style css",
 		"lint:js": "wp-scripts lint-js src",
+		"format:js": "wp-scripts format-js src",
+		"test:unit": "wp-scripts test-unit-js",
 		"packages-update": "wp-scripts packages-update"
 	},
 	"browserslist": [
