@@ -13,8 +13,6 @@ const TAX_TYPE  = 'wporg-pattern-flag-reason';
  * Actions and filters.
  */
 add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
-add_action( 'admin_menu', __NAMESPACE__ . '\taxonomy_submenu_page' );
-add_filter( 'parent_file', __NAMESPACE__ . '\taxonomy_submenu_highlight' );
 
 /**
  * Register entities for block pattern flags.
@@ -61,6 +59,8 @@ function register_post_type_data() {
 		'singular_name'              => __( 'Flag Reason', 'wporg-patterns' ),
 		'search_items'               => __( 'Search Reasons', 'wporg-patterns' ),
 		'all_items'                  => __( 'All Reasons', 'wporg-patterns' ),
+		'parent_item'                => __( 'Parent Reason', 'wporg-patterns' ),
+		'parent_item_colon'          => __( 'Parent Reason:', 'wporg-patterns' ),
 		'edit_item'                  => __( 'Edit Reason', 'wporg-patterns' ),
 		'view_item'                  => __( 'View Reason', 'wporg-patterns' ),
 		'update_item'                => __( 'Update Reason', 'wporg-patterns' ),
@@ -92,43 +92,4 @@ function register_post_type_data() {
 			'show_admin_column'  => true,
 		)
 	);
-}
-
-/**
- * Add the Flag Reason taxonomy page as a subpage of Block Pattern.
- *
- * WP won't do this on its own because Flag Reason is associated with the Pattern Flag post type rather than
- * the post type that we want to put it under.
- *
- * @return void
- */
-function taxonomy_submenu_page() {
-	$taxonomy = get_taxonomy( TAX_TYPE );
-
-	add_submenu_page(
-		'edit.php?post_type=wporg-pattern',
-		__( 'Flag Reasons', 'wporg-patterns' ),
-		__( 'Reasons', 'wporg-patterns' ),
-		$taxonomy->cap->manage_terms,
-		'edit-tags.php?taxonomy=' . TAX_TYPE . '&post_type=' . PATTERN,
-		null
-	);
-}
-
-/**
- * Make sure the Reasons submenu item is highlighted when editing terms.
- *
- * @param string $parent_file
- *
- * @return string
- */
-function taxonomy_submenu_highlight( $parent_file ) {
-	global $plugin_page, $submenu_file, $post_type, $taxonomy;
-
-	if ( PATTERN === $post_type && TAX_TYPE === $taxonomy ) {
-		$plugin_page  = 'edit-tags.php?taxonomy=' . TAX_TYPE . '&post_type=' . PATTERN;
-		$submenu_file = 'edit-tags.php?taxonomy=' . TAX_TYPE . '&post_type=' . PATTERN;
-	}
-
-	return $parent_file;
 }
