@@ -79,7 +79,7 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 		if ( ! current_user_can( $parent_post_type->cap->edit_posts ) ) {
 			return new WP_Error(
 				'rest_forbidden_context',
-				__( 'Sorry, you are not allowed to edit patterns.', 'wporg-patterns' ),
+				__( 'Sorry, you are not allowed to view pattern flags.', 'wporg-patterns' ),
 				array( 'status' => rest_authorization_required_code() )
 			);
 		}
@@ -179,6 +179,7 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 			'description' => __( 'The ID for the parent of the object.', 'wporg-patterns' ),
 			'type'        => 'integer',
 			'context'     => array( 'view', 'edit' ),
+			'required'    => true,
 		);
 
 		return $schema;
