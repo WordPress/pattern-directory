@@ -10,8 +10,8 @@ defined( 'WPINC' ) || die();
 /**
  * Actions and filters.
  */
-add_action( 'admin_menu', __NAMESPACE__ . '\taxonomy_submenu_page' );
-add_filter( 'parent_file', __NAMESPACE__ . '\taxonomy_submenu_highlight' );
+add_action( 'admin_menu', __NAMESPACE__ . '\flag_reason_submenu_page' );
+add_filter( 'parent_file', __NAMESPACE__ . '\flag_reason_submenu_highlight' );
 
 /**
  * Add the Flag Reason taxonomy page as a subpage of Block Pattern.
@@ -21,7 +21,7 @@ add_filter( 'parent_file', __NAMESPACE__ . '\taxonomy_submenu_highlight' );
  *
  * @return void
  */
-function taxonomy_submenu_page() {
+function flag_reason_submenu_page() {
 	$taxonomy = get_taxonomy( FLAG_REASON );
 
 	add_submenu_page(
@@ -41,7 +41,7 @@ function taxonomy_submenu_page() {
  *
  * @return string
  */
-function taxonomy_submenu_highlight( $parent_file ) {
+function flag_reason_submenu_highlight( $parent_file ) {
 	global $plugin_page, $submenu_file, $post_type, $taxonomy;
 
 	if ( PATTERN === $post_type && FLAG_REASON === $taxonomy ) {
