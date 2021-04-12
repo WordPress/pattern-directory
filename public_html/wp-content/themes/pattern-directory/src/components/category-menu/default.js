@@ -42,7 +42,7 @@ const DefaultMenu = ( { path, options, onClick, isLoading } ) => {
 						className={ path === i.value ? 'category-menu--is-active' : '' }
 						href={ i.value }
 						ref={ path === i.value ? activeRef : null }
-						onClick={ ( { target } ) => onClick( target.hash ) }
+						onClick={ onClick }
 					>
 						{ i.label }
 					</a>

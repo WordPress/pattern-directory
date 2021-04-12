@@ -8,7 +8,6 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import PatternThumbnail from '../pattern-thumbnail';
-import PatternGridMenu from '../pattern-grid-menu';
 import { store as patternStore } from '../../store';
 
 function PatternGrid() {
@@ -20,17 +19,13 @@ function PatternGrid() {
 	const isLoading = ! Array.isArray( posts );
 
 	return (
-		<>
-			<PatternGridMenu />
-
-			<div className="pattern-grid">
-				{ isLoading ? (
-					<Spinner />
-				) : (
-					posts.map( ( post ) => <PatternThumbnail key={ post.id } pattern={ post } /> )
-				) }
-			</div>
-		</>
+		<div className="pattern-grid">
+			{ isLoading ? (
+				<Spinner />
+			) : (
+				posts.map( ( post ) => <PatternThumbnail key={ post.id } pattern={ post } /> )
+			) }
+		</div>
 	);
 }
 
