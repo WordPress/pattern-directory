@@ -17,6 +17,17 @@ export function patterns( state = {}, action ) {
 	};
 }
 
+export function categories( state = [], action ) {
+	switch ( action.type ) {
+		case 'FETCH_CATEGORIES':
+			return null; // Indicates the query is in progress
+		case 'LOAD_CATEGORIES':
+			return [ ...action.categories ];
+	}
+
+	return state;
+}
+
 function byId( state = {}, action ) {
 	const patternsById = ( action.patterns || [] ).reduce( ( acc, cur ) => ( { ...acc, [ cur.id ]: cur } ), {} );
 	switch ( action.type ) {
@@ -39,7 +50,7 @@ function queries( state = {}, action ) {
 
 export default combineReducers( {
 	patterns,
-	// taxonomy items,
+	categories,
 	// filter query,
 	// favorites,
 } );
