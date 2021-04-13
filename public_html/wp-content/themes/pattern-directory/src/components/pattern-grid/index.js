@@ -9,14 +9,30 @@ import { useSelect } from '@wordpress/data';
  */
 import PatternThumbnail from '../pattern-thumbnail';
 import { store as patternStore } from '../../store';
+import { useRoute } from '../../hooks';
+import { getCategoryFromPath } from '../../utils';
 
 function PatternGrid() {
-	const posts = useSelect( ( select ) => {
-		const { getPatternsByQuery } = select( patternStore );
-		return getPatternsByQuery( {} );
+	const { path } = useRoute();
+	const { posts, isLoading } = useSelect( ( select ) => {
+		const { getPatternsByQuery, isLoadingPatternsByQuery, getCategoryBySlug } = select( patternStore );
+		const categorySlug = getCategoryFromPath( path );
+		const category = getCategoryBySlug( categorySlug );
+
+		let query = {};
+
+		if ( category ) {
+			query = {
+				...query,
+				'pattern-categories': category.id,
+			};
+		}
+
+		return {
+			posts: getPatternsByQuery( query ),
+			isLoading: isLoadingPatternsByQuery( query ),
+		};
 	} );
-	// `posts` will be null while the fetch happens.
-	const isLoading = ! Array.isArray( posts );
 
 	return (
 		<div className="pattern-grid">

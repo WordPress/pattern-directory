@@ -73,3 +73,20 @@ export function isLoadingCategories( state ) {
 export function getCategories( state ) {
 	return state.categories;
 }
+
+/**
+ * Get category by its slug.
+ *
+ * @param {Object} state Global application state.
+ * @param {string} slug Category slug.
+ *
+ * @return {Array|undefined} The requested category.
+ */
+export function getCategoryBySlug( state, slug ) {
+	if ( isLoadingCategories( state ) ) {
+		return;
+	}
+
+	const [ cat ] = state.categories.filter( ( i ) => i.slug === slug );
+	return cat;
+}

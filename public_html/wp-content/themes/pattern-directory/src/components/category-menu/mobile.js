@@ -20,9 +20,9 @@ const MobileMenu = ( { onClick, options } ) => {
 			<ul>
 				{ options.map( ( i ) => (
 					<li key={ i.value }>
-						<a href={ i.value } onClick={ () => {
+						<a href={ i.value } onClick={ ( event ) => {
 							setIsOpen( false );
-							onClick( i.value );
+							onClick( event );
 						} }>
 							{ i.label }
 						</a>
