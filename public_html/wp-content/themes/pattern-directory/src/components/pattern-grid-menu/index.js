@@ -1,8 +1,9 @@
 /**
- * External dependencies
+ * WordPress dependencies
  */
 import { useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
+import { getPath } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -39,7 +40,7 @@ const PatternGridMenu = () => {
 						categories
 							? categories.map( ( record ) => {
 								return {
-									value: record.link,
+									value: `/${ getPath( record.link ) || '' }`,
 									label: record.name,
 								};
 							} )
