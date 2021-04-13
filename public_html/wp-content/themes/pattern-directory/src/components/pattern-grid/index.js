@@ -10,13 +10,13 @@ import { useSelect } from '@wordpress/data';
 import PatternThumbnail from '../pattern-thumbnail';
 import { store as patternStore } from '../../store';
 import { useRoute } from '../../hooks';
-import { getCategoryFromPath } from '../../utils';
+import { getCategoryFromPathname } from '../../utils';
 
 function PatternGrid() {
 	const { path } = useRoute();
 	const { posts, isLoading } = useSelect( ( select ) => {
 		const { getPatternsByQuery, isLoadingPatternsByQuery, getCategoryBySlug } = select( patternStore );
-		const categorySlug = getCategoryFromPath( path );
+		const categorySlug = getCategoryFromPathname( path );
 		const category = getCategoryBySlug( categorySlug );
 
 		let query = {};

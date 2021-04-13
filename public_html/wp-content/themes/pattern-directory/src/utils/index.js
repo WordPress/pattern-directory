@@ -1,1 +1,1 @@
-export { getCategoryFromPath } from './category';
+export { getCategoryFromPathname } from './category';
