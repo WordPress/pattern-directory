@@ -18,11 +18,12 @@ export function patterns( state = {}, action ) {
 }
 
 export function categories( state = [], action ) {
+	const sorted = ( action.categories || [] ).sort( ( a, b ) => a.name.localeCompare( b.name ) );
 	switch ( action.type ) {
 		case 'FETCH_CATEGORIES':
 			return null; // Indicates the query is in progress
 		case 'LOAD_CATEGORIES':
-			return [ ...action.categories ];
+			return [ ...sorted ];
 	}
 
 	return state;
