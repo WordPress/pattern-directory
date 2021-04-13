@@ -3,7 +3,7 @@
  */
 import apiPatterns from './fixtures/patterns';
 import apiCategories from './fixtures/categories';
-import { getCategories, getPattern, getPatterns, getPatternsByQuery, isLoadingCategories, isLoadingPatternsByQuery } from '../selectors';
+import { getCategories, getCategoryBySlug, getPattern, getPatterns, getPatternsByQuery, isLoadingCategories, isLoadingPatternsByQuery } from '../selectors';
 
 describe( 'selectors', () => {
 	const initialState = {
@@ -116,6 +116,36 @@ describe( 'selectors', () => {
 			};
 
 			expect( getCategories( categoryState ) ).toHaveLength( apiCategories.length );
+		} );
+	} );
+
+	describe( 'getCategoryBySlug', () => {
+		it( 'should get undefined if categories are loading', () => {
+			expect( getCategoryBySlug( {}, 'header' ) ).toBeUndefined();
+		} );
+
+		it( 'should get undefined if there are no categories', () => {
+			const categoryState = {
+				categories: [],
+			};
+
+			expect( getCategoryBySlug( categoryState, apiCategories[ 0 ].slug ) ).toBeUndefined();
+		} );
+
+		it( 'should get undefined if no category exist', () => {
+			const categoryState = {
+				categories: apiCategories,
+			};
+
+			expect( getCategoryBySlug( categoryState, 'missing-category-slug' ) ).toBeUndefined();
+		} );
+
+		it( 'should get the correct category', () => {
+			const categoryState = {
+				categories: apiCategories,
+			};
+
+			expect( getCategoryBySlug( categoryState, apiCategories[ 0 ].slug ) ).toHaveProperty( 'id', apiCategories[ 0 ].id );
 		} );
 	} );
 } );
