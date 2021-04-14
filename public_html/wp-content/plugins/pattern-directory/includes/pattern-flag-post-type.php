@@ -2,6 +2,7 @@
 
 namespace WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type;
 
+use WP_Post, WP_Query;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTERN;
 
 defined( 'WPINC' ) || die();
@@ -15,6 +16,7 @@ const RESOLVED_STATUS = 'resolved';
  * Actions and filters.
  */
 add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
+add_action( 'wp_insert_post', __NAMESPACE__ . '\check_flag_threshold', 10, 3 );
 
 /**
  * Register entities for block pattern flags.
@@ -107,4 +109,39 @@ function register_post_type_data() {
 			'protected'   => true,
 		)
 	);
+}
+
+/**
+ * Automatically unpublish a pattern if it receives a certain number of flags.
+ *
+ * @param int     $post_ID
+ * @param WP_Post $post
+ * @param bool    $update
+ *
+ * @return void
+ */
+function check_flag_threshold( $post_ID, $post, $update ) {
+	if ( $update || POST_TYPE !== get_post_type( $post ) ) {
+		return;
+	}
+
+	$pattern = get_post( $post->post_parent );
+	if ( ! $pattern ) {
+		return;
+	}
+
+	$flag_check = new WP_Query( array(
+		'post_type'   => POST_TYPE,
+		'post_parent' => $pattern->ID,
+		'post_status' => PENDING_STATUS,
+	) );
+
+	$threshold = 3;
+
+	if ( $flag_check->found_posts >= $threshold ) {
+		wp_update_post( array(
+			'ID'          => $pattern->ID,
+			'post_status' => 'pending',
+		) );
+	}
 }
