@@ -17,7 +17,7 @@ function PatternGrid() {
 
 		return {
 			posts: query ? getPatternsByQuery( query ) : [],
-			isLoading: query ? isLoadingPatternsByQuery( query ) : true,
+			isLoading: query && isLoadingPatternsByQuery( query ),
 		};
 	} );
 
