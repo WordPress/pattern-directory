@@ -14,6 +14,7 @@ defined( 'WPINC' ) || die();
 /**
  * Actions and filters.
  */
+add_filter( 'query_vars', __NAMESPACE__ . '\flag_list_table_query_vars' );
 add_filter( 'manage_' . FLAG . '_posts_columns', __NAMESPACE__ . '\flag_list_table_columns' );
 add_action( 'manage_' . FLAG . '_posts_custom_column', __NAMESPACE__ . '\flag_list_table_render_custom_columns', 10, 2 );
 add_filter( 'display_post_states', __NAMESPACE__ . '\flag_list_table_post_states', 10, 2 );
@@ -24,6 +25,30 @@ add_filter( 'views_edit-wporg-pattern-flag', __NAMESPACE__ . '\flag_list_table_v
 add_filter( 'wp_untrash_post_status', __NAMESPACE__ . '\flag_untrash_status', 5, 2 ); // Low priority so it won't override "Undo".
 add_action( 'admin_menu', __NAMESPACE__ . '\flag_reason_submenu_page' );
 add_filter( 'submenu_file', __NAMESPACE__ . '\flag_reason_submenu_highlight', 10, 2 );
+
+/**
+ * Adjust available query vars for the flag list table.
+ *
+ * The posts list table doesn't have a way to filter the query that determines which posts appear in the list table.
+ * Instead, you have to modify the list of public query vars way down in the WP class. :/
+ *
+ * @param array $query_vars
+ *
+ * @return array
+ */
+function flag_list_table_query_vars( $query_vars ) {
+	if ( ! is_admin() ) {
+		return $query_vars;
+	}
+
+	$screen = get_current_screen();
+
+	if ( 'edit-wporg-pattern-flag' === $screen->id ) {
+		$query_vars[] = 'post_parent';
+	}
+
+	return $query_vars;
+}
 
 /**
  * Modify the flags list table columns and their order.
@@ -186,7 +211,28 @@ function flag_list_table_row_actions( $actions, $post ) {
 		);
 	}
 
-	return $actions + $saved_actions;
+	$actions = $actions + $saved_actions;
+
+	$parent = filter_input( INPUT_GET, 'post_parent', FILTER_VALIDATE_INT );
+	if ( ! $parent ) {
+		$view_all_url = add_query_arg(
+			array(
+				'post_type'   => FLAG,
+				'post_parent' => $post->post_parent,
+			),
+			admin_url( 'edit.php' )
+		);
+
+		$actions['view-all'] = sprintf(
+			'<br /><a href="%s" aria-label="%s">%s</a>',
+			esc_attr( $view_all_url ),
+			/* translators: %s: Post title. */
+			esc_attr( sprintf( __( 'View all flags for &#8220;%s&#8221;', 'wporg-patterns' ), $pattern_title ) ),
+			__( 'View All Flags For This Pattern', 'wporg-patterns' )
+		);
+	}
+
+	return $actions;
 }
 
 /**
@@ -251,6 +297,19 @@ function flag_list_table_handle_bulk_actions( $sendback, $doaction, $post_ids ) 
  * @return array
  */
 function flag_list_table_views( $views ) {
+	$parent_id = filter_input( INPUT_GET, 'post_parent', FILTER_VALIDATE_INT );
+	if ( $parent_id ) {
+		$views = array( $views['all'] );
+
+		$parent_title      = _draft_or_post_title( $parent_id );
+		$views['filtered'] = sprintf(
+			'<strong>%s</strong>',
+			sprintf( __( 'Viewing flags for &#8220;%s&#8221;', 'wporg-patterns' ), $parent_title )
+		);
+
+		return $views;
+	}
+
 	if ( isset( $views['resolved'] ) ) {
 		// Resolved comes after Pending, or if not listed, after All.
 		$resolved = array( $views['resolved'] );
