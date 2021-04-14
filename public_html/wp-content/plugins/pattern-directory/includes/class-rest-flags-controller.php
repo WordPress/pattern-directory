@@ -6,6 +6,8 @@ use WP_Error, WP_Post, WP_Post_Type;
 use WP_REST_Posts_Controller, WP_REST_Request, WP_REST_Server;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTERN;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_TAX;
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\PENDING_STATUS;
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\RESOLVED_STATUS;
 
 defined( 'WPINC' ) || die();
 
@@ -134,9 +136,22 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 
 		if ( ! is_user_logged_in() ) {
 			return new WP_Error(
-				'rest_post_exists',
+				'rest_authorization_required',
 				__( 'You must be logged in to submit a flag.', 'wporg-patterns' ),
 				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
+		$parent = $this->get_parent( $request['parent'] );
+		if ( is_wp_error( $parent ) ) {
+			return $parent;
+		}
+
+		if ( ! is_post_publicly_viewable( $parent ) ) {
+			return new WP_Error(
+				'rest_invalid_post',
+				__( 'Flags cannot be submitted for this pattern.', 'wporg-patterns' ),
+				array( 'status' => 403 )
 			);
 		}
 
@@ -172,8 +187,8 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 	public function get_item_schema() {
 		$schema = parent::get_item_schema();
 
-		$schema['properties']['status']['default'] = 'pending';
-		$schema['properties']['status']['enum']    = array( 'pending', 'private' );
+		$schema['properties']['status']['default'] = PENDING_STATUS;
+		$schema['properties']['status']['enum']    = array( PENDING_STATUS, RESOLVED_STATUS );
 
 		$schema['properties']['parent'] = array(
 			'description' => __( 'The ID for the parent of the object.', 'wporg-patterns' ),
@@ -193,8 +208,8 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 	public function get_collection_params() {
 		$query_params = parent::get_collection_params();
 
-		$query_params['status']['default']       = 'pending';
-		$query_params['status']['items']['enum'] = array( 'pending', 'private', 'any' );
+		$query_params['status']['default']       = PENDING_STATUS;
+		$query_params['status']['items']['enum'] = array( PENDING_STATUS, RESOLVED_STATUS, 'any' );
 
 		$query_params['parent']         = array(
 			'description' => __( 'Limit result set to items with particular parent IDs.', 'wporg-patterns' ),
@@ -218,8 +233,6 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 
 	/**
 	 * Get the parent post, if the ID is valid.
-	 *
-	 * @since 4.7.2
 	 *
 	 * @param int $parent Supplied ID.
 	 *

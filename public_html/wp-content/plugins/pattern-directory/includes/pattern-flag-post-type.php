@@ -6,8 +6,10 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTE
 
 defined( 'WPINC' ) || die();
 
-const POST_TYPE = 'wporg-pattern-flag';
-const TAX_TYPE  = 'wporg-pattern-flag-reason';
+const POST_TYPE       = 'wporg-pattern-flag';
+const TAX_TYPE        = 'wporg-pattern-flag-reason';
+const PENDING_STATUS  = 'pending';
+const RESOLVED_STATUS = 'resolved';
 
 /**
  * Actions and filters.
@@ -90,6 +92,19 @@ function register_post_type_data() {
 			'show_tagcloud'      => false,
 			'show_in_quick_edit' => false,
 			'show_admin_column'  => true,
+		)
+	);
+
+	register_post_status(
+		RESOLVED_STATUS,
+		array(
+			'label'       => __( 'Resolved', 'wporg-patterns' ),
+			'label_count' => _n_noop(
+				'Resolved <span class="count">(%s)</span>',
+				'Resolved <span class="count">(%s)</span>',
+				'wporg-patterns'
+			),
+			'protected'   => true,
 		)
 	);
 }
