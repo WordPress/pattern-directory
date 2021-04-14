@@ -8,6 +8,7 @@
 	background-size: 0;
 	background-position-x: 0;
 	transition: all 75ms ease-out;
+	min-height: 45px;
 
 	li {
 		display: inline-block;
@@ -80,6 +81,7 @@
 		width: 80%;
 		height: 24px;
 		left: 0;
+		top: calc(50% - 12px);
 		transition: none;
 	}
 }

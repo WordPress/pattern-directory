@@ -4,9 +4,13 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, search } from '@wordpress/icons';
 
-const CategorySearch = ( { isLoading } ) => {
+const CategorySearch = ( { isLoading, isVisible } ) => {
 	if ( isLoading ) {
 		return <span className="category-search--is-loading" />;
+	}
+
+	if ( ! isVisible ) {
+		return null;
 	}
 
 	return (

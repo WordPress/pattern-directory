@@ -29,7 +29,8 @@
 		border-radius: 4px;
 
 		@media only screen and (min-width: $breakpoint-mobile) {
-			width: 224px;
+			width: 224px !important;
+			min-width: auto !important;
 		}
 
 	}

@@ -16,11 +16,12 @@ import { useRoute } from '../../hooks';
 const PatternGridMenu = () => {
 	const { path, push: updatePath } = useRoute();
 
-	const { categories, isLoading } = useSelect( ( select ) => {
-		const { getCategories, isLoadingCategories } = select( patternStore );
+	const { categories, isLoading, hasLoaded } = useSelect( ( select ) => {
+		const { getCategories, isLoadingCategories, hasLoadedCategories } = select( patternStore );
 		return {
 			categories: getCategories(),
 			isLoading: isLoadingCategories(),
+			hasLoaded: hasLoadedCategories(),
 		};
 	} );
 
@@ -45,7 +46,7 @@ const PatternGridMenu = () => {
 					} }
 					isLoading={ isLoading }
 				/>
-				<CategorySearch isLoading={ isLoading } />
+				<CategorySearch isLoading={ isLoading } isVisible={ hasLoaded } />
 			</nav>
 			<CategoryContextBar />
 		</>
