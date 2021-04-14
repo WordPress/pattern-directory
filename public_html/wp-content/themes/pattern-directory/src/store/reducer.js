@@ -19,6 +19,8 @@ export function patterns( state = {}, action ) {
 }
 
 export function categories( state = [], action ) {
+	// Sort the categories alphabetically.
+	// See: https://github.com/WordPress/pattern-directory/pull/76#issuecomment-818330872
 	const sorted = ( action.categories || [] ).sort( ( a, b ) => a.name.localeCompare( b.name ) );
 
 	// Append the default category
