@@ -2,7 +2,7 @@
 
 namespace WordPressdotorg\Pattern_Directory;
 
-use WP_Error, WP_Post, WP_Post_Type;
+use WP_Error, WP_Post, WP_Query;
 use WP_REST_Posts_Controller, WP_REST_Request, WP_REST_Server;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTERN;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_TAX;
@@ -151,6 +151,21 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 			return new WP_Error(
 				'rest_invalid_post',
 				__( 'Flags cannot be submitted for this pattern.', 'wporg-patterns' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		// Check if the user has already submitted a flag for the pattern.
+		$flag_check = new WP_Query( array(
+			'post_type'   => $this->post_type,
+			'post_parent' => $parent->ID,
+			'post_status' => 'any',
+			'post_author' => get_current_user_id(),
+		) );
+		if ( $flag_check->found_posts > 0 ) {
+			return new WP_Error(
+				'rest_already_flagged',
+				__( 'You have already flagged this pattern.', 'wporg-patterns' ),
 				array( 'status' => 403 )
 			);
 		}
