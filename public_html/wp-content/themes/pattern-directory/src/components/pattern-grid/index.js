@@ -9,24 +9,11 @@ import { useSelect } from '@wordpress/data';
  */
 import PatternThumbnail from '../pattern-thumbnail';
 import { store as patternStore } from '../../store';
-import { useRoute } from '../../hooks';
-import { getCategoryFromPathname } from '../../utils';
 
 function PatternGrid() {
-	const { path } = useRoute();
 	const { posts, isLoading } = useSelect( ( select ) => {
-		const { getPatternsByQuery, isLoadingPatternsByQuery, getCategoryBySlug } = select( patternStore );
-		const categorySlug = getCategoryFromPathname( path );
-		const category = getCategoryBySlug( categorySlug );
-
-		let query = {};
-
-		if ( category ) {
-			query = {
-				...query,
-				'pattern-categories': category.id,
-			};
-		}
+		const { getPatternsByQuery, isLoadingPatternsByQuery, getCurrentQuery } = select( patternStore );
+		const query = getCurrentQuery();
 
 		return {
 			posts: getPatternsByQuery( query ),

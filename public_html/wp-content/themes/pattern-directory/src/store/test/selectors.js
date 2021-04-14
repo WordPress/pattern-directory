@@ -3,7 +3,7 @@
  */
 import apiPatterns from './fixtures/patterns';
 import apiCategories from './fixtures/categories';
-import { getCategories, getCategoryBySlug, getPattern, getPatterns, getPatternsByQuery, isLoadingCategories, isLoadingPatternsByQuery } from '../selectors';
+import { getCategories, getCategoryBySlug, getCurrentQuery, getPattern, getPatterns, getPatternsByQuery, isLoadingCategories, isLoadingPatternsByQuery } from '../selectors';
 
 describe( 'selectors', () => {
 	const initialState = {
@@ -89,6 +89,26 @@ describe( 'selectors', () => {
 			const pattern = getPattern( state, 25 );
 			expect( pattern ).toHaveProperty( 'id', 25 );
 			expect( pattern ).toHaveProperty( 'title.rendered', 'Large header with a heading' );
+		} );
+	} );
+
+	describe( 'getCurrentQuery', () => {
+		it( 'should get an empty object if there is no query', () => {
+			const initialQueryState = {
+				currentQuery: {},
+			};
+
+			expect( getCurrentQuery( initialQueryState ) ).toMatchObject( {} );
+		} );
+
+		it( 'should get an the correct query object', () => {
+			const initialQueryState = {
+				currentQuery: {
+					'pattern-categories': [ 1 ],
+				},
+			};
+
+			expect( getCurrentQuery( initialQueryState ) ).toMatchObject( initialQueryState.currentQuery );
 		} );
 	} );
 

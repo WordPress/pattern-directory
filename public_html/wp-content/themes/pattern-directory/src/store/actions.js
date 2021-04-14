@@ -22,6 +22,16 @@ export function loadPatterns( query, patterns ) {
 }
 
 /**
+ * Get the action object signalling that the current view has been set.
+ *
+ * @param {string} query Query object.
+ * @return {Object} Action object.
+ */
+export function setCurrentView( query ) {
+	return { type: 'SET_CURRENT_QUERY', query: query };
+}
+
+/**
  * Get the action object signalling that categories have been requested.
  *
  * @return {Object} Action object.

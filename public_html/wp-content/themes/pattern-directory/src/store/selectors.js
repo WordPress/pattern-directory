@@ -53,6 +53,17 @@ export function getPattern( state, id ) {
 }
 
 /**
+ * Get the current query.
+ *
+ * @param {Object} state Global application state.
+ *
+ * @return {Object} The current query.
+ */
+export function getCurrentQuery( state ) {
+	return state.currentQuery;
+}
+
+/**
  * Check if there is a pending request for category query.
  *
  * @param {Object} state Global application state.

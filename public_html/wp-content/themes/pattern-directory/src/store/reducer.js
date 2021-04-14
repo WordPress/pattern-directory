@@ -39,6 +39,22 @@ export function categories( state = [], action ) {
 	return state;
 }
 
+/**
+ * Reducer to track the current query.
+ *
+ * @param {Object} state Current state.
+ * @param {Object} action Dispatched action.
+ * @return {Object} Updated state.
+ */
+export function currentQuery( state = {}, action ) {
+	switch ( action.type ) {
+		case 'SET_CURRENT_QUERY':
+			return action.query;
+	}
+
+	return state;
+}
+
 function byId( state = {}, action ) {
 	const patternsById = ( action.patterns || [] ).reduce( ( acc, cur ) => ( { ...acc, [ cur.id ]: cur } ), {} );
 	switch ( action.type ) {
@@ -62,6 +78,6 @@ function queries( state = {}, action ) {
 export default combineReducers( {
 	patterns,
 	categories,
-	// filter query,
+	currentQuery,
 	// favorites,
 } );
