@@ -2,7 +2,11 @@
  * WordPress dependencies
  */
 import { combineReducers } from '@wordpress/data';
-import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import { getAllCategory } from './utils';
 
 /**
  * Reducer to track available patterns.
@@ -18,24 +22,23 @@ export function patterns( state = {}, action ) {
 	};
 }
 
-export function categories( state = [], action ) {
-	// Sort the categories alphabetically.
-	// See: https://github.com/WordPress/pattern-directory/pull/76#issuecomment-818330872
-	const sorted = ( action.categories || [] ).sort( ( a, b ) => a.name.localeCompare( b.name ) );
-
-	// Append the default category
-	sorted.unshift( {
-		id: -1,
-		slug: 'all',
-		name: __( 'All', 'wporg-patterns' ),
-		link: '/',
-	} );
-
+/**
+ * Reducer to track categories.
+ *
+ * @param {Object} state Current state.
+ * @param {Object} action Dispatched action.
+ * @return {Object} Updated state.
+ */
+export function categories( state = undefined, action ) {
 	switch ( action.type ) {
 		case 'FETCH_CATEGORIES':
 			return null; // Indicates the query is in progress
 		case 'LOAD_CATEGORIES':
-			return [ ...sorted ];
+			// Sort the categories alphabetically.
+			// See: https://github.com/WordPress/pattern-directory/pull/76#issuecomment-818330872
+			const sorted = ( action.categories || [] ).sort( ( a, b ) => a.name.localeCompare( b.name ) );
+
+			return [ getAllCategory(), ...sorted ];
 	}
 
 	return state;
@@ -48,7 +51,7 @@ export function categories( state = [], action ) {
  * @param {Object} action Dispatched action.
  * @return {Object} Updated state.
  */
-export function currentQuery( state = {}, action ) {
+export function currentQuery( state = undefined, action ) {
 	switch ( action.type ) {
 		case 'SET_CURRENT_QUERY':
 			return action.query;

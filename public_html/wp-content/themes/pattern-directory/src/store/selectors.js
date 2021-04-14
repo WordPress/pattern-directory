@@ -71,7 +71,18 @@ export function getCurrentQuery( state ) {
  * @return {boolean} True if an API request is in progress for this query.
  */
 export function isLoadingCategories( state ) {
-	return ! Array.isArray( state.categories );
+	return state.categories === null;
+}
+
+/**
+ * Check if the categories have been loaded.
+ *
+ * @param {Object} state Global application state.
+ *
+ * @return {boolean} True if categories is an array.
+ */
+export function hasLoadedCategories( state ) {
+	return Array.isArray( state.categories );
 }
 
 /**
@@ -94,7 +105,7 @@ export function getCategories( state ) {
  * @return {Array|undefined} The requested category.
  */
 export function getCategoryBySlug( state, slug ) {
-	if ( isLoadingCategories( state ) ) {
+	if ( ! hasLoadedCategories( state ) ) {
 		return;
 	}
 

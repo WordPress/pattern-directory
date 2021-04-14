@@ -3,7 +3,7 @@
  */
 import apiPatterns from './fixtures/patterns';
 import apiCategories from './fixtures/categories';
-import { getCategories, getCategoryBySlug, getCurrentQuery, getPattern, getPatterns, getPatternsByQuery, isLoadingCategories, isLoadingPatternsByQuery } from '../selectors';
+import { getCategories, getCategoryBySlug, getCurrentQuery, getPattern, getPatterns, getPatternsByQuery, hasLoadedCategories, isLoadingCategories, isLoadingPatternsByQuery } from '../selectors';
 
 describe( 'selectors', () => {
 	const initialState = {
@@ -129,6 +129,22 @@ describe( 'selectors', () => {
 		} );
 	} );
 
+	describe( 'hasLoadedCategories', () => {
+		it( 'should get false when state is undefined', () => {
+			const categoryState = {
+				categories: undefined,
+			};
+			expect( hasLoadedCategories( categoryState ) ).toBeFalsy();
+		} );
+
+		it( 'should get true when state is an array', () => {
+			const categoryState = {
+				categories: apiCategories,
+			};
+			expect( hasLoadedCategories( categoryState ) ).toBeTruthy();
+		} );
+	} );
+
 	describe( 'getCategories', () => {
 		it( 'should get a list of categories', () => {
 			const categoryState = {
@@ -140,8 +156,14 @@ describe( 'selectors', () => {
 	} );
 
 	describe( 'getCategoryBySlug', () => {
-		it( 'should get undefined if categories are loading', () => {
-			expect( getCategoryBySlug( {}, 'header' ) ).toBeUndefined();
+		it( 'should get undefined if categories have not loaded', () => {
+			expect( getCategoryBySlug( {
+				categories: undefined,
+			}, 'header' ) ).toBeUndefined();
+
+			expect( getCategoryBySlug( {
+				categories: null,
+			}, 'header' ) ).toBeUndefined();
 		} );
 
 		it( 'should get undefined if there are no categories', () => {

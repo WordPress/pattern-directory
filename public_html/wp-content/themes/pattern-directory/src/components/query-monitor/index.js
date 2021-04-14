@@ -12,20 +12,27 @@ import { useRoute } from '../../hooks';
 import { getCategoryFromPathname } from '../../utils';
 
 /**
- * Listens for changes to the path and reconstructs the query object base on the path
+ * Listens for changes to the path and reconstructs the query object based on the path
  */
 const QueryMonitor = () => {
 	const { path } = useRoute();
 
 	const query = useSelect(
 		( select ) => {
-			const { getCategoryBySlug, getCurrentQuery } = select( patternStore );
+			const { getCategoryBySlug, hasLoadedCategories } = select( patternStore );
 			const categorySlug = getCategoryFromPathname( path );
 			const category = getCategoryBySlug( categorySlug );
 
-			let _query = getCurrentQuery();
+			// We need categories loaded before building the query
+			if ( ! hasLoadedCategories() ) {
+				return;
+			}
 
-			if ( category ) {
+			// We rebuild the query on every path update
+			let _query = {};
+
+			// If we have a category and it's not the default category
+			if ( category && category.id !== -1 ) {
 				_query = {
 					..._query,
 					'pattern-categories': category.id,

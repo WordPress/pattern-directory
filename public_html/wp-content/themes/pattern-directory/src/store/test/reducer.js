@@ -72,7 +72,7 @@ describe( 'state', () => {
 			expect( state ).toBeNull();
 		} );
 
-		it( 'should store categories in the state', () => {
+		it( 'should store categories in the state with the "all" category', () => {
 			const state = categories(
 				{},
 				{
@@ -81,7 +81,9 @@ describe( 'state', () => {
 				}
 			);
 
-			expect( state ).toHaveLength( apiCategories.length );
+			const lengthWithAll = apiCategories.length + 1;
+
+			expect( state ).toHaveLength( lengthWithAll );
 		} );
 	} );
 } );
