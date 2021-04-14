@@ -20,6 +20,8 @@ add_filter( 'display_post_states', __NAMESPACE__ . '\flag_list_table_post_states
 add_filter( 'post_row_actions', __NAMESPACE__ . '\flag_list_table_row_actions', 10, 2 );
 add_filter( 'bulk_actions-edit-wporg-pattern-flag', __NAMESPACE__ . '\flag_list_table_bulk_actions' );
 add_filter( 'handle_bulk_actions-edit-wporg-pattern-flag', __NAMESPACE__ . '\flag_list_table_handle_bulk_actions', 10, 3 );
+add_filter( 'views_edit-wporg-pattern-flag', __NAMESPACE__ . '\flag_list_table_views' );
+add_filter( 'wp_untrash_post_status', __NAMESPACE__ . '\flag_untrash_status', 5, 2 ); // Low priority so it won't override "Undo".
 add_action( 'admin_menu', __NAMESPACE__ . '\flag_reason_submenu_page' );
 add_filter( 'submenu_file', __NAMESPACE__ . '\flag_reason_submenu_highlight', 10, 2 );
 
@@ -129,7 +131,8 @@ function flag_list_table_row_actions( $actions, $post ) {
 		'edit.php'
 	);
 
-	$actions = array();
+	$saved_actions = array_intersect_key( $actions, array_fill_keys( array( 'trash', 'untrash', 'delete' ), true ) );
+	$actions       = array();
 
 	$pattern       = get_post( $post->post_parent );
 	$pattern_title = _draft_or_post_title( $pattern );
@@ -183,7 +186,7 @@ function flag_list_table_row_actions( $actions, $post ) {
 		);
 	}
 
-	return $actions;
+	return $actions + $saved_actions;
 }
 
 /**
@@ -236,6 +239,42 @@ function flag_list_table_handle_bulk_actions( $sendback, $doaction, $post_ids ) 
 	}
 
 	return $sendback;
+}
+
+/**
+ * Rearrange the flag list table views.
+ *
+ * @param array $views
+ *
+ * @return array
+ */
+function flag_list_table_views( $views ) {
+	if ( isset( $views['resolved'] ) ) {
+		// Resolved comes after Pending, or if not listed, after All.
+		$resolved = array( $views['resolved'] );
+		unset( $views['resolved'] );
+
+		$split        = 1 + array_search( ( isset( $views['pending'] ) ? 'pending' : 'all' ), array_keys( $views ), true );
+		$views = array_merge( array_slice( $views, 0, $split ), $resolved, array_slice( $views, $split ) );
+	}
+
+	return $views;
+}
+
+/**
+ * Set untrashed flag posts to pending status instead of draft.
+ *
+ * @param string $new_status
+ * @param int    $post_id
+ *
+ * @return string
+ */
+function flag_untrash_status( $new_status, $post_id ) {
+	if ( FLAG === get_post_type( $post_id ) ) {
+		$new_status = PENDING_STATUS;
+	}
+
+	return $new_status;
 }
 
 /**
