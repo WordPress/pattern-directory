@@ -197,12 +197,14 @@ function flag_list_table_row_actions( $actions, $post ) {
  * @return array
  */
 function flag_list_table_bulk_actions( $actions ) {
+	$saved_actions = array_intersect_key( $actions, array_fill_keys( array( 'trash', 'untrash', 'delete' ), true ) );
+
 	$actions = array(
 		'resolve'   => __( 'Resolve', 'wporg-patterns' ),
 		'unresolve' => __( 'Unresolve', 'wporg-patterns' ),
 	);
 
-	return $actions;
+	return $actions + $saved_actions;
 }
 
 /**
