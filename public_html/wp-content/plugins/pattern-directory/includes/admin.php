@@ -21,7 +21,7 @@ add_filter( 'post_row_actions', __NAMESPACE__ . '\flag_list_table_row_actions', 
 add_filter( 'bulk_actions-edit-wporg-pattern-flag', __NAMESPACE__ . '\flag_list_table_bulk_actions' );
 add_filter( 'handle_bulk_actions-edit-wporg-pattern-flag', __NAMESPACE__ . '\flag_list_table_handle_bulk_actions', 10, 3 );
 add_action( 'admin_menu', __NAMESPACE__ . '\flag_reason_submenu_page' );
-add_filter( 'parent_file', __NAMESPACE__ . '\flag_reason_submenu_highlight' );
+add_filter( 'submenu_file', __NAMESPACE__ . '\flag_reason_submenu_highlight', 10, 2 );
 
 /**
  * Modify the flags list table columns and their order.
@@ -79,7 +79,7 @@ function flag_list_table_render_custom_columns( $column_name, $post_id ) {
 			}
 
 			printf(
-				$title_wrapper,
+				$title_wrapper, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				esc_html( _draft_or_post_title( $pattern ) )
 			);
 
@@ -87,7 +87,7 @@ function flag_list_table_render_custom_columns( $column_name, $post_id ) {
 			break;
 
 		case 'details':
-			echo get_the_excerpt( $current_flag );
+			echo wp_kses_data( get_the_excerpt( $current_flag ) );
 			break;
 	}
 }
@@ -262,17 +262,20 @@ function flag_reason_submenu_page() {
 /**
  * Make sure the Reasons submenu item is highlighted when editing terms.
  *
- * @param string $parent_file
+ * @param string $submenu_file
  *
  * @return string
  */
-function flag_reason_submenu_highlight( $parent_file ) {
-	global $plugin_page, $submenu_file, $post_type, $taxonomy;
+function flag_reason_submenu_highlight( $submenu_file, $parent_file ) {
+	global $post_type, $taxonomy;
 
-	if ( PATTERN === $post_type && FLAG_REASON === $taxonomy ) {
-		$plugin_page  = 'edit-tags.php?taxonomy=' . FLAG_REASON . '&post_type=' . PATTERN;
+	if (
+		'edit.php?post_type=wporg-pattern' === $parent_file
+		&& PATTERN === $post_type
+		&& FLAG_REASON === $taxonomy
+	) {
 		$submenu_file = 'edit-tags.php?taxonomy=' . FLAG_REASON . '&post_type=' . PATTERN;
 	}
 
-	return $parent_file;
+	return $submenu_file;
 }
