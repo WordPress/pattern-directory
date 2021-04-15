@@ -3,13 +3,14 @@
  */
 import { useEffect } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
+import { getQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
 import { store as patternStore } from '../../store';
 import { useRoute } from '../../hooks';
-import { getCategoryFromPathname } from '../../utils';
+import { getCategoryFromPath } from '../../utils';
 
 /**
  * Listens for changes to the path and reconstructs the query object based on the path
@@ -20,16 +21,19 @@ const QueryMonitor = () => {
 	const query = useSelect(
 		( select ) => {
 			const { getCategoryBySlug, hasLoadedCategories } = select( patternStore );
-			const categorySlug = getCategoryFromPathname( path );
-			const category = getCategoryBySlug( categorySlug );
 
 			// We need categories loaded before building the query
 			if ( ! hasLoadedCategories() ) {
 				return;
 			}
 
-			// We rebuild the query on every path update
-			let _query = {};
+			const categorySlug = getCategoryFromPath( path );
+			const category = getCategoryBySlug( categorySlug );
+
+			// Default to {} if empty
+			const queryStrings = getQueryArgs( path );
+
+			let _query = queryStrings;
 
 			// If we have a category and it's not the default category
 			if ( category && category.id !== -1 ) {

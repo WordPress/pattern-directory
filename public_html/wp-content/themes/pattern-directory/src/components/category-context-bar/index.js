@@ -8,7 +8,7 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import { useRoute } from '../../hooks';
-import { getCategoryFromPathname } from '../../utils';
+import { getCategoryFromPath } from '../../utils';
 import { getContextMessage } from './messaging';
 import { store as patternStore } from '../../store';
 
@@ -20,7 +20,7 @@ function CategoryContextBar() {
 
 	const category = useSelect( ( select ) => {
 		const { getCategoryBySlug } = select( patternStore );
-		const categorySlug = getCategoryFromPathname( path );
+		const categorySlug = getCategoryFromPath( path );
 
 		return getCategoryBySlug( categorySlug );
 	} );

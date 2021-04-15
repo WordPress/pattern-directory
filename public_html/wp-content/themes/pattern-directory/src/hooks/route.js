@@ -2,22 +2,68 @@
  * WordPress dependencies
  */
 import { createContext, useContext, useState } from '@wordpress/element';
+import { addQueryArgs, getQueryArgs } from '@wordpress/url';
+
+/**
+ * Internal dependencies
+ */
+import { removeEmptyArgs, removeQueryString } from '../utils';
 
 const StateContext = createContext();
 
 export function RouteProvider( { children } ) {
 	const [ path, setPath ] = useState( window.location.pathname );
 
-	const _pushState = ( _path ) => {
-		window.history.pushState( '', '', _path );
-		setPath( _path );
+	/**
+	 * Combines query strings from the current path and the new path for arguments with values.
+	 *
+	 * @param {string} newPath Path including query strings
+	 * @return {Object} Query strings as an object
+	 */
+	const mergeQueryStrings = ( newPath ) => {
+		const currentQueryStrings = getQueryArgs( path );
+		const newQueryStrings = getQueryArgs( newPath );
+
+		const combined = { ...currentQueryStrings, ...newQueryStrings };
+
+		// remove empty query strings
+		return removeEmptyArgs( combined );
+	};
+
+	/**
+	 * Combines the current and new path's query strings and updates the browser's url.
+	 *
+	 * @param {string} newPath
+	 */
+	const _pushState = ( newPath ) => {
+		// Merge the existing and new query strings.
+		const newQueryStrings = mergeQueryStrings( newPath );
+
+		// Remove the query strings from the path
+		const pathOnly = removeQueryString( newPath );
+
+		// Rebuild the full path
+		const rebuiltPath = addQueryArgs( pathOnly, newQueryStrings );
+
+		_replaceState( rebuiltPath );
+	};
+
+	/**
+	 * Calls `window.history.pushState` to update the browser's url.
+	 *
+	 * @param {string} newPath
+	 */
+	const _replaceState = ( newPath ) => {
+		window.history.pushState( '', '', newPath );
+		setPath( newPath );
 	};
 
 	return (
 		<StateContext.Provider
 			value={ {
 				path: path,
-				push: _pushState,
+				update: _pushState,
+				replace: _replaceState,
 			} }
 		>
 			{ children }

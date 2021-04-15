@@ -1,1 +1,1 @@
-export { getCategoryFromPathname } from './category';
+export { getCategoryFromPath, removeQueryString, removeEmptyArgs } from './category';
