@@ -19,17 +19,26 @@ function CategoryContextBar() {
 	const [ context, setContext ] = useState( {} );
 	const innerRef = useRef( null );
 
-	const { category } = useSelect( ( select ) => {
-		const { getCategoryBySlug } = select( patternStore );
+	const { isAllCategory, category, isLoadingPatterns, patterns } = useSelect( ( select ) => {
+		const {
+			getCategoryBySlug,
+			getPatternsByQuery,
+			isLoadingPatternsByQuery,
+			getCurrentQuery } = select( patternStore );
 		const categorySlug = getCategoryFromPath( path );
+		const _category = getCategoryBySlug( categorySlug );
+		const query = getCurrentQuery();
 
 		return {
-			category: getCategoryBySlug( categorySlug ),
+			isAllCategory: _category && _category.id === -1,
+			isLoadingPatterns: isLoadingPatternsByQuery( query ),
+			patterns: query ? getPatternsByQuery( query ) : [],
+			category: _category,
 		};
 	}, [ path ] );
 
 	useEffect( () => {
-		if ( ! category ) {
+		if ( ! category || isLoadingPatterns ) {
 			return;
 		}
 
@@ -37,20 +46,21 @@ function CategoryContextBar() {
 
 		let _context = {};
 
-		// Use the category count as default
+		// Use the category count as default since it has the count of all the associated patterns
 		let count = category.count;
 
-		// If we have a search term use the pattern results.
+		// If we have a search term use the pattern results length.
+		// Not: This is okay until we start using paging.
 		if ( searchTerm ) {
-			count = 12345; // TO DO get the pattern count
+			count = patterns.length;
 		}
 
-		if ( category.id !== -1 || searchTerm ) {
+		if ( ! isAllCategory || searchTerm ) {
 			_context = getContextMessage( count, category.name, searchTerm );
 		}
 
 		setContext( _context );
-	}, [ category, path ] );
+	}, [ isLoadingPatterns, patterns ] );
 
 	useEffect( () => {
 		const _height = context.message ? innerRef.current.offsetHeight : 0;
