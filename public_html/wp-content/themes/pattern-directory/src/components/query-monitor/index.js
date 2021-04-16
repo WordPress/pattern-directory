@@ -48,10 +48,10 @@ const QueryMonitor = () => {
 		[ path ]
 	);
 
-	const { setCurrentView } = useDispatch( patternStore );
+	const { setCurrentQuery } = useDispatch( patternStore );
 
 	useEffect( () => {
-		setCurrentView( query );
+		setCurrentQuery( query );
 	}, [ query ] );
 
 	return null;

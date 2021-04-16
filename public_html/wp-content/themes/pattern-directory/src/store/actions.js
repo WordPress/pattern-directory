@@ -27,7 +27,7 @@ export function loadPatterns( query, patterns ) {
  * @param {string} query Query object.
  * @return {Object} Action object.
  */
-export function setCurrentView( query ) {
+export function setCurrentQuery( query ) {
 	return { type: 'SET_CURRENT_QUERY', query: query };
 }
 
