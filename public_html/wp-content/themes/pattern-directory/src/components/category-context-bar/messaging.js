@@ -25,7 +25,7 @@ export const getContextMessage = ( count, categoryName, searchTerm ) => {
 		if ( categoryName !== 'All' ) {
 			message = sprintf(
 				/* translators: %1$d: number of patterns. %2$s category name. %3$s search term  */
-				_n( '%1$d <b>%2$s</b> pattern matching <b>%3$s</b>.', '%1$d <b>%2$s</b> patterns matching <b>%3$s</b>.', count, 'wporg-patterns' ),
+				_n( '%1$d <b>%2$s</b> pattern matching "<b>%3$s</b>".', '%1$d <b>%2$s</b> patterns matching "<b>%3$s</b>".', count, 'wporg-patterns' ),
 				count,
 				categoryName.toLowerCase(),
 				searchTerm,
@@ -34,7 +34,7 @@ export const getContextMessage = ( count, categoryName, searchTerm ) => {
 		} else {
 			message = sprintf(
 				/* translators: %1$d: number of patterns. %2$s search term.  */
-				_n( '%1$d pattern matching <b>%2$s</b>.', '%1$d patterns matching <b>%2$s</b>.', count, 'wporg-patterns' ),
+				_n( '%1$d pattern matching "<b>%2$s</b>".', '%1$d patterns matching "<b>%2$s</b>".', count, 'wporg-patterns' ),
 				count,
 				searchTerm,
 				'wporg-patterns'
