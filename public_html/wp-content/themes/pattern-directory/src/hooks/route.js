@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { createContext, useContext, useState } from '@wordpress/element';
-import { addQueryArgs, getQueryArgs } from '@wordpress/url';
+import { addQueryArgs, getPathAndQueryString, getQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -12,7 +12,7 @@ import { removeEmptyArgs, removeQueryString } from '../utils';
 const StateContext = createContext();
 
 export function RouteProvider( { children } ) {
-	const [ path, setPath ] = useState( window.location.pathname );
+	const [ path, setPath ] = useState( getPathAndQueryString( window.location.href ) );
 
 	/**
 	 * Combines query strings from the current path and the new path for arguments with values.

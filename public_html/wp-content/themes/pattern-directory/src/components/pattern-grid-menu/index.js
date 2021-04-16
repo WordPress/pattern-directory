@@ -1,9 +1,9 @@
 /**
  * WordPress dependencies
  */
+import { useDebounce } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
-import { useState } from '@wordpress/element';
-import { addQueryArgs, getPath } from '@wordpress/url';
+import { addQueryArgs, getPath, getQueryArg } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -15,8 +15,12 @@ import { store as patternStore } from '../../store';
 import { useRoute } from '../../hooks';
 import { removeQueryString } from '../../utils';
 
+/**
+ * Module constants
+ */
+const DEBOUNCE_MS = 300;
+
 const PatternGridMenu = () => {
-	const [ searchTerm, setSearchTerm ] = useState( '' );
 	const { path, update: updatePath } = useRoute();
 
 	const { categories, isLoading, hasLoaded } = useSelect( ( select ) => {
@@ -28,20 +32,16 @@ const PatternGridMenu = () => {
 		};
 	} );
 
-	const onSearchChange = ( event ) => {
-		event.preventDefault();
-		setSearchTerm( event.target.value );
-	};
-
-	const onSearchSubmit = ( event ) => {
-		event.preventDefault();
-
+	const handleUpdatePath = ( value ) => {
+		// We reset to root to make sure we don't search by pattern for now
 		const updatedPath = addQueryArgs( path, {
-			search: searchTerm,
+			search: value,
 		} );
 
 		updatePath( updatedPath );
 	};
+
+	const debouncedHandleUpdate = useDebounce( handleUpdatePath, DEBOUNCE_MS );
 
 	return (
 		<>
@@ -67,9 +67,15 @@ const PatternGridMenu = () => {
 				<CategorySearch
 					isLoading={ isLoading }
 					isVisible={ hasLoaded }
-					value={ searchTerm }
-					onChange={ onSearchChange }
-					onSubmit={ onSearchSubmit }
+					defaultValue={ getQueryArg( window.location.href, 'search' ) }
+					onUpdate={ ( event ) => {
+						event.preventDefault();
+						debouncedHandleUpdate( event.target.value );
+					} }
+					onSubmit={ ( event ) => {
+						event.preventDefault();
+						debouncedHandleUpdate( event.target.elements[ 0 ].value );
+					} }
 				/>
 			</nav>
 			<CategoryContextBar />

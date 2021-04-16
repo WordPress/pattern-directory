@@ -3,6 +3,7 @@
  */
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
+import { getQueryArg } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -18,18 +19,38 @@ function CategoryContextBar() {
 	const [ context, setContext ] = useState( {} );
 	const innerRef = useRef( null );
 
-	const category = useSelect( ( select ) => {
+	const { category } = useSelect( ( select ) => {
 		const { getCategoryBySlug } = select( patternStore );
 		const categorySlug = getCategoryFromPath( path );
 
-		return getCategoryBySlug( categorySlug );
-	} );
+		return {
+			category: getCategoryBySlug( categorySlug ),
+		};
+	}, [ path ] );
 
 	useEffect( () => {
-		const _context = category && category.count > 0 ? getContextMessage( category.count, category.name ) : {};
+		if ( ! category ) {
+			return;
+		}
+
+		const searchTerm = getQueryArg( path, 'search' );
+
+		let _context = {};
+
+		// Use the category count as default
+		let count = category.count;
+
+		// If we have a search term use the pattern results.
+		if ( searchTerm ) {
+			count = 12345; // TO DO get the pattern count
+		}
+
+		if ( category.id !== -1 || searchTerm ) {
+			_context = getContextMessage( count, category.name, searchTerm );
+		}
 
 		setContext( _context );
-	}, [ path, category ] );
+	}, [ category, path ] );
 
 	useEffect( () => {
 		const _height = context.message ? innerRef.current.offsetHeight : 0;

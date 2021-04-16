@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, search } from '@wordpress/icons';
 
-const CategorySearch = ( { isLoading, isVisible, onChange, onSubmit } ) => {
+const CategorySearch = ( { defaultValue, isLoading, isVisible, onUpdate, onSubmit } ) => {
 	if ( isLoading ) {
 		return <span className="category-search--is-loading" />;
 	}
@@ -18,7 +18,13 @@ const CategorySearch = ( { isLoading, isVisible, onChange, onSubmit } ) => {
 			<label htmlFor="pattern-search" className="screen-reader-text">
 				{ __( 'Search for:', 'wporg-patterns' ) }
 			</label>
-			<input onChange={ onChange } id="pattern-search" type="search" placeholder={ __( 'Search patterns', 'wporg-patterns' ) } />
+			<input
+				onChange={ onUpdate }
+				defaultValue={ defaultValue }
+				id="pattern-search"
+				type="search"
+				placeholder={ __( 'Search patterns', 'wporg-patterns' ) }
+			/>
 			<button type="submit" className="category-search__button">
 				<span className="screen-reader-text"> { __( 'Search patterns', 'wporg-patterns' ) }</span>
 				<Icon icon={ search } />
