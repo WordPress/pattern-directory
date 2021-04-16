@@ -33,7 +33,6 @@ const PatternGridMenu = () => {
 	} );
 
 	const handleUpdatePath = ( value ) => {
-		// We reset to root to make sure we don't search by pattern for now
 		const updatedPath = addQueryArgs( path, {
 			search: value,
 		} );
