@@ -41,7 +41,7 @@ export const removeQueryString = ( path ) => {
 };
 
 /**
- * Retrieves the category from a url pathname without query string params.
+ * Retrieves the category from a url path without query string params.
  *
  * @param {string} path
  * @return {string} The category slug.
