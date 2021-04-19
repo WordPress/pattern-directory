@@ -191,6 +191,16 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 			$prepared_post->post_status = $schema['properties']['status']['default'];
 		}
 
+		foreach ( $request['wporg-pattern-flag-reason'] as $term_id ) {
+			if ( ! term_exists( $term_id, FLAG_TAX ) ) {
+				return new WP_Error(
+					'rest_invalid_term_id',
+					__( 'Invalid term ID.', 'wporg-patterns' ),
+					array( 'status' => 400 )
+				);
+			}
+		}
+
 		return $prepared_post;
 	}
 
@@ -211,6 +221,8 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 			'context'     => array( 'view', 'edit' ),
 			'required'    => true,
 		);
+
+		$schema['properties']['wporg-pattern-flag-reason']['required'] = true;
 
 		return $schema;
 	}
