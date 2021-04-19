@@ -21,6 +21,7 @@ if ( ! isset( $wporg_global_header_options['in_wrapper'] ) ) {
 $wporg_global_header_options['in_wrapper'] .= '<a class="skip-link screen-reader-text" href="#content">' . esc_html__( 'Skip to content', 'wporg-patterns' ) . '</a>';
 
 get_template_part( 'header', 'wporg' );
+
 ?>
 <div id="page" class="site">
 	<div id="content" class="site-content">
@@ -32,10 +33,11 @@ get_template_part( 'header', 'wporg' );
 					<p class="site-description"><?php esc_html_e( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ); ?></p>
 
 					<div class="site-callout">
-						<?php /* Logged in actions are different */ ?>
-						<h2><?php esc_html_e( 'Create and share patterns', 'wporg-patterns' ); ?></h2>
-						<p><?php esc_html_e( 'Build your own patterns and share them with the WordPress world.', 'wporg-patterns' ); ?></p>
-						<p><a href="<?php echo esc_url( home_url( '/create' ) ); ?>"><?php esc_html_e( 'Learn more about patterns.', 'wporg-patterns' ); ?></a></p>
+						<?php  if ( is_user_logged_in() ) {
+							get_template_part( 'template-parts/section', 'pattern-callout-logged-in' );
+						} else {
+							get_template_part( 'template-parts/section', 'pattern-callout-logged-out' );
+						} ?>
 					</div>
 				<?php else : ?>
 					<div>
