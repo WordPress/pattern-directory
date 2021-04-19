@@ -160,7 +160,7 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 			'post_type'   => $this->post_type,
 			'post_parent' => $parent->ID,
 			'post_status' => 'any',
-			'post_author' => get_current_user_id(),
+			'author' => get_current_user_id(),
 		) );
 		if ( $flag_check->found_posts > 0 ) {
 			return new WP_Error(
