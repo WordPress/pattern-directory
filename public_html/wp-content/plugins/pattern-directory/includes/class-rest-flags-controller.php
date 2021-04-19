@@ -159,8 +159,8 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 		$flag_check = new WP_Query( array(
 			'post_type'   => $this->post_type,
 			'post_parent' => $parent->ID,
-			'post_status' => 'any',
-			'author' => get_current_user_id(),
+			'post_status' => 'pending',
+			'author'      => get_current_user_id(),
 		) );
 		if ( $flag_check->found_posts > 0 ) {
 			return new WP_Error(
