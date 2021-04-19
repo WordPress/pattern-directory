@@ -21,7 +21,6 @@ if ( ! isset( $wporg_global_header_options['in_wrapper'] ) ) {
 $wporg_global_header_options['in_wrapper'] .= '<a class="skip-link screen-reader-text" href="#content">' . esc_html__( 'Skip to content', 'wporg-patterns' ) . '</a>';
 
 get_template_part( 'header', 'wporg' );
-
 ?>
 <div id="page" class="site">
 	<div id="content" class="site-content">
