@@ -8,7 +8,7 @@ import { useState } from '@wordpress/element';
  */
 import CopyPatternButton from '../copy-pattern-button';
 import AddToFavoriteButton from '../add-to-favorite-button';
-import SuccessMessage from './success-message';
+import CopySuccessMessage from './copy-success-message';
 import CopyGuide from './copy-guide';
 
 const PatternPreviewActions = () => {
@@ -19,7 +19,7 @@ const PatternPreviewActions = () => {
 		<>
 			<CopyPatternButton onSuccess={ () => setShowSuccess( true ) } />
 			<AddToFavoriteButton />
-			{ showSuccess && <SuccessMessage onClick={ () => setShowGuide( true ) } /> }
+			{ showSuccess && <CopySuccessMessage onClick={ () => setShowGuide( true ) } /> }
 			{ showGuide && <CopyGuide onFinish={ () => setShowGuide( false ) } /> }
 		</>
 	);

@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button, Notice } from '@wordpress/components';
 
-const SuccessMessage = ( { onClick } ) => (
+const CopySuccessMessage = ( { onClick } ) => (
 	<Notice
 		className="pattern-actions__notice"
 		status="success"
@@ -20,4 +20,4 @@ const SuccessMessage = ( { onClick } ) => (
 	</Notice>
 );
 
-export default SuccessMessage;
+export default CopySuccessMessage;
