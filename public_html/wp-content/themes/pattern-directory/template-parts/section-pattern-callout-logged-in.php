@@ -23,13 +23,13 @@ $patterns_pending_review = array_filter( $user_patterns, function ( $pattern ) {
 			/* translators: number of patterns created. */
 		__( 'You\'ve created <b>%d patterns</b>.', 'wporg-patterns' ),
 		count( $user_patterns )
-	); ?> 
+	); ?>
 </p>
 
 <?php if ( count( $patterns_pending_review ) > 0 ) : ?> 
 	<p class="notice notice-warning notice-alt notice-large">
 		<?php echo sprintf(
-			/* translators: Number of patterns pending review. */
+			/* translators: number of patterns pending review. */
 			__( '%d patterns pending review.', 'wporg-patterns' ),
 			count( $patterns_pending_review )
 		); ?> 
