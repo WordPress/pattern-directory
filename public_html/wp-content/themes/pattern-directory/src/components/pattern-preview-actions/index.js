@@ -19,7 +19,7 @@ const PatternPreviewActions = () => {
 		<>
 			<CopyPatternButton onSuccess={ () => setShowSuccess( true ) } />
 			<AddToFavoriteButton />
-			<SuccessMessage showMessage={ showSuccess } onClick={ () => setShowGuide( true ) } />
+			{ showSuccess && <SuccessMessage onClick={ () => setShowGuide( true ) } /> }
 			{ showGuide && <CopyGuide onFinish={ () => setShowGuide( false ) } /> }
 		</>
 	);

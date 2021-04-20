@@ -30,7 +30,6 @@ body.single-wporg-pattern {
 		display: flex;
 		align-items: stretch;
 		flex-wrap: wrap;
-		overflow: hidden;
 
 		button + button {
 			margin-left: 2em;
@@ -40,8 +39,6 @@ body.single-wporg-pattern {
 			margin: 1.5rem 0 0;
 			height: auto;
 			flex-basis: 100%;
-			transform: translateY(0);
-			transition: transform 0.15s ease-in-out;
 
 			// @wordpress/components/notice wraps content
 			> * {
@@ -63,13 +60,6 @@ body.single-wporg-pattern {
 						margin-top: 0;
 					}
 				}
-			}
-
-			&--is-hidden {
-				margin: 0;
-				flex-basis: auto;
-				height: 0;
-				transform: translateY(60px);
 			}
 		}
 

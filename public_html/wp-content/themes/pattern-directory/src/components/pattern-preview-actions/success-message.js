@@ -4,9 +4,9 @@
 import { __ } from '@wordpress/i18n';
 import { Button, Notice } from '@wordpress/components';
 
-const SuccessMessage = ( { showMessage, onClick } ) => (
+const SuccessMessage = ( { onClick } ) => (
 	<Notice
-		className={ `pattern-actions__notice ${ ! showMessage ? 'pattern-actions__notice--is-hidden' : '' }` }
+		className="pattern-actions__notice"
 		status="success"
 		isDismissible={ false }
 	>
@@ -14,7 +14,7 @@ const SuccessMessage = ( { showMessage, onClick } ) => (
 			<b>{ __( 'Pattern copied!', 'wporg-patterns' ) }</b>
 			{ __( ' Now you can paste it into any WordPress post or page.', 'wporg-patterns' ) }
 		</div>
-		<Button onClick={ onClick } isSecondary tabIndex={ showMessage ? '0' : '-1' }>
+		<Button onClick={ onClick } isSecondary>
 			{ __( 'Learn More', 'wporg-patterns' ) }
 		</Button>
 	</Notice>
