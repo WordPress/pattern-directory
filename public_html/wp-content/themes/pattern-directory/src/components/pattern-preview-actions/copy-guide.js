@@ -58,11 +58,11 @@ const CopyGuide = ( { onFinish } ) => {
 											<p>
 												{ createInterpolateElement(
 													__(
-														'Paste the contents of your clipboard by pressing both the <span>⌘</span> and <span>v</span> keys, or right-clicking and choose "Paste" from the menu.',
+														'Paste the contents of your clipboard by pressing both the <kbd>⌘</kbd> and <kbd>v</kbd> keys, or right-clicking and choose "Paste" from the menu.',
 														'wporg-patterns'
 													),
 													{
-														span: <span className="pattern-actions__guide-shortcut" />,
+														kbd: <kbd className="pattern-actions__guide-shortcut" />,
 													}
 												) }
 											</p>
