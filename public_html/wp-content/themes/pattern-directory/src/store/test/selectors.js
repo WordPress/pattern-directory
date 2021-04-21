@@ -118,14 +118,14 @@ describe( 'selectors', () => {
 				categories: null,
 			};
 
-			expect( isLoadingCategories( categoryState ) ).toBeTruthy();
+			expect( isLoadingCategories( categoryState ) ).toBe( true );
 		} );
 
 		it( 'should get false when state is an array', () => {
 			const categoryState = {
 				categories: apiCategories,
 			};
-			expect( isLoadingCategories( categoryState ) ).toBeFalsy();
+			expect( isLoadingCategories( categoryState ) ).toBe ( false );
 		} );
 	} );
 
@@ -134,14 +134,14 @@ describe( 'selectors', () => {
 			const categoryState = {
 				categories: undefined,
 			};
-			expect( hasLoadedCategories( categoryState ) ).toBeFalsy();
+			expect( hasLoadedCategories( categoryState ) ).toBe ( false );
 		} );
 
 		it( 'should get true when state is an array', () => {
 			const categoryState = {
 				categories: apiCategories,
 			};
-			expect( hasLoadedCategories( categoryState ) ).toBeTruthy();
+			expect( hasLoadedCategories( categoryState ) ).toBe( true );
 		} );
 	} );
 
