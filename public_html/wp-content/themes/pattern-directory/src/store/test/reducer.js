@@ -4,7 +4,8 @@
 import apiPatterns from './fixtures/patterns';
 import apiPatternsPage2 from './fixtures/patterns-page-2';
 import apiCategories from './fixtures/categories';
-import { categories, patterns } from '../reducer';
+import apiPatternFlagReasons from './fixtures/pattern-flag-reasons';
+import { categories, patternFlagReasons, patterns } from '../reducer';
 
 describe( 'state', () => {
 	describe( 'patterns', () => {
@@ -84,6 +85,20 @@ describe( 'state', () => {
 			const lengthWithAll = apiCategories.length + 1;
 
 			expect( state ).toHaveLength( lengthWithAll );
+		} );
+	} );
+
+	describe( 'pattern flag reasons', () => {
+		it( 'should store the pattern flag reasons in state', () => {
+			const state = patternFlagReasons(
+				{},
+				{
+					type: 'LOAD_PATTERN_FLAG_REASONS',
+					reasons: apiPatternFlagReasons,
+				}
+			);
+
+			expect( state ).toEqual( apiPatternFlagReasons );
 		} );
 	} );
 } );

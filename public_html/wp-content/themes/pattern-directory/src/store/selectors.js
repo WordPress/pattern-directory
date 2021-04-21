@@ -53,7 +53,6 @@ export function getPattern( state, id ) {
 }
 
 /**
- * Get the current query.
  *
  * @param {Object} state Global application state.
  *
@@ -112,3 +111,26 @@ export function getCategoryBySlug( state, slug ) {
 	const [ cat ] = state.categories.filter( ( i ) => i.slug === slug );
 	return cat;
 }
+
+/**
+ * Get pattern flag reasons.
+ *
+ * @param {Object} state Global application state.
+ *
+ * @return {Array} A list of pattern flag reasons.
+ */
+export function getPatternFlagReasons( state ) {
+	return state.patternFlagReasons;
+}
+
+/**
+ * Check if pattern flag reasons are loading.
+ *
+ * @param {Object} state Global application state.
+ *
+ * @return {Array} A list of pattern flag reasons.
+ */
+export function isLoadingPatternFlagReasons( state ) {
+	return state.patternFlagReasons === null;
+}
+
