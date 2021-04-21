@@ -125,7 +125,7 @@ describe( 'selectors', () => {
 			const categoryState = {
 				categories: apiCategories,
 			};
-			expect( isLoadingCategories( categoryState ) ).toBe ( false );
+			expect( isLoadingCategories( categoryState ) ).toBe( false );
 		} );
 	} );
 
@@ -134,7 +134,7 @@ describe( 'selectors', () => {
 			const categoryState = {
 				categories: undefined,
 			};
-			expect( hasLoadedCategories( categoryState ) ).toBe ( false );
+			expect( hasLoadedCategories( categoryState ) ).toBe( false );
 		} );
 
 		it( 'should get true when state is an array', () => {
