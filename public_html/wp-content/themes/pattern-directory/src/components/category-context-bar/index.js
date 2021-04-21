@@ -60,7 +60,7 @@ function CategoryContextBar() {
 		}
 
 		setContext( _context );
-	}, [ isLoadingPatterns, patterns ] );
+	}, [ category, isLoadingPatterns, patterns ] );
 
 	useEffect( () => {
 		const _height = context.message ? innerRef.current.offsetHeight : 0;
