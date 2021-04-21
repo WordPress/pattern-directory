@@ -7,8 +7,8 @@ import { render } from '@wordpress/element';
  * Internal dependencies
  */
 import PatternPreview from './components/pattern-preview';
-import PatternGrid from './components/pattern-grid';
 import PatternPreviewActions from './components/pattern-preview-actions';
+import Patterns from './components/patterns';
 
 // Load the preview into any awaiting preview container.
 const previewContainers = document.querySelectorAll( '.pattern-preview__container' );
@@ -24,9 +24,9 @@ for ( let i = 0; i < previewContainers.length; i++ ) {
 }
 
 // Load the preview into any awaiting preview container.
-const gridContainer = document.getElementById( 'pattern-grid__container' );
+const gridContainer = document.getElementById( 'patterns__container' );
 if ( gridContainer ) {
-	render( <PatternGrid />, gridContainer );
+	render( <Patterns />, gridContainer );
 }
 
 // Load the pattern preview actions
