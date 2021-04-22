@@ -133,4 +133,3 @@ export function getPatternFlagReasons( state ) {
 export function isLoadingPatternFlagReasons( state ) {
 	return state.patternFlagReasons === null;
 }
-

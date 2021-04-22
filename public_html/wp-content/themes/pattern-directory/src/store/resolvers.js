@@ -7,7 +7,14 @@ import { apiFetch } from '@wordpress/data-controls';
 /**
  * Internal dependencies
  */
-import { fetchCategories, fetchPatternFlagReasons, fetchPatterns, loadCategories, loadPatternFlagReasons, loadPatterns } from './actions';
+import {
+	fetchCategories,
+	fetchPatternFlagReasons,
+	fetchPatterns,
+	loadCategories,
+	loadPatternFlagReasons,
+	loadPatterns,
+} from './actions';
 import { getQueryString } from './utils';
 
 export function* getPatternsByQuery( query ) {

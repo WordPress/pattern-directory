@@ -54,7 +54,7 @@ const PatternGridMenu = () => {
 									value: `/${ getPath( record.link ) || '' }`,
 									label: record.name,
 								};
-							} )
+							  } )
 							: []
 					}
 					onClick={ ( event ) => {

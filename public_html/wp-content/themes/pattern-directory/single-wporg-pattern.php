@@ -9,7 +9,19 @@
 
 namespace WordPressdotorg\Pattern_Directory\Theme;
 
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE;
+
 get_header();
+
+$args = array(
+	'post_parent' => get_the_ID(),
+	'post_type' => POST_TYPE,
+	'post_status' => 'any'
+);
+
+$items = new \WP_Query( $args );
+$userHasReported = $items->have_posts();
+
 ?>
 	<input id="block-data" type="hidden" value="<?php echo rawurlencode( wp_json_encode( get_the_content() ) ); ?>" />
 	<main id="main" class="site-main col-12" role="main">
@@ -44,7 +56,12 @@ get_header();
 							}
 							?>
 						</div>
-						<div class="pattern__report">
+						<div id="pattern-report"
+							class="pattern__report"
+							data-post-id="<?php echo get_the_ID(); ?>"
+							data-logged-in="<?php echo is_user_logged_in(); ?>""
+							data-has-review="<?php echo $userHasReported; ?>"
+							">
 							<button class="button">Report this pattern</button>
 						</div>
 					</div>
