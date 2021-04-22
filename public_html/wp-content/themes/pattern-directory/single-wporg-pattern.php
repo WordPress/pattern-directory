@@ -65,7 +65,7 @@ if( is_user_logged_in() ) {
 						<div id="pattern-report"
 							class="pattern__report"
 							data-post-id="<?php echo get_the_ID(); ?>"
-							data-logged-in="<?php echo is_user_logged_in(); ?>""
+							data-logged-in="<?php echo is_user_logged_in(); ?>"
 							data-user-has-reported="<?php echo $userHasReported; ?>"
 							">
 							<button class="button">Report this pattern</button>
