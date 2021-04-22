@@ -7,6 +7,46 @@ add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content',
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
 
 /**
+ * Check if a block is real - does it have actual content in it, or is it an
+ * empty/placeholder block.
+ *
+ * @param array $block A parsed block object.
+ * @return bool Whether the block has been edited by a user.
+ */
+function is_real_block( $block ) {
+	$registry = \WP_Block_Type_Registry::get_instance();
+	$block_type = $registry->get_registered( $block['blockName'] );
+
+	// Check if the attributes are different from the default attributes.
+	$block_attrs = $block_type->prepare_attributes_for_render( $block['attrs'] );
+	$default_attrs = $block_type->prepare_attributes_for_render( array() );
+	if ( $block_attrs != $default_attrs ) {
+		return true;
+	}
+
+	// If there are any child blocks, check those. Only return if there are real child blocks,
+	// otherwise continue on to check for any other content.
+	if ( count( $block['innerBlocks'] ) >= 1 ) {
+		$child_blocks = array_filter( $block['innerBlocks'], __NAMESPACE__ . '\is_real_block' );
+		if ( count( $child_blocks ) ) {
+			return true;
+		}
+	}
+
+	// Try to judge whether a block has text content, or a valid image.
+	// First, remove class attributes, since custom class names would be caught above.
+	// Next, remove empty alt tags, which are present on default image blocks.
+	// Lastly, remove HTML tags without attributes- this regex catches opening, closing, and self-closing tags.
+	// After all this, any block_content left should be there intentionally by the author.
+	$to_replace = array( '/class="[^"]*"/', '/alt=""/', '/<\/?[a-zA-Z]+\s*\/?>/' );
+	$block_content = trim( preg_replace( $to_replace, '', $block['innerHTML'] ) );
+	if ( ! empty( $block_content ) ) {
+		return true;
+	}
+	return false;
+}
+
+/**
  * Validate the pattern content.
  */
 function validate_content( $prepared_post, $request ) {
@@ -43,28 +83,7 @@ function validate_content( $prepared_post, $request ) {
 	}
 
 	// Next, we should check that we have at least one non-empty block.
-	$real_blocks = array_filter( $blocks, function( $block ) use ( $registry ) {
-		$block_type = $registry->get_registered( $block['blockName'] );
-
-		// Check if the attributes are different from the default attributes.
-		$block_attrs = $block_type->prepare_attributes_for_render( $block['attrs'] );
-		$default_attrs = $block_type->prepare_attributes_for_render( array() );
-		if ( $block_attrs != $default_attrs ) {
-			return true;
-		}
-
-		// Try to judge whether a block has text content, or a valid image.
-		// First, remove class attributes, since custom class names would be caught above.
-		// Next, remove empty alt tags, which are present on default image blocks.
-		// Lastly, remove HTML tags without attributes- this regex catches opening, closing, and self-closing tags.
-		// After all this, any block_content left should be there intentionally by the author.
-		$to_replace = array( '/class="[^"]*"/', '/alt=""/', '/<\/?[a-zA-Z]+\s*\/?>/' );
-		$block_content = trim( preg_replace( $to_replace, '', $block['innerHTML'] ) );
-		if ( ! empty( $block_content ) ) {
-			return true;
-		}
-		return false;
-	} );
+	$real_blocks = array_filter( $blocks, __NAMESPACE__ . '\is_real_block' );
 
 	if ( ! count( $real_blocks ) ) {
 		return new \WP_Error(
