@@ -13,14 +13,20 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE;
 
 get_header();
 
-$args = array(
-	'post_parent' => get_the_ID(),
-	'post_type' => POST_TYPE,
-	'post_status' => 'any'
-);
+$userHasReported = false;
 
-$items = new \WP_Query( $args );
-$userHasReported = $items->have_posts();
+if( is_user_logged_in() ) {
+	$args = array(
+		'author' => get_current_user_id(),
+		'post_parent' => get_the_ID(),
+		'post_type' => POST_TYPE,
+		'post_status' => 'any'
+	);
+	
+	$items = new \WP_Query( $args );
+	$userHasReported = $items->have_posts();
+}
+
 
 ?>
 	<input id="block-data" type="hidden" value="<?php echo rawurlencode( wp_json_encode( get_the_content() ) ); ?>" />
@@ -60,7 +66,7 @@ $userHasReported = $items->have_posts();
 							class="pattern__report"
 							data-post-id="<?php echo get_the_ID(); ?>"
 							data-logged-in="<?php echo is_user_logged_in(); ?>""
-							data-has-review="<?php echo $userHasReported; ?>"
+							data-user-has-reported="<?php echo $userHasReported; ?>"
 							">
 							<button class="button">Report this pattern</button>
 						</div>

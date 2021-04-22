@@ -39,10 +39,10 @@ if ( patternActionsContainer ) {
 // Load report button
 const patternReportContainer = document.getElementById( 'pattern-report' );
 if ( patternReportContainer ) {
-	const { loggedIn, postId, hasReview } = patternReportContainer.dataset;
+	const { loggedIn, postId, userHasReported } = patternReportContainer.dataset;
 	render(
 		<ReportPatternButton
-			hasReview={ Boolean( hasReview ) }
+			userHasReported={ Boolean( userHasReported ) }
 			loggedIn={ Boolean( loggedIn ) }
 			postId={ postId }
 		/>,

@@ -1,4 +1,4 @@
-.pattern-report-modal { 
+.pattern-report-modal {
 	max-width: 400px;
 	min-height: 400px;
 	width: 100%;
@@ -9,12 +9,12 @@
 
 	form > *:first-child {
 		padding-bottom: $gutter-default;
-	}	
+	}
 }
 
-.pattern-report-modal__copy { 
+.pattern-report-modal__copy {
 	text-align: center;
-	line-height: 1.5
+	line-height: 1.5;
 }
 
 .pattern-report-modal__actions {
@@ -28,6 +28,6 @@
 	}
 }
 
-.pattern-report-modal__radio .components-radio-control__option { 
+.pattern-report-modal__radio .components-radio-control__option {
 	margin-top: $gutter-default / 2;
 }

@@ -69,6 +69,10 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 			} );
 	};
 
+	const handleClose = () => {
+		onClose( state.isSubmitted );
+	};
+
 	const mappedReasons = useMemo( () => {
 		if ( ! reasons ) {
 			return [];
@@ -85,56 +89,63 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 		);
 	}, [ reasons ] );
 
-	return (
-		<Modal
-			className="pattern-report-modal"
-			title={ __( 'Report this pattern', 'wporg-patterns' ) }
-			onRequestClose={ () => {
-				onClose( state.isSubmitted );
-			} }
-		>
-			{ isLoading ? (
-				<Spinner />
-			) : state.isSubmitted ? (
+	const renderView = () => {
+		if ( isLoading ) {
+			return ( <Spinner /> );
+		}
+
+		if ( state.isSubmitted ) {
+			return (
 				<p className="pattern-report-modal__copy">
 					{ __(
 						'Thank you for your report submission. We will review this pattern and act accordingly.',
 						'wporg-patterns'
 					) }
 				</p>
-			) : (
-				<form onSubmit={ handleSubmit }>
-					<RadioControl
-						className="pattern-report-modal__radio"
-						label={ __( 'Please choose a reason:', 'wporg-patterns' ) }
-						selected={ selectedOption }
-						options={ mappedReasons }
-						onChange={ setOption }
-						required={ true }
-					/>
-					<TextareaControl
-						label="Please provide details (required)"
-						value={ details }
-						onChange={ setDetails }
-						required={ true }
-					/>
+			);
+		}
 
-					{ state.hasError && (
-						<div className="notice notice-large notice-alt notice-error">{ state.message }</div>
-					) }
-					<div className="pattern-report-modal__actions">
-						<Button isSecondary onClick={ onClose }>
-							{ __( 'Cancel', 'wporg-patterns' ) }
-						</Button>
-						<Button type="submit" isBusy={ state.isSubmitting } isPrimary>
-							{ state.isSubmitting
-								? __( 'Submitting …', 'wporg-patterns' )
-								: __( 'Report', 'wporg-patterns' ) }
-						</Button>
-					</div>
-				</form>
-			) }
-		</Modal>
+		return (
+			<form onSubmit={ handleSubmit }>
+				<RadioControl
+					className="pattern-report-modal__radio"
+					label={ __( 'Please choose a reason:', 'wporg-patterns' ) }
+					selected={ selectedOption }
+					options={ mappedReasons }
+					onChange={ setOption }
+					required={ true }
+				/>
+				<TextareaControl
+					label="Please provide details (required)"
+					value={ details }
+					onChange={ setDetails }
+					required={ true }
+				/>
+
+				{ state.hasError && (
+					<div className="notice notice-large notice-alt notice-error">{ state.message }</div>
+				) }
+				<div className="pattern-report-modal__actions">
+					<Button isSecondary onClick={ handleClose }>
+						{ __( 'Cancel', 'wporg-patterns' ) }
+					</Button>
+					<Button type="submit" isBusy={ state.isSubmitting } isPrimary>
+						{ state.isSubmitting
+							? __( 'Submitting …', 'wporg-patterns' )
+							: __( 'Report', 'wporg-patterns' ) }
+					</Button>
+				</div>
+			</form>
+		);
+	};
+
+	return (
+		<Modal
+			className="pattern-report-modal"
+			title={ __( 'Report this pattern', 'wporg-patterns' ) }
+			onRequestClose={ handleClose }
+
+		> { renderView() }</Modal>
 	);
 };
 

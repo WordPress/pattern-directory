@@ -4,40 +4,41 @@
 import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { check } from '@wordpress/icons';
+import { Icon, check } from '@wordpress/icons';
 
 /**
  * Internal dependencies
  */
 import ReportPatternModal from '../report-pattern-modal';
 
-const ReportPatternButton = ( { postId, loggedIn, hasReview } ) => {
+const ReportPatternButton = ( { postId, loggedIn, userHasReported } ) => {
 	const [ showModal, setShowModal ] = useState( false );
 	const [ hasSubmitted, setHasSubmitted ] = useState( false );
+	const alreadySubmitted = userHasReported || hasSubmitted;
 
-	const getBtnText = () => {
-		let btnText = __( 'Report this pattern', 'wporg-patterns' );
+	if ( alreadySubmitted ) {
+		return (
+			<p className="pattern-report-button__copy">
+				<Icon icon={ check } />
+				{ __( "You've reported this pattern", 'wporg-patterns' ) }
+			</p>
+		);
+	}
 
-		if ( ! loggedIn ) {
-			btnText = __( 'Login to report this pattern', 'wporg-patterns' );
-		}
-
-		if ( hasReview || hasSubmitted ) {
-			btnText = __( "You've reported this pattern", 'wporg-patterns' );
-		}
-
-		return btnText;
-	};
+	if ( ! loggedIn ) {
+		return (
+			<p className="pattern-report-button__copy">
+				<a href="/wp-login.php">{ __( 'Login to report this pattern', 'wporg-patterns' ) }</a>
+			</p>
+		);
+	}
 
 	return (
 		<>
-			<Button
-				disabled={ ! loggedIn || hasReview || hasSubmitted }
-				icon={ hasReview || hasSubmitted ? check : null }
-				onClick={ () => setShowModal( true ) }
-			>
-				{ getBtnText() }
+			<Button className="pattern-report-button" isLink onClick={ () => setShowModal( true ) }>
+				{ __( 'Report this pattern', 'wporg-patterns' ) }
 			</Button>
+
 			{ showModal && (
 				<ReportPatternModal
 					postId={ postId }
