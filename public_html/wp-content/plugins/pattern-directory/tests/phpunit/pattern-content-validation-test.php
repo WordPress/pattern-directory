@@ -239,7 +239,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test invalid block content: an empty media & text block.
+	 * Test invalid block content: a block that doesn't exist on this site.
 	 */
 	public function test_invalid_fake_block() {
 		wp_set_current_user( self::$user );
