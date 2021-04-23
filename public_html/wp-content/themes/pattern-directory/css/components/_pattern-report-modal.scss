@@ -1,6 +1,6 @@
 .pattern-report-modal {
 	max-width: 400px;
-	min-height: 400px;
+
 	width: 100%;
 
 	@include breakpoint( $breakpoint-small ) {
@@ -10,6 +10,10 @@
 	form > *:first-child {
 		padding-bottom: $gutter-default;
 	}
+}
+
+.pattern-report-modal--hasFixedHeight {
+	min-height: 400px;
 }
 
 .pattern-report-modal__copy {

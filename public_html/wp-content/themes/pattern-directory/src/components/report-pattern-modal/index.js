@@ -91,7 +91,7 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 
 	const renderView = () => {
 		if ( isLoading ) {
-			return ( <Spinner /> );
+			return <Spinner />;
 		}
 
 		if ( state.isSubmitted ) {
@@ -141,11 +141,14 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 
 	return (
 		<Modal
-			className="pattern-report-modal"
+			className={ `pattern-report-modal ${
+				! state.isSubmitted ? 'pattern-report-modal--hasFixedHeight' : ''
+			}` }
 			title={ __( 'Report this pattern', 'wporg-patterns' ) }
 			onRequestClose={ handleClose }
-
-		> { renderView() }</Modal>
+		>
+			{ renderView() }
+		</Modal>
 	);
 };
 
