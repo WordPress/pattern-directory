@@ -13,18 +13,18 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE;
 
 get_header();
 
-$userHasReported = false;
+$user_has_reported = false;
 
-if( is_user_logged_in() ) {
+if ( is_user_logged_in() ) {
 	$args = array(
 		'author' => get_current_user_id(),
 		'post_parent' => get_the_ID(),
 		'post_type' => POST_TYPE,
-		'post_status' => 'any'
+		'post_status' => 'any',
 	);
-	
+
 	$items = new \WP_Query( $args );
-	$userHasReported = $items->have_posts();
+	$user_has_reported = $items->have_posts();
 }
 
 
@@ -66,7 +66,7 @@ if( is_user_logged_in() ) {
 							class="pattern__report"
 							data-post-id="<?php echo get_the_ID(); ?>"
 							data-logged-in="<?php echo is_user_logged_in(); ?>"
-							data-user-has-reported="<?php echo $userHasReported; ?>"
+							data-user-has-reported="<?php echo $user_has_reported; ?>"
 							">
 							<button class="button">Report this pattern</button>
 						</div>
