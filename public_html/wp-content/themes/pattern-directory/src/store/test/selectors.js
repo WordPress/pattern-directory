@@ -236,7 +236,7 @@ describe( 'selectors', () => {
 				isLoadingPatternFlagReasons( {
 					patternFlagReasons: [],
 				} )
-			).toBeFalsy();
+			).toBe( false );
 		} );
 
 		it( 'should get true if null', () => {
@@ -244,7 +244,7 @@ describe( 'selectors', () => {
 				isLoadingPatternFlagReasons( {
 					patternFlagReasons: null,
 				} )
-			).toBeTruthy();
+			).toBe( true );
 		} );
 	} );
 } );
