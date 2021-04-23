@@ -55,7 +55,7 @@ class Patterns {
 	 * @return \WP_Post[] List of patterns in pending status.
 	 */
 	public function filter_pending_patterns( $pattern_posts ) {
-		return array_filter( $patterns_posts, function ( $pattern ) {
+		return array_filter( $pattern_posts, function ( $pattern ) {
 			return $pattern->post_status === 'pending';
 		});
 	}
