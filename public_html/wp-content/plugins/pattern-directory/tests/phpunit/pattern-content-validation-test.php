@@ -59,17 +59,6 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test valid block content: empty paragraph, with a class.
-	 */
-	public function test_valid_block_with_class() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content(
-			"<!-- wp:paragraph {\"className\":\"foo\"} -->\n<p class=\"foo\"></p>\n<!-- /wp:paragraph -->"
-		);
-		$this->assertFalse( $response->is_error() );
-	}
-
-	/**
 	 * Test valid block content: paragraph with only an image.
 	 */
 	public function test_valid_block_with_image() {
@@ -191,6 +180,19 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test invalid block content: empty paragraph, with a class.
+	 */
+	public function test_invalid_block_with_class() {
+		wp_set_current_user( self::$user );
+		$response = $this->save_block_content(
+			"<!-- wp:paragraph {\"className\":\"foo\"} -->\n<p class=\"foo\"></p>\n<!-- /wp:paragraph -->"
+		);
+		$this->assertTrue( $response->is_error() );
+		$data = $response->get_data();
+		$this->assertSame( 'rest_pattern_empty_blocks', $data['code'] );
+	}
+
+	/**
 	 * Test invalid block content: empty list (not default).
 	 */
 	public function test_invalid_empty_list() {
@@ -219,6 +221,19 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 		wp_set_current_user( self::$user );
 		$response = $this->save_block_content(
 			"<!-- wp:group -->\n<div class=\"wp-block-group\"><div class=\"wp-block-group__inner-container\"></div></div>\n<!-- /wp:group -->"
+		);
+		$this->assertTrue( $response->is_error() );
+		$data = $response->get_data();
+		$this->assertSame( 'rest_pattern_empty_blocks', $data['code'] );
+	}
+
+	/**
+	 * Test invalid block content: an empty media & text block.
+	 */
+	public function test_invalid_empty_media_text_block() {
+		wp_set_current_user( self::$user );
+		$response = $this->save_block_content(
+			"<!-- wp:media-text -->\n<div class=\"wp-block-media-text alignwide is-stacked-on-mobile\"><figure class=\"wp-block-media-text__media\"></figure><div class=\"wp-block-media-text__content\"><!-- wp:paragraph {\"placeholder\":\"Content…\",\"fontSize\":\"large\"} -->\n<p class=\"has-large-font-size\"></p>\n<!-- /wp:paragraph --></div></div>\n<!-- /wp:media-text -->"
 		);
 		$this->assertTrue( $response->is_error() );
 		$data = $response->get_data();

@@ -7,6 +7,22 @@ add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content',
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
 
 /**
+ * Strip out basic HTML to get at the manually-entered content in block content.
+ *
+ * First, remove class attributes, since custom class names will be caught by attribute checks.
+ * Next, remove empty alt tags, which are present on default image blocks.
+ * Lastly, remove any HTML tags without attributes- this regex catches opening, closing, and self-closing tags.
+ * After all this, any block_content left should be there intentionally by the author.
+ *
+ * @param string $html The block content, from `innerHTML` of a parsed block.
+ * @return string Any content that doesn't match the cases described above.
+ */
+function strip_basic_html( $html ) {
+	$to_replace = array( '/class="[^"]*"/', '/alt=""/', '/<\/?[a-zA-Z]+\s*\/?>/' );
+	return trim( preg_replace( $to_replace, '', $html ) );
+}
+
+/**
  * Check if a block has been edited by the user, as opposed to an empty/placeholder block.
  *
  * @param array $block A parsed block object.
@@ -15,6 +31,14 @@ add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 1
 function is_not_empty_block( $block ) {
 	$registry = \WP_Block_Type_Registry::get_instance();
 	$block_type = $registry->get_registered( $block['blockName'] );
+
+	// Paragraphs are a special case, these should never be empty.
+	if ( 'core/paragraph' === $block['blockName'] ) {
+		$block_content = strip_basic_html( $block['innerHTML'] );
+		if ( empty( $block_content ) ) {
+			return false;
+		}
+	}
 
 	// Check if the attributes are different from the default attributes.
 	$block_attrs = $block_type->prepare_attributes_for_render( $block['attrs'] );
@@ -32,13 +56,7 @@ function is_not_empty_block( $block ) {
 		}
 	}
 
-	// Try to judge whether a block has text content, or a valid image.
-	// First, remove class attributes, since custom class names would be caught above.
-	// Next, remove empty alt tags, which are present on default image blocks.
-	// Lastly, remove HTML tags without attributes- this regex catches opening, closing, and self-closing tags.
-	// After all this, any block_content left should be there intentionally by the author.
-	$to_replace = array( '/class="[^"]*"/', '/alt=""/', '/<\/?[a-zA-Z]+\s*\/?>/' );
-	$block_content = trim( preg_replace( $to_replace, '', $block['innerHTML'] ) );
+	$block_content = strip_basic_html( $block['innerHTML'] );
 	if ( ! empty( $block_content ) ) {
 		return true;
 	}
