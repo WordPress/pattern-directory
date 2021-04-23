@@ -46,4 +46,17 @@ class Patterns {
 
 		return get_posts( $args );
 	}
+
+	/**
+	 * Returns a list of pending patterns.
+	 *
+	 * @param \WP_Post[] $pattern_posts List of patterns.
+	 *
+	 * @return \WP_Post[] List of patterns in pending status.
+	 */
+	public function filter_pending_patterns( $pattern_posts ) {
+		return array_filter( $patterns_posts, function ( $pattern ) {
+			return $pattern->post_status === 'pending';
+		});
+	}
 }
