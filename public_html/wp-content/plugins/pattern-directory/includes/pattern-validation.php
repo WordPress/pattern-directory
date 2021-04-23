@@ -7,13 +7,12 @@ add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content',
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
 
 /**
- * Check if a block is real - does it have actual content in it, or is it an
- * empty/placeholder block.
+ * Check if a block has been edited by the user, as opposed to an empty/placeholder block.
  *
  * @param array $block A parsed block object.
- * @return bool Whether the block has been edited by a user.
+ * @return bool Whether the block has been edited.
  */
-function is_real_block( $block ) {
+function is_not_empty_block( $block ) {
 	$registry = \WP_Block_Type_Registry::get_instance();
 	$block_type = $registry->get_registered( $block['blockName'] );
 
@@ -27,7 +26,7 @@ function is_real_block( $block ) {
 	// If there are any child blocks, check those. Only return if there are real child blocks,
 	// otherwise continue on to check for any other content.
 	if ( count( $block['innerBlocks'] ) >= 1 ) {
-		$child_blocks = array_filter( $block['innerBlocks'], __NAMESPACE__ . '\is_real_block' );
+		$child_blocks = array_filter( $block['innerBlocks'], __NAMESPACE__ . '\is_not_empty_block' );
 		if ( count( $child_blocks ) ) {
 			return true;
 		}
@@ -83,7 +82,7 @@ function validate_content( $prepared_post, $request ) {
 	}
 
 	// Next, we should check that we have at least one non-empty block.
-	$real_blocks = array_filter( $blocks, __NAMESPACE__ . '\is_real_block' );
+	$real_blocks = array_filter( $blocks, __NAMESPACE__ . '\is_not_empty_block' );
 
 	if ( ! count( $real_blocks ) ) {
 		return new \WP_Error(
