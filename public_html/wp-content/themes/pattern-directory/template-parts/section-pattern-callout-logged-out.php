@@ -4,6 +4,7 @@
  *
  * @package WordPressdotorg\Theme;
  */
+
 ?>
 
 <h2><?php esc_html_e( 'Create and share patterns', 'wporg-patterns' ); ?></h2>

@@ -32,7 +32,7 @@ class Patterns {
 	/**
 	 * Returns all patterns by author.
 	 *
-	 * @param integer $id Author Id
+	 * @param integer $author_id Author Id.
 	 *
 	 * @return \WP_Post[] List of patterns.
 	 */
@@ -56,7 +56,7 @@ class Patterns {
 	 */
 	public function filter_pending_patterns( $pattern_posts ) {
 		return array_filter( $pattern_posts, function ( $pattern ) {
-			return $pattern->post_status === 'pending';
+			return 'pending' === $pattern->post_status;
 		});
 	}
 }

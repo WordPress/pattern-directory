@@ -16,19 +16,24 @@ $patterns_pending_review_count = count( $patterns_pending_review );
 
 <h2><?php esc_html_e( 'My patterns', 'wporg-patterns' ); ?></h2>
 <p>
-	<?php echo sprintf(
-			/* translators: %d: number of patterns created. */
-		_n( 'You\'ve created <b>%d pattern</b>.', 'You\'ve created <b>%d patterns</b>.', $user_pattern_count, 'wporg-patterns' ),
-		$user_pattern_count
-	); ?>
+	<?php
+		echo sprintf(
+			esc_html__( 'You\'ve created %s.', 'wporg-patterns' ),
+			sprintf(
+				/* translators: %d: number of patterns created. */
+				'<b>%d %s</b>',
+				intval( $user_pattern_count ),
+				esc_attr( _n( 'pattern', 'patterns', $user_pattern_count, 'wporg-patterns' ) ),
+			)
+		); ?>
 </p>
 
 <?php if ( $patterns_pending_review_count > 0 ) : ?> 
 	<p class="notice notice-warning notice-alt notice-large">
 		<?php echo sprintf(
-			/* translators: number of patterns pending review. */
-			__( '%d patterns pending review.', 'wporg-patterns' ),
-			$patterns_pending_review_count
+			/* translators: %d number of patterns pending review. */
+			esc_attr( _n( '%d pattern pending review.', '%d patterns pending review.', $patterns_pending_review_count, 'wporg-patterns' ) ),
+			intval( $patterns_pending_review_count )
 		); ?> 
 	</p>
 <?php endif; ?>
