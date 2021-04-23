@@ -7,13 +7,14 @@
 
 namespace WordPressdotorg\Pattern_Directory\Patterns;
 
-$user_id = get_current_user_id();
-$user_patterns = Patterns::instance()->get_patterns_by_author( $user_id );
+$user_patterns = Patterns::instance()->get_patterns_by_author( get_current_user_id() );
 
 $patterns_pending_review = array_filter( $user_patterns, function ( $pattern ) {
-	// TO DO: Update this to the correct pending review status;
-	return $pattern->post_status === 'draft';
+	return $pattern->post_status === 'pending';
 });
+
+$user_pattern_count = count( $user_patterns );
+$patterns_pending_review_count = count( $patterns_pending_review );
 
 ?>
 
@@ -21,17 +22,17 @@ $patterns_pending_review = array_filter( $user_patterns, function ( $pattern ) {
 <p>
 	<?php echo sprintf(
 			/* translators: number of patterns created. */
-		__( 'You\'ve created <b>%d patterns</b>.', 'wporg-patterns' ),
-		count( $user_patterns )
+		_n( 'You\'ve created <b>%d pattern</b>.', 'You\'ve created <b>%d patterns</b>.', $user_pattern_count, 'wporg-patterns' ),
+		$user_pattern_count
 	); ?>
 </p>
 
-<?php if ( count( $patterns_pending_review ) > 0 ) : ?> 
+<?php if ( $patterns_pending_review_count > 0 ) : ?> 
 	<p class="notice notice-warning notice-alt notice-large">
 		<?php echo sprintf(
 			/* translators: number of patterns pending review. */
 			__( '%d patterns pending review.', 'wporg-patterns' ),
-			count( $patterns_pending_review )
+			$patterns_pending_review_count
 		); ?> 
 	</p>
 <?php endif; ?>
