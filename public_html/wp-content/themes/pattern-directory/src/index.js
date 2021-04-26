@@ -43,8 +43,8 @@ if ( patternReportContainer ) {
 
 	render(
 		<ReportPatternButton
-			userHasReported={ userHasReported === "true" }
-			loggedIn={ loggedIn === "true"  }
+			userHasReported={ userHasReported === 'true' }
+			loggedIn={ loggedIn === 'true' }
 			postId={ postId }
 		/>,
 		patternReportContainer
