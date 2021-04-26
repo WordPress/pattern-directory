@@ -12,5 +12,15 @@
 		".htaccess": "./.wp-env/.htaccess",
 		"wp-content": "./public_html/wp-content",
 		"wp-content/mu-plugins/0-sandbox.php": "./.wp-env/0-sandbox.php"
+	},
+	"env": {
+		"tests": {
+			"mappings": {
+				".htaccess": "./.wp-env/.htaccess",
+				"wp-content": "./public_html/wp-content",
+				"wp-content/mu-plugins/0-sandbox.php": "./.wp-env/0-sandbox.php",
+				"vendor": "./vendor"
+			}
+		}
 	}
 }

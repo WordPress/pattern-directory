@@ -14,15 +14,35 @@ namespace WordPressdotorg\Pattern_Creator;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 const AUTOSAVE_INTERVAL = 30;
+const QUERY_VAR = 'edit-pattern';
 
 /**
  * Check the conditions of the page to determine if the editor should load.
+ * - It should be a single pattern page.
+ * - The current user can edit it.
+ * - The query variable is present.
  *
  * @return boolean
  */
 function should_load_creator() {
-	return \is_singular( POST_TYPE );
+	global $wp_query;
+	$is_editor = $wp_query->is_singular( POST_TYPE ) && false !== $wp_query->get( QUERY_VAR, false );
+	// @todo Should this be a page template? Something else?
+	$is_new = is_page( 'new-pattern' );
+	return $is_editor || $is_new;
 }
+
+/**
+ * Add our custom parameter to the list of public query variables.
+ *
+ * @param string[] $query_vars The array of allowed query variable names.
+ * @return stringp[] New query vars.
+ */
+function add_query_var( $query_vars ) {
+	$query_vars[] = QUERY_VAR;
+	return $query_vars;
+}
+add_filter( 'query_vars', __NAMESPACE__ . '\add_query_var' );
 
 /**
  * Register & load the assets.
@@ -35,6 +55,9 @@ function enqueue_assets() {
 	}
 
 	do_action( 'enqueue_block_editor_assets' );
+
+	/** Load in admin post functions for `get_default_post_to_edit`. */
+	require_once ABSPATH . 'wp-admin/includes/post.php';
 
 	$dir = dirname( __FILE__ );
 
@@ -63,9 +86,17 @@ function enqueue_assets() {
 		),
 	);
 
+	if ( is_singular( POST_TYPE ) ) {
+		$post_id = get_the_ID();
+		$post    = get_post( $post_id );
+	} else {
+		$post    = get_default_post_to_edit( POST_TYPE, true );
+		$post_id = $post->ID;
+	}
+
 	$settings = array(
 		'alignWide'                            => true, // Support wide patterns.
-		'allowedBlockTypes'                    => true, // All block types.
+		'allowedBlockTypes'                    => apply_filters( 'allowed_block_types', true, $post ),
 		'disablePostFormats'                   => true,
 		'enableCustomFields'                   => false,
 		'bodyPlaceholder'                      => __( 'Start writing or type / to choose a block', 'wporg-patterns' ),
@@ -91,7 +122,14 @@ function enqueue_assets() {
 			'var wporgBlockPattern = JSON.parse( decodeURIComponent( \'%s\' ) );',
 			rawurlencode( wp_json_encode( array(
 				'settings'   => $settings,
-				'postId'     => get_the_ID(),
+				'postId'     => $post_id,
+				'categories' => get_terms(
+					'wporg-pattern-category',
+					array(
+						'hide_empty' => false,
+						'fields' => 'id=>name',
+					)
+				),
 			) ) )
 		),
 		'before'
@@ -111,8 +149,14 @@ function enqueue_assets() {
 		filemtime( "$dir/build/style-index.css" )
 	);
 
-	// Postbox is only registered if is_admin.
-	wp_enqueue_script( 'postbox', admin_url( 'js/postbox.min.js' ), array( 'jquery-ui-sortable', 'wp-a11y' ), false, 1 );
+	// Postbox is only registered if `is_admin`, so we need to intentionally add it.
+	wp_enqueue_script(
+		'postbox',
+		admin_url( 'js/postbox.min.js' ),
+		array( 'jquery-ui-sortable', 'wp-a11y' ),
+		get_bloginfo( 'version' ),
+		true
+	);
 	wp_enqueue_style( 'dashicons' );
 	wp_enqueue_style( 'common' );
 	wp_enqueue_style( 'forms' );
@@ -132,9 +176,9 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
  * Bypass WordPress template system to load only our editor app.
  */
 function inject_editor_template( $template ) {
-	if ( ! should_load_creator() ) {
-		return $template;
+	if ( should_load_creator() ) {
+		return __DIR__ . '/view/editor.php';
 	}
-	return __DIR__ . '/view/editor.php';
+	return $template;
 }
 add_filter( 'template_include', __NAMESPACE__ . '\inject_editor_template' );

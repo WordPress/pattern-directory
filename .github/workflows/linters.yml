@@ -15,37 +15,36 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+
     - name: Cache node modules
       uses: actions/cache@v2
-      env:
-        cache-name: cache-node-modules
+      id: yarn-cache
       with:
-        # npm cache files are stored in `~/.npm` on Linux/macOS
-        path: ~/.npm
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
-          ${{ runner.os }}-build-${{ env.cache-name }}-
-          ${{ runner.os }}-build-
-          ${{ runner.os }}-
+          ${{ runner.os }}-yarn-
 
-    - name: Use Node.js 12.x
+    - name: Use Node.js 14.x
       uses: actions/setup-node@v1
       with:
-        node-version: 12.x
+        node-version: 14.x
 
-    - name: yarn install and build
+    - name: composer install
+      run: |
+        composer install
+
+    - name: yarn install
       run: |
         yarn
-        yarn workspaces run build
 
     - name: Lint JavaScript and Styles
       run: |
         yarn workspaces run lint:js
         yarn workspaces run lint:css
-
-    - name: composer install
-      run: |
-        composer install
 
     - name: Lint PHP
       run: |

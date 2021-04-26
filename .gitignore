@@ -11,8 +11,13 @@
 /public_html/wp-content/plugins/*
 /public_html/wp-content/themes/*
 /public_html/wp-content/uploads/*
+/public_html/wp-content/languages
 
 # And specifically include our plugins & themes.
 !/public_html/wp-content/plugins/pattern-creator
 !/public_html/wp-content/plugins/pattern-directory
 !/public_html/wp-content/themes/pattern-directory
+
+# Ignore built files inside our plugins & themes.
+/public_html/wp-content/themes/pattern-directory/css/*.css
+/public_html/wp-content/themes/pattern-directory/css/*.map

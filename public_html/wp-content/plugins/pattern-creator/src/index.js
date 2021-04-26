@@ -29,4 +29,3 @@ new Promise( ( resolve ) => {
 	// After the editor is initialized, we can set up any block customizations.
 	unregisterBlockType( 'core/shortcode' );
 } );
-
