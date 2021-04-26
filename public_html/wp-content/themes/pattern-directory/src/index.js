@@ -40,10 +40,11 @@ if ( patternActionsContainer ) {
 const patternReportContainer = document.getElementById( 'pattern-report' );
 if ( patternReportContainer ) {
 	const { loggedIn, postId, userHasReported } = patternReportContainer.dataset;
+
 	render(
 		<ReportPatternButton
-			userHasReported={ Boolean( userHasReported ) }
-			loggedIn={ Boolean( loggedIn ) }
+			userHasReported={ userHasReported === "true" }
+			loggedIn={ loggedIn === "true"  }
 			postId={ postId }
 		/>,
 		patternReportContainer
