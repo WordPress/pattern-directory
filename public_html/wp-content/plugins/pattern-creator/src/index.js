@@ -22,7 +22,13 @@ apiFetch.use( interceptUploads );
 new Promise( ( resolve ) => {
 	domReady( () => {
 		resolve(
-			initializeEditor( 'block-pattern-creator', 'wporg-pattern', wporgBlockPattern.postId, wporgBlockPattern.settings, {} )
+			initializeEditor(
+				'block-pattern-creator',
+				'wporg-pattern',
+				wporgBlockPattern.postId,
+				wporgBlockPattern.settings,
+				{}
+			)
 		);
 	} );
 } ).then( () => {

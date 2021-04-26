@@ -1,5 +1,5 @@
 // Add a middleware provider which intercepts all uploads and stores them within the browser
-export default function ( options, next ) {
+export default function( options, next ) {
 	if ( options.method === 'POST' && options.path === '/wp/v2/media' ) {
 		const file = options.body.get( 'file' );
 
@@ -34,9 +34,9 @@ export default function ( options, next ) {
 			_links: {},
 		};
 
-		return new Promise( function ( resolve ) {
+		return new Promise( function( resolve ) {
 			const a = new FileReader(); // eslint-disable-line
-			a.onload = function ( event ) {
+			a.onload = function( event ) {
 				window.fakeUploadedMedia[ id ].source_url = event.target.result;
 				resolve( window.fakeUploadedMedia[ id ] );
 			};

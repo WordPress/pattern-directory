@@ -1,8 +1,7 @@
 import { registerPlugin } from '@wordpress/plugins';
-import { __experimentalMainDashboardButton as MainDashboardButton } from '@wordpress/interface';
+/* eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK. */
+import { __experimentalMainDashboardButton as MainDashboardButton } from '@wordpress/edit-post';
 
 registerPlugin( 'main-dashboard-button-test', {
-	render: () => (
-		<MainDashboardButton>Block Pattern Directory</MainDashboardButton>
-	),
+	render: () => <MainDashboardButton>Block Pattern Directory</MainDashboardButton>,
 } );
