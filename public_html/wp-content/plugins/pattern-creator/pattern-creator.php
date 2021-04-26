@@ -54,6 +54,8 @@ function enqueue_assets() {
 		return;
 	}
 
+	wp_deregister_style( 'wporg-style' );
+
 	do_action( 'enqueue_block_editor_assets' );
 
 	/** Load in admin post functions for `get_default_post_to_edit`. */
@@ -99,6 +101,7 @@ function enqueue_assets() {
 		'allowedBlockTypes'                    => apply_filters( 'allowed_block_types', true, $post ),
 		'disablePostFormats'                   => true,
 		'enableCustomFields'                   => false,
+		'titlePlaceholder'                     => __( 'Add title', 'wporg-patterns' ),
 		'bodyPlaceholder'                      => __( 'Start writing or type / to choose a block', 'wporg-patterns' ),
 		'isRTL'                                => is_rtl(),
 		'autosaveInterval'                     => AUTOSAVE_INTERVAL,
@@ -141,9 +144,7 @@ function enqueue_assets() {
 		'wporg-pattern-creator-style',
 		plugins_url( 'build/style-index.css', __FILE__ ),
 		array(
-			'wp-components',
-			'wp-block-editor',
-			'wp-edit-blocks', // Includes block-library dependencies.
+			'wp-edit-post',
 			'wp-format-library',
 		),
 		filemtime( "$dir/build/style-index.css" )
@@ -170,7 +171,7 @@ function enqueue_assets() {
 	wp_enqueue_style( 'wp-edit-post' );
 	wp_enqueue_style( 'wporg-pattern-creator-style' );
 }
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets', 20 );
 
 /**
  * Bypass WordPress template system to load only our editor app.

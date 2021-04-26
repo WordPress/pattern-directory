@@ -1,25 +1,9 @@
-#block-pattern-creator {
-	position: relative;
-	height: 90vh;
-}
-
 .interface-interface-skeleton {
-	position: absolute;
-	height: unset;
 	left: 0;
 }
 
-.interface-interface-skeleton__footer {
-	position: absolute;
-}
-
-/* Prevent title placeholder from appearing at page load. */
-.edit-post-visual-editor__post-title-wrapper {
-	display: none;
-}
-
-/* Hide the preview dropdown. */
-.block-editor-post-preview__dropdown {
+/* Hide the admin bar. */
+body.is-fullscreen-mode #wpadminbar {
 	display: none;
 }
 
