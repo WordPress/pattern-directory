@@ -3,5 +3,5 @@ import { registerPlugin } from '@wordpress/plugins';
 import { __experimentalMainDashboardButton as MainDashboardButton } from '@wordpress/edit-post';
 
 registerPlugin( 'main-dashboard-button-test', {
-	render: () => <MainDashboardButton>Block Pattern Directory</MainDashboardButton>,
+	render: () => <MainDashboardButton>{ '←' }</MainDashboardButton>,
 } );

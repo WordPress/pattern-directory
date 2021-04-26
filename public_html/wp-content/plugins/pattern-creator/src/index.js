@@ -10,14 +10,12 @@ import '@wordpress/format-library';
 /**
  * Internal dependencies
  */
-import { filterEndpoints, interceptUploads } from './api-middleware';
+import { filterEndpoints } from './api-middleware';
 import './plugins/main-dashboard-button';
-import './plugins/preview-button';
 import './style.css';
 
 // Set up API middleware.
 apiFetch.use( filterEndpoints );
-apiFetch.use( interceptUploads );
 
 new Promise( ( resolve ) => {
 	domReady( () => {
