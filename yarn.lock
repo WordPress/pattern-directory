@@ -3110,7 +3110,7 @@
     react-resize-aware "^3.1.0"
     use-memo-one "^1.1.1"
 
-"@wordpress/core-data@^2.26.0":
+"@wordpress/core-data@2.26.0", "@wordpress/core-data@^2.26.0":
   version "2.26.0"
   resolved "https://registry.yarnpkg.com/@wordpress/core-data/-/core-data-2.26.0.tgz#b97a3580dcaccfbafb087a1e3ab358ad74ebf035"
   integrity sha512-U2xZJG4JrxpOonNP7hMIDbntkiuyNi7lhZzf+qA/LGcwXMUIJIyeai99vhXsdJupM7yUwalTDyyJTW42o30Fsw==
@@ -3130,7 +3130,7 @@
     rememo "^3.0.0"
     uuid "^8.3.0"
 
-"@wordpress/data-controls@^1.21.0":
+"@wordpress/data-controls@1.21.0", "@wordpress/data-controls@^1.21.0":
   version "1.21.0"
   resolved "https://registry.yarnpkg.com/@wordpress/data-controls/-/data-controls-1.21.0.tgz#935dbf2010182044e266bec6b2b9ba5ddb4d557f"
   integrity sha512-XikKs9R3HEDdQo+Ua4oB+hg56LUUp+6KXix/yJuvVvJ3q2MBNTGfkdXXwMTE3WOZw6HPsBGBX4cgSgsE88jUtg==
@@ -3521,7 +3521,7 @@
   resolved "https://registry.yarnpkg.com/@wordpress/prettier-config/-/prettier-config-1.0.1.tgz#1ca9b2089b94ca3d95e60c0594d1e5409f504ce4"
   integrity sha512-LgnivcSTWqUgy5JE24+AKygtQsVvcdvNUGEyeM4K4urWgnyvmkeyZDfbN1nuK2b7E1oRMSSCCwxqQJDoxlFgUg==
 
-"@wordpress/primitives@^1.12.0":
+"@wordpress/primitives@1.12.0", "@wordpress/primitives@^1.12.0":
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/@wordpress/primitives/-/primitives-1.12.0.tgz#4337e00e01abddac3fb968ec858cd61be5ae2238"
   integrity sha512-56YJZ6Vp9Ci6iyHmWmrxjZGzOp+yPcc4R1W+ek1ChkTojulX9/9L0S4HtKwRLKvKLhPxogTVwbaHveLyku/ZNQ==
@@ -3681,7 +3681,7 @@
     "@babel/runtime" "^7.12.5"
     lodash "^4.17.19"
 
-"@wordpress/url@^2.22.0":
+"@wordpress/url@2.22.0", "@wordpress/url@^2.22.0":
   version "2.22.0"
   resolved "https://registry.yarnpkg.com/@wordpress/url/-/url-2.22.0.tgz#746396a437e0c2282496ff819294ece796c0b526"
   integrity sha512-CRQo4+ENF7aMZCJEyP0MP7uJsXTpulxLUA1CMB0MVTuaKDHbj3DYg8bRpx418Yhq8h9SOBQJL0LzFHZXiiuqKQ==
@@ -3690,7 +3690,7 @@
     lodash "^4.17.19"
     react-native-url-polyfill "^1.1.2"
 
-"@wordpress/viewport@^2.26.0":
+"@wordpress/viewport@2.26.0", "@wordpress/viewport@^2.26.0":
   version "2.26.0"
   resolved "https://registry.yarnpkg.com/@wordpress/viewport/-/viewport-2.26.0.tgz#e811a5ddda084f8c3d1a370d13b6cdcfc65e8111"
   integrity sha512-Vsw0GZyinT81D8271eXVr0OYxKcJK/YrD6NgGhUkmGWSHDBqWes2iu9Wn8n8W+UOvFzAbxU0ufjb52zMGQSxww==
