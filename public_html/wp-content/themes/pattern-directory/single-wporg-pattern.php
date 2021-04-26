@@ -9,24 +9,11 @@
 
 namespace WordPressdotorg\Pattern_Directory\Theme;
 
-use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE;
+use function WordPressdotorg\Pattern_Directory\Theme\user_has_flagged_pattern;
 
 get_header();
 
-$user_has_reported = false;
-
-if ( is_user_logged_in() ) {
-	$args = array(
-		'author' => get_current_user_id(),
-		'post_parent' => get_the_ID(),
-		'post_type' => POST_TYPE,
-		'post_status' => 'any',
-	);
-
-	$items = new \WP_Query( $args );
-	$user_has_reported = $items->have_posts();
-}
-
+$user_has_reported = is_user_logged_in() ? user_has_flagged_pattern() : false;
 
 ?>
 	<input id="block-data" type="hidden" value="<?php echo rawurlencode( wp_json_encode( get_the_content() ) ); ?>" />
