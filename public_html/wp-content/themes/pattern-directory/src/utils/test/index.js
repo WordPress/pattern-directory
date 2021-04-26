@@ -15,7 +15,9 @@ describe( 'utils', () => {
 			expect( getCategoryFromPath( '/patterns-categories/header' ) ).toEqual( 'header' );
 			expect( getCategoryFromPath( '/patterns-categories/header/' ) ).toEqual( 'header' );
 			expect( getCategoryFromPath( '/patterns-categories/subdirectory/header/' ) ).toEqual( 'header' );
-			expect( getCategoryFromPath( '/patterns-categories/subdirectory/header/?search=test' ) ).toEqual( 'header' );
+			expect( getCategoryFromPath( '/patterns-categories/subdirectory/header/?search=test' ) ).toEqual(
+				'header'
+			);
 		} );
 	} );
 

@@ -19,23 +19,24 @@ function CategoryContextBar() {
 	const [ context, setContext ] = useState( {} );
 	const innerRef = useRef( null );
 
-	const { isAllCategory, category, isLoadingPatterns, patterns } = useSelect( ( select ) => {
-		const {
-			getCategoryBySlug,
-			getPatternsByQuery,
-			isLoadingPatternsByQuery,
-			getCurrentQuery } = select( patternStore );
-		const categorySlug = getCategoryFromPath( path );
-		const _category = getCategoryBySlug( categorySlug );
-		const query = getCurrentQuery();
+	const { isAllCategory, category, isLoadingPatterns, patterns } = useSelect(
+		( select ) => {
+			const { getCategoryBySlug, getPatternsByQuery, isLoadingPatternsByQuery, getCurrentQuery } = select(
+				patternStore
+			);
+			const categorySlug = getCategoryFromPath( path );
+			const _category = getCategoryBySlug( categorySlug );
+			const query = getCurrentQuery();
 
-		return {
-			isAllCategory: _category && _category.id === -1,
-			isLoadingPatterns: isLoadingPatternsByQuery( query ),
-			patterns: query ? getPatternsByQuery( query ) : [],
-			category: _category,
-		};
-	}, [ path ] );
+			return {
+				isAllCategory: _category && _category.id === -1,
+				isLoadingPatterns: isLoadingPatternsByQuery( query ),
+				patterns: query ? getPatternsByQuery( query ) : [],
+				category: _category,
+			};
+		},
+		[ path ]
+	);
 
 	useEffect( () => {
 		if ( ! category || isLoadingPatterns ) {
