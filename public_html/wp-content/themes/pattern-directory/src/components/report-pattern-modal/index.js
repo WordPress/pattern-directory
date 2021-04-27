@@ -98,7 +98,7 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 			return (
 				<p className="pattern-report-modal__copy">
 					{ __(
-						'Thank you for your report submission. We will review this pattern and act accordingly.',
+						'Your report has been submitted.',
 						'wporg-patterns'
 					) }
 				</p>
