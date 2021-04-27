@@ -5,6 +5,7 @@ import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Icon, check } from '@wordpress/icons';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -28,7 +29,9 @@ const ReportPatternButton = ( { postId, loggedIn, userHasReported } ) => {
 	if ( ! loggedIn ) {
 		return (
 			<p className="pattern-report-button__copy">
-				<a href="/wp-login.php">{ __( 'Login to report this pattern', 'wporg-patterns' ) }</a>
+				<a href={ addQueryArgs( '/wp-login.php', { redirect_to: window.location.pathname } ) }>
+					{ __( 'Login to report this pattern', 'wporg-patterns' ) }
+				</a>
 			</p>
 		);
 	}
