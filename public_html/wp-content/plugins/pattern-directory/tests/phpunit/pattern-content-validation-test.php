@@ -59,17 +59,6 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test valid block content: empty paragraph, with a class.
-	 */
-	public function test_valid_block_with_class() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content(
-			"<!-- wp:paragraph {\"className\":\"foo\"} -->\n<p class=\"foo\"></p>\n<!-- /wp:paragraph -->"
-		);
-		$this->assertFalse( $response->is_error() );
-	}
-
-	/**
 	 * Test valid block content: paragraph with only an image.
 	 */
 	public function test_valid_block_with_image() {
@@ -108,7 +97,29 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	public function test_valid_group_block() {
 		wp_set_current_user( self::$user );
 		$response = $this->save_block_content(
+			"<!-- wp:group -->\n<div class=\"wp-block-group\"><div class=\"wp-block-group__inner-container\"><!-- wp:image {\"sizeSlug\":\"large\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://s.w.org/style/images/wporg-logo.svg?3\" alt=\"\"/></figure>\n<!-- /wp:image --></div></div>\n<!-- /wp:group -->"
+		);
+		$this->assertFalse( $response->is_error() );
+	}
+
+	/**
+	 * Test valid block content: a group block with an image and a background color.
+	 */
+	public function test_valid_group_block_with_color() {
+		wp_set_current_user( self::$user );
+		$response = $this->save_block_content(
 			"<!-- wp:group {\"backgroundColor\":\"black\",\"textColor\":\"cyan-bluish-gray\"} -->\n<div class=\"wp-block-group has-cyan-bluish-gray-color has-black-background-color has-text-color has-background\"><div class=\"wp-block-group__inner-container\"><!-- wp:image {\"sizeSlug\":\"large\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://s.w.org/style/images/wporg-logo.svg?3\" alt=\"\"/></figure>\n<!-- /wp:image --></div></div>\n<!-- /wp:group -->"
+		);
+		$this->assertFalse( $response->is_error() );
+	}
+
+	/**
+	 * Test valid block content: two columns, one empty, should still be valid.
+	 */
+	public function test_valid_columns_block() {
+		wp_set_current_user( self::$user );
+		$response = $this->save_block_content(
+			"<!-- wp:columns -->\n<div class=\"wp-block-columns\"><!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:spacer -->\n<div style=\"height:100px\" aria-hidden=\"true\" class=\"wp-block-spacer\"></div>\n<!-- /wp:spacer -->\n\n<!-- wp:paragraph {\"style\":{\"typography\":{\"fontSize\":\"21px\"},\"color\":{\"text\":\"#000000\"}}} -->\n<p class=\"has-text-color\" style=\"color:#000000;font-size:21px\"><strong>We have worked with:</strong></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph {\"style\":{\"typography\":{\"fontSize\":\"24px\",\"lineHeight\":\"1.2\"}}} -->\n<p style=\"font-size:24px;line-height:1.2\"><a href=\"https://wordpress.org\">EARTHFUND™<br>ARCHWEEKLY<br>FUTURE ROADS<br>BUILDING NY</a></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:spacer -->\n<div style=\"height:100px\" aria-hidden=\"true\" class=\"wp-block-spacer\"></div>\n<!-- /wp:spacer --></div>\n<!-- /wp:column -->\n\n<!-- wp:column -->\n<div class=\"wp-block-column\"></div>\n<!-- /wp:column --></div>\n<!-- /wp:columns -->"
 		);
 		$this->assertFalse( $response->is_error() );
 	}
@@ -169,6 +180,19 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test invalid block content: empty paragraph, with a class.
+	 */
+	public function test_invalid_block_with_class() {
+		wp_set_current_user( self::$user );
+		$response = $this->save_block_content(
+			"<!-- wp:paragraph {\"className\":\"foo\"} -->\n<p class=\"foo\"></p>\n<!-- /wp:paragraph -->"
+		);
+		$this->assertTrue( $response->is_error() );
+		$data = $response->get_data();
+		$this->assertSame( 'rest_pattern_empty_blocks', $data['code'] );
+	}
+
+	/**
 	 * Test invalid block content: empty list (not default).
 	 */
 	public function test_invalid_empty_list() {
@@ -217,7 +241,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test invalid block content: an empty media & text block.
+	 * Test invalid block content: a block that doesn't exist on this site.
 	 */
 	public function test_invalid_fake_block() {
 		wp_set_current_user( self::$user );
