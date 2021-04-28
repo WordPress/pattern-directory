@@ -1,8 +1,9 @@
 /**
  * WordPress dependencies
  */
+import { speak } from '@wordpress/a11y';
 import { useMemo, useReducer, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Button, Modal, RadioControl, Spinner, TextareaControl } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
@@ -30,6 +31,11 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 	const [ state, dispatch ] = useReducer( reducer, {} );
 	const [ selectedOption, setOption ] = useState( '' );
 	const [ details, setDetails ] = useState( '' );
+
+	const submittedText = __(
+		'Your report has been submitted.',
+		'wporg-patterns'
+	);
 
 	const { isLoading, reasons } = useSelect( ( select ) => {
 		const { getPatternFlagReasons, isLoadingPatternFlagReasons } = select( patternStore );
@@ -60,12 +66,22 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 		} )
 			.then( () => {
 				dispatch( { status: 'submitted' } );
+				speak( submittedText );
 			} )
 			.catch( ( err ) => {
 				dispatch( {
 					status: 'error',
 					message: err.message,
 				} );
+
+				speak( sprintf(
+					/* translators: %s: Error message. */
+					__(
+						'Error: %s',
+						'wporg-patterns'
+					),
+					err.message
+				) );
 			} );
 	};
 
@@ -97,10 +113,7 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 		if ( state.isSubmitted ) {
 			return (
 				<p className="pattern-report-modal__copy">
-					{ __(
-						'Your report has been submitted.',
-						'wporg-patterns'
-					) }
+					{ submittedText }
 				</p>
 			);
 		}
