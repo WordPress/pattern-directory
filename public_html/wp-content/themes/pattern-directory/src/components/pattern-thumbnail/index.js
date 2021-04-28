@@ -72,7 +72,7 @@ function PatternThumbnail( { pattern } ) {
 					</button>
 				</Tooltip>
 				<Button className="pattern__copy-button is-small" isPrimary onClick={ handleCopy }>
-					{ copied ? __( 'Copied', 'wporg-patterns' ) : __( 'Copy', 'wporg-patterns' ) }
+					{ copied ? __( 'Copied!', 'wporg-patterns' ) : __( 'Copy', 'wporg-patterns' ) }
 				</Button>
 			</div>
 		</div>
