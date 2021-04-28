@@ -142,7 +142,7 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 	return (
 		<Modal
 			className={ `pattern-report-modal ${
-				! state.isSubmitted ? 'pattern-report-modal--hasFixedHeight' : ''
+				! state.isSubmitted ? 'pattern-report-modal__has-fixed-height' : ''
 			}` }
 			title={ __( 'Report this pattern', 'wporg-patterns' ) }
 			onRequestClose={ handleClose }
