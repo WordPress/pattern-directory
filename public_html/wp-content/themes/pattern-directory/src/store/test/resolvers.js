@@ -55,7 +55,7 @@ describe( 'getCategories', () => {
 } );
 
 describe( 'getPatternFlagReasons', () => {
-	it( 'yields with the requested patterns', async () => {
+	it( 'yields with the requested pattern flag reasons', async () => {
 		const generator = getPatternFlagReasons();
 
 		expect( generator.next().value ).toEqual( {
