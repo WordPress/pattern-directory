@@ -9,8 +9,6 @@
 
 namespace WordPressdotorg\Pattern_Directory\Theme;
 
-use function WordPressdotorg\Pattern_Directory\Theme\user_has_flagged_pattern;
-
 get_header();
 
 $user_has_reported = is_user_logged_in() ? user_has_flagged_pattern() : false;
