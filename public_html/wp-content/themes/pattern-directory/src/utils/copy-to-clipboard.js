@@ -10,6 +10,9 @@ export const copyToClipboard = ( stringToCopy ) => {
 	// We don't want the text area to be selected since it's temporary.
 	element.setAttribute( 'readonly', '' );
 
+	// We don't want screen readers to read to the content since it's pattern markup
+	element.setAttribute( 'aria-hidden', 'true' );
+
 	// We don't want the text area to be visible since it's temporary.
 	element.style.position = 'absolute';
 	element.style.left = '-9999px';

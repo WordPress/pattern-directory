@@ -1,7 +1,8 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { speak } from '@wordpress/a11y';
+import { __, sprintf } from '@wordpress/i18n';
 import { Button, Disabled, Tooltip } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 
@@ -29,7 +30,15 @@ function PatternThumbnail( { pattern } ) {
 			return;
 		}
 
-		const timer = setTimeout( () => setCopied( false ), 3000 );
+		speak(
+			sprintf(
+				/* translators: %s: pattern title. */
+				__( 'Copied %s pattern to clipboard.', 'wporg-patterns' ),
+				pattern.title.rendered
+			)
+		);
+
+		const timer = setTimeout( () => setCopied( false ), 20000 );
 		return () => {
 			clearTimeout( timer );
 		};
@@ -62,11 +71,7 @@ function PatternThumbnail( { pattern } ) {
 						<IconHeartOutline className="pattern__favorite-outline" />
 					</button>
 				</Tooltip>
-				<Button
-					className="pattern__copy-button is-small"
-					isPrimary
-					onClick={ handleCopy }
-				>
+				<Button className="pattern__copy-button is-small" isPrimary onClick={ handleCopy }>
 					{ copied ? __( 'Copied', 'wporg-patterns' ) : __( 'Copy', 'wporg-patterns' ) }
 				</Button>
 			</div>
