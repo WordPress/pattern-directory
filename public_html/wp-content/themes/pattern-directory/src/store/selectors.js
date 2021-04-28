@@ -53,6 +53,7 @@ export function getPattern( state, id ) {
 }
 
 /**
+ * Get the current query.
  *
  * @param {Object} state Global application state.
  *
