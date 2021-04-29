@@ -32,10 +32,7 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 	const [ selectedOption, setOption ] = useState( '' );
 	const [ details, setDetails ] = useState( '' );
 
-	const submittedText = __(
-		'Your report has been submitted.',
-		'wporg-patterns'
-	);
+	const submittedText = __( 'Your report has been submitted.', 'wporg-patterns' );
 
 	const { isLoading, reasons } = useSelect( ( select ) => {
 		const { getPatternFlagReasons, isLoadingPatternFlagReasons } = select( patternStore );
@@ -74,14 +71,13 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 					message: err.message,
 				} );
 
-				speak( sprintf(
+				speak(
+					sprintf(
 					/* translators: %s: Error message. */
-					__(
-						'Error: %s',
-						'wporg-patterns'
-					),
+						__( 'Error: %s', 'wporg-patterns' ),
 					err.message
-				) );
+					)
+				);
 			} );
 	};
 
@@ -111,11 +107,7 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 		}
 
 		if ( state.isSubmitted ) {
-			return (
-				<p className="pattern-report-modal__copy">
-					{ submittedText }
-				</p>
-			);
+			return <p className="pattern-report-modal__copy">{ submittedText }</p>;
 		}
 
 		return (
