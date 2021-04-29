@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { speak } from '@wordpress/a11y';
-import { useMemo, useReducer, useState } from '@wordpress/element';
+import { useMemo, useReducer, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Modal, RadioControl, Spinner, TextareaControl } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
@@ -31,6 +31,7 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 	const [ state, dispatch ] = useReducer( reducer, {} );
 	const [ selectedOption, setOption ] = useState( '' );
 	const [ details, setDetails ] = useState( '' );
+	const container = useRef();
 
 	const submittedText = __( 'Your report has been submitted.', 'wporg-patterns' );
 
@@ -64,6 +65,7 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 			.then( () => {
 				dispatch( { status: 'submitted' } );
 				speak( submittedText );
+				container.current.closest( '[role="dialog"]' ).focus();
 			} )
 			.catch( ( err ) => {
 				dispatch( {
@@ -73,9 +75,9 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 
 				speak(
 					sprintf(
-					/* translators: %s: Error message. */
+						/* translators: %s: Error message. */
 						__( 'Error: %s', 'wporg-patterns' ),
-					err.message
+						err.message
 					)
 				);
 			} );
@@ -152,7 +154,7 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 			title={ __( 'Report this pattern', 'wporg-patterns' ) }
 			onRequestClose={ handleClose }
 		>
-			{ renderView() }
+			<div ref={ container }>{ renderView() }</div>
 		</Modal>
 	);
 };
