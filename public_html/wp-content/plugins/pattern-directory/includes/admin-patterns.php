@@ -78,7 +78,7 @@ function pattern_list_table_render_custom_columns( $column_name, $post_id ) {
 						<span class="screen-reader-text">%s</span>
 					</a>',
 					esc_attr( $url ),
-					number_format_i18n( $flags->found_posts ),
+					esc_html( number_format_i18n( $flags->found_posts ) ),
 					sprintf(
 						esc_html( _n(
 							'%s pending flag',
@@ -86,7 +86,7 @@ function pattern_list_table_render_custom_columns( $column_name, $post_id ) {
 							$flags->found_posts,
 							'wporg-patterns'
 						) ),
-						number_format_i18n( $flags->found_posts )
+						esc_html( number_format_i18n( $flags->found_posts ) )
 					)
 				);
 			} else {
