@@ -306,3 +306,18 @@ function disable_block_directory() {
 		remove_action( 'enqueue_block_editor_assets', 'gutenberg_enqueue_block_editor_assets_block_directory' );
 	}
 }
+
+/**
+ * Get the post object of a block pattern, or false if it's not a pattern or not found.
+ *
+ * @param int|WP_Post $post
+ *
+ * @return WP_Post|false
+ */
+function get_block_pattern( $post ) {
+	$pattern = get_post( $post );
+	if ( ! $pattern || POST_TYPE !== $pattern->post_type ) {
+		return false;
+	}
+	return $pattern;
+}
