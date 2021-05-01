@@ -28,12 +28,6 @@ add_action( 'manage_posts_extra_tablenav', __NAMESPACE__ . '\pattern_list_table_
 function pattern_list_table_columns( $columns ) {
 	$flag = get_post_type_object( FLAG );
 
-	$flags_html = sprintf(
-		'<span class="vers dashicons dashicons-warning" title="%s"><span class="screen-reader-text">%s</span></span>',
-		esc_attr( $flag->labels->all_items ),
-		esc_html( $flag->labels->all_items )
-	);
-
 	$columns = array_slice( $columns, 0, 3, true )
 				+ array(
 					'flags' => esc_html__( 'Pending Flags', 'wporg-patterns' ),
