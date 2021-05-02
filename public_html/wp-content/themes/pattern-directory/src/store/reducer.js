@@ -22,6 +22,26 @@ export function patterns( state = {}, action ) {
 	};
 }
 
+function byId( state = {}, action ) {
+	const patternsById = ( action.patterns || [] ).reduce( ( acc, cur ) => ( { ...acc, [ cur.id ]: cur } ), {} );
+	switch ( action.type ) {
+		case 'LOAD_BLOCK_PATTERNS':
+			return { ...state, ...patternsById };
+		default:
+			return state;
+	}
+}
+
+function queries( state = {}, action ) {
+	const patternIds = ( action.patterns || [] ).map( ( { id } ) => id );
+	switch ( action.type ) {
+		case 'LOAD_BLOCK_PATTERNS':
+			return { ...state, [ action.query ]: [ ...( state[ action.query ] || [] ), ...patternIds ] };
+		default:
+			return state;
+	}
+}
+
 /**
  * Reducer to track categories.
  *
@@ -73,26 +93,6 @@ export function patternFlagReasons( state = undefined, action ) {
 			return null;
 		case 'LOAD_PATTERN_FLAG_REASONS':
 			return [ ...action.reasons ];
-		default:
-			return state;
-	}
-}
-
-function byId( state = {}, action ) {
-	const patternsById = ( action.patterns || [] ).reduce( ( acc, cur ) => ( { ...acc, [ cur.id ]: cur } ), {} );
-	switch ( action.type ) {
-		case 'LOAD_BLOCK_PATTERNS':
-			return { ...state, ...patternsById };
-		default:
-			return state;
-	}
-}
-
-function queries( state = {}, action ) {
-	const patternIds = ( action.patterns || [] ).map( ( { id } ) => id );
-	switch ( action.type ) {
-		case 'LOAD_BLOCK_PATTERNS':
-			return { ...state, [ action.query ]: [ ...( state[ action.query ] || [] ), ...patternIds ] };
 		default:
 			return state;
 	}
