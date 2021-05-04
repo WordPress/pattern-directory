@@ -51,7 +51,7 @@ function PatternThumbnail( { pattern } ) {
 			</a>
 			<div className="pattern-grid__actions">
 				<h2 className="pattern-grid__title">{ pattern.title.rendered }</h2>
-				<FavoriteButton showLabel={ false } />
+				<FavoriteButton showLabel={ false } patternId={ pattern.id } />
 				<Button className="pattern__copy-button is-small" isPrimary onClick={ handleCopy }>
 					{ copied ? __( 'Copied!', 'wporg-patterns' ) : __( 'Copy', 'wporg-patterns' ) }
 				</Button>

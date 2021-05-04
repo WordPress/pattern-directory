@@ -26,7 +26,7 @@ $user_has_reported = is_user_logged_in() ? user_has_flagged_pattern() : false;
 				<header class="entry-header">
 					<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
 					<p>A large hero section with an example background image and a heading in the center.</p>
-					<div id="pattern-actions" class="pattern-actions">
+					<div id="pattern-actions" class="pattern-actions" data-id="<?php the_ID(); ?>">
 						<button class="button button-primary">Copy Pattern</button>
 						<button class="button">Add to favorites</button>
 					</div>

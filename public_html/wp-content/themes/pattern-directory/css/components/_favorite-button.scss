@@ -23,7 +23,7 @@
 		opacity: 0;
 	}
 
-	&:hover {
+	&:hover:not([disabled]) {
 		color: $color__text;
 		background: transparent;
 
@@ -72,6 +72,12 @@
 			top: calc(50% - 12px);
 			left: 9px;
 		}
+	}
+
+	&[disabled] {
+		background: transparent !important;
+		text-shadow: none !important;
+		color: $color-gray-400 !important;
 	}
 }
 

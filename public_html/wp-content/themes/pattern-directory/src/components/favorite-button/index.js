@@ -7,18 +7,35 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useState } from '@wordpress/element';
+import { store as coreStore } from '@wordpress/core-data';
+import { useCallback } from '@wordpress/element';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import IconHeartOutline from '../icons/heart-outline';
 import IconHeartFilled from '../icons/heart-filled';
+import { store as patternStore } from '../../store';
 
-const FavoriteButton = ( { showLabel = true } ) => {
-	// @todo Implement a real favoriting process.
-	const [ isFavorite, setFavorite ] = useState( Math.random() < 0.3 );
-	const onClick = () => setFavorite( ! isFavorite );
+const FavoriteButton = ( { showLabel = true, patternId } ) => {
+	const { hasPermission, isFavorite } = useSelect( ( select ) => {
+		// Fetch favorites so that the state is synced.
+		select( patternStore ).getFavorites();
+		return {
+			// canUser defaults to adding `/wp/v2/` prefix, so we need to backtrack up the path.
+			hasPermission: !! select( coreStore ).canUser( 'update', '../../wporg/v1/pattern-favorites' ),
+			isFavorite: select( patternStore ).isFavorite( patternId ),
+		};
+	} );
+	const { addFavorite, removeFavorite } = useDispatch( patternStore );
+	const onClick = useCallback( () => {
+		if ( isFavorite ) {
+			removeFavorite( patternId );
+		} else {
+			addFavorite( patternId );
+		}
+	}, [ isFavorite ] );
 
 	const buttonClasses = classnames( 'button button-link pattern__favorite-button', {
 		'is-favorited': isFavorite,
@@ -28,8 +45,13 @@ const FavoriteButton = ( { showLabel = true } ) => {
 		'screen-reader-text': ! showLabel,
 	} );
 
+	const extraProps = {};
+	if ( ! hasPermission ) {
+		extraProps.disabled = 'disabled';
+	}
+
 	return (
-		<button className={ buttonClasses } onClick={ onClick }>
+		<button className={ buttonClasses } onClick={ onClick } { ...extraProps }>
 			<IconHeartFilled className="pattern__favorite-filled" />
 			<IconHeartOutline className="pattern__favorite-outline" />
 			<span className={ labelClasses }>
