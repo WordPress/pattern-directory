@@ -98,10 +98,31 @@ export function patternFlagReasons( state = undefined, action ) {
 	}
 }
 
+/**
+ * Reducer to track the user's favorites.
+ *
+ * @param {Object} state Current state.
+ * @param {Object} action Dispatched action.
+ * @return {Object} Updated state.
+ */
+export function favorites( state = [], action ) {
+	const { patternId } = action;
+	switch ( action.type ) {
+		case 'LOAD_FAVORITES':
+			return action.patternIds;
+		case 'ADD_FAVORITE':
+			return state.includes( patternId ) ? state : [ ...state, patternId ];
+		case 'REMOVE_FAVORITE':
+			return state.filter( ( id ) => id !== patternId );
+	}
+
+	return state;
+}
+
 export default combineReducers( {
 	patterns,
 	categories,
 	currentQuery,
 	patternFlagReasons,
-	// favorites,
+	favorites,
 } );

@@ -12,6 +12,7 @@ import {
 	fetchPatternFlagReasons,
 	fetchPatterns,
 	loadCategories,
+	loadFavorites,
 	loadPatternFlagReasons,
 	loadPatterns,
 } from './actions';
@@ -46,5 +47,14 @@ export function* getPatternFlagReasons() {
 			path: addQueryArgs( '/wp/v2/wporg-pattern-flag-reason' ),
 		} );
 		yield loadPatternFlagReasons( results );
+	} catch ( error ) {}
+}
+
+export function* getFavorites() {
+	try {
+		const results = yield apiFetch( {
+			path: addQueryArgs( '/wporg/v1/pattern-favorites' ),
+		} );
+		yield loadFavorites( results );
 	} catch ( error ) {}
 }

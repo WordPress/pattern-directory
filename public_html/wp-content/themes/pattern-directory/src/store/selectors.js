@@ -134,3 +134,26 @@ export function getPatternFlagReasons( state ) {
 export function isLoadingPatternFlagReasons( state ) {
 	return state.patternFlagReasons === null;
 }
+
+/**
+ * Get the list of favorites.
+ *
+ * @param {Object} state Global application state.
+ *
+ * @return {number[]} A list of favorite pattern IDs.
+ */
+export function getFavorites( state ) {
+	return state.favorites;
+}
+
+/**
+ * Check if a pattern ID is in the list of favorites.
+ *
+ * @param {Object} state Global application state.
+ * @param {number} patternId The pattern to check.
+ *
+ * @return {number[]} A list of favorite pattern IDs.
+ */
+export function isFavorite( state, patternId ) {
+	return state.favorites.includes( patternId );
+}
