@@ -54,7 +54,7 @@
 			opacity: 1;
 		}
 
-		&:hover .pattern__favorite-filled {
+		&:hover:not([disabled]) .pattern__favorite-filled {
 			animation: 0.9s infinite HeartBeat;
 
 			@media (prefers-reduced-motion) {
