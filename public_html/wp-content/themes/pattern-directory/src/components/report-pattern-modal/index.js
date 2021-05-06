@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { speak } from '@wordpress/a11y';
-import { useMemo, useReducer, useRef, useState } from '@wordpress/element';
+import { useReducer, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Modal, RadioControl, Spinner, TextareaControl } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
@@ -35,12 +35,18 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 
 	const submittedText = __( 'Your report has been submitted.', 'wporg-patterns' );
 
-	const { isLoading, reasons } = useSelect( ( select ) => {
+	const { isLoading, mappedReasons } = useSelect( ( select ) => {
 		const { getPatternFlagReasons, isLoadingPatternFlagReasons } = select( patternStore );
+		const reasons = getPatternFlagReasons() || [];
 
 		return {
 			isLoading: isLoadingPatternFlagReasons(),
-			reasons: getPatternFlagReasons(),
+			mappedReasons: reasons
+				.sort( ( a, b ) => a.id - b.id )
+				.map( ( i ) => {
+					// We need to convert id to string to make the RadioControl match the selected item.
+					return { label: i.name, value: i.id.toString() };
+				} ),
 		};
 	} );
 
@@ -86,22 +92,6 @@ const ReportPatternModal = ( { postId, onClose } ) => {
 	const handleClose = () => {
 		onClose( state.isSubmitted );
 	};
-
-	const mappedReasons = useMemo( () => {
-		if ( ! reasons ) {
-			return [];
-		}
-
-		return (
-			reasons
-				// We sort by id to give some control on the server side.
-				.sort( ( a, b ) => a.id - b.id )
-				.map( ( i ) => {
-					// We need to convert id to string to make the RadioControl match the selected item.
-					return { label: i.name, value: i.id.toString() };
-				} )
-		);
-	}, [ reasons ] );
 
 	const renderView = () => {
 		if ( isLoading ) {
