@@ -50,11 +50,11 @@ const PatternGridMenu = () => {
 					options={
 						categories
 							? categories.map( ( record ) => {
-								return {
-									value: `/${ getPath( record.link ) || '' }`,
-									label: record.name,
-								};
-							} )
+									return {
+										value: `/${ getPath( record.link ) || '' }`,
+										label: record.name,
+									};
+							  } )
 							: []
 					}
 					onClick={ ( event ) => {
