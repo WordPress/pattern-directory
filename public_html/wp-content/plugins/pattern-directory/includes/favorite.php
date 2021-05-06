@@ -28,7 +28,8 @@ function save_favorite( $post, $user = 0, $favorite = true ) {
 	} elseif ( $favorite ) {
 		$users_favorites[] = $post->ID;
 	} elseif ( ! $favorite && $already_favorited ) {
-		unset( $users_favorites[ array_search( $post->ID, $users_favorites, true ) ] );
+		$index = array_search( $post->ID, $users_favorites, true );
+		unset( $users_favorites[ $index ] );
 	} else {
 		return true;
 	}
