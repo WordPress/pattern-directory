@@ -60,7 +60,7 @@ function permissions_check() {
 	if ( ! is_user_logged_in() ) {
 		return new WP_Error(
 			'rest_authorization_required',
-			__( 'You must be logged in to save a pattern.', 'wporg-patterns' ),
+			__( 'You must be logged in to favorite a pattern.', 'wporg-patterns' ),
 			array( 'status' => rest_authorization_required_code() )
 		);
 	}
