@@ -52,3 +52,29 @@ html.interface-interface-skeleton__html-container {
 .interface-interface-skeleton__footer {
 	position: absolute;
 }
+
+.pattern-creator-welcome-guide {
+	max-width: 320px;
+}
+
+.pattern-creator-welcome-guide__title,
+.pattern-creator-welcome-guide p {
+	margin: 0;
+	padding: 0 var(--grid-unit);
+}
+
+.pattern-creator-welcome-guide__title {
+	margin: var(--grid-unit) 0;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+.pattern-creator-welcome-guide p {
+	margin-bottom: var(--grid-unit);
+	font-size: 14px;
+}
+
+.pattern-creator-welcome-guide__link {
+	margin-top: calc( var(--grid-unit) / 2 );
+	display: block;
+}

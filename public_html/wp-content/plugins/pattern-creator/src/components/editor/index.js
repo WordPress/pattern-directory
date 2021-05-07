@@ -22,6 +22,7 @@ import EditorInitialization from '@wordpress/edit-post/build/components/editor-i
  * Internal dependencies
  */
 import Layout from '../layout';
+import WelcomeGuide from '../welcome-guide';
 
 const AUTOSAVE_INTERVAL = 30;
 
@@ -75,6 +76,7 @@ export default function Provider( { settings, onError, postId, postType, initial
 							<UnsavedChangesWarning />
 							<AutosaveMonitor interval={ AUTOSAVE_INTERVAL } />
 							<LocalAutosaveMonitor />
+							<WelcomeGuide />
 							<Layout />
 							<Popover.Slot />
 						</ErrorBoundary>
