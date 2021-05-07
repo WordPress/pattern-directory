@@ -2,7 +2,7 @@
 
 namespace WordPressdotorg\Pattern_Directory\Favorites_API;
 
-use function WordPressdotorg\Pattern_Directory\Favorite\{save_favorite, get_favorites};
+use function WordPressdotorg\Pattern_Directory\Favorite\{add_favorite, get_favorites, remove_favorite};
 use WP_Error, WP_REST_Server, WP_REST_Response;
 
 add_action( 'rest_api_init', __NAMESPACE__ . '\init' );
@@ -87,7 +87,7 @@ function get_items( $request ) {
  */
 function update_item( $request ) {
 	$pattern_id = $request['id'];
-	$success = save_favorite( $pattern_id );
+	$success = add_favorite( $pattern_id );
 
 	if ( $success ) {
 		return new WP_REST_Response( true, 200 );
@@ -108,7 +108,7 @@ function update_item( $request ) {
  */
 function delete_item( $request ) {
 	$pattern_id = $request['id'];
-	$success = save_favorite( $pattern_id, null, false );
+	$success = remove_favorite( $pattern_id );
 
 	if ( $success ) {
 		return new WP_REST_Response( true, 200 );

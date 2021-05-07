@@ -3,7 +3,7 @@
  * Test Block Pattern validation.
  */
 
-use function WordPressdotorg\Pattern_Directory\Favorite\{save_favorite, get_favorites};
+use function WordPressdotorg\Pattern_Directory\Favorite\{add_favorite, get_favorites, remove_favorite};
 use const WordPressdotorg\Pattern_Directory\Favorite\META_KEY;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
@@ -40,7 +40,7 @@ class Pattern_Favorite_Test extends WP_UnitTestCase {
 				'role' => 'subscriber',
 			)
 		);
-		update_user_meta( self::$user_admin, META_KEY, array( self::$faved_pattern_id ) );
+		add_user_meta( self::$user_admin, META_KEY, self::$faved_pattern_id );
 	}
 
 	/**
@@ -48,10 +48,10 @@ class Pattern_Favorite_Test extends WP_UnitTestCase {
 	 */
 	public function test_favorite_pattern() {
 		wp_set_current_user( self::$user_admin );
-		$success = save_favorite( self::$pattern_id );
+		$success = add_favorite( self::$pattern_id );
 		$this->assertTrue( (bool) $success );
 
-		$favorites = get_user_meta( self::$user_admin, META_KEY, true );
+		$favorites = get_favorites( self::$user_admin );
 		$this->assertSame( $favorites, array( self::$faved_pattern_id, self::$pattern_id ) );
 	}
 
@@ -60,10 +60,10 @@ class Pattern_Favorite_Test extends WP_UnitTestCase {
 	 */
 	public function test_unfavorite_faved_pattern() {
 		wp_set_current_user( self::$user_admin );
-		$success = save_favorite( self::$faved_pattern_id, null, false );
+		$success = remove_favorite( self::$faved_pattern_id );
 		$this->assertTrue( (bool) $success );
 
-		$favorites = get_user_meta( self::$user_admin, META_KEY, true );
+		$favorites = get_favorites( self::$user_admin );
 		$this->assertSame( $favorites, array() );
 	}
 
@@ -72,10 +72,10 @@ class Pattern_Favorite_Test extends WP_UnitTestCase {
 	 */
 	public function test_favorite_faved_pattern() {
 		wp_set_current_user( self::$user_admin );
-		$success = save_favorite( self::$faved_pattern_id );
+		$success = add_favorite( self::$faved_pattern_id );
 		$this->assertTrue( (bool) $success );
 
-		$favorites = get_user_meta( self::$user_admin, META_KEY, true );
+		$favorites = get_favorites( self::$user_admin );
 		$this->assertSame( $favorites, array( self::$faved_pattern_id ) );
 	}
 
@@ -84,10 +84,10 @@ class Pattern_Favorite_Test extends WP_UnitTestCase {
 	 */
 	public function test_unfavorite_nonfaved_pattern() {
 		wp_set_current_user( self::$user_admin );
-		$success = save_favorite( self::$pattern_id, null, false );
+		$success = remove_favorite( self::$pattern_id );
 		$this->assertTrue( (bool) $success );
 
-		$favorites = get_user_meta( self::$user_admin, META_KEY, true );
+		$favorites = get_favorites( self::$user_admin );
 		$this->assertSame( $favorites, array( self::$faved_pattern_id ) );
 	}
 
@@ -96,7 +96,7 @@ class Pattern_Favorite_Test extends WP_UnitTestCase {
 	 */
 	public function test_favorite_invalid_pattern() {
 		wp_set_current_user( self::$user_admin );
-		$success = save_favorite( 'invalid-id' );
+		$success = add_favorite( 'invalid-id' );
 		$this->assertFalse( (bool) $success );
 	}
 
@@ -105,7 +105,7 @@ class Pattern_Favorite_Test extends WP_UnitTestCase {
 	 */
 	public function test_favorite_page() {
 		wp_set_current_user( self::$user_admin );
-		$success = save_favorite( self::$page_id );
+		$success = add_favorite( self::$page_id );
 		$this->assertFalse( (bool) $success );
 	}
 
@@ -114,10 +114,10 @@ class Pattern_Favorite_Test extends WP_UnitTestCase {
 	 */
 	public function test_favorite_pattern_subscriber() {
 		wp_set_current_user( self::$user_subscriber );
-		$success = save_favorite( self::$pattern_id );
+		$success = add_favorite( self::$pattern_id );
 		$this->assertTrue( (bool) $success );
 
-		$favorites = get_user_meta( self::$user_subscriber, META_KEY, true );
+		$favorites = get_favorites( self::$user_subscriber );
 		$this->assertSame( $favorites, array( self::$pattern_id ) );
 	}
 
@@ -125,7 +125,7 @@ class Pattern_Favorite_Test extends WP_UnitTestCase {
 	 * Test favoriting a pattern as an anonymous (not logged in) user.
 	 */
 	public function test_favorite_pattern_anon() {
-		$success = save_favorite( self::$pattern_id );
+		$success = add_favorite( self::$pattern_id );
 		$this->assertFalse( (bool) $success );
 	}
 
@@ -134,10 +134,10 @@ class Pattern_Favorite_Test extends WP_UnitTestCase {
 	 * This would only be done from the server, so there isn't a security issue here.
 	 */
 	public function test_anon_favorite_pattern_admin() {
-		$success = save_favorite( self::$pattern_id, self::$user_admin );
+		$success = add_favorite( self::$pattern_id, self::$user_admin );
 		$this->assertTrue( (bool) $success );
 
-		$favorites = get_user_meta( self::$user_admin, META_KEY, true );
+		$favorites = get_favorites( self::$user_admin );
 		$this->assertSame( $favorites, array( self::$faved_pattern_id, self::$pattern_id ) );
 	}
 
