@@ -2,7 +2,8 @@
  * WordPress dependencies
  */
 import { addQueryArgs } from '@wordpress/url';
-import { apiFetch } from '@wordpress/data-controls';
+// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+import { __unstableAwaitPromise, apiFetch } from '@wordpress/data-controls';
 
 /**
  * Internal dependencies
@@ -16,16 +17,35 @@ import {
 	loadPatternFlagReasons,
 	loadPatterns,
 } from './actions';
-import { getQueryString } from './utils';
+import { PER_PAGE, getQueryString } from './utils';
+
+async function parseResponse( response ) {
+	try {
+		return {
+			total: response.headers?.get( 'X-WP-Total' ),
+			totalPages: response.headers?.get( 'X-WP-TotalPages' ),
+			results: await response.json(),
+		};
+	} catch ( error ) {
+		return {};
+	}
+}
 
 export function* getPatternsByQuery( query ) {
 	const queryString = getQueryString( query );
 	try {
 		yield fetchPatterns( queryString );
-		const results = yield apiFetch( {
-			path: addQueryArgs( '/wp/v2/wporg-pattern', query ),
+		const response = yield apiFetch( {
+			path: addQueryArgs( '/wp/v2/wporg-pattern', { ...query, per_page: PER_PAGE } ),
+			parse: false,
 		} );
-		yield loadPatterns( queryString, results );
+		const { total, totalPages, results } = yield __unstableAwaitPromise( parseResponse( response ) );
+		yield loadPatterns( queryString, {
+			page: query.page || 1,
+			patterns: results,
+			total: total,
+			totalPages: totalPages,
+		} );
 	} catch ( error ) {}
 }
 

@@ -13,7 +13,8 @@ import { getQueryString } from './utils';
  */
 export function isLoadingPatternsByQuery( state, query ) {
 	const queryString = getQueryString( query );
-	return ! Array.isArray( state.patterns.queries[ queryString ] );
+	const page = query?.page || 1;
+	return ! Array.isArray( state.patterns.queries?.[ queryString ]?.[ page ] );
 }
 
 /**
@@ -37,7 +38,9 @@ export function getPatterns( state ) {
  */
 export function getPatternsByQuery( state, query ) {
 	const queryString = getQueryString( query );
-	return ( state.patterns.queries[ queryString ] || [] ).map( ( id ) => state.patterns.byId[ id ] );
+	const page = query?.page || 1;
+	const patternIds = state.patterns.queries?.[ queryString ]?.[ page ];
+	return ( patternIds || [] ).map( ( id ) => state.patterns.byId[ id ] );
 }
 
 /**

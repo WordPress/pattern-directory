@@ -4,6 +4,9 @@
 import { addQueryArgs } from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
 
+// Number of patterns per page, should be multiple of 2 and 3 (for 2- and 3-column layouts).
+export const PER_PAGE = 18;
+
 /**
  * Convert a query object into a standardized string.
  * See the `stableKey` generation in `getQueryParts`

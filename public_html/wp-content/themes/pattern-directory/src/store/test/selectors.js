@@ -31,8 +31,17 @@ describe( 'selectors', () => {
 	const state = {
 		patterns: {
 			queries: {
-				'': [ 31, 25, 27, 26 ],
-				'empty=1': [],
+				'': {
+					total: 4,
+					totalPages: 2,
+					1: [ 31, 25 ],
+					2: [ 27, 26 ],
+				},
+				'empty=1': {
+					total: 0,
+					totalPages: 0,
+					1: [],
+				},
 			},
 			byId: apiPatterns.reduce( ( acc, cur ) => ( { ...acc, [ cur.id ]: cur } ), {} ),
 		},
@@ -74,7 +83,7 @@ describe( 'selectors', () => {
 
 	describe( 'getPatternsByQuery', () => {
 		it( 'should get an empty array if no patterns are loaded for this query', () => {
-			expect( getPatternsByQuery( initialState, '' ) ).toEqual( [] );
+			expect( getPatternsByQuery( initialState, {} ) ).toEqual( [] );
 		} );
 
 		it( 'should get an empty array if no patterns are loaded for this query, even if patterns exist for another query', () => {
@@ -82,13 +91,19 @@ describe( 'selectors', () => {
 		} );
 
 		it( 'should get the list of patterns for this query', () => {
-			const patternsByQuery = getPatternsByQuery( state, '' );
-			expect( patternsByQuery ).toHaveLength( 4 );
-			// Keep the sort order of the query: [ 31, 25, 27, 26 ]
+			const patternsByQuery = getPatternsByQuery( state, {} );
+			expect( patternsByQuery ).toHaveLength( 2 );
+			// Keep the sort order of the query: [ 31, 25 ]
 			expect( patternsByQuery[ 0 ] ).toHaveProperty( 'id', 31 );
 			expect( patternsByQuery[ 1 ] ).toHaveProperty( 'id', 25 );
-			expect( patternsByQuery[ 2 ] ).toHaveProperty( 'id', 27 );
-			expect( patternsByQuery[ 3 ] ).toHaveProperty( 'id', 26 );
+		} );
+
+		it( 'should get the second page of patterns for this query', () => {
+			const patternsByQuery = getPatternsByQuery( state, { page: 2 } );
+			expect( patternsByQuery ).toHaveLength( 2 );
+			// Keep the sort order of the query: [ 27, 26 ]
+			expect( patternsByQuery[ 0 ] ).toHaveProperty( 'id', 27 );
+			expect( patternsByQuery[ 1 ] ).toHaveProperty( 'id', 26 );
 		} );
 	} );
 
