@@ -10,10 +10,9 @@ import { useSelect } from '@wordpress/data';
 import PatternThumbnail from '../pattern-thumbnail';
 import { store as patternStore } from '../../store';
 
-function PatternGrid() {
+function PatternGrid( { query } ) {
 	const { posts, isLoading } = useSelect( ( select ) => {
-		const { getPatternsByQuery, isLoadingPatternsByQuery, getCurrentQuery } = select( patternStore );
-		const query = getCurrentQuery();
+		const { getPatternsByQuery, isLoadingPatternsByQuery } = select( patternStore );
 
 		return {
 			posts: query ? getPatternsByQuery( query ) : [],
