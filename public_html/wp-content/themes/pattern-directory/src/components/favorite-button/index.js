@@ -24,7 +24,7 @@ const FavoriteButton = ( { showLabel = true, patternId } ) => {
 		select( patternStore ).getFavorites();
 		return {
 			// canUser defaults to adding `/wp/v2/` prefix, so we need to backtrack up the path.
-			hasPermission: !! select( coreStore ).canUser( 'update', '../../wporg/v1/pattern-favorites' ),
+			hasPermission: !! select( coreStore ).canUser( 'create', '../../wporg/v1/pattern-favorites' ),
 			isFavorite: select( patternStore ).isFavorite( patternId ),
 		};
 	} );
@@ -37,6 +37,10 @@ const FavoriteButton = ( { showLabel = true, patternId } ) => {
 		}
 	}, [ isFavorite ] );
 
+	if ( ! hasPermission ) {
+		return null;
+	}
+
 	const buttonClasses = classnames( 'button button-link pattern__favorite-button', {
 		'is-favorited': isFavorite,
 		'has-label': showLabel,
@@ -45,13 +49,8 @@ const FavoriteButton = ( { showLabel = true, patternId } ) => {
 		'screen-reader-text': ! showLabel,
 	} );
 
-	const extraProps = {};
-	if ( ! hasPermission ) {
-		extraProps.disabled = 'disabled';
-	}
-
 	return (
-		<button className={ buttonClasses } onClick={ onClick } { ...extraProps }>
+		<button className={ buttonClasses } onClick={ onClick }>
 			<IconHeartFilled className="pattern__favorite-filled" />
 			<IconHeartOutline className="pattern__favorite-outline" />
 			<span className={ labelClasses }>

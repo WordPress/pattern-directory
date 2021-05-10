@@ -23,7 +23,7 @@
 		opacity: 0;
 	}
 
-	&:hover:not([disabled]) {
+	&:hover {
 		color: $color__text;
 		background: transparent;
 
@@ -54,7 +54,7 @@
 			opacity: 1;
 		}
 
-		&:hover:not([disabled]) .pattern__favorite-filled {
+		&:hover .pattern__favorite-filled {
 			animation: 0.9s infinite HeartBeat;
 
 			@media (prefers-reduced-motion) {
