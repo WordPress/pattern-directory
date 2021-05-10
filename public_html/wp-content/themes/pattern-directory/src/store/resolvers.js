@@ -53,7 +53,7 @@ export function* getPatternFlagReasons() {
 export function* getFavorites() {
 	try {
 		const results = yield apiFetch( {
-			path: addQueryArgs( '/wporg/v1/pattern-favorites' ),
+			path: '/wporg/v1/pattern-favorites',
 		} );
 		yield loadFavorites( results );
 	} catch ( error ) {}
