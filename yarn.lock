@@ -2886,6 +2886,7 @@
     "@wordpress/dom-ready" "^2.13.2"
     "@wordpress/i18n" "^3.19.2"
 
+<<<<<<< HEAD
 "@wordpress/api-fetch@3.23.1":
   version "3.23.1"
   resolved "https://registry.yarnpkg.com/@wordpress/api-fetch/-/api-fetch-3.23.1.tgz#2a9eb9304bbb19395bf83bc51c7f63e7b32b1369"
@@ -2895,6 +2896,8 @@
     "@wordpress/i18n" "^3.19.2"
     "@wordpress/url" "^2.22.2"
 
+=======
+>>>>>>> Add in the real svg's even though backgrounds are not working properly.
 "@wordpress/api-fetch@^3.22.0":
   version "3.22.0"
   resolved "https://registry.yarnpkg.com/@wordpress/api-fetch/-/api-fetch-3.22.0.tgz#f10278bcd5c85cdeed294b89913a369db7d9d85b"
@@ -3320,6 +3323,19 @@
     react "^16.13.1"
     react-dom "^16.13.1"
 
+"@wordpress/element@^2.20.3":
+  version "2.20.3"
+  resolved "https://registry.yarnpkg.com/@wordpress/element/-/element-2.20.3.tgz#a86a20e90be41d6fe4ea1f0ce580f7f2f1d839e7"
+  integrity sha512-f4ZPTDf9CxiiOXiMxc4v1K7jcBMT4dsiehVOpkKzCDKboNXp4qVf8oe5PE23VGZNEjcOj5Mkg9hB57R0nqvMTw==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@types/react" "^16.9.0"
+    "@types/react-dom" "^16.9.0"
+    "@wordpress/escape-html" "^1.12.2"
+    lodash "^4.17.19"
+    react "^16.13.1"
+    react-dom "^16.13.1"
+
 "@wordpress/env@4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@wordpress/env/-/env-4.0.0.tgz#2bba5daeba3d1955ffe8304a70c23ec513e2b37d"
@@ -3344,6 +3360,13 @@
   integrity sha512-T+HiRDlm3UcPnbV00g3Qclea0SIopHd7d+xSSRfblhEhoiCDC5GTdjUAbrtMGZov46PHhHEl1/iN3oMv+mlWXQ==
   dependencies:
     "@babel/runtime" "^7.12.5"
+
+"@wordpress/escape-html@^1.12.2":
+  version "1.12.2"
+  resolved "https://registry.yarnpkg.com/@wordpress/escape-html/-/escape-html-1.12.2.tgz#dcc92178bacc69952cde9bb8fb1cbbea9deb2cc3"
+  integrity sha512-FabgSwznhdaUwe6hr1CsGpgxQbzqEoGevv73WIL1B9GvlZ6csRWodgHfWh4P6fYqpzxFL4WYB8wPJ1PdO32XFA==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
 
 "@wordpress/eslint-plugin@^9.0.1":
   version "9.0.1"
@@ -3580,6 +3603,15 @@
   dependencies:
     "@babel/runtime" "^7.12.5"
     "@wordpress/element" "^2.20.0"
+    classnames "^2.2.5"
+
+"@wordpress/primitives@1.12.3":
+  version "1.12.3"
+  resolved "https://registry.yarnpkg.com/@wordpress/primitives/-/primitives-1.12.3.tgz#6e095e62dae30ad5ce09db83925f8057b4c999ad"
+  integrity sha512-LIF44bVlJS7CJEVmk6TLuV6HZMdj5iwkyM8do4ukGY6qnZIzrXpBablgJeDBcyjzWrWRLn+w+tiZ/8l+2egoVA==
+  dependencies:
+    "@babel/runtime" "^7.13.10"
+    "@wordpress/element" "^2.20.3"
     classnames "^2.2.5"
 
 "@wordpress/priority-queue@^1.11.0":
