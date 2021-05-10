@@ -32,8 +32,8 @@ function init() {
 		'wporg/v1',
 		'pattern-favorites',
 		array(
-			'methods' => WP_REST_Server::EDITABLE,
-			'callback' => __NAMESPACE__ . '\update_item',
+			'methods' => WP_REST_Server::CREATABLE,
+			'callback' => __NAMESPACE__ . '\create_item',
 			'args' => $args,
 			'permission_callback' => __NAMESPACE__ . '\permissions_check',
 		)
@@ -85,7 +85,7 @@ function get_items( $request ) {
  * @param WP_REST_Request $request Full data about the request.
  * @return WP_Error|WP_REST_Response
  */
-function update_item( $request ) {
+function create_item( $request ) {
 	$pattern_id = $request['id'];
 	$success = add_favorite( $pattern_id );
 
