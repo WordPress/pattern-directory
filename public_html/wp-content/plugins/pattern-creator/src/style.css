@@ -66,10 +66,15 @@ html.interface-interface-skeleton__html-container {
 	overflow: hidden;
 }
 
+/* Change the close button color */
+.pattern-creator-welcome-guide .components-modal__header button {
+	background: #000;
+	color: #fff;
+}
+
 .pattern-creator-welcome-guide__image--is-bottom-aligned {
 	align-items: flex-end;
 }
-
 
 .pattern-creator-welcome-guide__image svg {
 	position: absolute;
