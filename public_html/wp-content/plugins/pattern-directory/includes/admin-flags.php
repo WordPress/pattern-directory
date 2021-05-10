@@ -22,6 +22,7 @@ add_filter( 'post_row_actions', __NAMESPACE__ . '\flag_list_table_row_actions', 
 add_filter( 'bulk_actions-edit-wporg-pattern-flag', __NAMESPACE__ . '\flag_list_table_bulk_actions' );
 add_filter( 'handle_bulk_actions-edit-wporg-pattern-flag', __NAMESPACE__ . '\flag_list_table_handle_bulk_actions', 10, 3 );
 add_filter( 'views_edit-wporg-pattern-flag', __NAMESPACE__ . '\flag_list_table_views' );
+add_filter( 'wp_count_posts', __NAMESPACE__ . '\flag_list_table_count_flags_for_pattern', 10, 2 );
 add_filter( 'wp_untrash_post_status', __NAMESPACE__ . '\flag_untrash_status', 5, 2 ); // Low priority so it won't override "Undo".
 add_action( 'admin_menu', __NAMESPACE__ . '\flag_reason_submenu_page' );
 add_filter( 'submenu_file', __NAMESPACE__ . '\flag_reason_submenu_highlight', 10, 2 );
@@ -297,17 +298,48 @@ function flag_list_table_handle_bulk_actions( $sendback, $doaction, $post_ids ) 
  * @return array
  */
 function flag_list_table_views( $views ) {
+	unset( $views['mine'] );
+
 	$parent_id = filter_input( INPUT_GET, 'post_parent', FILTER_VALIDATE_INT );
 	if ( $parent_id ) {
-		$views = array( $views['all'] );
+		$views = array_map(
+			// Add a post_parent parameter to each view's URL.
+			function( $item ) use ( $parent_id ) {
+				return preg_replace_callback(
+					'|href=[\'"]+([^\'"]+)[\'"]+|',
+					function( $matches ) use ( $parent_id ) {
+						$old_url = wp_kses_decode_entities( $matches[1] );
+						$new_url = add_query_arg( array( 'post_parent' => $parent_id ), $old_url );
 
-		$parent_title      = _draft_or_post_title( $parent_id );
-		$views['filtered'] = sprintf(
-			'<strong>%s</strong>',
-			sprintf( __( 'Viewing flags for &#8220;%s&#8221;', 'wporg-patterns' ), $parent_title )
+						return sprintf(
+							'href="%s"',
+							$new_url
+						);
+					},
+					$item
+				);
+			},
+			$views
 		);
 
-		return $views;
+		$post_type_obj = get_post_type_object( FLAG );
+		$return = array(
+			'return' => sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( add_query_arg( 'post_type', FLAG, admin_url( 'edit.php' ) ) ),
+				esc_html( $post_type_obj->labels->all_items )
+			),
+		);
+
+		$parent_title      = _draft_or_post_title( $parent_id );
+		$subtitle = array(
+			'filtered' => sprintf(
+				'<strong>%s</strong>',
+				sprintf( __( 'Viewing flags for &#8220;%s&#8221;', 'wporg-patterns' ), $parent_title )
+			),
+		);
+
+		$views = $subtitle + $views + $return;
 	}
 
 	if ( isset( $views['resolved'] ) ) {
@@ -320,6 +352,49 @@ function flag_list_table_views( $views ) {
 	}
 
 	return $views;
+}
+
+/**
+ * Update post counts when viewing only flags for a specific pattern.
+ *
+ * @param object $counts
+ * @param string $post_type
+ *
+ * @return object
+ */
+function flag_list_table_count_flags_for_pattern( $counts, $post_type ) {
+	global $wpdb;
+
+	if ( FLAG !== $post_type ) {
+		return $counts;
+	}
+
+	$pattern_id = filter_input( INPUT_GET, 'post_parent', FILTER_VALIDATE_INT );
+
+	if ( ! $pattern_id ) {
+		return $counts;
+	}
+
+	$results = $wpdb->get_results(
+		$wpdb->prepare(
+			"
+			SELECT post_status, COUNT( * ) AS num_posts
+			FROM {$wpdb->posts}
+			WHERE post_type = %s
+			AND post_parent = %d
+			GROUP BY post_status
+			",
+			FLAG,
+			$pattern_id
+		)
+	);
+
+	$empty_counts   = array_fill_keys( get_post_stati(), 0 );
+	$updated_counts = wp_list_pluck( $results, 'num_posts', 'post_status' );
+	$updated_counts = array_map( 'absint', $updated_counts );
+	$updated_counts = array_merge( $empty_counts, $updated_counts );
+
+	return (object) $updated_counts;
 }
 
 /**
