@@ -4,7 +4,6 @@
 import { ifViewportMatches } from '@wordpress/viewport';
 
 const DefaultMenu = ( { path, options, onClick, isLoading } ) => {
-
 	if ( ! isLoading && ! options.length ) {
 		return null;
 	}
@@ -12,16 +11,16 @@ const DefaultMenu = ( { path, options, onClick, isLoading } ) => {
 	return (
 		<ul className={ `category-menu ${ isLoading ? 'category-menu--is-loading' : '' } ` }>
 			{ options.map( ( i ) => (
-					<li key={ i.value }>
-						<a
-							className={ path === i.value ? 'category-menu--is-active' : '' }
-							href={ i.value }
-							onClick={ onClick }
-						>
-							{ i.label }
-						</a>
-					</li>
-				) ) }
+				<li key={ i.value }>
+					<a
+						className={ path === i.value ? 'category-menu--is-active' : '' }
+						href={ i.value }
+						onClick={ onClick }
+					>
+						{ i.label }
+					</a>
+				</li>
+			) ) }
 		</ul>
 	);
 };
