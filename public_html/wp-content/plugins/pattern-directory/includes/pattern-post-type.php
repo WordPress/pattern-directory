@@ -57,11 +57,12 @@ function register_post_type_data() {
 		'wporg-pattern-category',
 		POST_TYPE,
 		array(
-			'public'        => true,
-			'hierarchical'  => true,
-			'show_in_rest'  => true,
-			'rest_base'     => 'pattern-categories',
-			'rewrite'       => array(
+			'public'            => true,
+			'hierarchical'      => true,
+			'show_in_rest'      => true,
+			'rest_base'         => 'pattern-categories',
+			'show_admin_column' => true,
+			'rewrite'           => array(
 				'slug' => 'pattern-categories',
 			),
 		)
@@ -71,11 +72,12 @@ function register_post_type_data() {
 		'wporg-pattern-keyword',
 		POST_TYPE,
 		array(
-			'public'        => true,
-			'hierarchical'  => false,
-			'show_in_rest'  => true,
-			'rest_base'     => 'pattern-keywords',
-			'rewrite'       => array(
+			'public'            => true,
+			'hierarchical'      => false,
+			'show_in_rest'      => true,
+			'rest_base'         => 'pattern-keywords',
+			'show_admin_column' => true,
+			'rewrite'           => array(
 				'slug' => 'pattern-keywords',
 			),
 
