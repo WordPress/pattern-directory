@@ -83,7 +83,7 @@ html.interface-interface-skeleton__html-container {
 .pattern-creator-welcome-guide__title,
 .pattern-creator-welcome-guide p {
 	margin: 0;
-	padding: 0 var(--grid-unit);
+	padding: 0 calc(var(--grid-unit) * 2);
 }
 
 .pattern-creator-welcome-guide__title {

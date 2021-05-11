@@ -104,10 +104,16 @@ export default function WelcomeGuide() {
 								{ __( 'Learn more about designing patterns', 'wporg-patterns' ) }
 							</h1>
 							<p>
-								{ __( 'New to patterns? Want to learn more about building them?', 'wporg-patterns' ) }
+								{ __(
+									'New to patterns? Want to learn more about building them?',
+									'wporg-patterns'
+								) }
 								<ExternalLink
 									className="pattern-creator-welcome-guide__link"
-									href={ __( 'https://wordpress.org/support/article/wordpress-editor/', 'wporg-patterns' ) }
+									href={ __(
+										'https://wordpress.org/support/article/wordpress-editor/',
+										'wporg-patterns'
+									) } // TODO: This needs to be updated to something relevant.
 								>
 									{ __( "Here's a detailed guide.", 'wporg-patterns' ) }
 								</ExternalLink>
