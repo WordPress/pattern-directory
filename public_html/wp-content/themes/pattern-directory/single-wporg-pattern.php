@@ -10,6 +10,9 @@
 namespace WordPressdotorg\Pattern_Directory\Theme;
 
 get_header();
+
+$user_has_reported = is_user_logged_in() ? user_has_flagged_pattern() : false;
+
 ?>
 	<input id="block-data" type="hidden" value="<?php echo rawurlencode( wp_json_encode( get_the_content() ) ); ?>" />
 	<main id="main" class="site-main col-12" role="main">
@@ -44,7 +47,12 @@ get_header();
 							}
 							?>
 						</div>
-						<div class="pattern__report">
+						<div id="pattern-report"
+							class="pattern__report"
+							data-post-id="<?php echo intval( get_the_ID() ); ?>"
+							data-logged-in="<?php echo json_encode( is_user_logged_in() ); ?>"
+							data-user-has-reported="<?php echo json_encode( $user_has_reported ); ?>"
+							">
 							<button class="button">Report this pattern</button>
 						</div>
 					</div>

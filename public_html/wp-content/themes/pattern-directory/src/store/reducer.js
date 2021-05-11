@@ -60,6 +60,24 @@ export function currentQuery( state = undefined, action ) {
 	return state;
 }
 
+/**
+ * Reducer to track pattern flag reasons.
+ *
+ * @param {Object} state Current state.
+ * @param {Object} action Dispatched action.
+ * @return {Object} Updated state.
+ */
+export function patternFlagReasons( state = undefined, action ) {
+	switch ( action.type ) {
+		case 'FETCH_PATTERN_FLAG_REASONS':
+			return null;
+		case 'LOAD_PATTERN_FLAG_REASONS':
+			return [ ...action.reasons ];
+		default:
+			return state;
+	}
+}
+
 function byId( state = {}, action ) {
 	const patternsById = ( action.patterns || [] ).reduce( ( acc, cur ) => ( { ...acc, [ cur.id ]: cur } ), {} );
 	switch ( action.type ) {
@@ -84,5 +102,6 @@ export default combineReducers( {
 	patterns,
 	categories,
 	currentQuery,
+	patternFlagReasons,
 	// favorites,
 } );

@@ -8,6 +8,7 @@ import { render } from '@wordpress/element';
  */
 import PatternPreview from './components/pattern-preview';
 import PatternPreviewActions from './components/pattern-preview-actions';
+import ReportPatternButton from './components/report-pattern-button';
 import Patterns from './components/patterns';
 
 // Load the preview into any awaiting preview container.
@@ -33,4 +34,19 @@ if ( gridContainer ) {
 const patternActionsContainer = document.getElementById( 'pattern-actions' );
 if ( patternActionsContainer ) {
 	render( <PatternPreviewActions />, patternActionsContainer );
+}
+
+// Load report button
+const patternReportContainer = document.getElementById( 'pattern-report' );
+if ( patternReportContainer ) {
+	const { loggedIn, postId, userHasReported } = patternReportContainer.dataset;
+
+	render(
+		<ReportPatternButton
+			userHasReported={ userHasReported === 'true' }
+			loggedIn={ loggedIn === 'true' }
+			postId={ postId }
+		/>,
+		patternReportContainer
+	);
 }

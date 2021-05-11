@@ -8,10 +8,12 @@ import {
 	getCategoryBySlug,
 	getCurrentQuery,
 	getPattern,
+	getPatternFlagReasons,
 	getPatterns,
 	getPatternsByQuery,
 	hasLoadedCategories,
 	isLoadingCategories,
+	isLoadingPatternFlagReasons,
 	isLoadingPatternsByQuery,
 } from '../selectors';
 
@@ -211,6 +213,38 @@ describe( 'selectors', () => {
 				'id',
 				apiCategories[ 0 ].id
 			);
+		} );
+	} );
+
+	describe( 'getPatternFlagReasons', () => {
+		it( 'should get undefined if query has not been made', () => {
+			expect( getPatternFlagReasons( {} ) ).toBeUndefined();
+		} );
+
+		it( 'should get array if query has completed', () => {
+			const reasons = [
+				{ id: 1, name: 'crude' },
+				{ id: 2, name: 'rude' },
+			];
+			expect( getPatternFlagReasons( { patternFlagReasons: reasons } ) ).toEqual( reasons );
+		} );
+	} );
+
+	describe( 'isLoadingPatternFlagReasons', () => {
+		it( 'should get false if not null', () => {
+			expect(
+				isLoadingPatternFlagReasons( {
+					patternFlagReasons: [],
+				} )
+			).toBe( false );
+		} );
+
+		it( 'should get true if null', () => {
+			expect(
+				isLoadingPatternFlagReasons( {
+					patternFlagReasons: null,
+				} )
+			).toBe( true );
 		} );
 	} );
 } );

@@ -49,3 +49,22 @@ export function fetchCategories() {
 export function loadCategories( categories ) {
 	return { type: 'LOAD_CATEGORIES', categories: categories };
 }
+
+/**
+ * Get the action object signalling that pattern flag reasons have been requested.
+ *
+ * @return {Object} Action object.
+ */
+export function fetchPatternFlagReasons() {
+	return { type: 'FETCH_PATTERN_FLAG_REASONS' };
+}
+
+/**
+ * Get the action object signalling that pattern flag reasons have been loaded.
+ *
+ * @param {Array} reasons A list of reasons.
+ * @return {Object} Action object.
+ */
+export function loadPatternFlagReasons( reasons ) {
+	return { type: 'LOAD_PATTERN_FLAG_REASONS', reasons: reasons };
+}
