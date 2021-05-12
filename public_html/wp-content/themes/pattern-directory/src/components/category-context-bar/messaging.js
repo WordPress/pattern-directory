@@ -17,7 +17,7 @@ export const getDefaultMessage = ( count, categoryName ) => {
 			/* translators: %1$d: number of patterns. %2$s category name. */
 			_n( '%1$d <b>%2$s</b> pattern.', '%1$d <b>%2$s</b> patterns.', count, 'wporg-patterns' ),
 			count,
-			categoryName.toLowerCase(),
+			categoryName,
 			'wporg-patterns'
 		),
 		{
@@ -37,7 +37,7 @@ export const getLoadingMessage = ( categoryName ) => {
 		sprintf(
 			/* translators: %1$d: number of patterns. %2$s category name. */
 			__( 'Loading <b>%s</b> patterns.', 'wporg-patterns' ),
-			categoryName.toLowerCase(),
+			categoryName,
 			'wporg-patterns'
 		),
 		{
@@ -65,7 +65,7 @@ export const getDefaultSearchMessage = ( count, categoryName, searchTerm ) => {
 				'wporg-patterns'
 			),
 			count,
-			categoryName.toLowerCase(),
+			categoryName,
 			searchTerm,
 			'wporg-patterns'
 		),
