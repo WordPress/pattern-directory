@@ -48,23 +48,22 @@ function CategoryContextBar() {
 			return;
 		}
 
-		const searchTerm = getQueryArg( path, 'search' );
-
 		if ( isLoadingPatterns ) {
 			setMessage( getLoadingMessage( category.name ) );
 			return;
 		}
 
-		let _message = '';
-		if ( searchTerm && ! isAllCategory ) {
-			_message = getDefaultSearchMessage( patterns.length, category.name, searchTerm );
-		} else if ( searchTerm && isAllCategory ) {
-			_message = getAllSearchMessage( patterns.length, searchTerm );
-		} else if ( ! isAllCategory ) {
-			_message = getDefaultMessage( category.count || 0, category.name );
-		}
+		const searchTerm = getQueryArg( path, 'search' );
 
-		setMessage( _message );
+		if ( searchTerm && ! isAllCategory ) {
+			setMessage( getDefaultSearchMessage( patterns.length, category.name, searchTerm ) );
+		} else if ( searchTerm && isAllCategory ) {
+			setMessage( getAllSearchMessage( patterns.length, searchTerm ) );
+		} else if ( ! isAllCategory ) {
+			setMessage( getDefaultMessage( category.count || 0, category.name ) );
+		} else {
+			setMessage( '' );
+		}
 	}, [ category, isLoadingPatterns, patterns ] );
 
 	useEffect( () => {
