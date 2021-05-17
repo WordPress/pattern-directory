@@ -33,7 +33,10 @@ if ( gridContainer ) {
 // Load the pattern preview actions
 const patternActionsContainer = document.getElementById( 'pattern-actions' );
 if ( patternActionsContainer ) {
-	render( <PatternPreviewActions />, patternActionsContainer );
+	render(
+		<PatternPreviewActions patternId={ Number( patternActionsContainer.dataset.id ) } />,
+		patternActionsContainer
+	);
 }
 
 // Load report button

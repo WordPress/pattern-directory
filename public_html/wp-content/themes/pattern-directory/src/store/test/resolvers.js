@@ -4,7 +4,7 @@
 import apiPatterns from './fixtures/patterns';
 import apiCategories from './fixtures/categories';
 import apiPatternFlagReasons from './fixtures/pattern-flag-reasons';
-import { getCategories, getPatternFlagReasons, getPatternsByQuery } from '../resolvers';
+import { getCategories, getFavorites, getPatternFlagReasons, getPatternsByQuery } from '../resolvers';
 
 describe( 'getPatternsByQuery', () => {
 	it( 'yields with the requested patterns', async () => {
@@ -32,7 +32,7 @@ describe( 'getPatternsByQuery', () => {
 } );
 
 describe( 'getCategories', () => {
-	it( 'yields with the requested patterns', async () => {
+	it( 'yields with the requested categories', async () => {
 		const generator = getCategories();
 
 		expect( generator.next().value ).toEqual( {
@@ -73,6 +73,25 @@ describe( 'getPatternFlagReasons', () => {
 		expect( received ).toEqual( {
 			type: 'LOAD_PATTERN_FLAG_REASONS',
 			reasons: apiPatternFlagReasons,
+		} );
+	} );
+
+	describe( 'getFavorites', () => {
+		it( 'yields with the requested favorite patterns', async () => {
+			const generator = getFavorites();
+
+			// trigger apiFetch
+			const { value: apiFetchAction } = generator.next();
+			expect( apiFetchAction.request ).toEqual( {
+				path: '/wporg/v1/pattern-favorites',
+			} );
+
+			// Provide response and trigger action
+			const { value: received } = generator.next( [ 1, 2, 3 ] );
+			expect( received ).toEqual( {
+				type: 'LOAD_FAVORITES',
+				patternIds: [ 1, 2, 3 ],
+			} );
 		} );
 	} );
 } );

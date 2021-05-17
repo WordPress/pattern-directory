@@ -7,11 +7,13 @@ import {
 	getCategories,
 	getCategoryBySlug,
 	getCurrentQuery,
+	getFavorites,
 	getPattern,
 	getPatternFlagReasons,
 	getPatterns,
 	getPatternsByQuery,
 	hasLoadedCategories,
+	isFavorite,
 	isLoadingCategories,
 	isLoadingPatternFlagReasons,
 	isLoadingPatternsByQuery,
@@ -23,6 +25,7 @@ describe( 'selectors', () => {
 			queries: {},
 			byId: {},
 		},
+		favorites: [],
 	};
 
 	const state = {
@@ -33,6 +36,7 @@ describe( 'selectors', () => {
 			},
 			byId: apiPatterns.reduce( ( acc, cur ) => ( { ...acc, [ cur.id ]: cur } ), {} ),
 		},
+		favorites: [ 25, 27 ],
 	};
 
 	describe( 'isLoadingPatternsByQuery', () => {
@@ -245,6 +249,34 @@ describe( 'selectors', () => {
 					patternFlagReasons: null,
 				} )
 			).toBe( true );
+		} );
+	} );
+
+	describe( 'getFavorites', () => {
+		it( 'should get an empty array if no favorites are loaded', () => {
+			expect( getFavorites( initialState ) ).toEqual( [] );
+		} );
+
+		it( 'should get the list of favorites if they exist', () => {
+			expect( getFavorites( state ) ).toEqual( [ 25, 27 ] );
+		} );
+	} );
+
+	describe( 'isFavorite', () => {
+		it( 'should get false if no favorites are loaded', () => {
+			expect( isFavorite( initialState, 2 ) ).toBe( false );
+		} );
+
+		it( 'should get false if the ID requested is not in the list', () => {
+			expect( isFavorite( state, 2 ) ).toBe( false );
+		} );
+
+		it( 'should get false if the ID requested is not a valid ID', () => {
+			expect( isFavorite( state, 'fake' ) ).toBe( false );
+		} );
+
+		it( 'should get true if the ID requested is found in the list', () => {
+			expect( isFavorite( state, 25 ) ).toBe( true );
 		} );
 	} );
 } );
