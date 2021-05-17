@@ -44,6 +44,32 @@ export function getPatternsByQuery( state, query ) {
 }
 
 /**
+ * Get the count of all patterns for a given query.
+ *
+ * @param {Object} state Global application state.
+ * @param {Object} query Query parameters.
+ *
+ * @return {number} The count of all patterns matching this query.
+ */
+export function getPatternTotalsByQuery( state, query ) {
+	const queryString = getQueryString( query );
+	return state.patterns.queries?.[ queryString ]?.total || 0;
+}
+
+/**
+ * Get the number of pages of patterns for a given query.
+ *
+ * @param {Object} state Global application state.
+ * @param {Object} query Query parameters.
+ *
+ * @return {number} The count of pages.
+ */
+export function getPatternTotalPagesByQuery( state, query ) {
+	const queryString = getQueryString( query );
+	return state.patterns.queries?.[ queryString ]?.totalPages || 0;
+}
+
+/**
  * Get a specific pattern.
  *
  * @param {Object} state Global application state.

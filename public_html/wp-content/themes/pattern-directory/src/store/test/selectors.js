@@ -10,6 +10,8 @@ import {
 	getFavorites,
 	getPattern,
 	getPatternFlagReasons,
+	getPatternTotalPagesByQuery,
+	getPatternTotalsByQuery,
 	getPatterns,
 	getPatternsByQuery,
 	hasLoadedCategories,
@@ -104,6 +106,28 @@ describe( 'selectors', () => {
 			// Keep the sort order of the query: [ 27, 26 ]
 			expect( patternsByQuery[ 0 ] ).toHaveProperty( 'id', 27 );
 			expect( patternsByQuery[ 1 ] ).toHaveProperty( 'id', 26 );
+		} );
+	} );
+
+	describe( 'getPatternTotalsByQuery', () => {
+		it( 'should get 0 if no patterns are loaded for this query', () => {
+			expect( getPatternTotalsByQuery( initialState, {} ) ).toEqual( 0 );
+		} );
+
+		it( 'should get the total number of patterns for this query, regardless of pagination', () => {
+			expect( getPatternTotalsByQuery( state, {} ) ).toEqual( 4 );
+			expect( getPatternTotalsByQuery( state, { page: 2 } ) ).toEqual( 4 );
+		} );
+	} );
+
+	describe( 'getPatternTotalPagesByQuery', () => {
+		it( 'should get 0 if no patterns are loaded for this query', () => {
+			expect( getPatternTotalPagesByQuery( initialState, {} ) ).toEqual( 0 );
+		} );
+
+		it( 'should get the total number of pages for this query, regardless of pagination', () => {
+			expect( getPatternTotalPagesByQuery( state, {} ) ).toEqual( 2 );
+			expect( getPatternTotalPagesByQuery( state, { page: 2 } ) ).toEqual( 2 );
 		} );
 	} );
 
