@@ -7,7 +7,7 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _x, sprintf } from '@wordpress/i18n';
 
 export default function Pagination( { currentPage = 1, totalPages } ) {
 	if ( ! totalPages ) {
@@ -19,8 +19,8 @@ export default function Pagination( { currentPage = 1, totalPages } ) {
 	const pages = Array.from( { length: totalPages }, ( val, i ) => i + 1 );
 
 	return (
-		<nav aria-label={ __( 'Pagination', 'wporg-patterns' ) }>
-			<ul className="pagination">
+		<nav className="pagination" aria-label={ __( 'Pagination', 'wporg-patterns' ) }>
+			<ul className="pagination__list">
 				<li className="pagination__item pagination__item--previous-page">
 					<a
 						className={ classnames( {
@@ -31,6 +31,7 @@ export default function Pagination( { currentPage = 1, totalPages } ) {
 						aria-disabled={ ! hasPrevious ? 'disabled' : undefined }
 					>
 						<span className="screen-reader-text">{ __( 'Previous page', 'wporg-patterns' ) }</span>
+						<span aria-hidden>{ _x( 'Previous', 'previous page link label', 'wporg-patterns' ) }</span>
 					</a>
 				</li>
 				{ pages.map( ( page ) => (
@@ -59,8 +60,10 @@ export default function Pagination( { currentPage = 1, totalPages } ) {
 						} ) }
 						href="#"
 						aria-disabled={ ! hasNext ? 'disabled' : undefined }
+						onClick={ ( event ) => onClick( event, currentPage + 1 ) }
 					>
 						<span className="screen-reader-text">{ __( 'Next page', 'wporg-patterns' ) }</span>
+						<span aria-hidden>{ _x( 'Next', 'next page link label', 'wporg-patterns' ) }</span>
 					</a>
 				</li>
 			</ul>
