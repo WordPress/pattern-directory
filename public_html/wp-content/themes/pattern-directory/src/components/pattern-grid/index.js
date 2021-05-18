@@ -7,6 +7,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import Pagination from './pagination';
 import PatternThumbnail from '../pattern-thumbnail';
 import { store as patternStore } from '../../store';
 
@@ -21,13 +22,16 @@ function PatternGrid( { query } ) {
 	} );
 
 	return (
-		<div className="pattern-grid">
-			{ isLoading ? (
-				<Spinner />
-			) : (
-				posts.map( ( post ) => <PatternThumbnail key={ post.id } pattern={ post } /> )
-			) }
-		</div>
+		<>
+			<div className="pattern-grid">
+				{ isLoading ? (
+					<Spinner />
+				) : (
+					posts.map( ( post ) => <PatternThumbnail key={ post.id } pattern={ post } /> )
+				) }
+			</div>
+			<Pagination totalPages={ 10 } currentPage={ 5 } />
+		</>
 	);
 }
 
