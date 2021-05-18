@@ -43,8 +43,8 @@ export function* getPatternsByQuery( query ) {
 		yield loadPatterns( queryString, {
 			page: query.page || 1,
 			patterns: results,
-			total: total,
-			totalPages: totalPages,
+			total: Number( total ),
+			totalPages: Number( totalPages ),
 		} );
 	} catch ( error ) {}
 }
