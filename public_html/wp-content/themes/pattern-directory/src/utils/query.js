@@ -1,4 +1,9 @@
 /**
+ * WordPress dependencies
+ */
+import { getQueryArgs } from '@wordpress/url';
+
+/**
  * Remove the last '/' from a string if it exists.
  *
  * @param {string} str Url or url part
@@ -6,6 +11,16 @@
  */
 const removeTrailingSlash = ( str ) => {
 	return str.replace( /\/$/, '' );
+};
+
+/**
+ * Remove the first '/' from a string if it exists.
+ *
+ * @param {string} str Url or url part
+ * @return {string}
+ */
+const removeLeadingSlash = ( str ) => {
+	return str.replace( /^\//, '' );
 };
 
 /**
@@ -41,14 +56,25 @@ export const removeQueryString = ( path ) => {
 };
 
 /**
- * Retrieves the category from a url path without query string params.
+ * Retrieves the category from a url path.
+ * A query string will take precedence, otherwise will fall back to the category in the path.
  *
  * @param {string} path
  * @return {string} The category slug.
  */
 export const getCategoryFromPath = ( path ) => {
-	let _path = removeQueryString( path );
-	_path = removeTrailingSlash( _path );
+	const query = getQueryArgs( path );
+	if ( query[ 'pattern-categories' ] ) {
+		return query[ 'pattern-categories' ];
+	}
 
-	return _path.substring( _path.lastIndexOf( '/' ) + 1 );
+	const _path = removeLeadingSlash( removeTrailingSlash( removeQueryString( path ) ) );
+	const parts = _path.split( '/' );
+	// Find the `pattern-categories` section, if it exists. The next part of the URL is the category slug.
+	const index = parts.indexOf( 'pattern-categories' );
+	if ( -1 === index ) {
+		return '';
+	}
+
+	return parts[ index + 1 ] || '';
 };
