@@ -1,4 +1,4 @@
-.category-context__bar {
+.category-context-bar {
 	margin: 0 $gutter-default;
 	background: $color-gray-light-300;
 	border-radius: 2px;
@@ -44,7 +44,7 @@
 	}
 }
 
-.category-context__bar__copy {
+.category-context-bar__copy {
 	display: flex;
 	align-items: center;
 
@@ -54,7 +54,7 @@
 	font-weight: 400;
 }
 
-.category-context__bar__title {
+.category-context-bar__title {
 	margin: 0;
 	padding-right: $gutter-default;
 	color: $color__text;
@@ -63,7 +63,7 @@
 	text-transform: uppercase;
 }
 
-.category-context__bar__links {
+.category-context-bar__links {
 	display: flex;
 	align-items: center;
 
@@ -72,7 +72,7 @@
 	}
 }
 
-.category-context__bar__spinner {
+.category-context-bar__spinner {
 	display: flex;
 	width: 28px;
 	margin: 0;
@@ -85,14 +85,14 @@
 	}
 }
 
-.category-context__bar__spinner--is-hidden {
+.category-context-bar__spinner--is-hidden {
 	overflow: hidden;
 	width: 0;
 	opacity: 0;
 	transform: scale(0);
 }
 
-.category-context__bar--is-hidden {
+.category-context-bar--is-hidden {
 	height: 0;
 	overflow: hidden;
 }

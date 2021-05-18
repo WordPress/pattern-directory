@@ -72,12 +72,12 @@ function CategoryContextBar() {
 	}, [ message ] );
 
 	return (
-		<header className="category-context__bar" style={ { height: `${ height }px` } }>
+		<header className="category-context-bar" style={ { height: `${ height }px` } }>
 			<div ref={ innerRef }>
-				<h2 className="category-context__bar__copy">
+				<h2 className="category-context-bar__copy">
 					<span
-						className={ `category-context__bar__spinner ${
-							! isLoadingPatterns ? 'category-context__bar__spinner--is-hidden' : ''
+						className={ `category-context-bar__spinner ${
+							! isLoadingPatterns ? 'category-context-bar__spinner--is-hidden' : ''
 						}` }
 					>
 						<Spinner />
@@ -85,8 +85,8 @@ function CategoryContextBar() {
 					<span>{ message }</span>
 				</h2>
 				{ context.links && context.links.length > 0 && (
-					<div className="category-context__bar__links">
-						<h3 className="category-context__bar__title">{ context.title }</h3>
+					<div className="category-context-bar__links">
+						<h3 className="category-context-bar__title">{ context.title }</h3>
 
 						<ul>
 							{ context.links.map( ( i ) => (
