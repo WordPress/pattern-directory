@@ -2,6 +2,7 @@
 	--grid-unit: 16px;
 	--border-color: #e0e0e0;
 	--sidebar-width: 280px;
+	--modal-width: 600px;
 }
 
 #block-pattern-creator {
@@ -51,4 +52,104 @@ html.interface-interface-skeleton__html-container {
 
 .interface-interface-skeleton__footer {
 	position: absolute;
+}
+
+/* Overwrite the @wordpress/components/modal padding */
+.publish-modal .components-modal__content {
+	padding: 0;
+}
+
+.publish-modal .components-modal__header {
+	display: block;
+	position: absolute;
+	margin: 0;
+	padding: 0;
+	top: 8px;
+	right: 8px;
+	background: transparent;
+	border-bottom: none;
+}
+
+.publish-modal .components-modal__header-heading-container {
+	display: none;
+}
+
+.publish-modal .components-modal__header > button {
+	position: initial;
+}
+
+.publish-modal {
+	margin: 0 auto;
+	width: 100%;
+	max-width: var(--modal-width);
+}
+
+.publish-modal__page {
+	display: grid;
+	grid-template-columns: 30% 70%;
+	height: 375px;
+	background: #1d2327;
+}
+
+.publish-modal__page > div:first-child {
+	padding: var(--grid-unit);
+}
+
+.publish-modal__page > div:last-child {
+	background: #fff;
+	padding: calc(var(--grid-unit) * 2);
+}
+
+.publish-modal__page label:not(.components-checkbox-control__label),
+.publish-modal__page legend {
+	font-size: 0.8125rem;
+	font-weight: 600;
+}
+
+.publish-modal__page fieldset {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.publish-modal__checkbox-list {
+	display: grid;
+	grid-template-columns: 50% 50%;
+	grid-gap: 4px;
+	padding-top: 8px;
+}
+
+.publish-modal__sidebar-title {
+	margin: 8px 0 0 0;
+	color: #fff;
+	text-align: right;
+	font-size: 1.5rem;
+}
+
+.publish-modal__content {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.publish-modal__control {
+	margin-bottom: var(--grid-unit) !important;
+}
+
+.publish-modal__control .components-base-control__help {
+	margin: 0;
+}
+
+.publish-modal__footer {
+	display: flex;
+	justify-content: space-between;
+}
+
+.publish-modal__button {
+	width: 125px;
+	justify-content: center;
+}
+
+.publish-modal__button:disabled {
+	background: #ccc !important;
 }

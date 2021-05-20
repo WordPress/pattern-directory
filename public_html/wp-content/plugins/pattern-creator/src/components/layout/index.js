@@ -21,6 +21,7 @@ import Header from '../header';
 import Settings from '../settings';
 import Sidebar from './sidebar';
 import VisualEditor from '../visual-editor';
+import PublishModal from '../publish-modal';
 import './style.css';
 
 export default function Layout() {
@@ -143,6 +144,7 @@ export default function Layout() {
 						<EditorNotices />
 						<VisualEditor styles={ defaultEditorStyles } />
 						{ isMobileViewport && isSidebarOpened && <ScrollLock /> }
+						<PublishModal />
 					</>
 				}
 				footer={
