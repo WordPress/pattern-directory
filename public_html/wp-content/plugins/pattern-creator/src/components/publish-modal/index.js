@@ -2,35 +2,10 @@
  * WordPress dependencies
  */
 import { Button, CheckboxControl, Modal, TextControl, TextareaControl } from '@wordpress/components';
-import { useRef, useState } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-
-const Checkboxes = [
-	{
-		value: 'text',
-		label: 'Text',
-	},
-	{
-		value: 'gallery',
-		label: 'Gallery',
-	},
-	{
-		value: 'buttons',
-		label: 'Buttons',
-	},
-	{
-		value: 'headers',
-		label: 'Headers',
-	},
-	{
-		value: 'columns',
-		label: 'Columns',
-	},
-	{
-		value: 'query',
-		label: 'Query',
-	},
-];
+import { addQueryArgs } from '@wordpress/url';
 
 const ForwardButton = ( { children, disabled, onClick } ) => (
 	<Button className="publish-modal__button" isPrimary disabled={ disabled } onClick={ onClick }>
@@ -42,6 +17,7 @@ export default function PublishModal( { onFinish } ) {
 	const [ currentPage, setCurrentPage ] = useState( 0 );
 	const [ title, setTitle ] = useState( '' );
 	const [ description, setDescription ] = useState( '' );
+	const [ selectedCategories, setSelectedCategories ] = useState( [] );
 	const [ categories, setCategories ] = useState( [] );
 	const container = useRef();
 
@@ -61,8 +37,28 @@ export default function PublishModal( { onFinish } ) {
 			return hasTitleAndDescription;
 		}
 
-		return hasTitleAndDescription && categories.length > 0;
+		return hasTitleAndDescription && selectedCategories.length > 0;
 	};
+
+	useEffect( () => {
+		const getCategories = () => {
+			apiFetch( {
+				path: addQueryArgs( '/wp/v2/pattern-categories' ),
+			} )
+				.then( ( res ) => {
+					setCategories(
+						res.map( ( i ) => {
+							return {
+								value: i.slug,
+								label: i.name,
+							};
+						} )
+					);
+				} );
+		};
+
+		getCategories();
+	}, [] );
 
 	const pages = [
 		{
@@ -111,17 +107,19 @@ export default function PublishModal( { onFinish } ) {
 							) }
 						</p>
 						<div className="publish-modal__checkbox-list">
-							{ Checkboxes.map( ( i ) => (
+							{ categories.map( ( i ) => (
 								<CheckboxControl
 									key={ i.value }
 									label={ i.label }
 									value={ i.value }
-									checked={ categories.includes( i.value ) }
+									checked={ selectedCategories.includes( i.value ) }
 									onChange={ ( checked ) => {
 										if ( checked ) {
-											setCategories( [ ...categories, i.value ] );
+											setSelectedCategories( [ ...selectedCategories, i.value ] );
 										} else {
-											setCategories( categories.filter( ( cat ) => cat !== i.value ) );
+											setSelectedCategories(
+												selectedCategories.filter( ( cat ) => cat !== i.value )
+											);
 										}
 									} }
 								/>
