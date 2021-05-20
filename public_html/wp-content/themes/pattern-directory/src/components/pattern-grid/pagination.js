@@ -14,9 +14,9 @@ import { __, _x, sprintf } from '@wordpress/i18n';
 import getPaginationList from '../../utils/get-pagination-list';
 import { useRoute } from '../../hooks';
 
-export default function Pagination( { currentPage, totalPages } ) {
+export default function Pagination( { currentPage = 1, totalPages } ) {
 	const { path, update: updatePath } = useRoute();
-	if ( ! totalPages ) {
+	if ( ! totalPages || totalPages <= 1 ) {
 		return null;
 	}
 
