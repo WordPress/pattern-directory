@@ -1,11 +1,18 @@
 /**
  * WordPress dependencies
  */
-import { Button, CheckboxControl, Modal, TextControl, TextareaControl } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
+import { Button, CheckboxControl, Modal, TextControl, TextareaControl } from '@wordpress/components';
+import { store as editorStore } from '@wordpress/editor';
+import { useSelect } from '@wordpress/data';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
+
+/**
+ * Internal dependencies
+ */
+import usePostMeta from '../../store/hooks/use-post-meta';
 
 const ForwardButton = ( { children, disabled, onClick } ) => (
 	<Button className="publish-modal__button" isPrimary disabled={ disabled } onClick={ onClick }>
@@ -14,9 +21,16 @@ const ForwardButton = ( { children, disabled, onClick } ) => (
 );
 
 export default function PublishModal( { onFinish } ) {
+	// Get Document default
+	const { postTitle } = useSelect( ( select ) => {
+		return {
+			postTitle: select( editorStore ).getEditedPostAttribute( 'title' ),
+		};
+	} );
+
 	const [ currentPage, setCurrentPage ] = useState( 0 );
-	const [ title, setTitle ] = useState( '' );
-	const [ description, setDescription ] = useState( '' );
+	const [ title, setTitle ] = useState( postTitle );
+	const [ description, setDescription ] = usePostMeta( 'wpop_description', '' );
 	const [ selectedCategories, setSelectedCategories ] = useState( [] );
 	const [ categories, setCategories ] = useState( [] );
 	const container = useRef();
@@ -44,17 +58,16 @@ export default function PublishModal( { onFinish } ) {
 		const getCategories = () => {
 			apiFetch( {
 				path: addQueryArgs( '/wp/v2/pattern-categories' ),
-			} )
-				.then( ( res ) => {
-					setCategories(
-						res.map( ( i ) => {
-							return {
-								value: i.slug,
-								label: i.name,
-							};
-						} )
-					);
-				} );
+			} ).then( ( res ) => {
+				setCategories(
+					res.map( ( i ) => {
+						return {
+							value: i.slug,
+							label: i.name,
+						};
+					} )
+				);
+			} );
 		};
 
 		getCategories();
