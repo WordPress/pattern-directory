@@ -4,9 +4,9 @@
 import { Button, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
-export default function PublishedModal() {
+export default function PublishedModal( { onClose } ) {
 	return (
-		<Modal className="pattern-modal pattern-modal-published">
+		<Modal className="pattern-modal pattern-modal-published" onRequestClose={ onClose }>
 			<div className="pattern-modal-published__page">
 				<h3 className="pattern-modal__title">
 					{ __( 'Thank you for sharing your pattern!', 'wporg-patterns' ) }

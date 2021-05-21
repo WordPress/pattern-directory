@@ -10,7 +10,7 @@
 	position: relative;
 	height: 80vh;
 	margin-top: 2rem;
-	border: 1px solid var( --border-color );
+	border: 1px solid var(--border-color);
 }
 
 #block-pattern-creator *,

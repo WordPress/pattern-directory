@@ -9,11 +9,11 @@ import { useState } from '@wordpress/element';
 import SubmitModal from './submit';
 import SuccessModal from './success';
 
-export default function PublishModal() {
+export default function PublishModal( { onClose } ) {
 	const [ submitted, setSubmitted ] = useState( false );
 	return (
 		<>
-			{ ! submitted ? <SubmitModal onSuccess={ setSubmitted } /> : <SuccessModal /> }
+			{ ! submitted ? <SubmitModal onSuccess={ setSubmitted } /> : <SuccessModal onClose={ onClose } /> }
 		</>
 	);
 }

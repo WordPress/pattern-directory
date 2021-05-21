@@ -23,16 +23,17 @@
 .pattern-modal .components-modal__header > button {
 	position: initial;
 }
-/* Done overwrites */
 
+/* Done overwrites */
 .pattern-modal {
 	margin: 0 auto;
 	width: 100%;
-	max-width: var( --modal-width );
+	max-width: var(--modal-width);
 	height: 375px;
-	background: var( --modal-background );
+	background-color: var(--modal-background);
 	color: #fff;
 }
+
 
 .pattern-modal__checkbox-list {
 	display: grid;
@@ -42,7 +43,7 @@
 }
 
 .pattern-modal__control {
-	margin-bottom: var( --grid-unit ) !important;
+	margin-bottom: var(--grid-unit) !important;
 }
 
 .pattern-modal__control .components-base-control__help {
@@ -79,15 +80,15 @@
 }
 
 .pattern-modal-publish__page > div:first-child {
-	padding: var( --grid-unit );
+	padding: var(--grid-unit);
 }
 
 .pattern-modal-publish__page > div:last-child {
 	background: #fff;
-	padding: calc( var( --grid-unit ) * 2 );
+	padding: calc(var(--grid-unit) * 2);
 }
 
-.pattern-modal-publish__page label:not( .components-checkbox-control__label ),
+.pattern-modal-publish__page label:not(.components-checkbox-control__label),
 .pattern-modal-publish__page legend {
 	font-size: 0.8125rem;
 	font-weight: 600;
@@ -97,6 +98,14 @@
 	margin: 0;
 	padding: 0;
 	border: 0;
+}
+
+.pattern-modal-publish__sidebar {
+	background-image: url(images/triangle.svg), url(images/circle.svg), url(images/square.svg);
+	background-repeat: no-repeat, no-repeat, no-repeat;
+	background-position: center top -22.5%, center center, center bottom -30%;
+	background-size: 150px;
+
 }
 
 .pattern-modal-publish__content {
@@ -121,11 +130,19 @@
 
 .pattern-modal-published {
 	display: flex;
-    align-items: center;
-    justify-content: center;
+	align-items: center;
+	justify-content: center;
+	height: 350px;
+
+	background-image: url(images/triangle.svg), url(images/circle.svg), url(images/square.svg);
+	background-repeat: no-repeat, no-repeat, no-repeat;
+	background-position: left -30% bottom -60%, left 45% bottom -110%, right -30% bottom -110%;
+	background-size: 250px;
 }
 
+
 .pattern-modal-published > div {
+	margin-bottom: var(--grid-unit);
 	height: initial;
 }
 
@@ -146,4 +163,5 @@
 	background: #fff;
 	color: #000;
 }
+
 /* Done overwrites */
