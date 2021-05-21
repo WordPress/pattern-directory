@@ -143,6 +143,25 @@ function register_post_type_data() {
 			),
 		)
 	);
+
+	register_post_meta(
+		POST_TYPE,
+		'wpop_block_types',
+		array(
+			'type'              => 'string',
+			'description'       => 'A list of block types this pattern supports for transforms.',
+			'single'            => false,
+			'sanitize_callback' => function( $value, $key, $type ) {
+				return preg_replace( '/[^a-z0-9-\/]/', '', $value );
+			},
+			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type' => 'string',
+				),
+			),
+		)
+	);
 }
 
 /**
