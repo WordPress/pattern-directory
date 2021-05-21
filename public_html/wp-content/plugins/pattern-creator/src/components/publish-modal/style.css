@@ -1,0 +1,149 @@
+
+/* Overwrite @wordpress/components/modal styles */
+.pattern-modal .components-modal__content {
+	padding: 0;
+}
+
+.pattern-modal .components-modal__header {
+	display: block;
+	position: absolute;
+	margin: 0;
+	padding: 0;
+	top: 8px;
+	right: 8px;
+	background: transparent;
+	border-bottom: none;
+}
+
+.pattern-modal .components-modal__header-heading-container {
+	display: none;
+}
+
+/* This is the close button */
+.pattern-modal .components-modal__header > button {
+	position: initial;
+}
+/* Done overwrites */
+
+.pattern-modal {
+	margin: 0 auto;
+	width: 100%;
+	max-width: var( --modal-width );
+	height: 375px;
+	background: var( --modal-background );
+	color: #fff;
+}
+
+.pattern-modal__checkbox-list {
+	display: grid;
+	grid-template-columns: 50% 50%;
+	grid-gap: 4px;
+	padding-top: 8px;
+}
+
+.pattern-modal__control {
+	margin-bottom: var( --grid-unit ) !important;
+}
+
+.pattern-modal__control .components-base-control__help {
+	margin: 0;
+}
+
+.pattern-modal__title {
+	margin: 0;
+	color: #fff;
+	font-size: 1.5rem;
+}
+
+.pattern-modal__title-sidebar {
+	margin: 8px 0 0 0;
+	text-align: right;
+}
+
+.pattern-modal__copy {
+	font-size: 0.875rem;
+}
+
+.pattern-modal__link {
+	color: #fff !important;
+}
+
+.pattern-modal-publish {
+	color: #32373c;
+}
+
+.pattern-modal-publish__page {
+	display: grid;
+	grid-template-columns: 30% 70%;
+	height: 375px;
+}
+
+.pattern-modal-publish__page > div:first-child {
+	padding: var( --grid-unit );
+}
+
+.pattern-modal-publish__page > div:last-child {
+	background: #fff;
+	padding: calc( var( --grid-unit ) * 2 );
+}
+
+.pattern-modal-publish__page label:not( .components-checkbox-control__label ),
+.pattern-modal-publish__page legend {
+	font-size: 0.8125rem;
+	font-weight: 600;
+}
+
+.pattern-modal-publish__page fieldset {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.pattern-modal-publish__content {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.pattern-modal-publish__footer {
+	display: flex;
+	justify-content: space-between;
+}
+
+.pattern-modal-publish__button {
+	width: 125px;
+	justify-content: center;
+}
+
+.pattern-modal-publish__button:disabled {
+	background: #ccc !important;
+}
+
+.pattern-modal-published {
+	display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pattern-modal-published > div {
+	height: initial;
+}
+
+.pattern-modal-published__page {
+	margin: 0 auto;
+	width: 60%;
+}
+
+.pattern-modal-published__content {
+	padding-top: var(--grid-unit);
+	display: flex;
+	justify-content: space-between;
+}
+
+/* This is the close button */
+.pattern-modal .components-modal__header > button,
+.pattern-modal .components-modal__header > button:active {
+	background: #fff;
+	color: #000;
+}
+/* Done overwrites */
