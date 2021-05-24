@@ -10,7 +10,7 @@ import { InterfaceSkeleton, store as interfaceStore } from '@wordpress/interface
 import { EditorNotices } from '@wordpress/editor';
 import { store as editPostStore } from '@wordpress/edit-post';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 // eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK.
 import { __experimentalUseDialog as useDialog, useViewportMatch } from '@wordpress/compose';
 
@@ -25,6 +25,7 @@ import PublishModal from '../publish-modal';
 import './style.css';
 
 export default function Layout() {
+    const [showPublish, setShow ] = useState( false );
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const isHugeViewport = useViewportMatch( 'huge', '>=' );
 	const {
@@ -144,7 +145,9 @@ export default function Layout() {
 						<EditorNotices />
 						<VisualEditor styles={ defaultEditorStyles } />
 						{ isMobileViewport && isSidebarOpened && <ScrollLock /> }
-						<PublishModal />
+                        <Button onClick={ () => setShow(true) }> Show Modal</Button>
+						{showPublish && <PublishModal onClose={ () => setShow(false) } /> }
+
 					</>
 				}
 				footer={

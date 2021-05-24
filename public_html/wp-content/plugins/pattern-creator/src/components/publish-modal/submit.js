@@ -21,7 +21,7 @@ const ForwardButton = ( { children, disabled, onClick } ) => (
 	</Button>
 );
 
-export default function SubmitModal( { onSuccess } ) {
+export default function SubmitModal( { onSuccess, onClose } ) {
 	// Get Document default
 	const { postTitle } = useSelect( ( select ) => {
 		return {
@@ -29,9 +29,11 @@ export default function SubmitModal( { onSuccess } ) {
 		};
 	} );
 
+	const [ postDescription ] = usePostMeta( 'wpop_description', '' );
+
 	const [ currentPage, setCurrentPage ] = useState( 0 );
 	const [ title, setTitle ] = useState( postTitle );
-	const [ description, setDescription ] = usePostMeta( 'wpop_description', '' );
+	const [ description, setDescription ] = useState( postDescription );
 	const [ selectedCategories, setSelectedCategories ] = useState( [] );
 	const [ categories, setCategories ] = useState( [] );
 	const container = useRef();
@@ -43,6 +45,12 @@ export default function SubmitModal( { onSuccess } ) {
 	const goForward = () => {
 		setCurrentPage( currentPage + 1 );
 		container.current.closest( '[role="dialog"]' ).focus();
+	};
+
+	const handleSave = () => {
+        // TO DO: Implement save functionality.
+        onSuccess( true );
+        console.log( onSuccess );
 	};
 
 	useEffect( () => {
@@ -134,7 +142,7 @@ export default function SubmitModal( { onSuccess } ) {
 			footer: (
 				<>
 					<Button onClick={ goBack }>{ __( 'Previous', 'wporg-patterns' ) }</Button>
-					<ForwardButton disabled={ ! selectedCategories.length } onClick={ onSuccess }>
+					<ForwardButton disabled={ ! selectedCategories.length } onClick={ handleSave }>
 						{ __( 'Finish', 'wporg-patterns' ) }
 					</ForwardButton>
 				</>
@@ -143,7 +151,7 @@ export default function SubmitModal( { onSuccess } ) {
 	];
 
 	return (
-		<Modal className="pattern-modal pattern-modal-publish" onRequestClose={ onSuccess }>
+		<Modal className="pattern-modal pattern-modal-publish" onRequestClose={ onClose }>
 			<div className="pattern-modal-publish__page" ref={ container }>
 				<div className="pattern-modal-publish__sidebar">
 					<h3 className="pattern-modal__title pattern-modal__title-sidebar">

@@ -12,9 +12,9 @@
 		"start": "wp-scripts start"
 	},
 	"devDependencies": {
-		"@wordpress/api-fetch": "^5.0.0",
+		"@wordpress/api-fetch": "5.0.0",
 		"@wordpress/scripts": "14.0.1",
-		"@wordpress/url": "^3.0.0",
+		"@wordpress/url": "3.0.0",
 		"autoprefixer": "9.8.6",
 		"postcss-custom-properties": "10.0.0"
 	},
