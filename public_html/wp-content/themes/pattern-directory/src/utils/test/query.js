@@ -1,38 +1,72 @@
-import { getCategoryFromPath, removeEmptyArgs, removeQueryString } from '../index';
+import {
+	getCategoryFromPath,
+	getPageFromPath,
+	getValueFromPath,
+	removeEmptyArgs,
+	removeQueryString,
+} from '../index';
 
 describe( 'utils', () => {
+	describe( 'getValueFromPath', () => {
+		it( 'should return empty string if path or key is empty', async () => {
+			expect( getValueFromPath( '' ) ).toEqual( '' );
+			expect( getValueFromPath( '', 'key' ) ).toEqual( '' );
+			expect( getValueFromPath( '/', 'key' ) ).toEqual( '' );
+			expect( getValueFromPath( '/?', 'key' ) ).toEqual( '' );
+		} );
+
+		it( 'should return empty string if the path is malformed', async () => {
+			expect( getValueFromPath( '/key', 'key' ) ).toEqual( '' );
+		} );
+
+		it( 'should return empty string if the key is not found', async () => {
+			expect( getValueFromPath( '/nothing', 'key' ) ).toEqual( '' );
+			expect( getValueFromPath( '/1/2/3/', 'key' ) ).toEqual( '' );
+			expect( getValueFromPath( '/?search=test', 'key' ) ).toEqual( '' );
+		} );
+
+		it( 'should correctly return the value from a path', async () => {
+			expect( getValueFromPath( '/key/header', 'key' ) ).toEqual( 'header' );
+			expect( getValueFromPath( '/key/header/page/3/', 'key' ) ).toEqual( 'header' );
+			expect( getValueFromPath( '/key/header/?search=test', 'key' ) ).toEqual( 'header' );
+			expect( getValueFromPath( '/key/words-and-123/', 'key' ) ).toEqual( 'words-and-123' );
+		} );
+
+		it( 'should correctly return the value from a query string', async () => {
+			expect( getValueFromPath( '/?key=header', 'key' ) ).toEqual( 'header' );
+			expect( getValueFromPath( '/?key=header&page=2', 'key' ) ).toEqual( 'header' );
+			expect( getValueFromPath( '/?search=test&key=header', 'key' ) ).toEqual( 'header' );
+		} );
+
+		it( 'should correctly return the value from a combined path & query string', async () => {
+			expect( getValueFromPath( '/key/abc/?key=def', 'key' ) ).toEqual( 'def' );
+		} );
+	} );
+
 	describe( 'getCategoryFromPath', () => {
 		it( 'should return empty string if path is empty', async () => {
 			expect( getCategoryFromPath( '' ) ).toEqual( '' );
 		} );
 
-		it( 'should return empty string if path is "/"', async () => {
-			expect( getCategoryFromPath( '/' ) ).toEqual( '' );
-		} );
-
-		it( 'should return empty string if the path is malformed', async () => {
-			expect( getCategoryFromPath( '/pattern-categories' ) ).toEqual( '' );
-			expect( getCategoryFromPath( '/nothing' ) ).toEqual( '' );
-			expect( getCategoryFromPath( '/1/2/3/' ) ).toEqual( '' );
-		} );
-
-		it( 'should correctly return the category from a path', async () => {
-			expect( getCategoryFromPath( 'pattern-categories/header' ) ).toEqual( 'header' );
+		it( 'should correctly return the category', async () => {
 			expect( getCategoryFromPath( '/pattern-categories/header' ) ).toEqual( 'header' );
 			expect( getCategoryFromPath( '/pattern-categories/header/page/3/' ) ).toEqual( 'header' );
-			expect( getCategoryFromPath( '/pattern-categories/header/?search=test' ) ).toEqual( 'header' );
-			expect( getCategoryFromPath( '/pattern-categories/words-and-123/' ) ).toEqual( 'words-and-123' );
-		} );
-
-		it( 'should correctly return the category from a query string', async () => {
 			expect( getCategoryFromPath( '/?pattern-categories=header' ) ).toEqual( 'header' );
-			expect( getCategoryFromPath( '/?pattern-categories=header&page=2' ) ).toEqual( 'header' );
-			expect( getCategoryFromPath( '/?search=test' ) ).toEqual( '' );
 			expect( getCategoryFromPath( '/?search=test&pattern-categories=header' ) ).toEqual( 'header' );
+			expect( getCategoryFromPath( '/pattern-categories/abc/?pattern-categories=def' ) ).toEqual( 'def' );
+		} );
+	} );
+
+	describe( 'getPageFromPath', () => {
+		it( 'should return 1 (default first page) if the path is empty', async () => {
+			expect( getPageFromPath( '' ) ).toEqual( 1 );
 		} );
 
-		it( 'should correctly return the category from a combined path & query string', async () => {
-			expect( getCategoryFromPath( '/pattern-categories/abc/?pattern-categories=def' ) ).toEqual( 'def' );
+		it( 'should correctly return the page number', async () => {
+			expect( getPageFromPath( '/pattern-categories/header' ) ).toEqual( 1 );
+			expect( getPageFromPath( '/pattern-categories/header/page/3/' ) ).toEqual( 3 );
+			expect( getPageFromPath( '/pattern-categories=header?page=2' ) ).toEqual( 2 );
+			expect( getPageFromPath( '/page/4' ) ).toEqual( 4 );
 		} );
 	} );
 

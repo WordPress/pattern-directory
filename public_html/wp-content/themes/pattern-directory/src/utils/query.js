@@ -56,25 +56,52 @@ export const removeQueryString = ( path ) => {
 };
 
 /**
- * Retrieves the category from a url path.
- * A query string will take precedence, otherwise will fall back to the category in the path.
+ * Retrieve a given key from a url path.
+ * A query string will take precedence, otherwise will fall back to the value in the path, for example
+ * in '/category/blog/page/2', the value for category is blog, and page is 2. This could also be written
+ * as `?category=blog&page=2`, or `/category/blog/?page=2`.
  *
- * @param {string} path
- * @return {string} The category slug.
+ * @param {string} path A URL path and query string.
+ * @param {string} key  The query var to extract, ex: `pattern-categories`, `page`.
+ * @return {string} The value of the requested key.
  */
-export const getCategoryFromPath = ( path ) => {
+export const getValueFromPath = ( path, key ) => {
+	if ( ! key || ! path ) {
+		return '';
+	}
 	const query = getQueryArgs( path );
-	if ( query[ 'pattern-categories' ] ) {
-		return query[ 'pattern-categories' ];
+	if ( query[ key ] ) {
+		return query[ key ];
 	}
 
 	const _path = removeLeadingSlash( removeTrailingSlash( removeQueryString( path ) ) );
 	const parts = _path.split( '/' );
-	// Find the `pattern-categories` section, if it exists. The next part of the URL is the category slug.
-	const index = parts.indexOf( 'pattern-categories' );
+	// Find the key section, if it exists. The next part of the URL is the value.
+	const index = parts.indexOf( key );
 	if ( -1 === index ) {
 		return '';
 	}
 
 	return parts[ index + 1 ] || '';
 };
+
+/**
+ * Retrieve the category from a url path.
+ *
+ * @param {string} path
+ * @return {string} The category slug.
+ */
+export const getCategoryFromPath = ( path ) => {
+	return getValueFromPath( path, 'pattern-categories' );
+};
+
+/**
+ * Retrieve the page from a url path.
+ *
+ * @param {string} path
+ * @return {number} The page number.
+ */
+export const getPageFromPath = ( path ) => {
+	return Number( getValueFromPath( path, 'page' ) || 1 );
+};
+
