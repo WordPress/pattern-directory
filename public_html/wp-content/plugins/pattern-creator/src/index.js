@@ -11,6 +11,7 @@ import '@wordpress/format-library';
  * Internal dependencies
  */
 import { filterEndpoints } from './api-middleware';
+import './plugins/hide-inspector-controls';
 import './plugins/main-dashboard-button';
 import './style.css';
 
