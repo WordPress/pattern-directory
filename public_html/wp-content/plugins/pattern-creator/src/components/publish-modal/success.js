@@ -18,7 +18,7 @@ export default function PublishedModal( { onClose } ) {
 					) }
 				</p>
 				<div className="pattern-modal-published__content">
-					<Button isPrimary>{ __( 'Close', 'wporg-patterns' ) }</Button>
+					<Button isPrimary onClick={ onClose }>{ __( 'Close', 'wporg-patterns' ) }</Button>
 					<Button className="pattern-modal__link" isLink>{ __( 'Create another pattern', 'wporg-patterns' ) }</Button>
 					<Button className="pattern-modal__link" isLink>{ __( 'View my patterns', 'wporg-patterns' ) }</Button>
 				</div>
