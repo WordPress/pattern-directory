@@ -6,7 +6,7 @@ import { store } from '@wordpress/edit-post';
 import { useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 
-const HideInspectorControls = () => {
+const InspectorControlsModifier = () => {
 	useEffect( () => {
 		// We don't want the post-status control
 		dispatch( store ).removeEditorPanel( 'post-status' );
@@ -18,6 +18,6 @@ const HideInspectorControls = () => {
 	return null;
 };
 
-registerPlugin( 'hide-inspector-controls', {
-	render: () => <HideInspectorControls />,
+registerPlugin( 'inspector-controls-modifier', {
+	render: () => <InspectorControlsModifier />,
 } );
