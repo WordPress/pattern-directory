@@ -5,7 +5,6 @@ import apiPatterns from './fixtures/patterns';
 import apiCategories from './fixtures/categories';
 import apiPatternFlagReasons from './fixtures/pattern-flag-reasons';
 import { getCategories, getFavorites, getPatternFlagReasons, getPatternsByQuery } from '../resolvers';
-import { PER_PAGE } from '../utils';
 
 describe( 'getPatternsByQuery', () => {
 	it( 'yields with the requested patterns & query meta', async () => {
@@ -19,7 +18,7 @@ describe( 'getPatternsByQuery', () => {
 		// trigger apiFetch
 		const { value: apiFetchAction } = generator.next();
 		expect( apiFetchAction.request ).toEqual( {
-			path: `/wp/v2/wporg-pattern?per_page=${ PER_PAGE }`,
+			path: `/wp/v2/wporg-pattern`,
 			parse: false,
 		} );
 

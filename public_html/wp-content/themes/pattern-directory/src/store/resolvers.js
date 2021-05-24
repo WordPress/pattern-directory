@@ -17,7 +17,7 @@ import {
 	loadPatternFlagReasons,
 	loadPatterns,
 } from './actions';
-import { PER_PAGE, getQueryString } from './utils';
+import { getQueryString } from './utils';
 
 async function parseResponse( response ) {
 	try {
@@ -36,7 +36,7 @@ export function* getPatternsByQuery( query ) {
 	try {
 		yield fetchPatterns( queryString );
 		const response = yield apiFetch( {
-			path: addQueryArgs( '/wp/v2/wporg-pattern', { ...query, per_page: PER_PAGE } ),
+			path: addQueryArgs( '/wp/v2/wporg-pattern', query ),
 			parse: false,
 		} );
 		const { total, totalPages, results } = yield __unstableAwaitPromise( parseResponse( response ) );
