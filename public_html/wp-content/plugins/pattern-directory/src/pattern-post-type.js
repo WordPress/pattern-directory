@@ -27,7 +27,6 @@ const PatternPostType = () => {
 		PluginDocumentSettingPanel,
 		{
 			name: 'wporg-pattern-details',
-			title: 'Pattern Details',
 		},
 		<>
 			<TextControl
