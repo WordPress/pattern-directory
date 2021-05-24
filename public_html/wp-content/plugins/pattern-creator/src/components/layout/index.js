@@ -25,7 +25,7 @@ import PublishModal from '../publish-modal';
 import './style.css';
 
 export default function Layout() {
-    const [showPublish, setShow ] = useState( false );
+	const [ showPublish, setShow ] = useState( false );
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const isHugeViewport = useViewportMatch( 'huge', '>=' );
 	const {
@@ -145,8 +145,8 @@ export default function Layout() {
 						<EditorNotices />
 						<VisualEditor styles={ defaultEditorStyles } />
 						{ isMobileViewport && isSidebarOpened && <ScrollLock /> }
-                        <Button onClick={ () => setShow(true) }> Show Modal</Button>
-						{showPublish && <PublishModal onClose={ () => setShow(false) } /> }
+						<Button onClick={ () => setShow( true ) }> Show Modal</Button>
+						{ showPublish && <PublishModal onClose={ () => setShow( false ) } /> }
 
 					</>
 				}

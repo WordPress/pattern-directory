@@ -13,7 +13,11 @@ export default function PublishModal( { onClose } ) {
 	const [ submitted, setSubmitted ] = useState( false );
 	return (
 		<>
-			{ ! submitted ? <SubmitModal onSuccess={ setSubmitted } onClose={ onClose } /> : <SuccessModal onClose={ onClose } /> }
+			{ ! submitted ? (
+				<SubmitModal onSuccess={ setSubmitted } onClose={ onClose } />
+			) : (
+				<SuccessModal onClose={ onClose } />
+			) }
 		</>
 	);
 }

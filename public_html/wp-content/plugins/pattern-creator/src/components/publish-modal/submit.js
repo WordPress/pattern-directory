@@ -48,9 +48,8 @@ export default function SubmitModal( { onSuccess, onClose } ) {
 	};
 
 	const handleSave = () => {
-        // TO DO: Implement save functionality.
-        onSuccess( true );
-        console.log( onSuccess );
+		// TO DO: Implement save functionality.
+		onSuccess( true );
 	};
 
 	useEffect( () => {
