@@ -13,6 +13,7 @@ import '@wordpress/format-library';
 import { filterEndpoints } from './api-middleware';
 import './plugins/hide-inspector-controls';
 import './plugins/main-dashboard-button';
+import './plugins/update-inspector-panel-text';
 import './style.css';
 
 // Set up API middleware.
