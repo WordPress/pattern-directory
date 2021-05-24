@@ -3,5 +3,9 @@ import { registerPlugin } from '@wordpress/plugins';
 import { __experimentalMainDashboardButton as MainDashboardButton } from '@wordpress/edit-post';
 
 registerPlugin( 'main-dashboard-button-test', {
-	render: () => <MainDashboardButton>{ '←' }</MainDashboardButton>,
+	render: () => (
+		<MainDashboardButton>
+			<a className="main-dashboard-button" href="http://wordpress.org">{ '←' }</a>
+		</MainDashboardButton>
+	),
 } );

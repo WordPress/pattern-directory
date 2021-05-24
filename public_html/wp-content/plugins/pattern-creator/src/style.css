@@ -37,3 +37,20 @@ body.is-fullscreen-mode #wpadminbar {
 .block-editor-post-preview__dropdown {
 	display: none;
 }
+
+.main-dashboard-button,
+.main-dashboard-button:hover {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #23282e;
+	color: #fff;
+	height: 60px;
+	width: 60px;
+	font-size: 16px;
+	text-decoration: none;
+}
+
+.main-dashboard-button:hover {
+	background: #1e1e1e;
+}
