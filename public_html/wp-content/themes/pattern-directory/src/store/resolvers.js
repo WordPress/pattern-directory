@@ -22,8 +22,8 @@ import { getQueryString } from './utils';
 async function parseResponse( response ) {
 	try {
 		return {
-			total: response.headers?.get( 'X-WP-Total' ),
-			totalPages: response.headers?.get( 'X-WP-TotalPages' ),
+			total: Number( response.headers?.get( 'X-WP-Total' ) || 0 ),
+			totalPages: Number( response.headers?.get( 'X-WP-TotalPages' ) || 0 ),
 			results: await response.json(),
 		};
 	} catch ( error ) {
@@ -43,8 +43,8 @@ export function* getPatternsByQuery( query ) {
 		yield loadPatterns( queryString, {
 			page: query.page || 1,
 			patterns: results,
-			total: Number( total ),
-			totalPages: Number( totalPages ),
+			total: total,
+			totalPages: totalPages,
 		} );
 	} catch ( error ) {}
 }
