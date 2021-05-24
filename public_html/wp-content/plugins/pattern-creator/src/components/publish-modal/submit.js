@@ -70,7 +70,7 @@ export default function SubmitModal( { onSuccess } ) {
 				<>
 					<TextControl
 						className="pattern-modal__control"
-						label={ __( 'Title', 'wporg-patterns' ) }
+						label={ __( 'Title (Required)', 'wporg-patterns' ) }
 						value={ title }
 						placeholder={ __( 'Name your pattern', 'wporg-patterns' ) }
 						onChange={ setTitle }
@@ -86,14 +86,13 @@ export default function SubmitModal( { onSuccess } ) {
 							'wporg-patterns'
 						) }
 						onChange={ setDescription }
-						required={ true }
 					/>
 				</>
 			),
 			footer: (
 				<>
 					<span />
-					<ForwardButton disabled={ ! title.length || ! description.length } onClick={ goForward }>
+					<ForwardButton disabled={ ! title.length } onClick={ goForward }>
 						{ __( 'Next', 'wporg-patterns' ) }
 					</ForwardButton>
 				</>
@@ -103,7 +102,7 @@ export default function SubmitModal( { onSuccess } ) {
 			content: (
 				<>
 					<fieldset>
-						<legend>{ __( 'Category', 'wporg-patterns' ) }</legend>
+						<legend>{ __( 'Category (Required)', 'wporg-patterns' ) }</legend>
 						<p>
 							{ __(
 								'Categories help people find patterns and determines where your pattern will appear in the WordPress Editor.',

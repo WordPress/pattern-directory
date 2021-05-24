@@ -46,6 +46,10 @@
 	margin-bottom: var(--grid-unit) !important;
 }
 
+.pattern-modal__control-container {
+	position: relative;
+}
+
 .pattern-modal__control .components-base-control__help {
 	margin: 0;
 }
