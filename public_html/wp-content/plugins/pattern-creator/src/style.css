@@ -23,10 +23,16 @@ body.is-fullscreen-mode #wpadminbar {
 /* Update the main editing document color */
 .editor-styles-wrapper {
 	background: #2f2f2f;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
 
 .editor-post-title {
 	color: #fff;
+}
+
+.editor-post-title__input {
+	text-align: center;
+	font-weight: 400 !important;
 }
 
 .block-editor-block-list__layout {
