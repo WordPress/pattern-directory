@@ -12,7 +12,9 @@
 		"start": "wp-scripts start"
 	},
 	"devDependencies": {
+		"@wordpress/components": "14.1.0",
 		"@wordpress/data": "5.1.0",
+		"@wordpress/editor": "10.1.0",
 		"@wordpress/element": "3.1.0",
 		"@wordpress/i18n": "4.1.0",
 		"@wordpress/scripts": "14.0.1",

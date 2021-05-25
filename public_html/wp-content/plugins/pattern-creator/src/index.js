@@ -13,6 +13,7 @@ import '@wordpress/format-library';
 import { filterEndpoints } from './api-middleware';
 import './plugins/inspector-controls-modifier';
 import './plugins/main-dashboard-button';
+import './plugins/save-post-modifier';
 import './plugins/update-inspector-panel-text';
 import './style.css';
 
