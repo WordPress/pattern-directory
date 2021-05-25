@@ -101,7 +101,7 @@ function enqueue_assets() {
 		'allowedBlockTypes'                    => apply_filters( 'allowed_block_types', true, $post ),
 		'disablePostFormats'                   => true,
 		'enableCustomFields'                   => false,
-		'titlePlaceholder'                     => __( 'Add title', 'wporg-patterns' ),
+		'titlePlaceholder'                     => __( 'Add pattern title', 'wporg-patterns' ),
 		'bodyPlaceholder'                      => __( 'Start writing or type / to choose a block', 'wporg-patterns' ),
 		'isRTL'                                => is_rtl(),
 		'autosaveInterval'                     => AUTOSAVE_INTERVAL,
