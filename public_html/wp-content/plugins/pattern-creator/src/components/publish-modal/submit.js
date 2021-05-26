@@ -4,7 +4,7 @@
 import apiFetch from '@wordpress/api-fetch';
 import { Button, CheckboxControl, Modal, TextControl, TextareaControl } from '@wordpress/components';
 import { store as editorStore } from '@wordpress/editor';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
@@ -21,7 +21,7 @@ const ForwardButton = ( { children, disabled, onClick } ) => (
 	</Button>
 );
 
-export default function SubmitModal( { onSuccess, onClose } ) {
+export default function SubmitModal( { onSubmit, onClose } ) {
 	// Get current post defaults
 	const { postTitle, patternCategories, meta } = useSelect( ( select ) => {
 		return {
@@ -31,26 +31,14 @@ export default function SubmitModal( { onSuccess, onClose } ) {
 		};
 	} );
 
+	const { editPost } = useDispatch( editorStore );
+
 	const [ title, setTitle ] = useState( postTitle );
 	const [ description, setDescription ] = useState( meta.wpop_description );
 	const [ selectedCategories, setSelectedCategories ] = useState( patternCategories );
 	const [ categories, setCategories ] = useState( [] );
 	const [ currentPage, setCurrentPage ] = useState( 0 );
 	const container = useRef();
-
-	const goBack = () => {
-		setCurrentPage( currentPage - 1 );
-	};
-
-	const goForward = () => {
-		setCurrentPage( currentPage + 1 );
-		container.current.closest( '[role="dialog"]' ).focus();
-	};
-
-	const handleSave = () => {
-		// TO DO: Implement save functionality.
-		onSuccess( true );
-	};
 
 	useEffect( () => {
 		const getCategories = () => {
@@ -70,6 +58,26 @@ export default function SubmitModal( { onSuccess, onClose } ) {
 
 		getCategories();
 	}, [] );
+
+	useEffect( () => {
+		editPost( {
+			meta: {
+				...meta,
+				wpop_description: description,
+			},
+			title: title,
+			'pattern-categories': selectedCategories,
+		} );
+	}, [ title, description, selectedCategories ] );
+
+	const goBack = () => {
+		setCurrentPage( currentPage - 1 );
+	};
+
+	const goForward = () => {
+		setCurrentPage( currentPage + 1 );
+		container.current.closest( '[role="dialog"]' ).focus();
+	};
 
 	const pages = [
 		{
@@ -141,7 +149,7 @@ export default function SubmitModal( { onSuccess, onClose } ) {
 			footer: (
 				<>
 					<Button onClick={ goBack }>{ __( 'Previous', 'wporg-patterns' ) }</Button>
-					<ForwardButton disabled={ ! selectedCategories.length } onClick={ handleSave }>
+					<ForwardButton disabled={ ! selectedCategories.length } onClick={ onSubmit }>
 						{ __( 'Finish', 'wporg-patterns' ) }
 					</ForwardButton>
 				</>

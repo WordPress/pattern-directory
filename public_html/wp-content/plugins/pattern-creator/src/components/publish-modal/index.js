@@ -1,20 +1,14 @@
 /**
- * WordPress dependencies
- */
-import { useState } from '@wordpress/element';
-
-/**
  * Internal dependencies
  */
 import SubmitModal from './submit';
 import SuccessModal from './success';
 
-export default function PublishModal( { onClose } ) {
-	const [ submitted, setSubmitted ] = useState( false );
+export default function PublishModal( { isSubmitted, onSubmit, onClose } ) {
 	return (
 		<>
-			{ ! submitted ? (
-				<SubmitModal onSuccess={ setSubmitted } onClose={ onClose } />
+			{ ! isSubmitted ? (
+				<SubmitModal onSubmit={ onSubmit } onClose={ onClose } />
 			) : (
 				<SuccessModal onClose={ onClose } />
 			) }
