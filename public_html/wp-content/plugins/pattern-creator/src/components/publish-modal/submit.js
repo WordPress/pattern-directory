@@ -12,7 +12,6 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * Internal dependencies
  */
-
 import './style.css';
 
 const ForwardButton = ( { children, disabled, onClick } ) => (
@@ -116,16 +115,20 @@ export default function SubmitModal( { onSubmit, onClose } ) {
 		{
 			content: (
 				<>
-					<fieldset>
-						<legend>{ __( 'Category (Required)', 'wporg-patterns' ) }</legend>
-						<p>
-							{ __(
-								'Categories help people find patterns and determines where your pattern will appear in the WordPress Editor.',
-								'wporg-patterns'
-							) }
-						</p>
-						<div className="pattern-modal__checkbox-list">
-							{ categories.map( ( i ) => (
+					<h3 className="pattern-modal__subtitle">{ __( 'Category (Required)', 'wporg-patterns' ) }</h3>
+					<p>
+						{ __(
+							'Categories help people find patterns and determines where your pattern will appear in the WordPress Editor.',
+							'wporg-patterns'
+						) }
+					</p>
+					<ul
+						role="listbox"
+						className="pattern-modal__checkbox-list"
+						aria-label={ __( 'Pattern categories', 'wporg-patterns' ) }
+					>
+						{ categories.map( ( i ) => (
+							<li>
 								<CheckboxControl
 									key={ i.value }
 									label={ i.label }
@@ -141,9 +144,9 @@ export default function SubmitModal( { onSubmit, onClose } ) {
 										}
 									} }
 								/>
-							) ) }
-						</div>
-					</fieldset>
+							</li>
+						) ) }
+					</ul>
 				</>
 			),
 			footer: (

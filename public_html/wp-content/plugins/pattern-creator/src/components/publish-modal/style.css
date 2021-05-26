@@ -34,12 +34,16 @@
 	color: #fff;
 }
 
-
 .pattern-modal__checkbox-list {
 	display: grid;
 	grid-template-columns: 50% 50%;
 	grid-gap: 4px;
 	padding-top: 8px;
+	margin: 0;
+}
+
+.pattern-modal__checkbox-list li {
+	list-style: none;
 }
 
 .pattern-modal__control {
@@ -93,7 +97,9 @@
 }
 
 .pattern-modal-publish__page label:not(.components-checkbox-control__label),
-.pattern-modal-publish__page legend {
+.pattern-modal__subtitle {
+	margin-top: 0;
+	margin-bottom: 8px;
 	font-size: 0.8125rem;
 	font-weight: 600;
 }
@@ -144,7 +150,6 @@
 	background-size: 250px;
 }
 
-
 .pattern-modal-published > div {
 	margin-bottom: var(--grid-unit);
 	height: initial;
@@ -167,5 +172,4 @@
 	background: #fff;
 	color: #000;
 }
-
 /* Done overwrites */
