@@ -1,4 +1,3 @@
-
 :root {
 	--wp-admin-theme-color: #3858e9;
 	--wp-admin-theme-color-darker-10: #074fd2;
@@ -19,11 +18,24 @@ body.is-fullscreen-mode #wpadminbar {
 	display: none;
 }
 
+/* Used for the dropdown btn */
+.interface-interface-skeleton__header {
+	z-index: 10000;
+}
 
 /* Update the main editing document color */
 .editor-styles-wrapper {
 	background: #2f2f2f;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	font-family:
+		-apple-system,
+		BlinkMacSystemFont,
+		"Segoe UI",
+		Roboto,
+		Oxygen-Sans,
+		Ubuntu,
+		Cantarell,
+		"Helvetica Neue",
+		sans-serif;
 }
 
 .editor-post-title {
@@ -59,4 +71,8 @@ body.is-fullscreen-mode #wpadminbar {
 
 .main-dashboard-button:hover {
 	background: #1e1e1e;
+}
+
+.viewport-header-control > button {
+	color: var(--wp-admin-theme-color);
 }

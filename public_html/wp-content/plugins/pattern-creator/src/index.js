@@ -15,6 +15,7 @@ import './plugins/inspector-controls-modifier';
 import './plugins/main-dashboard-button';
 import './plugins/save-post-modifier';
 import './plugins/update-inspector-panel-text';
+import './plugins/viewport-header-control';
 import './style.css';
 
 // Set up API middleware.
