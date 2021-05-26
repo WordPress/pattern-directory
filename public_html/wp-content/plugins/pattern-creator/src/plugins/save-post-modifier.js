@@ -6,7 +6,7 @@ import { store } from '@wordpress/editor';
 import { useEffect, useState } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 
-window.gutenbergSavePost = wp.data.dispatch( store ).savePost;
+window.gutenbergSavePost = dispatch( store ).savePost;
 
 const SavePostModifier = () => {
 	const [ showModal, setShowModal ] = useState( false );
