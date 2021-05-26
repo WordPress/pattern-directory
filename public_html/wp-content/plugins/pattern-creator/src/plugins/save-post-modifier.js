@@ -1,7 +1,6 @@
 /**
  * WordPress dependencies
  */
-import { Modal } from '@wordpress/components';
 import { dispatch } from '@wordpress/data';
 import { store } from '@wordpress/editor';
 import { useEffect, useState } from '@wordpress/element';
@@ -34,7 +33,7 @@ const SavePostModifier = () => {
 
 	if ( showModal ) {
 		// To Do: This needs to be replaced by the actual UI
-		return <Modal onRequestClose={ () => setShowModal( false ) }>Replace with modal.</Modal>;
+		// Return the publish modal
 	}
 
 	return null;
