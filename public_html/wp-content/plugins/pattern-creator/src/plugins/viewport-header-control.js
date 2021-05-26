@@ -4,7 +4,12 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
-import { DropdownMenu, MenuGroup, MenuItem } from '@wordpress/components';
+import {
+	DropdownMenu,
+	MenuGroup,
+	MenuItem,
+	__experimentalUnitControl as UnitControl,
+} from '@wordpress/components';
 import { registerPlugin } from '@wordpress/plugins';
 
 /**
@@ -88,6 +93,14 @@ const ViewportHeaderControl = () => {
 		// Update the main container width
 		updateElementWidth();
 
+		const handleUpdate = ( { target } ) => {
+			if ( target.value < 1 ) {
+				return;
+			}
+
+			setViewport( target.value );
+		};
+
 		insertButton(
 			<DropdownMenu
 				className="viewport-header-control"
@@ -101,6 +114,23 @@ const ViewportHeaderControl = () => {
 			>
 				{ ( { onClose } ) => (
 					<>
+						<MenuGroup label="Viewport Width">
+							<p className="viewport-header-control__copy">
+								This is used when displaying a preview of your pattern.
+							</p>
+							<UnitControl
+								label={ __( 'Viewport Width', 'wporg-patterns' ) }
+								type="number"
+								hideLabelFromVision={ true }
+								isPressEnterToChange={ true }
+								units={ [ { value: 'px', label: 'px', default: 0 } ] }
+								onKeyUp={ ( event ) => {
+									if ( event.key === 'Enter' ) {
+										handleUpdate( event );
+									}
+								} }
+							/>
+						</MenuGroup>
 						<MenuGroup>
 							{ WIDTH_DEFAULTS.map( ( i ) => {
 								const isActive = i.value === viewportWidth;

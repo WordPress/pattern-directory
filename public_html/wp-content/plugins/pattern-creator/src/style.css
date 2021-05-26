@@ -76,5 +76,10 @@ body.is-fullscreen-mode #wpadminbar {
 
 .viewport-header-control > button {
 	color: var(--wp-admin-theme-color);
+}
 
+.viewport-header-control__copy {
+	font-size: 10px;
+    color: #757575;
+    margin: 0 0.5rem 1rem;
 }
