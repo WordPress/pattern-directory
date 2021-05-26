@@ -38,6 +38,25 @@ export function loadPatterns( query, { page, patterns, total, totalPages } ) {
 }
 
 /**
+ * Get the action object signalling that patterns have been loaded.
+ *
+ * @param {string} query Search string.
+ * @param {Object} response
+ * @param {Array} response.page The current page.
+ * @param {Object} response.error The error message, as reported from the API.
+ *
+ * @return {Object} Action object.
+ */
+export function setErrorPatterns( query, { page, error } ) {
+	return {
+		type: 'ERROR_BLOCK_PATTERNS',
+		query: query,
+		page: page,
+		error: error,
+	};
+}
+
+/**
  * Get the action object signalling that the current view has been set.
  *
  * @param {string} query Query object.
