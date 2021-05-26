@@ -12,7 +12,7 @@ import { addQueryArgs } from '@wordpress/url';
 /**
  * Internal dependencies
  */
-import usePostMeta from '../../store/hooks/use-post-meta';
+
 import './style.css';
 
 const ForwardButton = ( { children, disabled, onClick } ) => (
@@ -22,20 +22,20 @@ const ForwardButton = ( { children, disabled, onClick } ) => (
 );
 
 export default function SubmitModal( { onSuccess, onClose } ) {
-	// Get Document default
-	const { postTitle } = useSelect( ( select ) => {
+	// Get current post defaults
+	const { postTitle, patternCategories, meta } = useSelect( ( select ) => {
 		return {
+			meta: select( editorStore ).getEditedPostAttribute( 'meta' ),
 			postTitle: select( editorStore ).getEditedPostAttribute( 'title' ),
+			patternCategories: select( editorStore ).getEditedPostAttribute( 'pattern-categories' ),
 		};
 	} );
 
-	const [ postDescription ] = usePostMeta( 'wpop_description', '' );
-
-	const [ currentPage, setCurrentPage ] = useState( 0 );
 	const [ title, setTitle ] = useState( postTitle );
-	const [ description, setDescription ] = useState( postDescription );
-	const [ selectedCategories, setSelectedCategories ] = useState( [] );
+	const [ description, setDescription ] = useState( meta.wpop_description );
+	const [ selectedCategories, setSelectedCategories ] = useState( patternCategories );
 	const [ categories, setCategories ] = useState( [] );
+	const [ currentPage, setCurrentPage ] = useState( 0 );
 	const container = useRef();
 
 	const goBack = () => {
@@ -60,7 +60,7 @@ export default function SubmitModal( { onSuccess, onClose } ) {
 				setCategories(
 					res.map( ( i ) => {
 						return {
-							value: i.slug,
+							value: i.id,
 							label: i.name,
 						};
 					} )
