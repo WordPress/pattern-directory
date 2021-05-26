@@ -1,13 +1,16 @@
 /**
  * WordPress dependencies
  */
-import { dispatch } from '@wordpress/data';
+import { dispatch, useSelect } from '@wordpress/data';
 import { store } from '@wordpress/editor';
 import { useEffect, useState } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 
+window.gutenbergSavePost = wp.data.dispatch( store ).savePost;
+
 const SavePostModifier = () => {
 	const [ showModal, setShowModal ] = useState( false );
+	const postStatus = useSelect( ( select ) => select( store ).getEditedPostAttribute( 'status' ) );
 
 	useEffect( () => {
 		// We don't want the publish sidebar confirmation
@@ -27,7 +30,15 @@ const SavePostModifier = () => {
 				return;
 			}
 
-			setShowModal( true );
+			// The post is set to 'publish' before 'savePost' is called,
+			// we can rely on that to make sure we only show the window when necessary
+			if ( 'publish' === postStatus ) {
+				setShowModal( true );
+			} else if ( 'auto-draft' === postStatus ) {
+				window.gutenbergSavePost();
+			}
+
+			return false;
 		};
 	}, [] );
 
