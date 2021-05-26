@@ -31,7 +31,7 @@ export default function Pagination( { currentPage = 1, totalPages } ) {
 	return (
 		<nav className="pagination" aria-label={ __( 'Pagination', 'wporg-patterns' ) }>
 			<ul className="pagination__list">
-				<li className="pagination__item pagination__item--previous-page">
+				<li className="pagination__item pagination__item-previous-page">
 					{ hasPrevious && (
 						<a
 							className="pagination__link"
@@ -73,7 +73,7 @@ export default function Pagination( { currentPage = 1, totalPages } ) {
 						</li>
 					);
 				} ) }
-				<li className="pagination__item pagination__item--next-page">
+				<li className="pagination__item pagination__item-next-page">
 					{ hasNext && (
 						<a
 							className="pagination__link"
