@@ -130,7 +130,7 @@ function register_post_type_data() {
 			'type'              => 'number',
 			'description'       => 'The width of the pattern in the block inserter.',
 			'single'            => true,
-			'default'           => 1200,
+			'default'           => 800,
 			'sanitize_callback' => 'absint',
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
 			'show_in_rest'      => array(

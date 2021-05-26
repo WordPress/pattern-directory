@@ -48,8 +48,9 @@ body.is-fullscreen-mode #wpadminbar {
 }
 
 .block-editor-block-list__layout {
-	margin: 0 2rem;
+	margin: 0 auto;
 	background: #fff;
+	box-shadow: 0 0 0 1rem #fff;
 }
 
 .block-editor-post-preview__dropdown {
@@ -75,4 +76,5 @@ body.is-fullscreen-mode #wpadminbar {
 
 .viewport-header-control > button {
 	color: var(--wp-admin-theme-color);
+
 }

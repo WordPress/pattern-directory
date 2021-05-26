@@ -7,7 +7,25 @@ import { useEffect, useState } from '@wordpress/element';
 import { DropdownMenu, MenuGroup, MenuItem } from '@wordpress/components';
 import { registerPlugin } from '@wordpress/plugins';
 
+/**
+ * Internal dependencies
+ */
 const CONTAINER_ID = 'pattern-viewport-container';
+
+const WIDTH_DEFAULTS = [
+	{
+		label: 'Narrow (320px)',
+		value: 320,
+	},
+	{
+		label: 'Default (800px)',
+		value: 800,
+	},
+	{
+		label: 'Large (1200px)',
+		value: 1200,
+	},
+];
 
 /**
  * Removes the button container if it exists
@@ -54,20 +72,10 @@ const ViewportHeaderControl = () => {
 	const postMetaData = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'meta' ) || {} );
 	const [ viewportWidth, setViewport ] = useState( postMetaData.wpop_viewport_width );
 
-	const options = [
-		{
-			label: 'Narrow (320px)',
-			value: 320,
-		},
-		{
-			label: 'Medium (800px)',
-			value: 800,
-		},
-		{
-			label: 'Default (1200px)',
-			value: 1200,
-		},
-	];
+	const updateElementWidth = () => {
+		const page = document.querySelector( '.block-editor-block-list__layout' );
+		page.style.width = `${ viewportWidth }px`;
+	};
 
 	useEffect( () => {
 		editPost( {
@@ -76,9 +84,10 @@ const ViewportHeaderControl = () => {
 				wpop_viewport_width: viewportWidth,
 			},
 		} );
-	}, [ viewportWidth ] );
 
-	useEffect( () => {
+		// Update the main container width
+		updateElementWidth();
+
 		insertButton(
 			<DropdownMenu
 				className="viewport-header-control"
@@ -93,7 +102,7 @@ const ViewportHeaderControl = () => {
 				{ ( { onClose } ) => (
 					<>
 						<MenuGroup>
-							{ options.map( ( i ) => {
+							{ WIDTH_DEFAULTS.map( ( i ) => {
 								const isActive = i.value === viewportWidth;
 
 								return (
