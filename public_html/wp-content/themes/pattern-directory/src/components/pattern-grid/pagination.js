@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import classnames from 'classnames';
-
-/**
  * WordPress dependencies
  */
 import { __, _x, sprintf } from '@wordpress/i18n';
@@ -37,18 +32,18 @@ export default function Pagination( { currentPage = 1, totalPages } ) {
 		<nav className="pagination" aria-label={ __( 'Pagination', 'wporg-patterns' ) }>
 			<ul className="pagination__list">
 				<li className="pagination__item pagination__item--previous-page">
-					<a
-						className={ classnames( {
-							pagination__link: true,
-							'pagination__link--is-disabled': ! hasPrevious,
-						} ) }
-						href={ `${ basePath }page/${ currentPage - 1 }` }
-						aria-disabled={ ! hasPrevious ? 'disabled' : undefined }
-						onClick={ ( event ) => onClick( event, currentPage - 1 ) }
-					>
-						<span className="screen-reader-text">{ __( 'Previous page', 'wporg-patterns' ) }</span>
-						<span aria-hidden>{ _x( 'Previous', 'previous page link label', 'wporg-patterns' ) }</span>
-					</a>
+					{ hasPrevious && (
+						<a
+							className="pagination__link"
+							href={ `${ basePath }page/${ currentPage - 1 }` }
+							onClick={ ( event ) => onClick( event, currentPage - 1 ) }
+						>
+							<span className="screen-reader-text">{ __( 'Previous page', 'wporg-patterns' ) }</span>
+							<span aria-hidden>
+								{ _x( 'Previous', 'previous page link label', 'wporg-patterns' ) }
+							</span>
+						</a>
+					) }
 				</li>
 				{ pages.map( ( page, index ) => {
 					if ( '…' === page ) {
@@ -79,18 +74,16 @@ export default function Pagination( { currentPage = 1, totalPages } ) {
 					);
 				} ) }
 				<li className="pagination__item pagination__item--next-page">
-					<a
-						className={ classnames( {
-							pagination__link: true,
-							'pagination__link--is-disabled': ! hasNext,
-						} ) }
-						href={ `${ basePath }page/${ currentPage + 1 }` }
-						aria-disabled={ ! hasNext ? 'disabled' : undefined }
-						onClick={ ( event ) => onClick( event, currentPage + 1 ) }
-					>
-						<span className="screen-reader-text">{ __( 'Next page', 'wporg-patterns' ) }</span>
-						<span aria-hidden>{ _x( 'Next', 'next page link label', 'wporg-patterns' ) }</span>
-					</a>
+					{ hasNext && (
+						<a
+							className="pagination__link"
+							href={ `${ basePath }page/${ currentPage + 1 }` }
+							onClick={ ( event ) => onClick( event, currentPage + 1 ) }
+						>
+							<span className="screen-reader-text">{ __( 'Next page', 'wporg-patterns' ) }</span>
+							<span aria-hidden>{ _x( 'Next', 'next page link label', 'wporg-patterns' ) }</span>
+						</a>
+					) }
 				</li>
 			</ul>
 		</nav>

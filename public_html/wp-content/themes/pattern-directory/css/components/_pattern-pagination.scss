@@ -31,6 +31,11 @@
 	line-height: 1;
 	text-decoration: none;
 
+	&:hover,
+	&:active {
+		text-decoration: none;
+	}
+
 	&[aria-current="page"] {
 		border: 1px solid $color-gray-900;
 		background: $color-gray-900;
