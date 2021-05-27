@@ -34,9 +34,12 @@ function byId( state = {}, action ) {
 
 function queries( state = {}, action ) {
 	const patternIds = ( action.patterns || [] ).map( ( { id } ) => id );
+	const { page, total, totalPages } = action;
 	switch ( action.type ) {
 		case 'LOAD_BLOCK_PATTERNS':
-			return { ...state, [ action.query ]: [ ...( state[ action.query ] || [] ), ...patternIds ] };
+			const _queryState = { ...( state[ action.query ] || {} ), total, totalPages };
+			_queryState[ page ] = patternIds;
+			return { ...state, [ action.query ]: _queryState };
 		default:
 			return state;
 	}

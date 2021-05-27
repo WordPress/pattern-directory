@@ -10,6 +10,7 @@ add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
 add_filter( 'allowed_block_types', __NAMESPACE__ . '\remove_disallowed_blocks', 10, 2 );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
+add_filter( 'rest_' . POST_TYPE . '_collection_params', __NAMESPACE__ . '\filter_patterns_collection_params' );
 
 
 /**
@@ -326,6 +327,21 @@ function disable_block_directory() {
 		remove_action( 'enqueue_block_editor_assets', 'wp_enqueue_editor_block_directory_assets' );
 		remove_action( 'enqueue_block_editor_assets', 'gutenberg_enqueue_block_editor_assets_block_directory' );
 	}
+}
+
+/**
+ * Filter the collection parameters to set a new default for per_page.
+ *
+ * @param array $query_params JSON Schema-formatted collection parameters.
+ * @return array Filtered parameters.
+ */
+function filter_patterns_collection_params( $query_params ) {
+	if ( isset( $query_params['per_page'] ) ) {
+		// Number of patterns per page, should be multiple of 2 and 3 (for 2- and 3-column layouts).
+		$query_params['per_page']['default'] = 18;
+	}
+
+	return $query_params;
 }
 
 /**
