@@ -16,6 +16,7 @@ import {
 	loadFavorites,
 	loadPatternFlagReasons,
 	loadPatterns,
+	setErrorPatterns,
 } from './actions';
 import { getQueryString } from './utils';
 
@@ -26,6 +27,14 @@ async function parseResponse( response ) {
 			totalPages: Number( response.headers?.get( 'X-WP-TotalPages' ) || 0 ),
 			results: await response.json(),
 		};
+	} catch ( error ) {
+		return {};
+	}
+}
+
+async function parseError( response ) {
+	try {
+		return await response.json();
 	} catch ( error ) {
 		return {};
 	}
@@ -46,7 +55,14 @@ export function* getPatternsByQuery( query ) {
 			total: total,
 			totalPages: totalPages,
 		} );
-	} catch ( error ) {}
+	} catch ( error ) {
+		const parsedError = yield __unstableAwaitPromise( parseError( error ) );
+		// @todo Do something with this error message.
+		yield setErrorPatterns( queryString, {
+			page: query.page || 1,
+			error: parsedError,
+		} );
+	}
 }
 
 export function* getCategories() {
