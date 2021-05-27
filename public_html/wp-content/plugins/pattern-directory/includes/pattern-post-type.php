@@ -127,16 +127,17 @@ function register_post_type_data() {
 		POST_TYPE,
 		'wpop_viewport_width',
 		array(
-			'type'              => 'number',
+			'type'              => 'string',
+			'pattern' => '[0-9]+(px|%|rem|em|vw)',
 			'description'       => 'The width of the pattern in the block inserter.',
 			'single'            => true,
-			'default'           => 800,
-			'sanitize_callback' => 'absint',
+			'default'           => '800px',
+			'sanitize_callback' => 'sanitize_text_field',
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
 			'show_in_rest'      => array(
 				'schema' => array(
-					'minimum' => 400,
-					'maximum' => 2000,
+					'minLength' => 2,
+					'maxLength' => 360,
 				),
 			),
 		)

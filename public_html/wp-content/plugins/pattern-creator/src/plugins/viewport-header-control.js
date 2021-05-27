@@ -1,4 +1,9 @@
 /**
+ * External Dependencies
+ */
+import { noop } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
@@ -8,7 +13,7 @@ import {
 	DropdownMenu,
 	MenuGroup,
 	MenuItem,
-	__experimentalUnitControl as UnitControl,
+	TextControl,
 } from '@wordpress/components';
 import { registerPlugin } from '@wordpress/plugins';
 
@@ -20,15 +25,15 @@ const CONTAINER_ID = 'pattern-viewport-container';
 const WIDTH_DEFAULTS = [
 	{
 		label: 'Narrow (320px)',
-		value: 320,
+		value: '320px',
 	},
 	{
 		label: 'Default (800px)',
-		value: 800,
+		value: '800px',
 	},
 	{
-		label: 'Large (1200px)',
-		value: 1200,
+		label: 'Full (100%)',
+		value: '100%',
 	},
 ];
 
@@ -79,7 +84,7 @@ const ViewportHeaderControl = () => {
 
 	const updateElementWidth = () => {
 		const page = document.querySelector( '.block-editor-block-list__layout' );
-		page.style.width = `${ viewportWidth }px`;
+		page.style.width = viewportWidth;
 	};
 
 	useEffect( () => {
@@ -93,21 +98,13 @@ const ViewportHeaderControl = () => {
 		// Update the main container width
 		updateElementWidth();
 
-		const handleUpdate = ( { target } ) => {
-			if ( target.value < 1 ) {
-				return;
-			}
-
-			setViewport( target.value );
-		};
-
 		insertButton(
 			<DropdownMenu
 				className="viewport-header-control"
 				icon={ null }
 				text={ sprintf(
-					/* translators: %d viewport width as a number*/
-					__( `Width (%dpx)`, 'wporg-patterns' ),
+					/* translators: %s viewport width as css, ie: 100% */
+					__( `Width (%s)`, 'wporg-patterns' ),
 					viewportWidth
 				) }
 				label={ __( 'Select a viewport width', 'wporg-patterns' ) }
@@ -118,15 +115,13 @@ const ViewportHeaderControl = () => {
 							<p className="viewport-header-control__copy">
 								This is used when displaying a preview of your pattern.
 							</p>
-							<UnitControl
+							<TextControl
 								label={ __( 'Viewport Width', 'wporg-patterns' ) }
-								type="number"
 								hideLabelFromVision={ true }
-								isPressEnterToChange={ true }
-								units={ [ { value: 'px', label: 'px', default: 0 } ] }
+								onChange={ noop }
 								onKeyUp={ ( event ) => {
-									if ( event.key === 'Enter' ) {
-										handleUpdate( event );
+									if ( event.key === 'Enter' && /[0-9]+(px|%|rem|em|vw)/.test( event.target.value ) ) {
+										setViewport( event.target.value );
 									}
 								} }
 							/>
