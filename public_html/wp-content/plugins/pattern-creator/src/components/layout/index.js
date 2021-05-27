@@ -21,11 +21,9 @@ import Header from '../header';
 import Settings from '../settings';
 import Sidebar from './sidebar';
 import VisualEditor from '../visual-editor';
-import PublishModal from '../publish-modal';
 import './style.css';
 
 export default function Layout() {
-	const [ showModal, setShowModal ] = useState( false );
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const isHugeViewport = useViewportMatch( 'huge', '>=' );
 	const {
@@ -145,8 +143,6 @@ export default function Layout() {
 						<EditorNotices />
 						<VisualEditor styles={ defaultEditorStyles } />
 						{ isMobileViewport && isSidebarOpened && <ScrollLock /> }
-						{ showModal && <PublishModal onClose={ () => setShowModal( true ) } /> }
-						<button onClick={ () => setShowModal( true ) }>This should be a button </button>
 					</>
 				}
 				footer={
