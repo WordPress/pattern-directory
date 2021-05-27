@@ -10,7 +10,7 @@ import { InterfaceSkeleton, store as interfaceStore } from '@wordpress/interface
 import { EditorNotices } from '@wordpress/editor';
 import { store as editPostStore } from '@wordpress/edit-post';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect } from '@wordpress/element';
 // eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK.
 import { __experimentalUseDialog as useDialog, useViewportMatch } from '@wordpress/compose';
 
