@@ -128,9 +128,8 @@ export default function SubmitModal( { onSubmit, onClose } ) {
 						aria-label={ __( 'Pattern categories', 'wporg-patterns' ) }
 					>
 						{ categories.map( ( i ) => (
-							<li>
+							<li key={ i.value }>
 								<CheckboxControl
-									key={ i.value }
 									label={ i.label }
 									value={ i.value }
 									checked={ selectedCategories.includes( i.value ) }
