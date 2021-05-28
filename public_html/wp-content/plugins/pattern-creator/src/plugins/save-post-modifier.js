@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { dispatch, useSelect } from '@wordpress/data';
+import { dispatch, select } from '@wordpress/data';
 import { store } from '@wordpress/editor';
 import { useEffect, useState } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
@@ -10,12 +10,10 @@ window.gutenbergSavePost = dispatch( store ).savePost;
 
 const SavePostModifier = () => {
 	const [ showModal, setShowModal ] = useState( false );
-	const postStatus = useSelect( ( select ) => select( store ).getEditedPostAttribute( 'status' ) );
 
 	useEffect( () => {
 		// We don't want the publish sidebar confirmation
 		dispatch( store ).disablePublishSidebar();
-
 		/**
 		 * We currently don't have a hook to intercept Gutenberg save functionality
 		 * so we override the `savePost` function.
@@ -29,6 +27,9 @@ const SavePostModifier = () => {
 			if ( props && props.isAutosave ) {
 				return;
 			}
+
+			// We need to wait until now to get the status otherwise we will be working with a previous context
+			const postStatus = select( store ).getEditedPostAttribute( 'status' );
 
 			// The post is set to 'publish' before 'savePost' is called,
 			// we can rely on that to make sure we only show the window when necessary
