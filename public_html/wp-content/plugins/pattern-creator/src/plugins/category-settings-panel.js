@@ -20,7 +20,7 @@ const PATTERN_CAT_KEY = 'pattern-categories';
 
 const CategorySettingsPanel = () => {
 	const categories = useSelect( ( select ) =>
-		select( coreStore ).getEntityRecords( 'taxonomy', 'wporg-pattern-category', { per_page: 20 } )
+		select( coreStore ).getEntityRecords( 'taxonomy', 'wporg-pattern-category', { per_page: 20 } ) || []
 	);
 
 	const patternCategories = useSelect(
@@ -34,10 +34,6 @@ const CategorySettingsPanel = () => {
 			[ PATTERN_CAT_KEY ]: newCategories,
 		} );
 	};
-
-	if ( ! categories || ! categories.length ) {
-		return null;
-	}
 
 	return (
 		<DocumentPanel
