@@ -11,6 +11,7 @@ import '@wordpress/format-library';
  * Internal dependencies
  */
 import { filterEndpoints } from './api-middleware';
+import './plugins/category-settings-panel';
 import './plugins/inspector-controls-modifier';
 import './plugins/main-dashboard-button';
 import './plugins/save-post-modifier';
