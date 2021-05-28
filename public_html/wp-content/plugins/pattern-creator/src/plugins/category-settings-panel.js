@@ -73,7 +73,7 @@ const CategorySettingsPanel = () => {
 		</DocumentPanel>
 	);
 };
-registerPlugin( 'plugin-document-setting-panel-demo', {
+registerPlugin( 'plugin-document-setting-category-panel', {
 	render: CategorySettingsPanel,
 	icon: null,
 } );
