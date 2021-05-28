@@ -8,7 +8,7 @@ import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
  */
 import './style.css';
 
-const DocumentPanel = ( { name, title, summary, children } ) => {
+const DocumentSettingPanel = ( { name, title, summary, children } ) => {
 	return (
 		<PluginDocumentSettingPanel name={ name } title={ title }>
 			<p className="document-panel-summary">{ summary }</p>
@@ -17,4 +17,4 @@ const DocumentPanel = ( { name, title, summary, children } ) => {
 	);
 };
 
-export default DocumentPanel;
+export default DocumentSettingPanel;

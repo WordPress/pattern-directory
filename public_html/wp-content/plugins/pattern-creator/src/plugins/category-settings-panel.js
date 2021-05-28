@@ -4,14 +4,14 @@
 import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 import { CheckboxControl } from '@wordpress/components';
-import { useDispatch, useSelect } from '@wordpress/data';
-import { store } from '@wordpress/editor';
+import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
  */
-import DocumentPanel from '../components/document-panel';
+import DocumentSettingPanel from '../components/document-setting-panel';
+import usePostTaxonomy from '../hooks/use-post-taxonomy';
 
 /**
  * Module constants
@@ -23,20 +23,10 @@ const CategorySettingsPanel = () => {
 		select( coreStore ).getEntityRecords( 'taxonomy', 'wporg-pattern-category', { per_page: 20 } ) || []
 	);
 
-	const patternCategories = useSelect(
-		( select ) => select( store ).getEditedPostAttribute( PATTERN_CAT_KEY ) || []
-	);
-
-	const { editPost } = useDispatch( store );
-
-	const updateCategoryList = ( newCategories ) => {
-		editPost( {
-			[ PATTERN_CAT_KEY ]: newCategories,
-		} );
-	};
+	const [ terms, setTerms ] = usePostTaxonomy( PATTERN_CAT_KEY );
 
 	return (
-		<DocumentPanel
+		<DocumentSettingPanel
 			name="wporg-categories"
 			title={ __( 'Categories', 'wporg-patterns' ) }
 			summary={ __(
@@ -52,13 +42,13 @@ const CategorySettingsPanel = () => {
 							<CheckboxControl
 								label={ i.name }
 								value={ i.id }
-								checked={ patternCategories.includes( i.id ) }
+								checked={ terms.includes( i.id ) }
 								onChange={ ( checked ) => {
 									if ( checked ) {
-										updateCategoryList( [ ...patternCategories, i.id ] );
+										setTerms( [ ...terms, i.id ] );
 									} else {
-										updateCategoryList(
-											patternCategories.filter( ( catId ) => catId !== i.id )
+										setTerms(
+											terms.filter( ( catId ) => catId !== i.id )
 										);
 									}
 								} }
@@ -66,7 +56,7 @@ const CategorySettingsPanel = () => {
 						</li>
 					) ) }
 			</ul>
-		</DocumentPanel>
+		</DocumentSettingPanel>
 	);
 };
 registerPlugin( 'plugin-document-setting-category-panel', {
