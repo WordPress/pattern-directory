@@ -8,11 +8,17 @@ import { registerPlugin } from '@wordpress/plugins';
 
 const InspectorControlsModifier = () => {
 	useEffect( () => {
+		const { removeEditorPanel } = dispatch( store );
+
 		// We don't want the post-status control
-		dispatch( store ).removeEditorPanel( 'post-status' );
+		removeEditorPanel( 'post-status' );
 
 		// We don't want permalinks
-		dispatch( store ).removeEditorPanel( 'post-link' );
+		removeEditorPanel( 'post-link' );
+
+		// Turn off the custom taxonomy panels and replace with our own
+		removeEditorPanel( 'taxonomy-panel-wporg-pattern-category' );
+		removeEditorPanel( 'taxonomy-panel-wporg-pattern-keyword' );
 	}, [] );
 
 	return null;
