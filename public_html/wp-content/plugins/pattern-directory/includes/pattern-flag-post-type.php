@@ -35,7 +35,7 @@ function register_post_type_data() {
 		'search_items'          => __( 'Search Flags', 'wporg-patterns' ),
 		'not_found'             => __( 'No flags found.', 'wporg-patterns' ),
 		'not_found_in_trash'    => __( 'No flags found in Trash.', 'wporg-patterns' ),
-		'all_items'             => __( 'Flags', 'wporg-patterns' ),
+		'all_items'             => __( 'All Flags', 'wporg-patterns' ),
 		'insert_into_item'      => __( 'Insert into flag', 'wporg-patterns' ),
 		'filter_items_list'     => __( 'Filter flags list', 'wporg-patterns' ),
 		'items_list_navigation' => __( 'Flags list navigation', 'wporg-patterns' ),

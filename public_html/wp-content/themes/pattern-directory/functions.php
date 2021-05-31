@@ -3,6 +3,7 @@
 namespace WordPressdotorg\Pattern_Directory\Theme;
 
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG_POST_TYPE;
 
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
@@ -11,6 +12,8 @@ add_action( 'pre_get_posts', __NAMESPACE__ . '\pre_get_posts' );
 
 add_filter( 'search_template', __NAMESPACE__ . '\use_index_php_as_template' );
 add_filter( 'archive_template', __NAMESPACE__ . '\use_index_php_as_template' );
+
+add_filter( 'pre_handle_404', __NAMESPACE__ . '\bypass_404_page', 10, 2 );
 
 /**
  * Sets up theme defaults and registers support for various WordPress features.
@@ -58,6 +61,12 @@ function enqueue_assets() {
 		wp_enqueue_style( 'wp-components' );
 
 		wp_set_script_translations( 'wporg-pattern-script', 'wporg-patterns' );
+
+		wp_add_inline_script(
+			'wporg-pattern-script',
+			sprintf( 'var wporgAssetUrl = "%s";', esc_url( get_stylesheet_directory_uri() ) ),
+			'before'
+		);
 	}
 
 	wp_enqueue_script( 'wporg-navigation', get_template_directory_uri() . "/js/navigation$suffix.js", array(), '20210331', true );
@@ -129,4 +138,37 @@ function pre_get_posts( $wp_query ) {
  */
 function use_index_php_as_template() {
 	return __DIR__ . '/index.php';
+}
+
+/**
+ * Checks whether the user has a pending flag for a specific pattern.
+ *
+ * @return bool
+ */
+function user_has_flagged_pattern() {
+	$args = array(
+		'author' => get_current_user_id(),
+		'post_parent' => get_the_ID(),
+		'post_type' => FLAG_POST_TYPE,
+		'post_status' => 'pending',
+	);
+
+	$items = new \WP_Query( $args );
+
+	return $items->have_posts();
+}
+
+/**
+ * Handle a possible 404 page when viewing patterns, which might happen if the JS pagination is
+ * different than the WP default.
+ *
+ * @param bool     $preempt  Whether to short-circuit default header status handling. Default false.
+ * @param WP_Query $wp_query WordPress Query object.
+ * @return bool
+ */
+function bypass_404_page( $preempt, $wp_query ) {
+	if ( isset( $wp_query->query_vars['post_type'][0] ) && POST_TYPE === $wp_query->query_vars['post_type'][0] ) {
+		return true;
+	}
+	return $preempt;
 }

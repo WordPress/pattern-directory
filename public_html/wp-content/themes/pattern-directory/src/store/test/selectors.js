@@ -7,11 +7,17 @@ import {
 	getCategories,
 	getCategoryBySlug,
 	getCurrentQuery,
+	getFavorites,
 	getPattern,
+	getPatternFlagReasons,
+	getPatternTotalPagesByQuery,
+	getPatternTotalsByQuery,
 	getPatterns,
 	getPatternsByQuery,
 	hasLoadedCategories,
+	isFavorite,
 	isLoadingCategories,
+	isLoadingPatternFlagReasons,
 	isLoadingPatternsByQuery,
 } from '../selectors';
 
@@ -21,16 +27,27 @@ describe( 'selectors', () => {
 			queries: {},
 			byId: {},
 		},
+		favorites: [],
 	};
 
 	const state = {
 		patterns: {
 			queries: {
-				'': [ 31, 25, 27, 26 ],
-				'empty=1': [],
+				'': {
+					total: 4,
+					totalPages: 2,
+					1: [ 31, 25 ],
+					2: [ 27, 26 ],
+				},
+				'empty=1': {
+					total: 0,
+					totalPages: 0,
+					1: [],
+				},
 			},
 			byId: apiPatterns.reduce( ( acc, cur ) => ( { ...acc, [ cur.id ]: cur } ), {} ),
 		},
+		favorites: [ 25, 27 ],
 	};
 
 	describe( 'isLoadingPatternsByQuery', () => {
@@ -68,7 +85,7 @@ describe( 'selectors', () => {
 
 	describe( 'getPatternsByQuery', () => {
 		it( 'should get an empty array if no patterns are loaded for this query', () => {
-			expect( getPatternsByQuery( initialState, '' ) ).toEqual( [] );
+			expect( getPatternsByQuery( initialState, {} ) ).toEqual( [] );
 		} );
 
 		it( 'should get an empty array if no patterns are loaded for this query, even if patterns exist for another query', () => {
@@ -76,13 +93,41 @@ describe( 'selectors', () => {
 		} );
 
 		it( 'should get the list of patterns for this query', () => {
-			const patternsByQuery = getPatternsByQuery( state, '' );
-			expect( patternsByQuery ).toHaveLength( 4 );
-			// Keep the sort order of the query: [ 31, 25, 27, 26 ]
+			const patternsByQuery = getPatternsByQuery( state, {} );
+			expect( patternsByQuery ).toHaveLength( 2 );
+			// Keep the sort order of the query: [ 31, 25 ]
 			expect( patternsByQuery[ 0 ] ).toHaveProperty( 'id', 31 );
 			expect( patternsByQuery[ 1 ] ).toHaveProperty( 'id', 25 );
-			expect( patternsByQuery[ 2 ] ).toHaveProperty( 'id', 27 );
-			expect( patternsByQuery[ 3 ] ).toHaveProperty( 'id', 26 );
+		} );
+
+		it( 'should get the second page of patterns for this query', () => {
+			const patternsByQuery = getPatternsByQuery( state, { page: 2 } );
+			expect( patternsByQuery ).toHaveLength( 2 );
+			// Keep the sort order of the query: [ 27, 26 ]
+			expect( patternsByQuery[ 0 ] ).toHaveProperty( 'id', 27 );
+			expect( patternsByQuery[ 1 ] ).toHaveProperty( 'id', 26 );
+		} );
+	} );
+
+	describe( 'getPatternTotalsByQuery', () => {
+		it( 'should get 0 if no patterns are loaded for this query', () => {
+			expect( getPatternTotalsByQuery( initialState, {} ) ).toEqual( 0 );
+		} );
+
+		it( 'should get the total number of patterns for this query, regardless of pagination', () => {
+			expect( getPatternTotalsByQuery( state, {} ) ).toEqual( 4 );
+			expect( getPatternTotalsByQuery( state, { page: 2 } ) ).toEqual( 4 );
+		} );
+	} );
+
+	describe( 'getPatternTotalPagesByQuery', () => {
+		it( 'should get 0 if no patterns are loaded for this query', () => {
+			expect( getPatternTotalPagesByQuery( initialState, {} ) ).toEqual( 0 );
+		} );
+
+		it( 'should get the total number of pages for this query, regardless of pagination', () => {
+			expect( getPatternTotalPagesByQuery( state, {} ) ).toEqual( 2 );
+			expect( getPatternTotalPagesByQuery( state, { page: 2 } ) ).toEqual( 2 );
 		} );
 	} );
 
@@ -211,6 +256,66 @@ describe( 'selectors', () => {
 				'id',
 				apiCategories[ 0 ].id
 			);
+		} );
+	} );
+
+	describe( 'getPatternFlagReasons', () => {
+		it( 'should get undefined if query has not been made', () => {
+			expect( getPatternFlagReasons( {} ) ).toBeUndefined();
+		} );
+
+		it( 'should get array if query has completed', () => {
+			const reasons = [
+				{ id: 1, name: 'crude' },
+				{ id: 2, name: 'rude' },
+			];
+			expect( getPatternFlagReasons( { patternFlagReasons: reasons } ) ).toEqual( reasons );
+		} );
+	} );
+
+	describe( 'isLoadingPatternFlagReasons', () => {
+		it( 'should get false if not null', () => {
+			expect(
+				isLoadingPatternFlagReasons( {
+					patternFlagReasons: [],
+				} )
+			).toBe( false );
+		} );
+
+		it( 'should get true if null', () => {
+			expect(
+				isLoadingPatternFlagReasons( {
+					patternFlagReasons: null,
+				} )
+			).toBe( true );
+		} );
+	} );
+
+	describe( 'getFavorites', () => {
+		it( 'should get an empty array if no favorites are loaded', () => {
+			expect( getFavorites( initialState ) ).toEqual( [] );
+		} );
+
+		it( 'should get the list of favorites if they exist', () => {
+			expect( getFavorites( state ) ).toEqual( [ 25, 27 ] );
+		} );
+	} );
+
+	describe( 'isFavorite', () => {
+		it( 'should get false if no favorites are loaded', () => {
+			expect( isFavorite( initialState, 2 ) ).toBe( false );
+		} );
+
+		it( 'should get false if the ID requested is not in the list', () => {
+			expect( isFavorite( state, 2 ) ).toBe( false );
+		} );
+
+		it( 'should get false if the ID requested is not a valid ID', () => {
+			expect( isFavorite( state, 'fake' ) ).toBe( false );
+		} );
+
+		it( 'should get true if the ID requested is found in the list', () => {
+			expect( isFavorite( state, 25 ) ).toBe( true );
 		} );
 	} );
 } );

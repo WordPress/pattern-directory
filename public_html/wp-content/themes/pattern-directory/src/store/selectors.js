@@ -13,7 +13,8 @@ import { getQueryString } from './utils';
  */
 export function isLoadingPatternsByQuery( state, query ) {
 	const queryString = getQueryString( query );
-	return ! Array.isArray( state.patterns.queries[ queryString ] );
+	const page = query?.page || 1;
+	return ! Array.isArray( state.patterns.queries?.[ queryString ]?.[ page ] );
 }
 
 /**
@@ -37,7 +38,35 @@ export function getPatterns( state ) {
  */
 export function getPatternsByQuery( state, query ) {
 	const queryString = getQueryString( query );
-	return ( state.patterns.queries[ queryString ] || [] ).map( ( id ) => state.patterns.byId[ id ] );
+	const page = query?.page || 1;
+	const patternIds = state.patterns.queries?.[ queryString ]?.[ page ];
+	return ( patternIds || [] ).map( ( id ) => state.patterns.byId[ id ] );
+}
+
+/**
+ * Get the count of all patterns for a given query.
+ *
+ * @param {Object} state Global application state.
+ * @param {Object} query Query parameters.
+ *
+ * @return {number} The count of all patterns matching this query.
+ */
+export function getPatternTotalsByQuery( state, query ) {
+	const queryString = getQueryString( query );
+	return state.patterns.queries?.[ queryString ]?.total || 0;
+}
+
+/**
+ * Get the number of pages of patterns for a given query.
+ *
+ * @param {Object} state Global application state.
+ * @param {Object} query Query parameters.
+ *
+ * @return {number} The count of pages.
+ */
+export function getPatternTotalPagesByQuery( state, query ) {
+	const queryString = getQueryString( query );
+	return state.patterns.queries?.[ queryString ]?.totalPages || 0;
 }
 
 /**
@@ -111,4 +140,49 @@ export function getCategoryBySlug( state, slug ) {
 
 	const [ cat ] = state.categories.filter( ( i ) => i.slug === slug );
 	return cat;
+}
+
+/**
+ * Get pattern flag reasons.
+ *
+ * @param {Object} state Global application state.
+ *
+ * @return {Array} A list of pattern flag reasons.
+ */
+export function getPatternFlagReasons( state ) {
+	return state.patternFlagReasons;
+}
+
+/**
+ * Check if pattern flag reasons are loading.
+ *
+ * @param {Object} state Global application state.
+ *
+ * @return {Array} A list of pattern flag reasons.
+ */
+export function isLoadingPatternFlagReasons( state ) {
+	return state.patternFlagReasons === null;
+}
+
+/**
+ * Get the list of favorites.
+ *
+ * @param {Object} state Global application state.
+ *
+ * @return {number[]} A list of favorite pattern IDs.
+ */
+export function getFavorites( state ) {
+	return state.favorites;
+}
+
+/**
+ * Check if a pattern ID is in the list of favorites.
+ *
+ * @param {Object} state Global application state.
+ * @param {number} patternId The pattern to check.
+ *
+ * @return {number[]} A list of favorite pattern IDs.
+ */
+export function isFavorite( state, patternId ) {
+	return state.favorites.includes( patternId );
 }
