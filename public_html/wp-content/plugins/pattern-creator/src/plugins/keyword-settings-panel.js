@@ -11,7 +11,7 @@ import { store as coreStore } from '@wordpress/core-data';
  * Internal dependencies
  */
 import DocumentSettingPanel from '../components/document-setting-panel';
-import usePostTaxonomy from '../hooks/use-post-taxonomy';
+import usePostData from '../hooks/use-post-data';
 
 /**
  * Module constants
@@ -24,7 +24,7 @@ const KeywordSettingPanel = () => {
 			select( coreStore ).getEntityRecords( 'taxonomy', 'wporg-pattern-keyword', { per_page: 20 } ) || []
 	);
 
-	const [ terms, setTerms ] = usePostTaxonomy( PATTERN_KEYWORD_KEY );
+	const [ terms, setTerms ] = usePostData( PATTERN_KEYWORD_KEY );
 
 	return (
 		<DocumentSettingPanel

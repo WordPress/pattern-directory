@@ -11,7 +11,7 @@ import { store as coreStore } from '@wordpress/core-data';
  * Internal dependencies
  */
 import DocumentSettingPanel from '../components/document-setting-panel';
-import usePostTaxonomy from '../hooks/use-post-taxonomy';
+import usePostData from '../hooks/use-post-data';
 
 /**
  * Module constants
@@ -23,7 +23,7 @@ const CategorySettingsPanel = () => {
 		select( coreStore ).getEntityRecords( 'taxonomy', 'wporg-pattern-category', { per_page: 20 } ) || []
 	);
 
-	const [ terms, setTerms ] = usePostTaxonomy( PATTERN_CAT_KEY );
+	const [ terms, setTerms ] = usePostData( PATTERN_CAT_KEY );
 
 	return (
 		<DocumentSettingPanel

@@ -11,8 +11,12 @@ import '@wordpress/format-library';
  * Internal dependencies
  */
 import { filterEndpoints } from './api-middleware';
+
+// The order of these panels matter since Gutenberg currently doesn't have a way to order panels.
 import './plugins/category-settings-panel';
 import './plugins/keyword-settings-panel';
+import './plugins/block-scope-settings-panel';
+
 import './plugins/inspector-controls-modifier';
 import './plugins/main-dashboard-button';
 import './plugins/save-post-modifier';
