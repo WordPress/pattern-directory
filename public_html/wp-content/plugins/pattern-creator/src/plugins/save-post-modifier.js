@@ -35,7 +35,6 @@ const SavePostModifier = () => {
 			// we can rely on that to make sure we only show the window when necessary
 			if ( 'publish' === postStatus ) {
 				setShowModal( true );
-                window.gutenbergSavePost();
 			} else if ( 'auto-draft' === postStatus ) {
 				window.gutenbergSavePost();
 			}
