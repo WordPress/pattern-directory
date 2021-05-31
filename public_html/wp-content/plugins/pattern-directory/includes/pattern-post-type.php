@@ -131,7 +131,7 @@ function register_post_type_data() {
 		'wpop_viewport_width',
 		array(
 			'type'              => 'string',
-			'pattern' => '[0-9]+(px|%|rem|em|vw)',
+			'pattern'           => '[0-9]+(px|%|rem|em|vw)',
 			'description'       => 'The width of the pattern in the block inserter.',
 			'single'            => true,
 			'default'           => '800px',
