@@ -35,9 +35,11 @@ function PatternThumbnail( { pattern } ) {
 						<img alt={ pattern.author_avatar.alt } src={ pattern.author_avatar.url } />
 					</span>
 				) : null }
-				<span className="pattern-grid__favorite-count">
-					<IconHeartFilled height={ 12 } width={ 12 } /> 123
-				</span>
+				{ pattern.favorite_count > 0 ? (
+					<span className="pattern-grid__favorite-count">
+						<IconHeartFilled height={ 12 } width={ 12 } /> { pattern.favorite_count }
+					</span>
+				) : null }
 			</p>
 		</div>
 	);

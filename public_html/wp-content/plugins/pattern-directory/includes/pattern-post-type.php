@@ -246,6 +246,23 @@ function register_rest_fields() {
 	 */
 	register_rest_field(
 		POST_TYPE,
+		'favorite_count',
+		array(
+			'get_callback' => function() {
+				return rand( 50, 750 );
+			},
+
+			'schema' => array(
+				'type'  => 'integer',
+			),
+		)
+	);
+
+	/*
+	 * Get the author's avatar.
+	 */
+	register_rest_field(
+		POST_TYPE,
 		'author_avatar',
 		array(
 			'get_callback' => function() {
