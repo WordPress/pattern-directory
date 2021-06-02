@@ -59,6 +59,7 @@ const BlockScopeSettingsPanel = () => {
 									} );
 								} else {
 									setMeta( {
+										...meta,
 										[ META_KEY ]: metaBlockTypes.filter( ( term ) => term !== i.value ),
 									} );
 								}
