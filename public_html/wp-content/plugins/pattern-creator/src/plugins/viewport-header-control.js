@@ -122,9 +122,9 @@ const ViewportHeaderControl = () => {
 			>
 				{ ( ) => (
 					<>
-						<MenuGroup label="Viewport Width">
+						<MenuGroup label={ __( 'Viewport Width', 'wporg-patterns' ) }>
 							<p className="viewport-header-control__copy">
-								This is used when displaying a preview of your pattern.
+								{ __( 'This is used when displaying a preview of your pattern.', 'wporg-patterns' ) }
 							</p>
 							<UnitControl
 								label={ __( 'Viewport Width', 'wporg-patterns' ) }
