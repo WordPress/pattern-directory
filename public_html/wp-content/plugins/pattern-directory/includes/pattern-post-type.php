@@ -240,6 +240,39 @@ function register_rest_fields() {
 			),
 		)
 	);
+
+	/*
+	 * Get the author's avatar.
+	 */
+	register_rest_field(
+		POST_TYPE,
+		'author_avatar',
+		array(
+			'get_callback' => function() {
+				return array(
+					'alt' => get_the_author_meta( 'display_name' ),
+					'url' => get_avatar_url(
+						get_the_ID(),
+						array(
+							'size' => 36,
+						)
+					),
+				);
+			},
+
+			'schema' => array(
+				'type'  => 'object',
+				'properties' => array(
+					'alt' => array(
+						'type'  => 'string',
+					),
+					'url' => array(
+						'type'  => 'string',
+					),
+				),
+			),
+		)
+	);
 }
 
 /**

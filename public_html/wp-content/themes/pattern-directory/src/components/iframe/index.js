@@ -114,7 +114,7 @@ function Iframe( { contentRef, children, head, headHTML, themeSlug, ...props }, 
 		headHTML += `<link rel="stylesheet" href="https://wp-themes.com/wp-content/themes/${ themeSlug }/style.css" media="all" />`;
 	} else {
 		headHTML +=
-			'<link rel="stylesheet" href="https://wp-themes.com/wp-content/themes/twentytwentyone/style.css" media="all" />';
+			'<link rel="stylesheet" href="https://wp-themes.com/wp-content/themes/twentynineteen/style.css" media="all" />';
 	}
 
 	const setRef = useCallback( ( node ) => {
