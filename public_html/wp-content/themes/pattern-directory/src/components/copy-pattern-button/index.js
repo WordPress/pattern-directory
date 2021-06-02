@@ -2,34 +2,60 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { speak } from '@wordpress/a11y';
 import { Button } from '@wordpress/components';
+import { useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { copyToClipboard } from '../../utils';
 
-const CopyPatternButton = ( { onSuccess } ) => {
-	const handleClick = ( { target } ) => {
+const CopyPatternButton = ( { isSmall = false, onSuccess, content } ) => {
+	const [ copied, setCopied ] = useState( false );
+
+	if ( ! content ) {
 		// Grab the pattern markup from hidden input
 		const blockData = document.getElementById( 'block-data' );
-		const blockPattern = JSON.parse( decodeURIComponent( blockData.value ) );
+		content = JSON.parse( decodeURIComponent( blockData.value ) );
+	}
 
-		const success = copyToClipboard( blockPattern );
+	const handleClick = ( { target } ) => {
+		const success = copyToClipboard( content );
+
+		setCopied( success );
 
 		// Make sure we reset focus in case it was lost in the 'copy' command.
 		target.focus();
 
-		if ( success ) {
+		if ( success && 'function' === typeof onSuccess ) {
 			onSuccess();
 		} else {
 			// TODO Handle error case
 		}
 	};
 
+	useEffect( () => {
+		if ( ! copied ) {
+			return;
+		}
+
+		speak( __( 'Copied pattern to clipboard.', 'wporg-patterns' ) );
+
+		const timer = setTimeout( () => setCopied( false ), 20000 );
+		return () => {
+			clearTimeout( timer );
+		};
+	}, [ copied ] );
+
+	let label = __( 'Copy Pattern', 'wporg-patterns' );
+	if ( isSmall ) {
+		label = copied ? __( 'Copied', 'wporg-patterns' ) : __( 'Copy', 'wporg-patterns' );
+	}
+
 	return (
 		<Button isPrimary onClick={ handleClick }>
-			{ __( 'Copy Pattern', 'wporg-patterns' ) }
+			{ label }
 		</Button>
 	);
 };
