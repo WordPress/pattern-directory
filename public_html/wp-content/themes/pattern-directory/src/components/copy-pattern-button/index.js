@@ -1,6 +1,11 @@
 /**
  * External dependencies
  */
+import classnames from 'classnames';
+
+/**
+ * External dependencies
+ */
 import { __ } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
 import { Button } from '@wordpress/components';
@@ -53,8 +58,13 @@ const CopyPatternButton = ( { isSmall = false, onSuccess, content } ) => {
 		label = copied ? __( 'Copied', 'wporg-patterns' ) : __( 'Copy', 'wporg-patterns' );
 	}
 
+	const classes = classnames( {
+		'pattern__copy-button': true,
+		'is-small-label': isSmall,
+	} );
+
 	return (
-		<Button isPrimary onClick={ handleClick }>
+		<Button className={ classes } isPrimary onClick={ handleClick }>
 			{ label }
 		</Button>
 	);
