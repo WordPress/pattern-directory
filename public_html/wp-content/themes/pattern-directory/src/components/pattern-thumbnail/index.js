@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { Disabled } from '@wordpress/components';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -16,7 +17,7 @@ function PatternThumbnail( { pattern } ) {
 		<div className="pattern-grid__pattern">
 			<div className="pattern-grid__pattern-frame">
 				<a href={ pattern.link } rel="bookmark">
-					<span className="screen-reader-text">{ pattern.title.rendered }</span>
+					<span className="screen-reader-text">{ decodeEntities( pattern.title.rendered ) }</span>
 					<Disabled>
 						<Canvas className="pattern-grid__preview" html={ pattern.content.rendered } />
 					</Disabled>
@@ -27,7 +28,7 @@ function PatternThumbnail( { pattern } ) {
 				</div>
 			</div>
 
-			<h2 className="pattern-grid__title">{ pattern.title.rendered }</h2>
+			<h2 className="pattern-grid__title">{ decodeEntities( pattern.title.rendered ) }</h2>
 			<p className="pattern-grid__meta">
 				{ pattern.author_avatar ? (
 					<span className="pattern-grid__author-avatar">
