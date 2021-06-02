@@ -9,7 +9,7 @@
 		"format:js": "wp-scripts format-js",
 		"lint:css": "echo \"No CSS.\"",
 		"lint:js": "wp-scripts lint-js",
-		"start": "wp-scripts start pattern-post-type=./src/pattern-post-type.jst"
+		"start": "wp-scripts start pattern-post-type=./src/pattern-post-type.js"
 	},
 	"dependencies": {
 		"@wordpress/components": "13.0.0",
