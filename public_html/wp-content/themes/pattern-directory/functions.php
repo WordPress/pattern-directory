@@ -125,22 +125,32 @@ function generate_block_editor_styles_html() {
 }
 
 /**
- * Update the archive views to show block patterns.
+ * Handle queries.
+ * - My Patterns and Favories have "subpages" which should still show the root page.
+ * - Default & archive views should show patterns, not posts.
  *
- * @param \WP_Query $wp_query The WordPress Query object.
+ * @param \WP_Query $query The WordPress Query object.
  */
-function pre_get_posts( $wp_query ) {
+function pre_get_posts( $query ) {
 	if ( is_admin() ) {
 		return;
 	}
+	if ( ! $query->is_main_query() ) {
+		return;
+	}
 
-	// Unless otherwise specified, queries should fetch published block patterns.
-	if (
-		empty( $wp_query->query_vars['pagename'] ) &&
-		( empty( $wp_query->query_vars['post_type'] ) || 'post' == $wp_query->query_vars['post_type'] )
-	) {
-		$wp_query->query_vars['post_type']   = array( POST_TYPE );
-		$wp_query->query_vars['post_status'] = array( 'publish' );
+	$pagename = $query->get( 'pagename' );
+	if ( $pagename ) {
+		list( $_pagename ) = explode( '/', $pagename );
+		if ( in_array( $_pagename, array( 'my-patterns', 'favorites' ) ) ) {
+			// Need to get the page ID because this is set before `pre_get_posts` fires.
+			$page = get_page_by_path( $_pagename );
+			$query->set( 'pagename', $_pagename );
+			$query->set( 'page_id', (int) $page->ID );
+		}
+	} else if ( ! $query->get( 'pagename' ) && 'post' === $query->get( 'post_type', 'post' ) ) {
+		$query->set( 'post_type', array( POST_TYPE ) );
+		$query->set( 'post_status', array( 'publish' ) );
 	}
 }
 /**
