@@ -79,14 +79,6 @@ function enqueue_assets() {
 
 	wp_set_script_translations( 'wporg-pattern-creator-script', 'wporg-pattern-creator' );
 
-	// Editor Styles.
-	$styles = array(
-		array(
-			'css' => file_get_contents(
-				ABSPATH . WPINC . '/css/dist/editor/editor-styles.css'
-			),
-		),
-	);
 
 	if ( is_singular( POST_TYPE ) ) {
 		$post_id = get_the_ID();
@@ -106,7 +98,6 @@ function enqueue_assets() {
 		'isRTL'                                => is_rtl(),
 		'autosaveInterval'                     => AUTOSAVE_INTERVAL,
 		'maxUploadFileSize'                    => 0,
-		'styles'                               => $styles,
 		'richEditingEnabled'                   => user_can_richedit(),
 		'__experimentalBlockPatterns'          => array(),
 		'__experimentalBlockPatternCategories' => array(),
