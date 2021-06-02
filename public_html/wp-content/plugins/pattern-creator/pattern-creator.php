@@ -79,7 +79,6 @@ function enqueue_assets() {
 
 	wp_set_script_translations( 'wporg-pattern-creator-script', 'wporg-pattern-creator' );
 
-
 	if ( is_singular( POST_TYPE ) ) {
 		$post_id = get_the_ID();
 		$post    = get_post( $post_id );
