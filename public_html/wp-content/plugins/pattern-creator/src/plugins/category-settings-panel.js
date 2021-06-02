@@ -20,7 +20,7 @@ const PATTERN_CAT_KEY = 'pattern-categories';
 
 const CategorySettingsPanel = () => {
 	const categories = useSelect( ( select ) =>
-		select( coreStore ).getEntityRecords( 'taxonomy', 'wporg-pattern-category', { per_page: 20 } ) || []
+		select( coreStore ).getEntityRecords( 'taxonomy', 'wporg-pattern-category', { per_page: -1 } ) || []
 	);
 
 	const [ terms, setTerms ] = usePostData( PATTERN_CAT_KEY );
