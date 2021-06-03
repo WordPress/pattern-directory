@@ -84,8 +84,12 @@ body.is-fullscreen-mode #wpadminbar {
 	color: #2f2f2f;
 }
 
+.viewport-header-control .components-popover__content {
+	width: 225px;
+}
+
 .viewport-header-control__copy {
-	font-size: 10px;
+	font-size: 13px;
 	color: #757575;
 	margin: 0 0.5rem 1rem;
 }

@@ -22,15 +22,15 @@ const META_KEY = 'wpop_viewport_width';
 const WIDTH_DEFAULTS = [
 	{
 		label: 'Narrow (320px)',
-		value: '320px',
+		value: 320,
 	},
 	{
 		label: 'Default (800px)',
-		value: '800px',
+		value: 800,
 	},
 	{
-		label: 'Full (100%)',
-		value: '100%',
+		label: 'Full (1200px)',
+		value: 1200,
 	},
 ];
 
@@ -82,11 +82,11 @@ export const insertButton = ( newNode ) => {
 /**
  * Updates the width of the DOM element surrounded the patterns.
  *
- * @param {string} newValue A valid css width property
+ * @param {string} newValue An integer
  */
 const updateElementWidth = ( newValue ) => {
 	const page = document.querySelector( '.block-editor-block-list__layout' );
-	page.style.width = newValue;
+	page.style.width = `${ newValue }px`;
 };
 
 const ViewportHeaderControl = () => {
@@ -111,7 +111,7 @@ const ViewportHeaderControl = () => {
 				icon={ null }
 				text={ sprintf(
 					/* translators: %s viewport width as css, ie: 100% */
-					__( `Width (%s)`, 'wporg-patterns' ),
+					__( `Width (%spx)`, 'wporg-patterns' ),
 					viewportWidth
 				) }
 				popoverProps={ {
