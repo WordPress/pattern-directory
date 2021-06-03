@@ -6,6 +6,8 @@ import PatternPreviewActions from '../pattern-preview-actions';
 import ReportPatternButton from '../report-pattern-button';
 
 const Pattern = ( { content, postId, userHasReported, loggedIn } ) => {
+	// postId as passed from the HTML dataset is a string.
+	postId = Number( postId ) || 0;
 	return (
 		<>
 			<PatternPreviewActions postId={ postId } />
