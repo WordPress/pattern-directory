@@ -85,7 +85,7 @@ export const insertButton = ( newNode ) => {
  * @param {string} newValue An integer
  */
 const updateElementWidth = ( newValue ) => {
-	const page = document.querySelector( '.block-editor-block-list__layout' );
+	const page = document.querySelector( '.is-root-container' );
 	page.style.maxWidth = `${ newValue }px`;
 };
 
@@ -105,6 +105,10 @@ const ViewportHeaderControl = () => {
 	};
 
 	useEffect( () => {
+		updateElementWidth( viewportWidth );
+	}, [] );
+
+	useEffect( () => {
 		insertButton(
 			<DropdownMenu
 				className="viewport-header-control"
@@ -120,11 +124,14 @@ const ViewportHeaderControl = () => {
 				} }
 				label={ __( 'Select a viewport width', 'wporg-patterns' ) }
 			>
-				{ ( ) => (
+				{ () => (
 					<>
 						<MenuGroup label={ __( 'Viewport Width', 'wporg-patterns' ) }>
 							<p className="viewport-header-control__copy">
-								{ __( 'This is used when displaying a preview of your pattern.', 'wporg-patterns' ) }
+								{ __(
+									'This is used when displaying a preview of your pattern.',
+									'wporg-patterns'
+								) }
 							</p>
 							<UnitControl
 								label={ __( 'Viewport Width', 'wporg-patterns' ) }
