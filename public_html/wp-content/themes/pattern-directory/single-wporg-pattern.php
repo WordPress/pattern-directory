@@ -29,7 +29,6 @@ $user_has_reported = is_user_logged_in() ? user_has_flagged_pattern() : false;
 						<?php
 						$categories_list = get_the_term_list( get_the_ID(), 'wporg-pattern-category' );
 						if ( $categories_list ) {
-							printf( '<span class="pattern__categories-label">%s</span>', esc_html__( 'Categories', 'wporg-patterns' ) );
 							echo $categories_list; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						}
 						?>
