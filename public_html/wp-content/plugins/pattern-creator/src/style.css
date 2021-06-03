@@ -9,6 +9,10 @@
 	top: 0;
 }
 
+.admin-bar .interface-interface-skeleton {
+	top: 32px;
+}
+
 /* Hide the admin bar. */
 body.is-fullscreen-mode #wpadminbar {
 	display: none;
