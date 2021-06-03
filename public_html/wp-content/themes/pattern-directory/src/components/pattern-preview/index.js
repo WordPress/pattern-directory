@@ -75,7 +75,7 @@ function PatternPreview( { blockContent } ) {
 					/>
 				) }
 			</div>
-			<div className="pattern-preview__viewport" style={ { width } }>
+			<div className="pattern-preview__viewport" style={ { width: width + 40 } }>
 				<DragHandle
 					label={ __( 'Drag to resize', 'wporg-patterns' ) }
 					className="is-left"
