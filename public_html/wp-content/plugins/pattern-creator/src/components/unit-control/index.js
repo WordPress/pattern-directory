@@ -3,10 +3,9 @@
  */
 /* eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK. */
 import { __experimentalUnitControl as Control } from '@wordpress/components';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 
-const UnitControl = ( { label, onChange } ) => {
-	const [ value, setValue ] = useState();
+const UnitControl = ( { label, value, onChange } ) => {
 	const container = useRef();
 
 	useEffect( () => {
@@ -33,7 +32,6 @@ const UnitControl = ( { label, onChange } ) => {
 				// We want to remove the unit
 				if ( parsed >= 0 ) {
 					onChange( parsed );
-					setValue( parsed );
 				}
 			} }
 			value={ value }

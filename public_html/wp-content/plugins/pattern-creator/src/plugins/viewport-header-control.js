@@ -135,6 +135,7 @@ const ViewportHeaderControl = () => {
 									} );
 									updateElementWidth( newValue );
 								} }
+								value={ viewportWidth }
 							/>
 						</MenuGroup>
 						<MenuGroup>
