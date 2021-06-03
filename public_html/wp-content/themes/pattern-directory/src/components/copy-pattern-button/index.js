@@ -2,9 +2,10 @@
  * External dependencies
  */
 import classnames from 'classnames';
+import { noop } from 'lodash';
 
 /**
- * External dependencies
+ * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
@@ -16,7 +17,7 @@ import { useEffect, useState } from '@wordpress/element';
  */
 import { copyToClipboard } from '../../utils';
 
-const CopyPatternButton = ( { isSmall = false, onSuccess, content } ) => {
+const CopyPatternButton = ( { isSmall = false, onSuccess = noop, content } ) => {
 	const [ copied, setCopied ] = useState( false );
 
 	if ( ! content ) {
@@ -33,7 +34,7 @@ const CopyPatternButton = ( { isSmall = false, onSuccess, content } ) => {
 		// Make sure we reset focus in case it was lost in the 'copy' command.
 		target.focus();
 
-		if ( success && 'function' === typeof onSuccess ) {
+		if ( success ) {
 			onSuccess();
 		} else {
 			// TODO Handle error case
