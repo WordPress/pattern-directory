@@ -22,7 +22,7 @@ body.is-fullscreen-mode #wpadminbar {
 /* Remove the preview button */
 .edit-post-header__settings .editor-post-preview,
 .edit-site-header__actions .editor-post-preview {
-	display:none;
+	display: none;
 }
 
 /* Used for the dropdown btn */
@@ -54,7 +54,7 @@ body.is-fullscreen-mode #wpadminbar {
 	font-weight: 400 !important;
 }
 
-.block-editor-block-list__layout {
+.is-root-container {
 	margin: 0 auto;
 	background: #fff;
 	box-shadow: 0 0 0 1rem #fff;
