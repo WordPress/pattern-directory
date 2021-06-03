@@ -86,7 +86,7 @@ export const insertButton = ( newNode ) => {
  */
 const updateElementWidth = ( newValue ) => {
 	const page = document.querySelector( '.block-editor-block-list__layout' );
-	page.style.width = `${ newValue }px`;
+	page.style.maxWidth = `${ newValue }px`;
 };
 
 const ViewportHeaderControl = () => {
