@@ -54,7 +54,7 @@ function PatternPreview( { blockContent } ) {
 	}, [ showViewportControl, showViewportControlDefault, showViewportControlLarge ] );
 
 	let currentOpt = false;
-	if ( -1 === availableWidths.map( ( opt ) => opt.value ).indexOf( width ) ) {
+	if ( ! availableWidths.some( ( opt ) => opt.value === width ) ) {
 		currentOpt = {
 			/* translators: %s is the width in pixels, ex 600. */
 			label: sprintf( __( 'Current (%spx)', 'wporg-patterns' ), width ),
