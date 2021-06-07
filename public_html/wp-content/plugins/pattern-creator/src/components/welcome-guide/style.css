@@ -4,6 +4,7 @@
 }
 
 .pattern-creator-welcome-guide__image {
+	margin-bottom: calc(var(--grid-unit) / 2); /* Pushes the dot controls away */
 	display: flex;
 	align-items: center;
 	justify-content: center;
