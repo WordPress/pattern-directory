@@ -1,10 +1,15 @@
+/**
+ * Internal dependencies
+ */
+const prettierConfig = require( './.prettierrc' );
+
 module.exports = {
 	extends: 'plugin:@wordpress/eslint-plugin/recommended',
 
 	root: true,
 
 	globals: {
-		wp: true,
+		wp: true, // eslint-disable-line id-length
 	},
 
 	ignorePatterns: [ '*.min.js' ],
@@ -143,5 +148,13 @@ module.exports = {
 		 * @todo `@param` tags should align the variable name and description, just like in PHP.
 		 */
 		'jsdoc/require-returns-description': 'off',
+
+		/*
+		 * Import our local prettier config to be used by the prettier rule.
+		 *
+		 * `wp-scripts lint-js` does this automatically, but local eslint (ex, in code editors) does not know the
+		 * connection, and will default back to vanilla prettier configuration.
+		 */
+		'prettier/prettier': [ 'error', prettierConfig ],
 	},
 };
