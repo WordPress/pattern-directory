@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { ExternalLink, Guide } from '@wordpress/components';
+import { Guide } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as editPostStore } from '@wordpress/edit-post';
 import { __ } from '@wordpress/i18n';
@@ -9,7 +9,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { ImageCollectionImage, PatternDesignImage, PatternEditorImage, PatternsImage } from './images';
+import { ImageCollectionImage, PatternEditorImage, PatternsImage } from './images';
+import './style.css';
 
 /**
  * Module constants
@@ -29,7 +30,7 @@ export default function WelcomeGuide() {
 		<Guide
 			className="pattern-creator-welcome-guide"
 			contentLabel={ __( 'Welcome to the pattern creator', 'wporg-patterns' ) }
-			finishButtonText={ __( 'Get started', 'wporg-patterns' ) }
+			finishButtonText={ __( 'Done', 'wporg-patterns' ) }
 			onFinish={ () => toggleFeature( GUIDE_ID ) }
 			pages={ [
 				{
@@ -74,49 +75,20 @@ export default function WelcomeGuide() {
 				},
 				{
 					image: (
-						<div className="pattern-creator-welcome-guide__image pattern-creator-welcome-guide__image--is-bottom-aligned triangles-background">
+						<div className="pattern-creator-welcome-guide__image triangles-background">
 							<PatternEditorImage />
 						</div>
 					),
 					content: (
 						<>
 							<h1 className="pattern-creator-welcome-guide__title">
-								{ __( 'Find your patterns in the editor', 'wporg-patterns' ) }
+								{ __( 'Submit your pattern to the directory', 'wporg-patterns' ) }
 							</h1>
 							<p>
 								{ __(
-									'Patterns in the directory are available from any WordPress editor. Patterns you’ve created and favorited will be highlight for easy access.',
+									'Choose a category and share your pattern with the world. All patterns in the directory are available from any WordPress site.',
 									'wporg-patterns'
 								) }
-							</p>
-						</>
-					),
-				},
-				{
-					image: (
-						<div className="pattern-creator-welcome-guide__image pattern-creator-welcome-guide__image--is-bottom-aligned square-background">
-							<PatternDesignImage />
-						</div>
-					),
-					content: (
-						<>
-							<h1 className="pattern-creator-welcome-guide__title">
-								{ __( 'Learn more about designing patterns', 'wporg-patterns' ) }
-							</h1>
-							<p>
-								{ __(
-									'New to patterns? Want to learn more about building them?',
-									'wporg-patterns'
-								) }
-								<ExternalLink
-									className="pattern-creator-welcome-guide__link"
-									href={ __(
-										'https://wordpress.org/support/article/wordpress-editor/',
-										'wporg-patterns'
-									) } // TODO: This needs to be updated to something relevant.
-								>
-									{ __( "Here's a detailed guide.", 'wporg-patterns' ) }
-								</ExternalLink>
 							</p>
 						</>
 					),
