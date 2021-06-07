@@ -1,6 +1,6 @@
 ---
 name: Pattern Submission
-about: Describe this issue template's purpose here.
+about: Submit a pattern to the Pattern Directory
 title: ''
 labels: "[Status] Needs Design Feedback, [Type] Pattern Submission"
 assignees: ''
