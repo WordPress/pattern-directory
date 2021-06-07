@@ -1,5 +1,5 @@
 module.exports = {
-	extends: 'plugin:@wordpress/eslint-plugin/recommended-with-formatting',
+	extends: 'plugin:@wordpress/eslint-plugin/recommended',
 
 	root: true,
 

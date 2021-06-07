@@ -17,7 +17,7 @@
 		"dev": "grunt",
 		"lint:css": "wp-scripts lint-style css",
 		"lint:js": "wp-scripts lint-js src",
-		"format:js": "wp-scripts format-js src",
+		"format:js": "wp-scripts format src -- --config=../../../../.prettierrc.js",
 		"test:unit": "wp-scripts test-unit-js",
 		"packages-update": "wp-scripts packages-update"
 	},
@@ -63,7 +63,6 @@
 			"wporgSiteUrl": "readonly"
 		}
 	},
-	"prettier": "../../../../.prettierrc.js",
 	"stylelint": {
 		"extends": "../../../../.stylelintrc",
 		"ignoreFiles": [
