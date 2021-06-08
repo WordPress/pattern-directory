@@ -2886,7 +2886,6 @@
     "@wordpress/dom-ready" "^2.13.2"
     "@wordpress/i18n" "^3.19.2"
 
-<<<<<<< HEAD
 "@wordpress/api-fetch@3.23.1":
   version "3.23.1"
   resolved "https://registry.yarnpkg.com/@wordpress/api-fetch/-/api-fetch-3.23.1.tgz#2a9eb9304bbb19395bf83bc51c7f63e7b32b1369"
@@ -2896,8 +2895,6 @@
     "@wordpress/i18n" "^3.19.2"
     "@wordpress/url" "^2.22.2"
 
-=======
->>>>>>> Add in the real svg's even though backgrounds are not working properly.
 "@wordpress/api-fetch@^3.22.0":
   version "3.22.0"
   resolved "https://registry.yarnpkg.com/@wordpress/api-fetch/-/api-fetch-3.22.0.tgz#f10278bcd5c85cdeed294b89913a369db7d9d85b"
