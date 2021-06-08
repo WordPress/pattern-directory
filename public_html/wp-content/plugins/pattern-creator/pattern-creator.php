@@ -196,9 +196,14 @@ add_filter( 'template_include', __NAMESPACE__ . '\inject_editor_template' );
 function rewrite_for_pattern_editing() {
 	add_rewrite_rule( '^pattern/(\d+)/edit', 'index.php?pagename=new-pattern&' . PATTERN_ID_VAR . '=$matches[1]', 'top' );
 
-	if ( isset( $_GET['post'] ) && isset( $_GET['action'] ) && 'edit' === $_GET['action'] && POST_TYPE !== get_post_type( $_GET['post'] ) && ! is_admin() ) {
-		wp_safe_redirect( home_url( '/pattern/' . absint( $_GET['post'] ) . '/edit' ) );
-		exit;
+	if ( isset( $_GET['post'] ) &&
+		isset( $_GET['action'] ) &&
+		'edit' === $_GET['action'] &&
+		POST_TYPE === get_post_type( $_GET['post'] ) &&
+		! is_admin()
+		) {
+			wp_safe_redirect( home_url( '/pattern/' . absint( $_GET['post'] ) . '/edit' ) );
+			exit;
 	}
 }
 
