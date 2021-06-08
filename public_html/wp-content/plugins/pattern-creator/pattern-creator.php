@@ -15,7 +15,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 const AUTOSAVE_INTERVAL = 30;
 const QUERY_VAR = 'edit-pattern';
-const PATTERN_ID_VAR = 'patternId';
+const PATTERN_ID_VAR = 'pattern-id';
 
 /**
  * Check the conditions of the page to determine if the editor should load.
