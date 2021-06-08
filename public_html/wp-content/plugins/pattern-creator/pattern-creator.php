@@ -101,6 +101,7 @@ function enqueue_assets() {
 	// Update the post id if we're editing a pattern.
 	if ( should_load_creator() && is_editing_pattern() ) {
 		$post_id = get_query_var( PATTERN_ID_VAR );
+		$post    = get_post( $post_id );
 	}
 
 	$settings = array(
