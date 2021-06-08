@@ -4,18 +4,23 @@
 	--wp-admin-theme-color-darker-20: #0646ba;
 }
 
+
 .interface-interface-skeleton {
 	left: 0;
 	top: 0;
 }
 
-.admin-bar .interface-interface-skeleton {
+body.admin-bar .interface-interface-skeleton {
 	top: 32px;
 }
 
 /* Hide the admin bar. */
 body.is-fullscreen-mode #wpadminbar {
 	display: none;
+}
+
+body.is-fullscreen-mode .interface-interface-skeleton {
+	top: 0;
 }
 
 /* Hide the revisions UI. */
