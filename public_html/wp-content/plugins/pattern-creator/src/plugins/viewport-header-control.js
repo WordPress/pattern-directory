@@ -5,7 +5,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { DropdownMenu, MenuGroup, MenuItem } from '@wordpress/components';
 import { select } from '@wordpress/data';
 import { store } from '@wordpress/editor';
-import { useEffect, useState } from '@wordpress/element';
+import { render, useEffect, useState } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 
 /**
@@ -75,8 +75,7 @@ export const insertButton = ( newNode ) => {
 
 	insertContainer( btnDomRef );
 
-	/* eslint-disable no-undef*/
-	ReactDOM.render( newNode, document.getElementById( CONTAINER_ID ) );
+	render( newNode, document.getElementById( CONTAINER_ID ) );
 };
 
 /**
