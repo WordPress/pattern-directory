@@ -17,11 +17,18 @@ const DefaultMenu = ( { currentCategory, options, onClick, isLoading } ) => {
 	return (
 		<>
 			<h2 className="screen-reader-text">{ __( 'Main Menu', 'wporg-patterns' ) }</h2>
-			<ul className={ classnames( { 'category-menu': true, 'category-menu--is-loading': isLoading } ) }>
+			<ul
+				className={ classnames( {
+					'category-menu': true,
+					'category-menu--is-loading': isLoading,
+				} ) }
+			>
 				{ options.map( ( i ) => (
 					<li key={ i.value }>
 						<a
-							className={ classnames( { 'category-menu--is-active': currentCategory === i.slug } ) }
+							className={ classnames( {
+								'category-menu--is-active': currentCategory === i.slug,
+							} ) }
 							href={ i.value }
 							onClick={ onClick }
 							aria-current={ currentCategory === i.slug ? 'page' : undefined }

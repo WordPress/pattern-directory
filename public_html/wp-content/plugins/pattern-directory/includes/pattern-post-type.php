@@ -133,7 +133,7 @@ function register_post_type_data() {
 			'type'              => 'number',
 			'description'       => 'The width of the pattern in the block inserter.',
 			'single'            => true,
-			'default'           => 1200,
+			'default'           => 800,
 			'sanitize_callback' => 'absint',
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
 			'show_in_rest'      => array(
@@ -264,7 +264,7 @@ function can_edit_this_pattern( $allowed, $meta_key, $pattern_id ) {
  * @throws Error If the build files don't exist.
  */
 function enqueue_editor_assets() {
-	if ( POST_TYPE !== get_current_screen()->id ) {
+	if ( function_exists( 'get_current_screen' ) && POST_TYPE !== get_current_screen()->id ) {
 		return;
 	}
 

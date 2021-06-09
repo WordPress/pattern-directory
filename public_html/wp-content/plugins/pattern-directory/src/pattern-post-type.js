@@ -11,39 +11,44 @@ import { useDispatch, useSelect } from '@wordpress/data';
 const PatternPostType = () => {
 	const { editPost } = useDispatch( 'core/editor' );
 	const postMetaData = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'meta' ) || {} );
+	const postTitle = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'title' ) || '' );
 	const [ description, setDescription ] = useState( postMetaData.wpop_description );
-	const [ viewportWidth, setViewportWidth ] = useState( postMetaData.wpop_viewport_width );
 
 	useEffect( () => {
 		editPost( {
 			meta: {
 				...postMetaData,
 				wpop_description: description,
-				wpop_viewport_width: viewportWidth,
 			},
 		} );
-	}, [ description, viewportWidth ] );
+	}, [ description ] );
 
 	return createElement(
 		PluginDocumentSettingPanel,
 		{
 			name: 'wporg-pattern-details',
-			title: 'Pattern Details',
 		},
 		<>
+			<TextControl
+				key="title"
+				label={ __( 'Title', 'wporg-patterns' ) }
+				value={ postTitle }
+				placeholder={ __( 'Pattern title', 'wporg-patterns' ) }
+				onChange={ ( newTitle ) =>
+					editPost( {
+						title: newTitle,
+					} )
+				}
+			/>
 			<TextareaControl
 				key="description"
 				label={ __( 'Description', 'wporg-patterns' ) }
 				value={ description }
 				onChange={ setDescription }
-			/>
-			{ /* Replace this with a `NumberControl` once it's stable. */ }
-			<TextControl
-				key="viewportWidth"
-				label={ __( 'Viewport Width', 'wporg-patterns' ) }
-				value={ viewportWidth }
-				onChange={ setViewportWidth }
-				type="number"
+				help={ __(
+					'The description is used to help users of assistive technology understand the content of your pattern.',
+					'wporg-patterns'
+				) }
 			/>
 		</>
 	);
