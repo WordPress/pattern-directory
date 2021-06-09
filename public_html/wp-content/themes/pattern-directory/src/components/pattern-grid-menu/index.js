@@ -47,7 +47,7 @@ const PatternGridMenu = () => {
 		<>
 			<nav className="pattern-grid-menu">
 				<Menu
-					currentCategory={ categorySlug }
+					current={ categorySlug }
 					options={
 						categories
 							? categories.map( ( record ) => {

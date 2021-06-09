@@ -11,7 +11,7 @@ const MobileMenu = ( { onClick, options } ) => {
 
 	return (
 		<PanelBody
-			className="category-menu__mobile"
+			className="menu is-mobile"
 			title={ __( 'Browse categories', 'wporg-patterns' ) }
 			initialOpen={ isOpen }
 			opened={ isOpen }
