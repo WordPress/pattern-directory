@@ -1,4 +1,5 @@
 :root {
+	--grid-unit: 16px;
 	--wp-admin-theme-color: #3858e9;
 	--wp-admin-theme-color-darker-10: #074fd2;
 	--wp-admin-theme-color-darker-20: #0646ba;

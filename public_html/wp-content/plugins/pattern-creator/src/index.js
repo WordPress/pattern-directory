@@ -22,6 +22,7 @@ import './plugins/main-dashboard-button';
 import './plugins/save-post-modifier';
 import './plugins/update-inspector-panel-text';
 import './plugins/viewport-header-control';
+import './plugins/welcome-guide-plugin';
 import './style.css';
 
 // Set up API middleware.

@@ -13,10 +13,20 @@
 	overflow: hidden;
 }
 
+/* Change circle indicator color */
+.components-guide__page-control [aria-current="step"] circle {
+	fill: var(--wp-admin-theme-color);
+}
+
 /* Change the close button color */
 .pattern-creator-welcome-guide .components-modal__header button {
 	background: #000;
 	color: #fff;
+}
+
+/* Change the link color */
+.components-button.components-guide__forward-button {
+	color: var(--wp-admin-theme-color);
 }
 
 .pattern-creator-welcome-guide__image svg {
