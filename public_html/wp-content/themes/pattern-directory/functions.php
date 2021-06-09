@@ -71,9 +71,10 @@ function enqueue_assets() {
 		wp_add_inline_script(
 			'wporg-pattern-script',
 			sprintf(
-				'var wporgAssetUrl = "%s", wporgSiteUrl = "%s";',
+				'var wporgAssetUrl = "%s", wporgSiteUrl = "%s", wporgLoginUrl = "%s";',
 				esc_url( get_stylesheet_directory_uri() ),
-				esc_url( home_url() )
+				esc_url( home_url() ),
+				esc_url( wp_login_url() )
 			),
 			'before'
 		);
