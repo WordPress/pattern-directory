@@ -8,6 +8,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as 
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
 add_action( 'wp_head', __NAMESPACE__ . '\generate_block_editor_styles_html' );
+add_action( 'body_class', __NAMESPACE__ . '\body_class', 10, 2 );
 add_action( 'pre_get_posts', __NAMESPACE__ . '\pre_get_posts' );
 
 add_filter( 'search_template', __NAMESPACE__ . '\use_index_php_as_template' );
@@ -126,6 +127,20 @@ function generate_block_editor_styles_html() {
 }
 
 /**
+ * Add a class to body for the My Patterns page.
+ *
+ * @param string[] $classes An array of body class names.
+ * @param string[] $class   An array of additional class names added to the body.
+ */
+function body_class( $classes, $class ) {
+	global $wp_query;
+	if ( 'my-patterns' === $wp_query->get( 'pagename' ) ) {
+		$classes[] = 'my-patterns';
+	}
+	return $classes;
+}
+
+/**
  * Handle queries.
  * - My Patterns and Favories have "subpages" which should still show the root page.
  * - Default & archive views should show patterns, not posts.
@@ -154,6 +169,7 @@ function pre_get_posts( $query ) {
 		$query->set( 'post_status', array( 'publish' ) );
 	}
 }
+
 /**
  * Use the index.php template for various WordPress views that would otherwise be handled by the parent theme.
  */

@@ -1,0 +1,15 @@
+.button.button {
+	height: auto;
+}
+
+.button.button-outline {
+	box-sizing: border-box;
+	padding: 0.25rem 1rem;
+	background: $color-white;
+	border: 1px solid color(gray-10);
+	border-radius: 2px;
+	box-shadow: none;
+	height: auto;
+	color: color(blue-50);
+	font-weight: 600;
+}
