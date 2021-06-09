@@ -19,8 +19,9 @@ import usePostData from '../hooks/use-post-data';
 const PATTERN_CAT_KEY = 'pattern-categories';
 
 const CategorySettingsPanel = () => {
-	const categories = useSelect( ( select ) =>
-		select( coreStore ).getEntityRecords( 'taxonomy', 'wporg-pattern-category', { per_page: -1 } ) || []
+	const categories = useSelect(
+		( select ) =>
+			select( coreStore ).getEntityRecords( 'taxonomy', 'wporg-pattern-category', { per_page: -1 } ) || []
 	);
 
 	const [ terms, setTerms ] = usePostData( PATTERN_CAT_KEY );
@@ -47,9 +48,7 @@ const CategorySettingsPanel = () => {
 									if ( checked ) {
 										setTerms( [ ...terms, i.id ] );
 									} else {
-										setTerms(
-											terms.filter( ( catId ) => catId !== i.id )
-										);
+										setTerms( terms.filter( ( catId ) => catId !== i.id ) );
 									}
 								} }
 							/>
