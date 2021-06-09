@@ -1,7 +1,0 @@
-.block-pattern-creator__editor .editor-styles-wrapper {
-	padding: calc(var(--grid-unit) * 2.5) 0;
-}
-
-#block-pattern-creator .components-snackbar__action.components-button {
-	color: inherit;
-}
