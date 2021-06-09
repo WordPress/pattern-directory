@@ -15,7 +15,7 @@ import './style.css';
 /**
  * Module constants
  */
-const GUIDE_ID = 'wporgPatternGuide';
+const GUIDE_ID = 'welcomeGuide';
 
 export default function WelcomeGuide() {
 	const isActive = useSelect( ( select ) => select( editPostStore ).isFeatureActive( GUIDE_ID ), [] );
