@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
-import { dispatch, select } from '@wordpress/data';
+import { dispatch, select, useDispatch, useSelect } from '@wordpress/data';
 import { PanelRow, SelectControl } from '@wordpress/components';
 
 /**
@@ -22,12 +22,18 @@ const statuses = [
 ];
 
 const StatusSelect = () => {
-	const [ selection, setSelection ] = useState();
+	const { editPost } = useDispatch( 'core/editor' );
+	const postStatus = useSelect( ( statusSelect ) => statusSelect( 'core/editor' ).getEditedPostAttribute( 'status' ) || {} );
+	const [ status, setStatus ] = useState( postStatus );
+
+	useEffect( () => {
+		editPost( { status } );
+	}, [ status ] );
 
 	return (
 		<SelectControl
-			value={ selection }
-			onChange={ setSelection }
+			value={ status }
+			onChange={ setStatus }
 			label={ 'Pattern Status' }
 			hideLabelFromVision={ true }
 			options={ statuses }
@@ -62,11 +68,11 @@ const PatternStatus = () => {
 			name: PANEL_NAME,
 			title: 'Status',
 		},
-		<PluginDocumentSettingPanel name={ PANEL_NAME }>
+		<>
 			<PanelRow>
 				<StatusSelect />
 			</PanelRow>
-		</PluginDocumentSettingPanel>
+		</>
 	);
 };
 
