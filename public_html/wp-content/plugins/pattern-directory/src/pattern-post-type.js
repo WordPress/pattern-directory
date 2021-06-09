@@ -34,18 +34,21 @@ const PatternPostType = () => {
 				label={ __( 'Title', 'wporg-patterns' ) }
 				value={ postTitle }
 				placeholder={ __( 'Pattern title', 'wporg-patterns' ) }
-				onChange={ ( newTitle ) => editPost( {
-					title: newTitle,
-				} ) }
+				onChange={ ( newTitle ) =>
+					editPost( {
+						title: newTitle,
+					} )
+				}
 			/>
 			<TextareaControl
 				key="description"
 				label={ __( 'Description', 'wporg-patterns' ) }
 				value={ description }
 				onChange={ setDescription }
-				help={
-					__( 'The description is used to help users of assistive technology understand the content of your pattern.', 'wporg-patterns' )
-				}
+				help={ __(
+					'The description is used to help users of assistive technology understand the content of your pattern.',
+					'wporg-patterns'
+				) }
 			/>
 		</>
 	);
