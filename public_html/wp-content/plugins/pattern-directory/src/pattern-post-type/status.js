@@ -66,7 +66,7 @@ const PatternStatus = () => {
 		PluginDocumentSettingPanel,
 		{
 			name: PANEL_NAME,
-			title: 'Status',
+			title: __( 'Status', 'wporg-patterns' ),
 		},
 		<>
 			<PanelRow>
