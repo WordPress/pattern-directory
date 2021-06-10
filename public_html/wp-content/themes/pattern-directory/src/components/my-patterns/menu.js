@@ -12,7 +12,10 @@ import { useRoute } from '../../hooks';
 
 export default function () {
 	const { path, update: updatePath } = useRoute();
-	const view = getValueFromPath( path, 'my-patterns' );
+	let view = getValueFromPath( path, 'my-patterns' );
+	if ( 'page' === view ) {
+		view = 'all';
+	}
 
 	// @todo Load from an API to get pattern counts.
 	const options = [

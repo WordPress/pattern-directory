@@ -45,7 +45,7 @@ const QueryMonitor = () => {
 			}
 
 			const myPatternStatus = getValueFromPath( path, 'my-patterns' );
-			if ( myPatternStatus ) {
+			if ( myPatternStatus && 'page' !== myPatternStatus ) {
 				_query.status = myPatternStatus;
 			}
 
