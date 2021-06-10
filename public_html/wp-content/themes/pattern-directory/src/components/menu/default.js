@@ -19,7 +19,7 @@ const DefaultMenu = ( { current, isLoading, label = __( 'Main Menu', 'wporg-patt
 			<h2 className="screen-reader-text">{ label }</h2>
 			<ul
 				className={ classnames( {
-					menu: true,
+					'pattern-menu': true,
 					'is-loading': isLoading,
 				} ) }
 			>
@@ -27,7 +27,7 @@ const DefaultMenu = ( { current, isLoading, label = __( 'Main Menu', 'wporg-patt
 					<li key={ i.value }>
 						<a
 							className={ classnames( {
-								menu__item: true,
+								'pattern-menu__item': true,
 								'is-active': current === i.slug,
 							} ) }
 							href={ i.value }

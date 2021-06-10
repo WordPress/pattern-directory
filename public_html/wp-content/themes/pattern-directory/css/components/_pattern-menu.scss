@@ -1,4 +1,4 @@
-.menu {
+.pattern-menu {
 	&:not(.is-mobile) {
 		margin: 0;
 		padding: 0;
@@ -25,7 +25,7 @@
 		}
 	}
 
-	.menu__item.is-active {
+	.pattern-menu__item.is-active {
 		color: $color-white;
 		background: $color__wp-blue;
 		border-radius: 2px;

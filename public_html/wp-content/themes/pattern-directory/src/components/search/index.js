@@ -16,7 +16,7 @@ const Search = ( { defaultValue, isLoading, isVisible, onUpdate, onSubmit } ) =>
 	}
 
 	return (
-		<form method="get" action="/" className="search" onSubmit={ onSubmit }>
+		<form method="get" action="/" className="pattern-search" onSubmit={ onSubmit }>
 			<label htmlFor={ `search-${ instanceId }` } className="screen-reader-text">
 				{ __( 'Search for:', 'wporg-patterns' ) }
 			</label>
@@ -27,7 +27,7 @@ const Search = ( { defaultValue, isLoading, isVisible, onUpdate, onSubmit } ) =>
 				type="search"
 				placeholder={ __( 'Search patterns', 'wporg-patterns' ) }
 			/>
-			<button type="submit" className="search__button">
+			<button type="submit" className="pattern-search__button">
 				<span className="screen-reader-text"> { __( 'Search patterns', 'wporg-patterns' ) }</span>
 				<Icon icon={ search } />
 			</button>
