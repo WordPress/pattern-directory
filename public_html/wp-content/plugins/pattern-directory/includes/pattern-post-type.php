@@ -10,6 +10,7 @@ add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
 add_filter( 'allowed_block_types', __NAMESPACE__ . '\remove_disallowed_blocks', 10, 2 );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
+add_filter( 'rest_' . POST_TYPE . '_collection_params', __NAMESPACE__ . '\filter_patterns_collection_params' );
 
 
 /**
@@ -132,13 +133,32 @@ function register_post_type_data() {
 			'type'              => 'number',
 			'description'       => 'The width of the pattern in the block inserter.',
 			'single'            => true,
-			'default'           => 1200,
+			'default'           => 800,
 			'sanitize_callback' => 'absint',
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
 			'show_in_rest'      => array(
 				'schema' => array(
 					'minimum' => 400,
 					'maximum' => 2000,
+				),
+			),
+		)
+	);
+
+	register_post_meta(
+		POST_TYPE,
+		'wpop_block_types',
+		array(
+			'type'              => 'string',
+			'description'       => 'A list of block types this pattern supports for transforms.',
+			'single'            => false,
+			'sanitize_callback' => function( $value, $key, $type ) {
+				return preg_replace( '/[^a-z0-9-\/]/', '', $value );
+			},
+			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type' => 'string',
 				),
 			),
 		)
@@ -244,7 +264,7 @@ function can_edit_this_pattern( $allowed, $meta_key, $pattern_id ) {
  * @throws Error If the build files don't exist.
  */
 function enqueue_editor_assets() {
-	if ( POST_TYPE !== get_current_screen()->id ) {
+	if ( function_exists( 'get_current_screen' ) && POST_TYPE !== get_current_screen()->id ) {
 		return;
 	}
 
@@ -307,6 +327,21 @@ function disable_block_directory() {
 		remove_action( 'enqueue_block_editor_assets', 'wp_enqueue_editor_block_directory_assets' );
 		remove_action( 'enqueue_block_editor_assets', 'gutenberg_enqueue_block_editor_assets_block_directory' );
 	}
+}
+
+/**
+ * Filter the collection parameters to set a new default for per_page.
+ *
+ * @param array $query_params JSON Schema-formatted collection parameters.
+ * @return array Filtered parameters.
+ */
+function filter_patterns_collection_params( $query_params ) {
+	if ( isset( $query_params['per_page'] ) ) {
+		// Number of patterns per page, should be multiple of 2 and 3 (for 2- and 3-column layouts).
+		$query_params['per_page']['default'] = 18;
+	}
+
+	return $query_params;
 }
 
 /**

@@ -6,24 +6,23 @@
 	"license": "GPL-2.0-or-later",
 	"scripts": {
 		"build": "wp-scripts build pattern-post-type=./src/pattern-post-type.js",
-		"format:js": "wp-scripts format-js",
+		"format:js": "wp-scripts format src -- --config=../../../../.prettierrc.js",
 		"lint:css": "echo \"No CSS.\"",
-		"lint:js": "wp-scripts lint-js",
-		"start": "wp-scripts start pattern-post-type=./src/pattern-post-type.jst"
+		"lint:js": "wp-scripts lint-js src",
+		"start": "wp-scripts start pattern-post-type=./src/pattern-post-type.js"
 	},
 	"dependencies": {
-		"@wordpress/components": "13.0.0",
-		"@wordpress/data": "4.27.0",
-		"@wordpress/edit-post": "3.27.0",
-		"@wordpress/element": "2.20.0",
-		"@wordpress/i18n": "3.19.0",
-		"@wordpress/plugins": "2.25.0",
-		"@wordpress/scripts": "14.0.1"
+		"@wordpress/components": "14.1.2",
+		"@wordpress/data": "5.1.1",
+		"@wordpress/edit-post": "4.1.4",
+		"@wordpress/element": "3.1.1",
+		"@wordpress/i18n": "4.1.1",
+		"@wordpress/plugins": "3.1.1",
+		"@wordpress/scripts": "16.1.2"
 	},
 	"eslintConfig": {
 		"extends": "../../../../.eslintrc.js"
 	},
-	"prettier": "../../../../.prettierrc.js",
 	"stylelint": {
 		"extends": "../../../../.stylelintrc"
 	}
