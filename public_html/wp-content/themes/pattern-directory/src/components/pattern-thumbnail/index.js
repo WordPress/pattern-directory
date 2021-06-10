@@ -13,7 +13,20 @@ import CopyPatternButton from '../copy-pattern-button';
 import FavoriteButton from '../favorite-button';
 import IconHeartFilled from '../icons/heart-filled';
 
+function getStatusLabel( pattern ) {
+	switch ( pattern.status ) {
+		case 'pending':
+			return __( 'Pending', 'wporg-patterns' );
+		case 'draft':
+			return __( 'Draft', 'wporg-patterns' );
+		case 'declined':
+			return __( 'Declined', 'wporg-patterns' );
+	}
+	return '';
+}
+
 function PatternThumbnail( { pattern, showAvatar } ) {
+	const statusLabel = getStatusLabel( pattern );
 	return (
 		<div className="pattern-grid__pattern">
 			<div className="pattern-grid__pattern-frame">
@@ -23,6 +36,11 @@ function PatternThumbnail( { pattern, showAvatar } ) {
 						<Canvas className="pattern-grid__preview" html={ pattern.content.rendered } />
 					</Disabled>
 				</a>
+				{ statusLabel ? (
+					<div className={ `pattern-grid__status is-${ pattern.status }` }>
+						<span>{ statusLabel }</span>
+					</div>
+				) : null }
 				<div className="pattern-grid__actions">
 					<FavoriteButton showLabel={ false } patternId={ pattern.id } />
 					<CopyPatternButton isSmall={ true } content={ pattern.pattern_content } />
@@ -31,7 +49,7 @@ function PatternThumbnail( { pattern, showAvatar } ) {
 
 			<h2 className="pattern-grid__title">{ decodeEntities( pattern.title.rendered ) }</h2>
 			<p className="pattern-grid__meta">
-				{ ! hideAvatar && pattern.author_avatar ? (
+				{ showAvatar && pattern.author_avatar ? (
 					<span className="pattern-grid__author-avatar">
 						<img alt={ pattern.author_avatar.alt } src={ pattern.author_avatar.url } />
 					</span>
