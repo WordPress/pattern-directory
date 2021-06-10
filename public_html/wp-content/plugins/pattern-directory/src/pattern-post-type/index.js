@@ -7,8 +7,8 @@ import PatternStatus from './status';
 const PluginWrapper = () => {
 	return (
 		<>
-			<PatternDetails />
 			<PatternStatus />
+			<PatternDetails />
 		</>
 	);
 };
