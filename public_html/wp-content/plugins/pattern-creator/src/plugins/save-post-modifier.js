@@ -1,15 +1,27 @@
 /**
  * WordPress dependencies
  */
-import { dispatch, select } from '@wordpress/data';
+import { dispatch, select, useSelect } from '@wordpress/data';
 import { store } from '@wordpress/editor';
 import { useEffect, useState } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
+
+/**
+ * Internal dependencies
+ */
+import PublishModal from '../components/publish-modal';
 
 window.gutenbergSavePost = dispatch( store ).savePost;
 
 const SavePostModifier = () => {
 	const [ showModal, setShowModal ] = useState( false );
+	const { isPublished, hasSaveRequestFail, isPublishable } = useSelect( ( localSelect ) => {
+		return {
+			hasSaveRequestFail: localSelect( store ).didPostSaveRequestFail(),
+			isPublished: localSelect( store ).isCurrentPostPublished(),
+			isPublishable: localSelect( store ).isEditedPostPublishable(),
+		};
+	} );
 
 	useEffect( () => {
 		// We don't want the publish sidebar confirmation
@@ -43,9 +55,25 @@ const SavePostModifier = () => {
 		};
 	}, [] );
 
+	useEffect( () => {
+		// If there are any save request failures, we hide the modal so the user can resolve
+		if ( hasSaveRequestFail ) {
+			setShowModal( false );
+		}
+	}, [ hasSaveRequestFail ] );
+
+	// There isn't a great way to identify when a post has saved via user action accurately,
+	// so we'll first assume the submitted state and flip when there are publishable edits.
+	const isSubmitted = ! hasSaveRequestFail && isPublished && ! isPublishable;
+
 	if ( showModal ) {
-		// To Do: This needs to be replaced by the actual UI
-		// Return the publish modal
+		return (
+			<PublishModal
+				isSubmitted={ isSubmitted }
+				onSubmit={ () => window.gutenbergSavePost() }
+				onClose={ () => setShowModal( false ) }
+			/>
+		);
 	}
 
 	return null;
