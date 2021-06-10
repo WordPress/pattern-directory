@@ -1,6 +1,7 @@
 /**
  * WordPress dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { Disabled } from '@wordpress/components';
 import { decodeEntities } from '@wordpress/html-entities';
 
@@ -12,7 +13,7 @@ import CopyPatternButton from '../copy-pattern-button';
 import FavoriteButton from '../favorite-button';
 import IconHeartFilled from '../icons/heart-filled';
 
-function PatternThumbnail( { pattern } ) {
+function PatternThumbnail( { pattern, showAvatar } ) {
 	return (
 		<div className="pattern-grid__pattern">
 			<div className="pattern-grid__pattern-frame">
@@ -30,7 +31,7 @@ function PatternThumbnail( { pattern } ) {
 
 			<h2 className="pattern-grid__title">{ decodeEntities( pattern.title.rendered ) }</h2>
 			<p className="pattern-grid__meta">
-				{ pattern.author_avatar ? (
+				{ ! hideAvatar && pattern.author_avatar ? (
 					<span className="pattern-grid__author-avatar">
 						<img alt={ pattern.author_avatar.alt } src={ pattern.author_avatar.url } />
 					</span>
