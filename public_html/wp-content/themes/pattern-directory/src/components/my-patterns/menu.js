@@ -23,7 +23,7 @@ export default function () {
 		},
 		{
 			value: `${ wporgSiteUrl }/my-patterns/draft/`,
-			slug: 'drafts',
+			slug: 'draft',
 			label: __( 'Drafts', 'wporg-patterns' ),
 		},
 		{
