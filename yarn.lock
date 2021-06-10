@@ -3155,10 +3155,10 @@
   dependencies:
     "@babel/runtime" "^7.13.10"
 
-"@wordpress/blocks@^9.1.2":
-  version "9.1.2"
-  resolved "https://registry.yarnpkg.com/@wordpress/blocks/-/blocks-9.1.2.tgz#fdfa8043ba43a737ef10fa03a5a9a85b84d8064b"
-  integrity sha512-JCc3zV3fJzmJ114nN4g7yzA+Dp8jbwp5IzqO3VdjEifd+nbnTzrikeAlddTHYl55DKeQFMsVMsV9L0q7PhgcnQ==
+"@wordpress/blocks@9.1.3", "@wordpress/blocks@^9.1.3":
+  version "9.1.3"
+  resolved "https://registry.yarnpkg.com/@wordpress/blocks/-/blocks-9.1.3.tgz#da55d49c045f944d259338e66d78411386c58ee3"
+  integrity sha512-hmldR/VhqWqolWBkZ3xAMKif0yxe0582XIkAcWevgHYbsVr1Otqa/5QsHCNmqus3P5O6BpXiJGtf39F45gyD0A==
   dependencies:
     "@babel/runtime" "^7.13.10"
     "@wordpress/autop" "^3.1.1"
@@ -3183,10 +3183,10 @@
     tinycolor2 "^1.4.2"
     uuid "^8.3.0"
 
-"@wordpress/blocks@^9.1.3":
-  version "9.1.3"
-  resolved "https://registry.yarnpkg.com/@wordpress/blocks/-/blocks-9.1.3.tgz#da55d49c045f944d259338e66d78411386c58ee3"
-  integrity sha512-hmldR/VhqWqolWBkZ3xAMKif0yxe0582XIkAcWevgHYbsVr1Otqa/5QsHCNmqus3P5O6BpXiJGtf39F45gyD0A==
+"@wordpress/blocks@^9.1.2":
+  version "9.1.2"
+  resolved "https://registry.yarnpkg.com/@wordpress/blocks/-/blocks-9.1.2.tgz#fdfa8043ba43a737ef10fa03a5a9a85b84d8064b"
+  integrity sha512-JCc3zV3fJzmJ114nN4g7yzA+Dp8jbwp5IzqO3VdjEifd+nbnTzrikeAlddTHYl55DKeQFMsVMsV9L0q7PhgcnQ==
   dependencies:
     "@babel/runtime" "^7.13.10"
     "@wordpress/autop" "^3.1.1"
@@ -3298,7 +3298,7 @@
     rememo "^3.0.0"
     uuid "^8.3.0"
 
-"@wordpress/core-data@^3.1.4":
+"@wordpress/core-data@3.1.4":
   version "3.1.4"
   resolved "https://registry.yarnpkg.com/@wordpress/core-data/-/core-data-3.1.4.tgz#20da169b6f04230e6a161fe63c1aa75f529c0747"
   integrity sha512-8Lv1OwK4XqMLS4AXNdUyVrcLdvbY8sKnGzecFkG48X21qOMIoIZAcb2KiAcoetUFWk/XWKU5zqKnv9aagUwUFg==
@@ -3373,7 +3373,7 @@
     "@babel/runtime" "^7.13.10"
     "@wordpress/hooks" "^3.1.1"
 
-"@wordpress/dom-ready@^3.1.1":
+"@wordpress/dom-ready@3.1.1", "@wordpress/dom-ready@^3.1.1":
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/@wordpress/dom-ready/-/dom-ready-3.1.1.tgz#c1ec662ca12130e92e41d3d9c95041adce3dde22"
   integrity sha512-Kc0jxOgOBKDdJ5OOA1iNHXog5D3QzNrv4IBt4UYYDy59XnuzJEwDSeWQE9gP6ssRx4/qzJxi5KGr3pNZzDwqTg==
