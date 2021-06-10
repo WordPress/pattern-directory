@@ -30,12 +30,15 @@ const MyPatterns = () => {
 			</div>
 		);
 	}
+	// Show all patterns regardless of status, but if the current query has a status (the view is draft, for
+	// example), that will override `any`. Lastly, make sure this shows the current user's patterns.
+	const modifiedQuery = { status: 'any', ...query, author: author };
 
 	return (
 		<RouteProvider>
 			<QueryMonitor />
 			<Menu />
-			<PatternGrid query={ { ...query, author } } />
+			<PatternGrid query={ modifiedQuery } />
 		</RouteProvider>
 	);
 };
