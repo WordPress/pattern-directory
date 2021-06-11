@@ -20,8 +20,7 @@ const QueryMonitor = () => {
 
 	const query = useSelect(
 		( select ) => {
-			const queryStrings = getQueryArgs( path );
-			let _query = queryStrings;
+			let _query = getQueryArgs( path );
 
 			const categorySlug = getCategoryFromPath( path );
 			if ( categorySlug ) {
