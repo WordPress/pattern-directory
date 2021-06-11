@@ -4,7 +4,7 @@
 
 	@include breakpoint( $breakpoint-small ) {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
 		gap: 1.5rem;
 
 		> * {
@@ -22,7 +22,7 @@
 	position: relative;
 	margin: 0;
 	width: 100%;
-	border: 1px solid $color-gray-light-600;
+	box-shadow: 0 0 0 1px color(gray-2);
 	border-radius: 2px;
 	transition: all 0.075s ease-in-out;
 
@@ -87,7 +87,7 @@
 	margin: 0.5rem 0;
 	font-size: 0.875rem;
 	font-weight: 600;
-	color: $color-gray-800;
+	color: color(gray-90);
 }
 
 .pattern-grid__meta {
@@ -111,12 +111,12 @@
 	display: flex;
 	font-size: 0.875rem;
 	line-height: 1;
-	color: $color-gray-800;
+	color: color(gray-90);
 
 	svg {
 		margin-right: 0.25rem;
 		height: 1em;
 		width: 1em;
-		fill: $color-gray-300;
+		fill: color(gray-40);
 	}
 }
