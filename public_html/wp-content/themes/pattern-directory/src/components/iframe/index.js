@@ -94,8 +94,7 @@ function Iframe( { contentRef, children, head, headHTML, themeSlug, ...props }, 
 	const [ iframeDocument, setIframeDocument ] = useState();
 
 	headHTML += `<style>
-    body{
-        pointer-events:none;
+    body {
         display: flex;
         min-height: 100vh;
         align-items: center;
@@ -105,7 +104,9 @@ function Iframe( { contentRef, children, head, headHTML, themeSlug, ...props }, 
         padding: 0;
     }
     body > div {
-        width: 100%
+        width: 100%;
+        max-height: 100%;
+        pointer-events: none;
     }
     </style>`;
 
