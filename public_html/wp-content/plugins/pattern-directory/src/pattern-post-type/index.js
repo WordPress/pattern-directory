@@ -2,12 +2,12 @@
  * Internal dependencies
  */
 import PatternDetails from './details';
-import PatternStatus from './status';
+import UnlistButton from './unlist-button';
 
 const PluginWrapper = () => {
 	return (
 		<>
-			<PatternStatus />
+			<UnlistButton />
 			<PatternDetails />
 		</>
 	);
