@@ -8,4 +8,13 @@
 	height: auto;
 	color: color(blue-50);
 	font-weight: 600;
+
+	&:hover {
+		border-color: color(blue-40);
+	}
+
+	&:focus {
+		border-color: color(blue-40);
+		box-shadow: 0 0 3px color(blue-20);
+	}
 }
