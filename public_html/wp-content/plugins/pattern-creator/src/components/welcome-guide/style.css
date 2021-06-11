@@ -14,7 +14,7 @@
 }
 
 /* Change circle indicator color */
-.components-guide__page-control [aria-current="step"] circle {
+.pattern-creator-welcome-guide .components-guide__page-control [aria-current="step"] circle {
 	fill: var(--wp-admin-theme-color);
 }
 
@@ -25,7 +25,7 @@
 }
 
 /* Change the link color */
-.components-button.components-guide__forward-button {
+.pattern-creator-welcome-guide .components-button.components-guide__forward-button {
 	color: var(--wp-admin-theme-color);
 }
 
@@ -43,6 +43,7 @@
 	margin: var(--grid-unit) 0;
 	font-size: 20px;
 	font-weight: 600;
+	line-height: normal;
 }
 
 .pattern-creator-welcome-guide p {
@@ -53,4 +54,8 @@
 .pattern-creator-welcome-guide__link {
 	margin-top: calc(var(--grid-unit) / 2);
 	display: block;
+}
+
+.pattern-creator-welcome-guide .components-guide__footer > button {
+	padding: 6px 12px;
 }
