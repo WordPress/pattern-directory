@@ -21,7 +21,7 @@ const UnlistButton = ( { status } ) => {
 		// eslint-disable-next-line no-alert
 		if ( window.confirm( confirmMessage ) ) {
 			editPost( {
-				status: 'removed',
+				status: UNLISTED_STATUS,
 			} );
 			savePost();
 		}
