@@ -4,9 +4,15 @@
 import { __ } from '@wordpress/i18n';
 import { PluginPostStatusInfo } from '@wordpress/edit-post';
 import { Button } from '@wordpress/components';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, withSelect } from '@wordpress/data';
+import { compose } from '@wordpress/compose';
 
-const UnlistButton = () => {
+/**
+ * Internal Dependencies
+ */
+import { UNLISTED_STATUS } from './settings';
+
+const UnlistButton = ( { status } ) => {
 	const { editPost, savePost } = useDispatch( 'core/editor' );
 
 	const onClick = () => {
@@ -22,15 +28,26 @@ const UnlistButton = () => {
 	};
 
 	return (
-		<PluginPostStatusInfo>
-			<Button
-				onClick={ onClick }
-				isTertiary
-			>
-				{ __( 'Unlist', 'wporg-patterns' ) }
-			</Button>
-		</PluginPostStatusInfo>
+		<>
+			{ status !== UNLISTED_STATUS &&
+				<PluginPostStatusInfo>
+					<Button
+						onClick={ onClick }
+						isTertiary
+					>
+						{ __( 'Unlist', 'wporg-patterns' ) }
+					</Button>
+				</PluginPostStatusInfo>
+			}
+		</>
 	);
 };
 
-export default UnlistButton;
+export default compose(
+	withSelect( ( select ) => {
+		const { getCurrentPostAttribute } = select( 'core/editor' );
+		return {
+			status: getCurrentPostAttribute( 'status' ),
+		};
+	} ),
+)( UnlistButton );
