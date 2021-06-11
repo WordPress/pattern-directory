@@ -56,7 +56,7 @@ function PatternThumbnail( { pattern, showAvatar } ) {
 				) : null }
 				{ pattern.favorite_count > 0 ? (
 					<span className="pattern-grid__favorite-count">
-						<IconHeartFilled height={ 12 } width={ 12 } /> { pattern.favorite_count }
+						<IconHeartFilled /> { pattern.favorite_count }
 					</span>
 				) : null }
 			</p>

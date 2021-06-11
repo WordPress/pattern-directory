@@ -97,18 +97,26 @@
 	align-items: center;
 }
 
+.pattern-grid__author-avatar {
+	line-height: 1;
+}
+
 .pattern-grid__author-avatar img {
-	width: 18px;
-	height: 18px;
-	vertical-align: baseline;
+	width: 1.125rem;
+	height: 1.125rem;
 	border-radius: 6px;
 }
 
 .pattern-grid__favorite-count {
+	display: flex;
 	font-size: 0.875rem;
+	line-height: 1;
 	color: $color-gray-800;
 
 	svg {
+		margin-right: 0.25rem;
+		height: 1em;
+		width: 1em;
 		fill: $color-gray-300;
 	}
 }
