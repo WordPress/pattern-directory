@@ -7,6 +7,7 @@ const POST_TYPE = 'wporg-pattern';
 
 add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
 add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
+add_action( 'init', __NAMESPACE__ . '\register_post_statuses' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
 add_filter( 'allowed_block_types', __NAMESPACE__ . '\remove_disallowed_blocks', 10, 2 );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
@@ -238,6 +239,22 @@ function register_rest_fields() {
 			'schema' => array(
 				'type'  => 'string',
 			),
+		)
+	);
+}
+
+/**
+ * Register custom statuses for patterns.
+ *
+ * @return void
+ */
+function register_post_statuses() {
+	register_post_status(
+		'removed',
+		array(
+			'label'     => __( 'Removed', 'wporg-patterns' ),
+			'public'    => false,
+			'protected' => true,
 		)
 	);
 }
