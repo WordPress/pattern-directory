@@ -16,15 +16,6 @@ add_action( 'init', __NAMESPACE__ . '\register_post_statuses' );
  */
 function register_post_statuses() {
 	register_post_status(
-		'declined',
-		array(
-			'label'     => __( 'Declined', 'wporg-patterns' ),
-			'public'    => false,
-			'protected' => true,
-		)
-	);
-
-	register_post_status(
 		'removed',
 		array(
 			'label'     => __( 'Removed', 'wporg-patterns' ),
