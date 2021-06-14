@@ -16,7 +16,10 @@ const UnlistNotice = ( { status } ) => {
 	if ( status === UNLISTED_STATUS ) {
 		dispatch( 'core/notices' ).createNotice(
 			'warning',
-			__( 'This pattern is unlisted. It will not appear in the public pattern directory.', 'wporg-patterns' ),
+			__(
+				'This pattern is unlisted. It will not appear in the public pattern directory.',
+				'wporg-patterns'
+			),
 			{
 				id: NOTICE_ID,
 				isDismissible: false,
@@ -35,5 +38,5 @@ export default compose(
 		return {
 			status: getCurrentPostAttribute( 'status' ),
 		};
-	} ),
+	} )
 )( UnlistNotice );

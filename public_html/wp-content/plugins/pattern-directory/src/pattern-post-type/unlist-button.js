@@ -29,16 +29,13 @@ const UnlistButton = ( { status } ) => {
 
 	return (
 		<>
-			{ status !== UNLISTED_STATUS &&
+			{ status !== UNLISTED_STATUS && (
 				<PluginPostStatusInfo>
-					<Button
-						onClick={ onClick }
-						isTertiary
-					>
+					<Button onClick={ onClick } isTertiary>
 						{ __( 'Unlist', 'wporg-patterns' ) }
 					</Button>
 				</PluginPostStatusInfo>
-			}
+			) }
 		</>
 	);
 };
@@ -49,5 +46,5 @@ export default compose(
 		return {
 			status: getCurrentPostAttribute( 'status' ),
 		};
-	} ),
+	} )
 )( UnlistButton );
