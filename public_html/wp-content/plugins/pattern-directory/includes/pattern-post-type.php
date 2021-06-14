@@ -252,13 +252,14 @@ function register_post_statuses() {
 	register_post_status(
 		'unlisted',
 		array(
-			'label'       => __( 'Unlisted', 'wporg-patterns' ),
-			'label_count' => _n_noop(
+			'label'                  => __( 'Unlisted', 'wporg-patterns' ),
+			'label_count'            => _n_noop(
 				'Unlisted <span class="count">(%s)</span>',
 				'Unlisted <span class="count">(%s)</span>'
 			),
-			'public'      => false,
-			'protected'   => true,
+			'public'                 => false,
+			'protected'              => true,
+			'show_in_admin_all_list' => false,
 		)
 	);
 }
