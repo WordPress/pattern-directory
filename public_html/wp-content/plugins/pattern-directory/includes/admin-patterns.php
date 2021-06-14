@@ -219,7 +219,7 @@ function handle_pattern_list_table_views( WP_Query $query ) {
 /**
  * More post states for the Patterns list table.
  *
- * @param array $post_states
+ * @param array   $post_states
  * @param WP_Post $post
  *
  * @return array
@@ -232,7 +232,7 @@ function display_post_states( $post_states, $post ) {
 	}
 
 	if ( 'unlisted' === $post->post_status && 'unlisted' !== $post_status ) {
-		$post_states['unlisted'] = _x( 'Unlisted', 'post status' );
+		$post_states['unlisted'] = _x( 'Unlisted', 'post status', 'wporg-patterns' );
 	}
 
 	return $post_states;

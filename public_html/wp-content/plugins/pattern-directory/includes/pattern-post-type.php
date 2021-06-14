@@ -255,7 +255,8 @@ function register_post_statuses() {
 			'label'                  => __( 'Unlisted', 'wporg-patterns' ),
 			'label_count'            => _n_noop(
 				'Unlisted <span class="count">(%s)</span>',
-				'Unlisted <span class="count">(%s)</span>'
+				'Unlisted <span class="count">(%s)</span>',
+				'wporg-patterns'
 			),
 			'public'                 => false,
 			'protected'              => true,
