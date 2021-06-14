@@ -138,7 +138,7 @@ function register_post_type_data() {
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
 			'show_in_rest'      => array(
 				'schema' => array(
-					'minimum' => 400,
+					'minimum' => 200,
 					'maximum' => 2000,
 				),
 			),
