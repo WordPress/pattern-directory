@@ -1,1 +1,1 @@
-export const UNLISTED_STATUS = 'removed';
+export const UNLISTED_STATUS = 'unlisted';

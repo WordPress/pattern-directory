@@ -250,9 +250,9 @@ function register_rest_fields() {
  */
 function register_post_statuses() {
 	register_post_status(
-		'removed',
+		'unlisted',
 		array(
-			'label'     => __( 'Removed', 'wporg-patterns' ),
+			'label'     => __( 'Unlisted', 'wporg-patterns' ),
 			'public'    => false,
 			'protected' => true,
 		)
