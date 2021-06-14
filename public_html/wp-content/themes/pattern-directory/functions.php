@@ -10,6 +10,7 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
 add_action( 'wp_head', __NAMESPACE__ . '\generate_block_editor_styles_html' );
 add_action( 'body_class', __NAMESPACE__ . '\body_class', 10, 2 );
 add_action( 'pre_get_posts', __NAMESPACE__ . '\pre_get_posts' );
+add_filter( 'init', __NAMESPACE__ . '\add_rewrite' );
 
 add_filter( 'search_template', __NAMESPACE__ . '\use_index_php_as_template' );
 add_filter( 'archive_template', __NAMESPACE__ . '\use_index_php_as_template' );
@@ -169,6 +170,15 @@ function pre_get_posts( $query ) {
 		$query->set( 'post_status', array( 'publish' ) );
 	}
 }
+
+/**
+ * Add the "My Patterns" status rewrites.
+ * This will redirect `my-patterns/draft`, `my-patterns/pending` etc to use the My Patterns page.
+ */
+function add_rewrite() {
+	add_rewrite_rule( '^my-patterns/[^/]+/?$', 'index.php?pagename=my-patterns', 'top' );
+}
+
 
 /**
  * Use the index.php template for various WordPress views that would otherwise be handled by the parent theme.
