@@ -17,7 +17,7 @@ import './plugins/category-settings-panel';
 import './plugins/keyword-settings-panel';
 import './plugins/block-scope-settings-panel';
 
-import './plugins/gutenberg-editor-modifier';
+import './plugins/gutenberg-feature-remover';
 import './plugins/main-dashboard-button';
 import './plugins/save-post-modifier';
 import './plugins/update-inspector-panel-text';
