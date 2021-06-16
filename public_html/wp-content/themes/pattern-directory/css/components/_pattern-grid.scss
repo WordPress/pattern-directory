@@ -85,6 +85,10 @@
 	font-size: 0.875rem;
 	font-weight: 600;
 	color: color(gray-90);
+
+	a {
+		color: currentColor;
+	}
 }
 
 .pattern-grid__meta {
@@ -100,6 +104,7 @@
 	font-size: 0.875rem;
 	line-height: 1;
 	color: color(gray-90);
+	text-decoration: none;
 }
 
 .pattern-grid__author-avatar img {

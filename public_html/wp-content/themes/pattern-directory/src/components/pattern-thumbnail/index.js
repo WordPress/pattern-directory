@@ -11,7 +11,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import Canvas from './canvas';
 import CopyPatternButton from '../copy-pattern-button';
 import FavoriteButton from '../favorite-button';
-import IconHeartFilled from '../icons/heart-filled';
+import FavoriteButtonSmall from '../favorite-button/small';
 
 function getStatusLabel( pattern ) {
 	switch ( pattern.status ) {
@@ -58,9 +58,11 @@ function PatternThumbnail( { pattern, showAvatar } ) {
 					</a>
 				) : null }
 				{ pattern.favorite_count > 0 ? (
-					<span className="pattern-grid__favorite-count">
-						<IconHeartFilled /> { pattern.favorite_count }
-					</span>
+					<FavoriteButtonSmall
+						className="pattern-grid__favorite-count"
+						patternId={ pattern.id }
+						label={ pattern.favorite_count }
+					/>
 				) : null }
 			</p>
 		</div>

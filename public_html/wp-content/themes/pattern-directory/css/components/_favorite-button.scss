@@ -19,7 +19,7 @@
 		}
 	}
 
-	.pattern__favorite-filled {
+	.pattern-favorite-button__filled {
 		opacity: 0;
 	}
 
@@ -30,6 +30,12 @@
 		svg path {
 			fill: color(gray-60);
 		}
+	}
+
+	&:focus {
+		box-shadow:
+			inset 0 0 0 1px #fff,
+			0 0 0 var(--wp-admin-border-width-focus) var(--wp-admin-theme-color);
 	}
 
 	&:active {
@@ -57,9 +63,14 @@
 		background-color: $color-white;
 		box-shadow: 0 1px 2px rgba($color-black, 0.15);
 
-		&:hover,
-		&:active {
-			background-color: $color-white;
+		&:hover {
+			background: color(gray-2);
+		}
+
+		&:focus {
+			box-shadow:
+				inset 0 0 0 1px #fff,
+				0 0 0 var(--wp-admin-border-width-focus) var(--wp-admin-theme-color);
 		}
 	}
 
@@ -68,22 +79,40 @@
 			fill: color(red-40);
 		}
 
-		.pattern__favorite-outline {
+		.pattern-favorite-button__outline {
 			opacity: 0;
 			transform: scale(2.8);
 		}
 
-		.pattern__favorite-filled {
+		.pattern-favorite-button__filled {
 			opacity: 1;
 		}
 
-		&:hover .pattern__favorite-filled {
+		&:hover .pattern-favorite-button__filled {
 			animation: 0.9s infinite HeartBeat;
 
 			@media (prefers-reduced-motion) {
 				animation: none;
 			}
 		}
+	}
+}
+
+.pattern-favorite-button-small {
+	height: auto;
+
+	&:hover {
+		background: transparent;
+	}
+
+	&:focus {
+		background: transparent;
+		outline: 1px dotted currentColor;
+		box-shadow: none;
+	}
+
+	&.is-favorited svg path {
+		fill: color(red-40);
 	}
 }
 
