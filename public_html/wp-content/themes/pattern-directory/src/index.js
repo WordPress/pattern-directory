@@ -13,7 +13,7 @@ import MyPatterns from './components/my-patterns';
 // Load the grid into the awaiting preview container.
 const gridContainer = document.getElementById( 'patterns__container' );
 if ( gridContainer ) {
-	render( <Patterns />, gridContainer );
+	render( <Patterns { ...gridContainer.dataset } />, gridContainer );
 }
 
 // Load the preview into any awaiting preview container.

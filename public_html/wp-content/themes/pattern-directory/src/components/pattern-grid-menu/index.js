@@ -1,8 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { addQueryArgs, getPath, getQueryArg } from '@wordpress/url';
-import { useDebounce } from '@wordpress/compose';
+import { getPath } from '@wordpress/url';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -11,20 +10,14 @@ import { useSelect } from '@wordpress/data';
 import CategoryContextBar from '../category-context-bar';
 import { getCategoryFromPath } from '../../utils';
 import Menu from '../menu';
-import Search from '../search';
 import { store as patternStore } from '../../store';
 import { useRoute } from '../../hooks';
-
-/**
- * Module constants
- */
-const DEBOUNCE_MS = 300;
 
 const PatternGridMenu = () => {
 	const { path, update: updatePath } = useRoute();
 	const categorySlug = getCategoryFromPath( path );
 
-	const { categories, isLoading, hasLoaded } = useSelect( ( select ) => {
+	const { categories, isLoading } = useSelect( ( select ) => {
 		const { getCategories, isLoadingCategories, hasLoadedCategories } = select( patternStore );
 		return {
 			categories: getCategories(),
@@ -32,16 +25,6 @@ const PatternGridMenu = () => {
 			hasLoaded: hasLoadedCategories(),
 		};
 	} );
-
-	const handleUpdatePath = ( value ) => {
-		const updatedPath = addQueryArgs( path, {
-			search: value,
-		} );
-
-		updatePath( updatedPath );
-	};
-
-	const debouncedHandleUpdate = useDebounce( handleUpdatePath, DEBOUNCE_MS );
 
 	return (
 		<>
@@ -64,19 +47,6 @@ const PatternGridMenu = () => {
 						updatePath( event.target.pathname );
 					} }
 					isLoading={ isLoading }
-				/>
-				<Search
-					isLoading={ isLoading }
-					isVisible={ hasLoaded }
-					defaultValue={ getQueryArg( window.location.href, 'search' ) }
-					onUpdate={ ( event ) => {
-						event.preventDefault();
-						debouncedHandleUpdate( event.target.value );
-					} }
-					onSubmit={ ( event ) => {
-						event.preventDefault();
-						debouncedHandleUpdate( event.target.elements[ 0 ].value );
-					} }
 				/>
 			</nav>
 			<CategoryContextBar />

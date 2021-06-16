@@ -5,15 +5,8 @@ import { __ } from '@wordpress/i18n';
 import { Icon, search } from '@wordpress/icons';
 import { useInstanceId } from '@wordpress/compose';
 
-const Search = ( { defaultValue, isLoading, isVisible, onUpdate, onSubmit } ) => {
+const Search = ( { defaultValue, onUpdate, onSubmit } ) => {
 	const instanceId = useInstanceId( Search );
-	if ( isLoading ) {
-		return <span className="search is-loading" />;
-	}
-
-	if ( ! isVisible ) {
-		return null;
-	}
 
 	return (
 		<form method="get" action="/" className="pattern-search" onSubmit={ onSubmit }>
