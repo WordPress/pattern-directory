@@ -263,12 +263,14 @@ function register_rest_fields() {
 	 */
 	register_rest_field(
 		POST_TYPE,
-		'author_avatar',
+		'author_meta',
 		array(
 			'get_callback' => function() {
+				global $authordata;
 				return array(
-					'alt' => get_the_author_meta( 'display_name' ),
-					'url' => get_avatar_url(
+					'name'   => get_the_author_meta( 'display_name' ),
+					'url'   => get_author_posts_url( $authordata->ID ),
+					'avatar' => get_avatar_url(
 						get_the_ID(),
 						array(
 							'size' => 36,
@@ -280,10 +282,13 @@ function register_rest_fields() {
 			'schema' => array(
 				'type'  => 'object',
 				'properties' => array(
-					'alt' => array(
+					'name' => array(
 						'type'  => 'string',
 					),
 					'url' => array(
+						'type'  => 'string',
+					),
+					'avatar' => array(
 						'type'  => 'string',
 					),
 				),

@@ -49,9 +49,10 @@ function PatternThumbnail( { pattern, showAvatar } ) {
 
 			<h2 className="pattern-grid__title">{ decodeEntities( pattern.title.rendered ) }</h2>
 			<p className="pattern-grid__meta">
-				{ showAvatar && pattern.author_avatar ? (
+				{ showAvatar && pattern.author_meta ? (
 					<span className="pattern-grid__author-avatar">
-						<img alt={ pattern.author_avatar.alt } src={ pattern.author_avatar.url } />
+						<img alt="" src={ pattern.author_meta.avatar } />
+						{ pattern.author_meta.name }
 					</span>
 				) : null }
 				{ pattern.favorite_count > 0 ? (
