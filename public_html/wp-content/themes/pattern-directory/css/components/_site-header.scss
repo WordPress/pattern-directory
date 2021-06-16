@@ -7,7 +7,7 @@ body.home {
 	.site-branding {
 		display: grid;
 		grid-template-rows: auto 1fr;
-		grid-template-columns: 1fr 22rem;
+		grid-template-columns: 1fr 26rem;
 
 		> * {
 			align-self: center;
@@ -31,11 +31,20 @@ body.home {
 	.site-description {
 		grid-column-start: 1;
 		grid-row-start: 2;
-		margin: 0;
-		font-size: 1.25rem;
+		margin: 0 0 1.5rem;
+		font-size: 1rem;
 		line-height: $type__line-height;
 		text-align: left;
 		color: $color-white;
+	}
+
+	.pattern-search {
+		grid-column-start: 1;
+		grid-row-start: 3;
+
+		@media only screen and (min-width: $breakpoint-tablet) {
+			max-width: 60%;
+		}
 	}
 }
 

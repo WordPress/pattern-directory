@@ -30,6 +30,7 @@ get_template_part( 'header', 'wporg' );
 					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Pattern Directory', 'Site title', 'wporg-patterns' ); ?></a></h1>
 
 					<p class="site-description"><?php esc_html_e( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ); ?></p>
+					<?php get_search_form(); ?>
 				<?php else : ?>
 					<div>
 						<a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
