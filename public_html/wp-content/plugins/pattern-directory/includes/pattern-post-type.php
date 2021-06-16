@@ -266,10 +266,9 @@ function register_rest_fields() {
 		'author_meta',
 		array(
 			'get_callback' => function() {
-				global $authordata;
 				return array(
 					'name'   => get_the_author_meta( 'display_name' ),
-					'url'   => get_author_posts_url( $authordata->ID ),
+					'url'   => get_author_posts_url( get_the_author_meta( 'ID' ) ),
 					'avatar' => get_avatar_url(
 						get_the_ID(),
 						array(
