@@ -66,6 +66,7 @@ get_template_part( 'header', 'wporg' );
 							) );
 							?>
 						</div>
+						<?php get_search_form(); ?>
 					</nav><!-- #site-navigation -->
 				<?php endif; ?>
 			</div><!-- .site-branding -->
