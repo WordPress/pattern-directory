@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { Disabled } from '@wordpress/components';
 import { decodeEntities } from '@wordpress/html-entities';
 
@@ -61,7 +61,23 @@ function PatternThumbnail( { pattern, showAvatar } ) {
 					<FavoriteButtonSmall
 						className="pattern-grid__favorite-count"
 						patternId={ pattern.id }
-						label={ pattern.favorite_count }
+						label={
+							<>
+								<span className="screen-reader-text">
+									{ sprintf(
+										/* translators: %s is the favorite count for a pattern. */
+										_n(
+											'Favorited %s times',
+											'Favorited %s times',
+											pattern.favorite_count,
+											'wporg-patterns'
+										),
+										pattern.favorite_count
+									) }
+								</span>
+								<span aria-hidden>{ pattern.favorite_count }</span>
+							</>
+						}
 					/>
 				) : null }
 			</p>
