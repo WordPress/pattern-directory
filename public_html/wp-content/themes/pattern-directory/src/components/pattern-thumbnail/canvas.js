@@ -56,6 +56,7 @@ function PatternThumbnail( { className, html } ) {
 			<Iframe
 				className="pattern-grid__preview-iframe"
 				style={ style }
+				bodyStyle={ 'overflow: hidden;' }
 				headHTML={ window.__editorStyles.html }
 			>
 				<div
