@@ -308,6 +308,13 @@ function enqueue_editor_assets() {
 	);
 
 	wp_set_script_translations( 'wporg-pattern-post-type', 'wporg-patterns' );
+
+	wp_enqueue_style(
+		'wporg-pattern-post-type',
+		plugins_url( 'build/pattern-post-type.css', dirname( __FILE__ ) ),
+		array(),
+		$script_asset['version'],
+	);
 }
 
 /**
