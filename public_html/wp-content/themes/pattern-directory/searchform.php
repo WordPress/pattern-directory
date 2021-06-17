@@ -8,11 +8,11 @@
  */
 global $wp;
 
-$action = home_url( $wp->request );
+//$action = isset($args['redirect']) ? '/pattern-categories/all' : '';
 
 ?>
-<form role="search" method="get" class="pattern-search" action="<?php echo $action; ?>">
-	<label for="serach" class="screen-reader-text"><?php echo esc_html( _x( 'Search for:', 'label', 'wporg-patterns]' ) ); ?></label>
+<form role="search" method="get" class="pattern-search">
+	<label for="search" class="screen-reader-text"><?php echo esc_html( _x( 'Search for:', 'label', 'wporg-patterns]' ) ); ?></label>
 	<input
 		type="search"
 		id="search"

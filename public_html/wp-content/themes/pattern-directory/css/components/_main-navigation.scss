@@ -2,9 +2,15 @@
 	float: none;
 	position: static;
 	width: auto;
+	display: flex;
+	align-items: center;
 
 	a {
 		font-size: 0.8125rem;
+	}
+
+	form[role="search"] {
+		margin-left: 1rem;
 	}
 
 	&.toggled {

@@ -30,7 +30,7 @@ get_template_part( 'header', 'wporg' );
 					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Pattern Directory', 'Site title', 'wporg-patterns' ); ?></a></h1>
 
 					<p class="site-description"><?php esc_html_e( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ); ?></p>
-					<?php get_search_form(); ?>
+					<?php get_search_form(array('redirect' => true)); ?>
 				<?php else : ?>
 					<div>
 						<a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
@@ -59,14 +59,13 @@ get_template_part( 'header', 'wporg' );
 						>
 						</button>
 
-						<div id="primary-menu" class="menu">
-							<?php
-							wp_nav_menu( array(
-								'theme_location' => 'primary',
-								'menu_id'        => 'primary-menu',
-							) );
-							?>
-						</div>
+						<?php
+						wp_nav_menu( array(
+							'theme_location' => 'primary',
+							'menu_id'        => 'primary-menu',
+						) );
+						?>
+						
 						<?php get_search_form(); ?>
 					</nav><!-- #site-navigation -->
 				<?php endif; ?>
