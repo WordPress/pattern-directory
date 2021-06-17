@@ -19,6 +19,7 @@ add_action( 'manage_' . PATTERN . '_posts_custom_column', __NAMESPACE__ . '\patt
 add_action( 'manage_posts_extra_tablenav', __NAMESPACE__ . '\pattern_list_table_styles' );
 add_filter( 'views_edit-' . PATTERN, __NAMESPACE__ . '\pattern_list_table_views' );
 add_action( 'pre_get_posts', __NAMESPACE__ . '\handle_pattern_list_table_views' );
+add_filter( 'display_post_states', __NAMESPACE__ . '\display_post_states', 10, 2 );
 
 /**
  * Modify the patterns list table columns.
@@ -213,4 +214,26 @@ function handle_pattern_list_table_views( WP_Query $query ) {
 
 		$query->set( 'post__in', $valid_ids );
 	}
+}
+
+/**
+ * More post states for the Patterns list table.
+ *
+ * @param array   $post_states
+ * @param WP_Post $post
+ *
+ * @return array
+ */
+function display_post_states( $post_states, $post ) {
+	if ( isset( $_REQUEST['post_status'] ) ) {
+		$post_status = $_REQUEST['post_status'];
+	} else {
+		$post_status = '';
+	}
+
+	if ( 'unlisted' === $post->post_status && 'unlisted' !== $post_status ) {
+		$post_states['unlisted'] = _x( 'Unlisted', 'post status', 'wporg-patterns' );
+	}
+
+	return $post_states;
 }

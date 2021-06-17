@@ -7,6 +7,7 @@ const POST_TYPE = 'wporg-pattern';
 
 add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
 add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
+add_action( 'init', __NAMESPACE__ . '\register_post_statuses' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
 add_filter( 'allowed_block_types', __NAMESPACE__ . '\remove_disallowed_blocks', 10, 2 );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
@@ -243,6 +244,28 @@ function register_rest_fields() {
 }
 
 /**
+ * Register custom statuses for patterns.
+ *
+ * @return void
+ */
+function register_post_statuses() {
+	register_post_status(
+		'unlisted',
+		array(
+			'label'                  => __( 'Unlisted', 'wporg-patterns' ),
+			'label_count'            => _n_noop(
+				'Unlisted <span class="count">(%s)</span>',
+				'Unlisted <span class="count">(%s)</span>',
+				'wporg-patterns'
+			),
+			'public'                 => false,
+			'protected'              => true,
+			'show_in_admin_all_list' => false,
+		)
+	);
+}
+
+/**
  * Determines if the current user can edit the given pattern post.
  *
  * This is a callback for the `auth_{$object_type}_meta_{$meta_key}` filter, and it's used to authorize access to
@@ -285,6 +308,13 @@ function enqueue_editor_assets() {
 	);
 
 	wp_set_script_translations( 'wporg-pattern-post-type', 'wporg-patterns' );
+
+	wp_enqueue_style(
+		'wporg-pattern-post-type',
+		plugins_url( 'build/pattern-post-type.css', dirname( __FILE__ ) ),
+		array(),
+		$script_asset['version'],
+	);
 }
 
 /**
