@@ -1,8 +1,9 @@
 /**
- * External dependencies
+ * WordPress dependencies
  */
-import { addQueryArgs } from '@wordpress/url';
+import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -12,7 +13,10 @@ import PageMenu from '../page-menu';
 import Search from '../search';
 import Breadcrumbs from '../breadcrumbs';
 
-const MySearch = () => {
+/**
+ * Use a different search component when viewing a single pattern since it should just post to the categories page.
+ */
+const CustomSearch = () => {
 	const [ searchValue, setSearchValue ] = useState();
 
 	return (
@@ -34,8 +38,8 @@ const MySearch = () => {
 const PatternHeader = ( { isLoggedIn } ) => {
 	return (
 		<Header isHome={ false }>
-			<Breadcrumbs crumbs={ [ { href: '', label: 'Pattern Details' } ] } />
-			<PageMenu isLoggedIn={ isLoggedIn } searchComponent={ MySearch } />
+			<Breadcrumbs crumbs={ [ { href: '', label: __( 'Pattern Details', 'wporg-patterns' ) } ] } />
+			<PageMenu isLoggedIn={ isLoggedIn } searchComponent={ CustomSearch } />
 		</Header>
 	);
 };
