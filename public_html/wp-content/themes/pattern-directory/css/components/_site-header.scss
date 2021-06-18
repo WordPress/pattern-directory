@@ -49,6 +49,10 @@
 .site-header:not(.home) {
 	padding: 0.5rem;
 
+	@media only screen and (max-width: $breakpoint-tablet) {
+		padding: 1rem 0.5rem;
+	}
+
 	.site-branding {
 		display: flex;
 		align-items: center;
