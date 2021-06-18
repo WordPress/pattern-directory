@@ -3,12 +3,7 @@
  */
 import { hasQueryArg } from '@wordpress/url';
 import { useSelect } from '@wordpress/data';
-
-/**
- * Internal dependencies
- */
-import { getCategoryFromPath } from '../../utils';
-import { store as patternStore } from '../../store';
+import { useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -18,19 +13,26 @@ import MastHead from '../masthead';
 import PageMenu from '../page-menu';
 import Breadcrumbs from '../breadcrumbs';
 import { useRoute } from '../../hooks';
+import { getCategoryFromPath } from '../../utils';
+import { store as patternStore } from '../../store';
 
 const PatternsHeader = ( { isHome, isLoggedIn } ) => {
 	const { path } = useRoute();
+	const [ showMastHead, setShowMastHead ] = useState( isHome );
 
-	const categorySlug = getCategoryFromPath( window.location.href );
 	const { category, hasLoadedCategories } = useSelect( ( select ) => {
+		const categorySlug = getCategoryFromPath( window.location.href );
 		return {
 			category: select( patternStore ).getCategoryBySlug( categorySlug ),
 			hasLoadedCategories: select( patternStore ).hasLoadedCategories(),
 		};
 	} );
 
-	const showMastHead = isHome && ! hasQueryArg( path, 'search' );
+	useEffect( () => {
+		if ( hasQueryArg( path, 'search' ) ) {
+			setShowMastHead( false );
+		}
+	}, [ path ] );
 
 	return (
 		<Header isHome={ showMastHead }>
@@ -38,13 +40,15 @@ const PatternsHeader = ( { isHome, isLoggedIn } ) => {
 				<MastHead />
 			) : (
 				<>
-					{ hasLoadedCategories && (
+					{ hasLoadedCategories ? (
 						<Breadcrumbs
 							crumbs={ [
 								{ href: '/pattern-categories', label: 'Categories' },
 								{ href: '', label: category.name },
 							] }
 						/>
+					) : (
+						<span />
 					) }
 					<PageMenu isLoggedIn={ isLoggedIn } />
 				</>
