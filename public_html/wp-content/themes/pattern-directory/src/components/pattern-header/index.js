@@ -10,36 +10,20 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import Header from '../header';
 import PageMenu from '../page-menu';
-import Search from '../search';
 import Breadcrumbs from '../breadcrumbs';
 
-/**
- * Use a different search component when viewing a single pattern since it should just post to the categories page.
- */
-const CustomSearch = () => {
-	const [ searchValue, setSearchValue ] = useState();
-
-	return (
-		<Search
-			onUpdate={ ( event ) => {
-				event.preventDefault();
-				setSearchValue( event.target.value );
-			} }
-			onSubmit={ ( event ) => {
-				event.preventDefault();
-				window.location.href = addQueryArgs( wporgSiteUrl, {
-					search: searchValue,
-				} );
-			} }
-		/>
-	);
-};
-
 const PatternHeader = ( { isLoggedIn } ) => {
+
+    console.log( document.referrer );
 	return (
 		<Header isHome={ false }>
 			<Breadcrumbs crumbs={ [ { href: '', label: __( 'Pattern Details', 'wporg-patterns' ) } ] } />
-			<PageMenu isLoggedIn={ isLoggedIn } searchComponent={ CustomSearch } />
+			<PageMenu
+				isLoggedIn={ isLoggedIn }
+				searchProps={ {
+					action: '/patterns-categories/all',
+				} }
+			/>
 		</Header>
 	);
 };

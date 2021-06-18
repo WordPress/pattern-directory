@@ -8,9 +8,7 @@ import { __ } from '@wordpress/i18n';
  */
 import PatternSearch from '../pattern-search';
 
-const PageMenu = ( { isLoggedIn, searchComponent = PatternSearch } ) => {
-	const SearchComponent = searchComponent;
-
+const PageMenu = ( { isLoggedIn, searchProps } ) => {
 	return (
 		<nav id="site-navigation" className="main-navigation" role="navigation">
 			<button
@@ -34,7 +32,7 @@ const PageMenu = ( { isLoggedIn, searchComponent = PatternSearch } ) => {
 						</a>
 					</li>
 					<li className="page_item">
-						<SearchComponent />
+						<PatternSearch { ...searchProps } />
 					</li>
 				</ul>
 			</div>

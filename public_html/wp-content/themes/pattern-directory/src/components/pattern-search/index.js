@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { addQueryArgs, getQueryArg } from '@wordpress/url';
-import { useDebounce } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -10,34 +9,31 @@ import { useDebounce } from '@wordpress/compose';
 import Search from '../search';
 import { useRoute } from '../../hooks';
 
-/**
- * Module constants
- */
-const DEBOUNCE_MS = 300;
-
-const PatternSearch = () => {
+const PatternSearch = ( { action } ) => {
 	const { path, update: updatePath } = useRoute();
 
 	const handleUpdatePath = ( value ) => {
-		const updatedPath = addQueryArgs( path, {
+		const _path = action ? action : path;
+
+        debugger;
+
+		const updatedPath = addQueryArgs( _path, {
 			search: value,
 		} );
 
-		updatePath( updatedPath );
+		if ( action ) {
+			window.location.href = _path;
+		} else {
+			updatePath( updatedPath );
+		}
 	};
-
-	const debouncedHandleUpdate = useDebounce( handleUpdatePath, DEBOUNCE_MS );
 
 	return (
 		<Search
 			defaultValue={ getQueryArg( window.location.href, 'search' ) }
-			onUpdate={ ( event ) => {
-				event.preventDefault();
-				debouncedHandleUpdate( event.target.value );
-			} }
 			onSubmit={ ( event ) => {
 				event.preventDefault();
-				debouncedHandleUpdate( event.target.elements[ 0 ].value );
+				handleUpdatePath( event.target.elements[ 0 ].value );
 			} }
 		/>
 	);
