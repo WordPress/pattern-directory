@@ -15,8 +15,6 @@ const PatternSearch = ( { action } ) => {
 	const handleUpdatePath = ( value ) => {
 		const _path = action ? action : path;
 
-        debugger;
-
 		const updatedPath = addQueryArgs( _path, {
 			search: value,
 		} );
