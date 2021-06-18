@@ -12,7 +12,7 @@ const MastHead = () => {
 	return (
 		<>
 			<h1 className="site-title">
-				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
+				<a href={ wporgSiteUrl } rel="home">
 					{ __( 'WordPress Patterns', 'wporg-patterns' ) }
 				</a>
 			</h1>
