@@ -20,7 +20,7 @@ const PatternSearch = ( { action } ) => {
 		} );
 
 		if ( action ) {
-			window.location.href = _path;
+			window.location.href = updatedPath;
 		} else {
 			updatePath( updatedPath );
 		}

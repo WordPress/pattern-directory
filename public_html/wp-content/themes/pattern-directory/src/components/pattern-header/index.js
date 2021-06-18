@@ -17,7 +17,7 @@ const PatternHeader = ( { isLoggedIn } ) => {
 			<PageMenu
 				isLoggedIn={ isLoggedIn }
 				searchProps={ {
-					action: '/patterns-categories/all',
+					action: '/',
 				} }
 			/>
 		</Header>
