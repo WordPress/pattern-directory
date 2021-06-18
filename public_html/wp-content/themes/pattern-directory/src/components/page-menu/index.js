@@ -21,13 +21,13 @@ const PageMenu = ( { isLoggedIn, searchProps } ) => {
 				<ul className="nav-menu">
 					{ isLoggedIn && (
 						<li className="page_item">
-							<a href="http://localhost:8888/my-patterns/">
+							<a href={ `${ wporgSiteUrl }/my-patterns/` }>
 								{ __( 'My patterns', 'wporg-patterns' ) }
 							</a>
 						</li>
 					) }
 					<li className="page_item">
-						<a href="http://localhost:8888/new-patterns/">
+						<a href={ `${ wporgSiteUrl }/new-patterns/` }>
 							{ __( 'Create patterns', 'wporg-patterns' ) }
 						</a>
 					</li>

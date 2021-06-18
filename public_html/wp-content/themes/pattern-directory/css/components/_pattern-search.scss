@@ -17,20 +17,6 @@
 			outline: $color__wp-blue auto 1px;
 		}
 	}
-
-	&.is-loading {
-		display: block;
-		height: 24px;
-		min-width: 100%;
-		background: $color-gray-light-200;
-		border-radius: 4px;
-
-		@media only screen and (min-width: $breakpoint-mobile) {
-			width: 224px !important;
-			min-width: auto !important;
-		}
-
-	}
 }
 
 .pattern-search__button {
