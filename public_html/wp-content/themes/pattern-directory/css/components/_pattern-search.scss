@@ -38,6 +38,8 @@
 	background: transparent;
 	border: none;
 	color: $color__text-lighter;
+	height: 35px;
+	align-items: center;
 
 	&:active {
 		background: $color-gray-light-600;
