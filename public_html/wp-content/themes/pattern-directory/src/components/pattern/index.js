@@ -1,13 +1,16 @@
 /**
  * WordPress dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
+import PatternGrid from '../pattern-grid';
 import PatternPreview from '../pattern-preview';
 import PatternPreviewActions from '../pattern-preview-actions';
+import PatternThumbnail from '../pattern-thumbnail';
 import ReportPatternButton from '../report-pattern-button';
 import { store as patternStore } from '../../store';
 
@@ -22,13 +25,24 @@ const Pattern = ( { postId, userHasReported, loggedIn } ) => {
 	return (
 		<>
 			<PatternPreviewActions postId={ postId } />
-			<PatternPreview blockContent={ pattern.content.rendered } />
-			<div className="pattern__meta">
-				<ReportPatternButton
-					userHasReported={ userHasReported === 'true' }
-					loggedIn={ loggedIn === 'true' }
-					postId={ postId }
-				/>
+			<div className="pattern-preview__container">
+				<PatternPreview blockContent={ pattern.content.rendered } />
+				<div className="pattern__meta">
+					<ReportPatternButton
+						userHasReported={ userHasReported === 'true' }
+						loggedIn={ loggedIn === 'true' }
+						postId={ postId }
+					/>
+				</div>
+			</div>
+			<div className="entry-content">
+				<h2>{ __( 'More from this designer', 'wporg-patterns' ) }</h2>
+				<PatternGrid
+					query={ { author: pattern.author, per_page: 3, exclude: postId } }
+					showPagination={ false }
+				>
+					{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } /> }
+				</PatternGrid>
 			</div>
 		</>
 	);
