@@ -43,6 +43,11 @@ const QueryMonitor = () => {
 		query[ 'pattern-categories' ] = categoryId;
 	}
 
+	const author = getValueFromPath( path, 'author' );
+	if ( author ) {
+		query.author_name = author;
+	}
+
 	const page = getPageFromPath( path );
 	if ( page > 1 ) {
 		query.page = page;
