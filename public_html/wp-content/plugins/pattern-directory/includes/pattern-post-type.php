@@ -250,7 +250,7 @@ function register_rest_fields() {
 		'favorite_count',
 		array(
 			'get_callback' => function() {
-				return rand( 50, 750 );
+				return 1;
 			},
 
 			'schema' => array(
@@ -268,14 +268,9 @@ function register_rest_fields() {
 		array(
 			'get_callback' => function() {
 				return array(
-					'name'   => get_the_author_meta( 'display_name' ),
-					'url'   => get_author_posts_url( get_the_author_meta( 'ID' ) ),
-					'avatar' => get_avatar_url(
-						get_the_ID(),
-						array(
-							'size' => 36,
-						)
-					),
+					'name'   => esc_html( get_the_author_meta( 'display_name' ) ),
+					'url'   => esc_url( home_url( '/author/' . get_the_author_meta( 'user_nicename' ) ) ),
+					'avatar' => get_avatar_url( get_the_ID(), array( 'size' => 36 ) ),
 				);
 			},
 
