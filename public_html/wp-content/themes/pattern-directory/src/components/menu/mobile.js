@@ -3,16 +3,15 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
-import { ifViewportMatches } from '@wordpress/viewport';
 import { PanelBody } from '@wordpress/components';
 
-const MobileMenu = ( { onClick, options } ) => {
+const MobileMenu = ( { onClick, options, label = __( 'Browse categories', 'wporg-patterns' ) } ) => {
 	const [ isOpen, setIsOpen ] = useState( false );
 
 	return (
 		<PanelBody
-			className="category-menu__mobile"
-			title={ __( 'Browse categories', 'wporg-patterns' ) }
+			className="pattern-menu is-mobile"
+			title={ label }
 			initialOpen={ isOpen }
 			opened={ isOpen }
 			onToggle={ () => setIsOpen( ! isOpen ) }
@@ -36,5 +35,4 @@ const MobileMenu = ( { onClick, options } ) => {
 	);
 };
 
-// Will only render if the viewport is < medium
-export default ifViewportMatches( '< medium' )( MobileMenu );
+export default MobileMenu;

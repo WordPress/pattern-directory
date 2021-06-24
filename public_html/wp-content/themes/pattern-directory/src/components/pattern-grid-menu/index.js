@@ -8,10 +8,10 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import CategoryMenu from '../category-menu';
-import CategorySearch from '../category-search';
 import CategoryContextBar from '../category-context-bar';
 import { getCategoryFromPath } from '../../utils';
+import Menu from '../menu';
+import Search from '../search';
 import { store as patternStore } from '../../store';
 import { useRoute } from '../../hooks';
 
@@ -46,8 +46,8 @@ const PatternGridMenu = () => {
 	return (
 		<>
 			<nav className="pattern-grid-menu">
-				<CategoryMenu
-					currentCategory={ categorySlug }
+				<Menu
+					current={ categorySlug }
 					options={
 						categories
 							? categories.map( ( record ) => {
@@ -65,7 +65,7 @@ const PatternGridMenu = () => {
 					} }
 					isLoading={ isLoading }
 				/>
-				<CategorySearch
+				<Search
 					isLoading={ isLoading }
 					isVisible={ hasLoaded }
 					defaultValue={ getQueryArg( window.location.href, 'search' ) }

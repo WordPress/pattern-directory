@@ -13,7 +13,6 @@ require_once __DIR__ . '/includes/class-rest-favorite-controller.php';
 require_once __DIR__ . '/includes/pattern-post-type.php';
 require_once __DIR__ . '/includes/pattern-flag-post-type.php';
 require_once __DIR__ . '/includes/pattern-validation.php';
-require_once __DIR__ . '/includes/post-status.php';
 require_once __DIR__ . '/includes/search.php';
 require_once __DIR__ . '/includes/admin.php';
 require_once __DIR__ . '/includes/favorite.php';
