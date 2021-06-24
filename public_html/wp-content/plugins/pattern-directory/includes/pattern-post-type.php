@@ -241,6 +241,60 @@ function register_rest_fields() {
 			),
 		)
 	);
+
+	/*
+	 * Get the author's avatar.
+	 */
+	register_rest_field(
+		POST_TYPE,
+		'favorite_count',
+		array(
+			'get_callback' => function() {
+				return rand( 50, 750 );
+			},
+
+			'schema' => array(
+				'type'  => 'integer',
+			),
+		)
+	);
+
+	/*
+	 * Get the author's avatar.
+	 */
+	register_rest_field(
+		POST_TYPE,
+		'author_meta',
+		array(
+			'get_callback' => function() {
+				return array(
+					'name'   => get_the_author_meta( 'display_name' ),
+					'url'   => get_author_posts_url( get_the_author_meta( 'ID' ) ),
+					'avatar' => get_avatar_url(
+						get_the_ID(),
+						array(
+							'size' => 36,
+						)
+					),
+				);
+			},
+
+			'schema' => array(
+				'type'  => 'object',
+				'properties' => array(
+					'name' => array(
+						'type'  => 'string',
+					),
+					'url' => array(
+						'type'  => 'string',
+					),
+					'avatar' => array(
+						'type'  => 'string',
+					),
+				),
+			),
+		)
+	);
 }
 
 /**
