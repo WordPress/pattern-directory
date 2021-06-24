@@ -1,7 +1,9 @@
 <?php
 
 namespace WordPressdotorg\Pattern_Directory\Pattern_Post_Type;
+
 use Error, WP_Block_Type_Registry;
+use function WordPressdotorg\Locales\get_locales;
 
 const POST_TYPE = 'wporg-pattern';
 
@@ -160,6 +162,32 @@ function register_post_type_data() {
 			'show_in_rest'      => array(
 				'schema' => array(
 					'type' => 'string',
+				),
+			),
+		)
+	);
+
+	register_post_meta(
+		POST_TYPE,
+		'wpop_locale',
+		array(
+			'type'              => 'string',
+			'description'       => 'The language used when creating this pattern.',
+			'single'            => true,
+			'sanitize_callback' => function( $value ) {
+				if ( ! in_array( $value, array_keys( get_locales() ), true ) ) {
+					return 'en_US';
+				}
+
+				return $value;
+			},
+			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type'     => 'string',
+					'enum'     => array_keys( get_locales() ),
+					'required' => true,
+					'default'  => 'en_US',
 				),
 			),
 		)
