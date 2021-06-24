@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f6d87aec4f27dcdf04cd2bdb33d8635d",
+    "content-hash": "68539235d5fc1a6d06be1e0e6f366802",
     "packages": [
         {
             "name": "composer/installers",
@@ -157,6 +157,16 @@
             "time": "2021-04-28T06:42:17+00:00"
         },
         {
+            "name": "wordpress-meta/pub",
+            "version": "1",
+            "source": {
+                "type": "svn",
+                "url": "https://meta.svn.wordpress.org/sites/",
+                "reference": "trunk/wordpress.org/public_html/wp-content/mu-plugins/pub/"
+            },
+            "type": "wordpress-muplugin"
+        },
+        {
             "name": "wordpress-meta/wporg",
             "version": "1",
             "source": {
@@ -168,15 +178,15 @@
         },
         {
             "name": "wpackagist-plugin/gutenberg",
-            "version": "10.7.1",
+            "version": "10.9.0",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/gutenberg/",
-                "reference": "tags/10.7.1"
+                "reference": "tags/10.9.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/gutenberg.10.7.1.zip"
+                "url": "https://downloads.wordpress.org/plugin/gutenberg.10.9.0.zip"
             },
             "require": {
                 "composer/installers": "~1.0"
@@ -2286,5 +2296,5 @@
     "platform-overrides": {
         "php": "7.2"
     },
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.1.0"
 }
