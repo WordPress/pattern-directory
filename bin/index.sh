@@ -28,4 +28,4 @@ yarn wp-env run cli wp theme activate pattern-directory
 yarn wp-env run cli wp rewrite structure '/%postname%/'
 
 # Import tables
-npm run wp-env run cli wp db import wp-content/uploads/data/wporg_locales.sql
+yarn wp-env run cli wp db import wp-content/uploads/data/wporg_locales.sql
