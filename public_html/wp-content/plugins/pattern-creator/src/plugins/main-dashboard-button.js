@@ -5,7 +5,7 @@ import { __experimentalMainDashboardButton as MainDashboardButton } from '@wordp
 registerPlugin( 'main-dashboard-button-test', {
 	render: () => (
 		<MainDashboardButton>
-			<a className="main-dashboard-button" href="http://wordpress.org">
+			<a className="main-dashboard-button" href={ wporgBlockPattern.siteUrl }>
 				{ '←' }
 			</a>
 		</MainDashboardButton>

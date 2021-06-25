@@ -131,6 +131,7 @@ function enqueue_assets() {
 		sprintf(
 			'var wporgBlockPattern = JSON.parse( decodeURIComponent( \'%s\' ) );',
 			rawurlencode( wp_json_encode( array(
+				'siteUrl'    => esc_url( home_url() ),
 				'settings'   => $settings,
 				'postId'     => $post_id,
 				'categories' => get_terms(
