@@ -3,7 +3,7 @@
 namespace WordPressdotorg\Pattern_Directory\Pattern_Post_Type;
 
 use Error, WP_Block_Type_Registry;
-use function WordPressdotorg\Locales\{ get_locales, get_locales_with_english_names };
+use function WordPressdotorg\Locales\{ get_locales, get_locales_with_english_names, get_locales_with_native_names };
 
 const POST_TYPE = 'wporg-pattern';
 
@@ -386,9 +386,11 @@ function enqueue_editor_assets() {
 
 	wp_set_script_translations( 'wporg-pattern-post-type', 'wporg-patterns' );
 
+	$locales = ( is_admin() ) ? get_locales_with_english_names() : get_locales_with_native_names();
+
 	wp_add_inline_script(
 		'wporg-pattern-post-type',
-		'var wporgLocaleData = ' . wp_json_encode( get_locales_with_english_names() ) . ';',
+		'var wporgLocaleData = ' . wp_json_encode( $locales ) . ';',
 		'before'
 	);
 
