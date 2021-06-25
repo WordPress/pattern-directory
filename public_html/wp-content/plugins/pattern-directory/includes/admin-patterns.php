@@ -3,6 +3,7 @@
 namespace WordPressdotorg\Pattern_Directory\Admin\Patterns;
 
 use WP_Post, WP_Query;
+use function WordPressdotorg\Locales\get_locales_with_english_names;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTERN;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
@@ -33,7 +34,8 @@ function pattern_list_table_columns( $columns ) {
 
 	$columns = array_slice( $columns, 0, 3, true )
 				+ array(
-					'flags' => esc_html__( 'Pending Flags', 'wporg-patterns' ),
+					'flags'    => esc_html__( 'Pending Flags', 'wporg-patterns' ),
+					'language' => esc_html__( 'Language', 'wporg-patterns' ),
 				)
 				+ array_slice( $columns, 3, null, true );
 
@@ -86,6 +88,17 @@ function pattern_list_table_render_custom_columns( $column_name, $post_id ) {
 						esc_html( number_format_i18n( $flags->found_posts ) )
 					)
 				);
+			} else {
+				echo '&mdash;';
+			}
+			break;
+
+		case 'language':
+			$locale        = $current_pattern->wpop_locale ?: 'en_US';
+			$locale_labels = get_locales_with_english_names();
+
+			if ( isset( $locale_labels[ $locale ] ) ) {
+				echo esc_html( $locale_labels[ $locale ] );
 			} else {
 				echo '&mdash;';
 			}
