@@ -21,17 +21,15 @@ const PatternDetails = () => {
 	const postMetaData = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'meta' ) || {} );
 	const postTitle = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'title' ) || '' );
 	const [ description, setDescription ] = useState( postMetaData.wpop_description );
-	const [ locale, setLocale ] = useState( postMetaData.wpop_locale );
 
 	useEffect( () => {
 		editPost( {
 			meta: {
 				...postMetaData,
 				wpop_description: description,
-				wpop_locale: locale,
 			},
 		} );
-	}, [ description, locale ] );
+	}, [ description ] );
 
 	return (
 		<PluginDocumentSettingPanel
@@ -64,8 +62,15 @@ const PatternDetails = () => {
 				key="locale"
 				label={ __( 'Language', 'wporg-patterns' ) }
 				options={ localeOptions }
-				value={ locale }
-				onChange={ setLocale }
+				value={ postMetaData.wpop_locale }
+				onChange={ ( newLocale ) =>
+					editPost( {
+						meta: {
+							...postMetaData,
+							wpop_locale: newLocale,
+						},
+					} )
+				}
 				help={ __(
 					'The language field is used to help users find patterns that were created in their preferred language.',
 					'wporg-patterns'
