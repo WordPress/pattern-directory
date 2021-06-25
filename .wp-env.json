@@ -11,7 +11,8 @@
 	"mappings": {
 		".htaccess": "./.wp-env/.htaccess",
 		"wp-content": "./public_html/wp-content",
-		"wp-content/mu-plugins/0-sandbox.php": "./.wp-env/0-sandbox.php"
+		"wp-content/mu-plugins/0-sandbox.php": "./.wp-env/0-sandbox.php",
+		"wp-content/uploads/data": "./.wp-env/data"
 	},
 	"env": {
 		"tests": {
@@ -19,6 +20,7 @@
 				".htaccess": "./.wp-env/.htaccess",
 				"wp-content": "./public_html/wp-content",
 				"wp-content/mu-plugins/0-sandbox.php": "./.wp-env/0-sandbox.php",
+				"wp-content/uploads/data": "./.wp-env/data",
 				"vendor": "./vendor"
 			}
 		}
