@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { createElement } from '@wordpress/element';
 import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
 import { ComboboxControl, TextControl, TextareaControl } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
