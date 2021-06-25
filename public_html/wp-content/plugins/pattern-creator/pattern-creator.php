@@ -14,7 +14,7 @@ namespace WordPressdotorg\Pattern_Creator;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 const AUTOSAVE_INTERVAL = 30;
-const QUERY_VAR = 'edit-pattern';
+const IS_EDIT_VAR = 'edit-pattern';
 const PATTERN_ID_VAR = 'pattern-id';
 
 /**
@@ -27,7 +27,7 @@ const PATTERN_ID_VAR = 'pattern-id';
  */
 function should_load_creator() {
 	global $wp_query;
-	$is_editor = $wp_query->is_singular( POST_TYPE ) && false !== $wp_query->get( QUERY_VAR, false );
+	$is_editor = $wp_query->is_singular( POST_TYPE ) && false !== $wp_query->get( IS_EDIT_VAR, false );
 	// @todo Should this be a page template? Something else?
 	$is_new = is_page( 'new-pattern' );
 	return $is_editor || $is_new;
@@ -49,7 +49,7 @@ function is_editing_pattern() {
  * @return stringp[] New query vars.
  */
 function add_query_var( $query_vars ) {
-	$query_vars[] = QUERY_VAR;
+	$query_vars[] = IS_EDIT_VAR;
 	$query_vars[] = PATTERN_ID_VAR;
 	return $query_vars;
 }
@@ -207,5 +207,5 @@ function rewrite_for_pattern_editing() {
 			exit;
 	}
 }
-
 add_action( 'init', __NAMESPACE__ . '\rewrite_for_pattern_editing' );
+
