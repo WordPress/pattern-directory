@@ -424,8 +424,12 @@ function filter_patterns_collection_params( $query_params ) {
 	}
 
 	$query_params['author_name'] = array(
-		'description' => __( 'Limit result set to patterns by a single author.', 'wporg-patterns' ),
-		'type'        => 'string',
+		'description'       => __( 'Limit result set to patterns by a single author.', 'wporg-patterns' ),
+		'type'              => 'string',
+		'validate_callback' => function( $value ) {
+			$user = get_user_by( 'slug', $value );
+			return (bool) $user;
+		},
 	);
 
 	return $query_params;
