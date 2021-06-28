@@ -266,11 +266,11 @@ function register_rest_fields() {
 		POST_TYPE,
 		'author_meta',
 		array(
-			'get_callback' => function() {
+			'get_callback' => function( $post ) {
 				return array(
 					'name'   => esc_html( get_the_author_meta( 'display_name' ) ),
-					'url'   => esc_url( home_url( '/author/' . get_the_author_meta( 'user_nicename' ) ) ),
-					'avatar' => get_avatar_url( get_the_ID(), array( 'size' => 36 ) ),
+					'url'    => esc_url( home_url( '/author/' . get_the_author_meta( 'user_nicename' ) ) ),
+					'avatar' => get_avatar_url( $post['author'], array( 'size' => 36 ) ),
 				);
 			},
 
