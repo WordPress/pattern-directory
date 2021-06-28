@@ -7,12 +7,13 @@
 	"scripts": {
 		"build": "wp-scripts build pattern-post-type=./src/pattern-post-type.js",
 		"format:js": "wp-scripts format src -- --config=../../../../.prettierrc.js",
-		"lint:css": "echo \"No CSS.\"",
+		"lint:css": "wp-scripts lint-style src",
 		"lint:js": "wp-scripts lint-js src",
 		"start": "wp-scripts start pattern-post-type=./src/pattern-post-type.js"
 	},
 	"dependencies": {
 		"@wordpress/components": "14.1.2",
+		"@wordpress/compose": "4.1.1",
 		"@wordpress/data": "5.1.1",
 		"@wordpress/edit-post": "4.1.4",
 		"@wordpress/element": "3.1.1",

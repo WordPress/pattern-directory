@@ -7,6 +7,7 @@ const POST_TYPE = 'wporg-pattern';
 
 add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
 add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
+add_action( 'init', __NAMESPACE__ . '\register_post_statuses' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
 add_filter( 'allowed_block_types', __NAMESPACE__ . '\remove_disallowed_blocks', 10, 2 );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
@@ -138,7 +139,7 @@ function register_post_type_data() {
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
 			'show_in_rest'      => array(
 				'schema' => array(
-					'minimum' => 400,
+					'minimum' => 200,
 					'maximum' => 2000,
 				),
 			),
@@ -240,6 +241,77 @@ function register_rest_fields() {
 			),
 		)
 	);
+
+	/*
+	 * Get the author's avatar.
+	 */
+	register_rest_field(
+		POST_TYPE,
+		'favorite_count',
+		array(
+			'get_callback' => function() {
+				return 1;
+			},
+
+			'schema' => array(
+				'type'  => 'integer',
+			),
+		)
+	);
+
+	/*
+	 * Get the author's avatar.
+	 */
+	register_rest_field(
+		POST_TYPE,
+		'author_meta',
+		array(
+			'get_callback' => function() {
+				return array(
+					'name'   => esc_html( get_the_author_meta( 'display_name' ) ),
+					'url'   => esc_url( home_url( '/author/' . get_the_author_meta( 'user_nicename' ) ) ),
+					'avatar' => get_avatar_url( get_the_ID(), array( 'size' => 36 ) ),
+				);
+			},
+
+			'schema' => array(
+				'type'  => 'object',
+				'properties' => array(
+					'name' => array(
+						'type'  => 'string',
+					),
+					'url' => array(
+						'type'  => 'string',
+					),
+					'avatar' => array(
+						'type'  => 'string',
+					),
+				),
+			),
+		)
+	);
+}
+
+/**
+ * Register custom statuses for patterns.
+ *
+ * @return void
+ */
+function register_post_statuses() {
+	register_post_status(
+		'unlisted',
+		array(
+			'label'                  => __( 'Unlisted', 'wporg-patterns' ),
+			'label_count'            => _n_noop(
+				'Unlisted <span class="count">(%s)</span>',
+				'Unlisted <span class="count">(%s)</span>',
+				'wporg-patterns'
+			),
+			'public'                 => false,
+			'protected'              => true,
+			'show_in_admin_all_list' => false,
+		)
+	);
 }
 
 /**
@@ -285,6 +357,13 @@ function enqueue_editor_assets() {
 	);
 
 	wp_set_script_translations( 'wporg-pattern-post-type', 'wporg-patterns' );
+
+	wp_enqueue_style(
+		'wporg-pattern-post-type',
+		plugins_url( 'build/pattern-post-type.css', dirname( __FILE__ ) ),
+		array(),
+		$script_asset['version'],
+	);
 }
 
 /**

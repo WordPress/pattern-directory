@@ -1,5 +1,9 @@
 :root {
 	--grid-unit: 16px;
+	--border-color: #e0e0e0;
+	--sidebar-width: 280px;
+	--modal-width: 600px;
+	--modal-background: #1d2327;
 	--wp-admin-theme-color: #3858e9;
 	--wp-admin-theme-color-darker-10: #074fd2;
 	--wp-admin-theme-color-darker-20: #0646ba;

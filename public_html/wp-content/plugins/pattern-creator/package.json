@@ -36,14 +36,19 @@
 		"@wordpress/icons": "4.0.1",
 		"@wordpress/interface": "3.1.2",
 		"@wordpress/plugins": "3.1.1",
+<<<<<<< HEAD
 		"@wordpress/primitives": "2.1.1",
+=======
+		"@wordpress/url": "3.1.1",
+>>>>>>> trunk
 		"classnames": "2.3.1",
 		"lodash": "4.17.21"
 	},
 	"eslintConfig": {
 		"extends": "../../../../.eslintrc.js",
 		"globals": {
-			"wporgBlockPattern": "readonly"
+			"wporgBlockPattern": "readonly",
+			"wporgSiteUrl": "readonly"
 		}
 	},
 	"stylelint": {

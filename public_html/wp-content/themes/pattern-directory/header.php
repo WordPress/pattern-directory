@@ -30,13 +30,6 @@ get_template_part( 'header', 'wporg' );
 					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Pattern Directory', 'Site title', 'wporg-patterns' ); ?></a></h1>
 
 					<p class="site-description"><?php esc_html_e( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ); ?></p>
-
-					<div class="site-callout">
-						<?php /* Logged in actions are different */ ?>
-						<h2><?php esc_html_e( 'Create and share patterns', 'wporg-patterns' ); ?></h2>
-						<p><?php esc_html_e( 'Build your own patterns and share them with the WordPress world.', 'wporg-patterns' ); ?></p>
-						<p><a href="<?php echo esc_url( home_url( '/create' ) ); ?>"><?php esc_html_e( 'Learn more about patterns.', 'wporg-patterns' ); ?></a></p>
-					</div>
 				<?php else : ?>
 					<div>
 						<a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
@@ -77,3 +70,14 @@ get_template_part( 'header', 'wporg' );
 				<?php endif; ?>
 			</div><!-- .site-branding -->
 		</header><!-- #masthead -->
+
+		<?php if ( ! is_singular() ) : ?>
+		<div class="notice notice-warning notice-alt" style="max-width:960px; margin:1rem auto;">
+			<p style="font-size:0.9375rem; margin:0.75rem 0;">
+			<?php
+				esc_html_e( 'You’re a bit early to the party! This directory hasn’t yet fully launched.', 'wporg-patterns' );
+				echo ' <a href="https://github.com/WordPress/pattern-directory/">' . esc_html__( 'Follow along to see our progress.', 'wporg-patterns' ) . '</a>';
+			?>
+			</p>
+		</div>
+		<?php endif; ?>
