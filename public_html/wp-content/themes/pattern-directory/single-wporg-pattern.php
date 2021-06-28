@@ -16,10 +16,10 @@ $user_has_reported = is_user_logged_in() ? user_has_flagged_pattern() : false;
 $raw_block_content = get_the_content();
 $parsed_block_content = get_all_the_content( get_the_ID() );
 
-$categoryList = wp_get_post_terms( get_the_ID(), 'wporg-pattern-category' );
+$category_list = wp_get_post_terms( get_the_ID(), 'wporg-pattern-category' );
 
-for ( $i = 0, $c = count( $categoryList ); $i < $c; $i++ ) {
-	$categoryList[ $i ]->link = get_term_link( $categoryList[ $i ]->term_id );
+for ( $i = 0, $c = count( $category_list ); $i < $c; $i++ ) {
+	$category_list[ $i ]->link = get_term_link( $category_list[ $i ]->term_id );
 }
 
 ?>
@@ -36,7 +36,7 @@ for ( $i = 0, $c = count( $categoryList ); $i < $c; $i++ ) {
 					hidden
 					class="pattern__container"
 					data-post-title="<?php the_title(); ?>"
-					data-categories="<?php echo rawurlencode( wp_json_encode( $categoryList ) ); ?>"
+					data-categories="<?php echo rawurlencode( wp_json_encode( $category_list ) ); ?>"
 					data-post-id="<?php echo intval( get_the_ID() ); ?>"
 					data-logged-in="<?php echo json_encode( is_user_logged_in() ); ?>"
 					data-user-has-reported="<?php echo json_encode( $user_has_reported ); ?>"

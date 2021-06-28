@@ -19,7 +19,7 @@ get_header();
 
 	<main id="main" class="site-main" role="main">
 
-		<div id="patterns__container" data-is-home="<?php echo is_home(); ?>" data-logged-in="<?php echo json_encode( is_user_logged_in() ); ?>">
+		<div id="patterns__container" data-is-home="<?php echo json_encode( is_home() ); ?>" data-logged-in="<?php echo json_encode( is_user_logged_in() ); ?>">
 			<!-- Filter placeholder -->
 
 			<div class="pattern-grid">

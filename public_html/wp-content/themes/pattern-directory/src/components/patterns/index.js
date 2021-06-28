@@ -21,7 +21,7 @@ const Patterns = ( { isHome, loggedIn } ) => {
 	return (
 		<RouteProvider>
 			<QueryMonitor />
-			<PatternsHeader isHome={ Boolean( isHome ) } isLoggedIn={ loggedIn === 'true' } />
+			<PatternsHeader isHome={ isHome === 'true' } isLoggedIn={ loggedIn === 'true' } />
 			<BetaNotice />
 			<PatternGridMenu />
 			<PatternGrid query={ query }>
