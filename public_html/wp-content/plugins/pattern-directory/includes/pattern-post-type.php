@@ -12,6 +12,7 @@ add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_asse
 add_filter( 'allowed_block_types', __NAMESPACE__ . '\remove_disallowed_blocks', 10, 2 );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
 add_filter( 'rest_' . POST_TYPE . '_collection_params', __NAMESPACE__ . '\filter_patterns_collection_params' );
+add_filter( 'rest_' . POST_TYPE . '_query', __NAMESPACE__ . '\filter_patterns_rest_query', 10, 2 );
 
 
 /**
@@ -409,7 +410,9 @@ function disable_block_directory() {
 }
 
 /**
- * Filter the collection parameters to set a new default for per_page.
+ * Filter the collection parameters:
+ * - set a new default for per_page.
+ * - add a new parameter, `author_name`, for a user's nicename slug.
  *
  * @param array $query_params JSON Schema-formatted collection parameters.
  * @return array Filtered parameters.
@@ -420,7 +423,36 @@ function filter_patterns_collection_params( $query_params ) {
 		$query_params['per_page']['default'] = 18;
 	}
 
+	$query_params['author_name'] = array(
+		'description'       => __( 'Limit result set to patterns by a single author.', 'wporg-patterns' ),
+		'type'              => 'string',
+		'validate_callback' => function( $value ) {
+			$user = get_user_by( 'slug', $value );
+			return (bool) $user;
+		},
+	);
+
 	return $query_params;
+}
+
+/**
+ * Filter the arguments passed to the pattern query in the API.
+ *
+ * Uses the `author_name` passed in to the API to request patterns by an author slug, not just an ID.
+ *
+ * @param array           $args    Array of arguments to be passed to WP_Query.
+ * @param WP_REST_Request $request The REST API request.
+ */
+function filter_patterns_rest_query( $args, $request ) {
+	if ( isset( $request['author_name'] ) ) {
+		$user = get_user_by( 'slug', $request['author_name'] );
+		if ( $user ) {
+			$args['author'] = $user->ID;
+		} else {
+			$args['post__in'] = array( -1 );
+		}
+	}
+	return $args;
 }
 
 /**
