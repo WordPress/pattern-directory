@@ -8,9 +8,18 @@ import { __ } from '@wordpress/i18n';
  */
 import PatternSearch from '../pattern-search';
 
-const PageMenu = ( { isLoggedIn, searchProps } ) => {
+const PageMenu = ( { isHidden, isLoggedIn, searchProps } ) => {
+	const extraProps = {};
+
+	// Since we use a third party navigation script, we always need the elements in the dom to bind to
+	if ( isHidden ) {
+		extraProps.style = {
+			display: 'none',
+		};
+	}
+
 	return (
-		<nav id="site-navigation" className="main-navigation" role="navigation">
+		<nav id="site-navigation" className="main-navigation" role="navigation" { ...extraProps }>
 			<button
 				className="menu-toggle dashicons dashicons-arrow-down-alt2"
 				aria-controls="primary-menu"

@@ -50,9 +50,9 @@ const PatternsHeader = ( { isHome, isLoggedIn } ) => {
 					) : (
 						<span />
 					) }
-					<PageMenu isLoggedIn={ isLoggedIn } />
 				</>
 			) }
+			<PageMenu isHidden={ showMastHead } isLoggedIn={ isLoggedIn } />
 		</Header>
 	);
 };
