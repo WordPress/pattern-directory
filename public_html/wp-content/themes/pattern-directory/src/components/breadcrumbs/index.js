@@ -6,7 +6,7 @@ import { Fragment } from '@wordpress/element';
 
 const Breadcrumbs = ( { crumbs } ) => {
 	return (
-		<div>
+		<div className="pattern-breadcrumbs">
 			<a key="crumb-base" href={ wporgSiteUrl } rel="home">
 				{ __( 'All Patterns', 'wporg-patterns' ) }
 			</a>
