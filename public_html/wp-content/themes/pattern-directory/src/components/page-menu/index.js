@@ -37,7 +37,7 @@ const PageMenu = ( { isHidden, isLoggedIn, searchProps } ) => {
 					) }
 					<li className="page_item">
 						<a href={ `${ wporgSiteUrl }/new-patterns/` }>
-							{ __( 'Create patterns', 'wporg-patterns' ) }
+							{ __( 'Create pattern', 'wporg-patterns' ) }
 						</a>
 					</li>
 					<li className="page_item">
