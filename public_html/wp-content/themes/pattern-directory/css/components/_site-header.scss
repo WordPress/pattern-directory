@@ -1,18 +1,34 @@
 .site-header.home {
-	padding: 3.75rem 1rem;
+	padding: 0;
 	text-align: left;
 
 	.site-branding {
-		display: grid;
-		grid-template-rows: auto 1fr;
-		grid-template-columns: 1fr 26rem;
+		display: block;
+		padding: 3.75rem 1rem;
 
-		> * {
-			align-self: center;
+
+		@include breakpoint( $breakpoint-medium ) {
+			display: grid;
+			grid-template-rows: auto 1fr;
+			grid-template-columns: 1fr 25rem;
+
+			background-image: url(../images/masthead-bg.png);
+			background-size: contain;
+			background-repeat: no-repeat;
+			background-position-x: 160%;
+
+			> * {
+				align-self: center;
+			}
 		}
 
-		@include breakpoint( 0, $ms-breakpoint - 1 ) {
-			display: block;
+		@include breakpoint( $breakpoint-large - 100 ) {
+			background-position-x: 120%;
+		}
+
+		@include breakpoint( $breakpoint-large ) {
+			grid-template-columns: 1fr 30rem;
+			background-position-x: right;
 		}
 	}
 
@@ -40,7 +56,7 @@
 		grid-column-start: 1;
 		grid-row-start: 3;
 
-		@media only screen and (min-width: $breakpoint-tablet) {
+		@include breakpoint( $breakpoint-large ) {
 			max-width: 60%;
 		}
 	}
