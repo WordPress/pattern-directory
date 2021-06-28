@@ -4,7 +4,7 @@ const PatternPreviewHeader = ( { title, categories } ) => {
 			<h1 className="entry-title">{ title }</h1>
 			<div className="pattern__categories">
 				{ categories.map( ( cat ) => (
-					<a key={ cat.slug } href={ `${ wporgSiteUrl }/pattern-categories/${ cat.slug }` }>
+					<a key={ cat.slug } href={ cat.link }>
 						{ cat.name }
 					</a>
 				) ) }
