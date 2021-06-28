@@ -13,7 +13,6 @@
  */
 
 namespace WordPressdotorg\Pattern_Directory\Theme;
-use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 get_header();
 ?>
