@@ -11,7 +11,6 @@ import PatternsHeader from '../patterns-header';
 import PatternGridMenu from '../pattern-grid-menu';
 import PatternThumbnail from '../pattern-thumbnail';
 import QueryMonitor from '../query-monitor';
-
 import { RouteProvider } from '../../hooks';
 import { store as patternStore } from '../../store';
 
