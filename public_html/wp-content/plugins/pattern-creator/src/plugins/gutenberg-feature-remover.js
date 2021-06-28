@@ -6,8 +6,8 @@ import { store } from '@wordpress/edit-post';
 import { useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 
-const InspectorControlsModifier = () => {
-	useEffect( () => {
+const GutenbergEditorModifier = () => {
+	const removeDocumentPanelComponents = () => {
 		const { removeEditorPanel } = dispatch( store );
 
 		// We don't want the post-status control
@@ -19,11 +19,15 @@ const InspectorControlsModifier = () => {
 		// Turn off the custom taxonomy panels and replace with our own
 		removeEditorPanel( 'taxonomy-panel-wporg-pattern-category' );
 		removeEditorPanel( 'taxonomy-panel-wporg-pattern-keyword' );
+	};
+
+	useEffect( () => {
+		removeDocumentPanelComponents();
 	}, [] );
 
 	return null;
 };
 
-registerPlugin( 'inspector-controls-modifier', {
-	render: () => <InspectorControlsModifier />,
+registerPlugin( 'gutenberg-editor-modifier', {
+	render: () => <GutenbergEditorModifier />,
 } );

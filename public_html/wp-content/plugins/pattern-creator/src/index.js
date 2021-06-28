@@ -17,11 +17,12 @@ import './plugins/category-settings-panel';
 import './plugins/keyword-settings-panel';
 import './plugins/block-scope-settings-panel';
 
-import './plugins/inspector-controls-modifier';
+import './plugins/gutenberg-feature-remover';
 import './plugins/main-dashboard-button';
 import './plugins/save-post-modifier';
 import './plugins/update-inspector-panel-text';
 import './plugins/viewport-header-control';
+import './plugins/welcome-guide-plugin';
 import './style.css';
 
 // Set up API middleware.
