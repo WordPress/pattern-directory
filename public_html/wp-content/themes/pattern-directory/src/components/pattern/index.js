@@ -7,6 +7,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import AuthorDetails from './author-details';
 import PatternGrid from '../pattern-grid';
 import PatternPreview from '../pattern-preview';
 import PatternPreviewActions from '../pattern-preview-actions';
@@ -36,10 +37,15 @@ const Pattern = ( { postId, userHasReported, loggedIn } ) => {
 				</div>
 			</div>
 			<div className="entry-content">
-				<h2>{ __( 'More from this designer', 'wporg-patterns' ) }</h2>
 				<PatternGrid
 					query={ { author: pattern.author, per_page: 3, exclude: postId } }
 					showPagination={ false }
+					before={
+						<>
+							<h2>{ __( 'More from this designer', 'wporg-patterns' ) }</h2>
+							<AuthorDetails { ...pattern.author_meta } />
+						</>
+					}
 				>
 					{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } /> }
 				</PatternGrid>
