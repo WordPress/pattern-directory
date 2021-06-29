@@ -52,7 +52,7 @@ const FavoriteButton = ( { showLabel = true, patternId } ) => {
 	return (
 		<button className={ buttonClasses } onClick={ onClick }>
 			<IconHeartFilled className="pattern-favorite-button__filled" />
-			<IconHeartOutline height="12px" width="12px" className="pattern-favorite-button__outline" />
+			<IconHeartOutline className="pattern-favorite-button__outline" />
 			<span className={ labelClasses }>
 				{ isFavorite
 					? __( 'Remove from favorites', 'wporg-patterns' )
