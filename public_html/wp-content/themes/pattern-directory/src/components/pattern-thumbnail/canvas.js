@@ -11,6 +11,16 @@ import Iframe from '../iframe';
 const VIEWPORT_WIDTH = 800;
 const ASPECT_RATIO = 2 / 3;
 
+/**
+ * Returns the height of the preview window.
+ *
+ * @param {HTMLElement} element Html element
+ */
+
+export const getFrameHeight = ( element ) => {
+	return element.clientWidth * ASPECT_RATIO;
+};
+
 function PatternThumbnail( { className, html } ) {
 	const wrapperRef = useRef();
 	const [ frameHeight, setFrameHeight ] = useState( '100%' );
@@ -19,7 +29,7 @@ function PatternThumbnail( { className, html } ) {
 	useEffect( () => {
 		const handleOnResize = () => {
 			try {
-				setFrameHeight( wrapperRef.current.clientWidth * ASPECT_RATIO );
+				setFrameHeight( getFrameHeight( wrapperRef.current ) );
 				setFrameScale( wrapperRef.current.clientWidth / VIEWPORT_WIDTH );
 			} catch ( err ) {}
 		};
