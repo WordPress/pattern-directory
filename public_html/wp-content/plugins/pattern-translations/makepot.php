@@ -72,7 +72,7 @@ class PatternMakepot {
 
 		$project = \GP::$project->by_path( 'wpcom/block-patterns' );
 		if ( ! $project ) {
-			return new \WP_Error( __( 'Project not found!', 'glotpress' ) );
+			return __( 'Project not found!', 'glotpress' );
 		}
 
 		$po = $this->makepo();
