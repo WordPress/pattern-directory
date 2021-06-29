@@ -99,7 +99,7 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 		$all_posts = isset( $args['all-posts'] );
 		$locale = $args['locale'] ?? false;
 
-		$store = PatternStores::get_store();
+		$store = new PatternStores();
 
 		if ( empty( $store ) ) {
 			WP_CLI::error( "No registered store" );
