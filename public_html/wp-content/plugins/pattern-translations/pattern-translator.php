@@ -15,3 +15,7 @@ require __DIR__ . '/pattern-cache.php';
 require __DIR__ . '/parser.php';
 require __DIR__ . '/i18n.php';
 require __DIR__ . '/makepot.php';
+
+if ( defined( 'WP_CLI' ) ) {
+	require __DIR__ . '/cli-commands.php';
+}
