@@ -78,7 +78,7 @@ class PatternStores {
 		$pattern->name = $post->post_name;
 		$pattern->description = $post->post_excerpt;
 		$pattern->html = $post->post_content;
-		$pattern->source_url = $post->guid;
+		$pattern->source_url = get_permalink( $post );
 		$pattern->modified_date = get_the_modified_date( 'Y-m-d H:i:s', $post );
 
 		$categories = get_the_terms( $post, 'category' );
