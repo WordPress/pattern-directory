@@ -50,17 +50,12 @@ class PatternMakepot {
 				}
 
 				if ( ! empty( $pattern->source_url ) && ! in_array( $pattern->source_url, $entries[ $string ]->references ) ) {
-					$entries[ $string ]->references[] = static::block_patterns_reference( $pattern->source_url );
+					$entries[ $string ]->references[] = $pattern->source_url;
 				}
 			}
 		}
 
 		return array_values( $entries );
-	}
-
-	public static function block_patterns_reference( $url ) {
-		// Mirrored preg_replace in `WPCOM_Specifics::reference_source_url`.
-		return preg_replace( '/^https?:\/\//', 'block-patterns/', $url ) . ':';
 	}
 
 	public function import( $save = false ) {
@@ -70,6 +65,8 @@ class PatternMakepot {
 		if ( empty( $this->patterns ) ) {
 			return __( 'No patterns found: skipping import.', 'glotpress' );
 		}
+
+		return 'Not yet available.';
 
 		switch_to_blog( TRANSLATE_BLOG_ID );
 		wpcom_glotpress_loader();
