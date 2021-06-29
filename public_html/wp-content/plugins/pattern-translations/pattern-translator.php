@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * Plugin Name: Pattern Translations
+ * Description: Imports Pattern translations into GlotPress and provides translated patterns.
+ * Plugin URI:  https://wordpress.org/patterns/
+ * Text Domain: wporg-plugins
+ */
 namespace A8C\Lib\Patterns;
 
 require __DIR__ . '/init.php';
