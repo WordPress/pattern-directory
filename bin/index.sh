@@ -10,7 +10,7 @@ yarn
 yarn workspaces run build
 
 # Setup the environment
-yarn wp-env start
+yarn wp-env start --update
 
 # Update wp configs
 yarn wp-env run cli wp config set JETPACK_DEV_DEBUG true
@@ -26,3 +26,6 @@ yarn wp-env run cli wp theme activate pattern-directory
 
 # Change permalinks
 yarn wp-env run cli wp rewrite structure '/%postname%/'
+
+# Import tables
+yarn wp-env run cli wp db import wp-content/uploads/data/wporg_locales.sql

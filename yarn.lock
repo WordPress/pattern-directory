@@ -3553,7 +3553,7 @@
   dependencies:
     "@babel/runtime" "^7.13.10"
 
-"@wordpress/html-entities@^3.1.1":
+"@wordpress/html-entities@3.1.1", "@wordpress/html-entities@^3.1.1":
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/@wordpress/html-entities/-/html-entities-3.1.1.tgz#dd396d24fada1e063792bf8b280ef46a96584e0d"
   integrity sha512-LDeSO//QV0rm7u4SoYz2wa9fM0VhvInwWI8+mT+7jPubkgC+2DfaPte7ahofPz4/lQd9MAQ9NgvGXWTw2x0/vw==

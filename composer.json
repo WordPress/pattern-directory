@@ -35,6 +35,16 @@
 						"url": "https://meta.svn.wordpress.org/sites/",
 						"reference": "trunk/wordpress.org/public_html/wp-content/themes/pub/wporg/"
 					}
+				},
+				{
+					"name": "wordpress-meta/pub",
+					"type": "wordpress-muplugin",
+					"version": "1",
+					"source": {
+						"type": "svn",
+						"url": "https://meta.svn.wordpress.org/sites/",
+						"reference": "trunk/wordpress.org/public_html/wp-content/mu-plugins/pub/"
+					}
 				}
 			]
 		}
@@ -42,7 +52,8 @@
 	"require": {
 		"composer/installers": "~1.0",
 		"wpackagist-plugin/gutenberg": "*",
-		"wordpress-meta/wporg": "1"
+		"wordpress-meta/wporg": "1",
+		"wordpress-meta/pub": "1"
 	},
 	"require-dev": {
 		"dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
