@@ -1,6 +1,6 @@
 <?php
 
-namespace A8C\Lib\Patterns;
+namespace WordPressdotorg\Pattern_Translations;
 
 class PatternTranslator {
 	public $pattern;
@@ -58,7 +58,6 @@ class PatternTranslator {
 		return $extended_translations;
 	}
 
-	// Used by https://mc.a8c.com/patterns/
 	public function get_translated_strings_without_fallback() : array {
 		return temporary_switch_to_locale(
 			$this->locale,
@@ -88,7 +87,6 @@ class PatternTranslator {
 		);
 	}
 
-	// Used by https://mc.a8c.com/patterns/
 	public function get_translation_status() : float {
 		return temporary_switch_to_locale(
 			$this->locale,

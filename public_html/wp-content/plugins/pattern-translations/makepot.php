@@ -1,6 +1,6 @@
 <?php
 
-namespace A8C\Lib\Patterns;
+namespace WordPressdotorg\Pattern_Translations;
 
 require_once ABSPATH . '/wp-includes/pomo/po.php';
 
@@ -61,7 +61,6 @@ class PatternMakepot {
 	public function import( $save = false ) {
 		// Avoid attempting to import strings when no patterns are found.
 		// This is a precautionary check to ensure we don't accidentally remove all translations.
-		// Reported in: https://createp2.wordpress.com/2021/03/04/new-page-layout-picker-call-for-testing/#comment-4287
 		if ( empty( $this->patterns ) ) {
 			return __( 'No patterns found: skipping import.', 'glotpress' );
 		}

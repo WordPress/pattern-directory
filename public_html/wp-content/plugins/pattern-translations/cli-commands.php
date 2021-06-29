@@ -1,5 +1,6 @@
 <?php
-namespace A8C\Lib\Patterns;
+namespace WordPressdotorg\Pattern_Translations;
+
 use WP_CLI;
 use WP_CLI_Command;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace A8C\Lib\Patterns;
+namespace WordPressdotorg\Pattern_Translations;
 
 /**
  * Filter the upload size limit.

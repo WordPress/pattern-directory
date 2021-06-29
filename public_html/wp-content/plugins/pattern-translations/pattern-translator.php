@@ -5,7 +5,7 @@
  * Plugin URI:  https://wordpress.org/patterns/
  * Text Domain: wporg-plugins
  */
-namespace A8C\Lib\Patterns;
+namespace WordPressdotorg\Pattern_Translations;
 
 require __DIR__ . '/init.php';
 require __DIR__ . '/pattern-meta.php';

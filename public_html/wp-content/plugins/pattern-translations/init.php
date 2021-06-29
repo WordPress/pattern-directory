@@ -1,6 +1,6 @@
 <?php
 
-namespace A8C\Lib\Patterns;
+namespace WordPressdotorg\Pattern_Translations;
 
 /**
  * Init function to group together taxonomy registration and any other tasks
@@ -20,7 +20,7 @@ function patterns_lib_init() {
  * Unload taxonomy registration and hooks loaded by the init function.
  * In most cases this will not need to be called, but it is used when tearing down tests.
  *
- * @see \A8C\Lib\Patterns\patterns_lib_init
+ * @see namespace WordPressdotorg\Pattern_Translations\patterns_lib_init
  */
 function patterns_lib_unload() {
 	if ( ! has_blog_sticker( 'block-patterns-source-site' ) ) {

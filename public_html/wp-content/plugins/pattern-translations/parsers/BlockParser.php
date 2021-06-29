@@ -10,7 +10,7 @@
  * @phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
  */
 
-namespace A8C\Lib\Patterns;
+namespace WordPressdotorg\Pattern_Translations;
 
 // A block transform is specific to a certain block type and contains
 // the know-how of how to both extract and replace strings

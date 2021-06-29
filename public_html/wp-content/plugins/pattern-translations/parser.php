@@ -1,7 +1,7 @@
 <?php
 //phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DomDocument/DOMXPath returns classes that use camelCasing
 
-namespace A8C\Lib\Patterns;
+namespace WordPressdotorg\Pattern_Translations;
 
 require_once ABSPATH . '/wp-includes/pomo/po.php';
 
