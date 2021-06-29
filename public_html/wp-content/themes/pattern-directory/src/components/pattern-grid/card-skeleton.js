@@ -26,13 +26,13 @@ const CardSkeleton = () => {
 				<Skeleton height={ height } />
 				<Skeleton height="14px" marginTop="1rem" />
 
-				<SkeletonWrapper style={ { flexDirection: 'row', marginTop: '0.5rem', alignItems: 'center' } }>
+				<SkeletonWrapper styles={ { flexDirection: 'row', marginTop: '0.5rem', alignItems: 'center' } }>
 					<Skeleton height="18px" width="18px" marginRight="0.5rem" borderRadius="32px" />
 					<Skeleton height="12px" width="100px" marginRight="0.75rem" />
 					<IconHeartFilled
 						width="16px"
 						height="16px"
-						fill="grey"
+						fill="#787c82"
 						className="pattern-favorite-button__filled"
 					/>
 					<Skeleton height="12px" width="32px" marginLeft="0.5rem" />
