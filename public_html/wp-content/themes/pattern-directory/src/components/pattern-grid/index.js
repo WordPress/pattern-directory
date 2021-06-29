@@ -30,7 +30,7 @@ function PatternGrid( { header, children, query, showPagination = true } ) {
 				{ isLoading
 					? Array( 6 )
 							.fill()
-							.map( ( idx ) => <CardSkeleton key={ idx } /> )
+							.map( ( val, idx ) => <CardSkeleton key={ idx } /> )
 					: posts.map( children ) }
 			</div>
 			<Pagination totalPages={ totalPages } currentPage={ query?.page } />
