@@ -22,12 +22,6 @@ class PatternParser {
 	public $parsers = [];
 	public $fallback;
 
-	public $excluded_tags = [
-		'block_pattern_published',
-		'block_pattern_show_in_inserter',
-		'premium_block_pattern',
-	];
-
 	public function __construct( Pattern $pattern ) {
 		$this->pattern = $pattern;
 
@@ -103,24 +97,6 @@ class PatternParser {
 			$strings = array_merge( $strings, $this->block_parser_to_strings( $block ) );
 		}
 
-		foreach ( $this->pattern->categories as $category ) {
-			if ( is_string( $category ) ) {
-				$strings[] = $category;
-			} else if ( is_array( $category ) ) {
-				$strings = array_merge( $strings, array_filter( array_values( $category ) ) );
-			}
-		}
-
-		foreach ( $this->pattern->tags as $slug => $tag ) {
-			if ( is_string( $tag ) ) {
-				$strings[] = $tag;
-			} else if ( is_array( $tag ) ) {
-				if ( ! in_array( $slug, $this->excluded_tags ) ) {
-					$strings = array_merge( $strings, array_filter( array_values( $tag ) ) );
-				}
-			}
-		}
-
 		return array_unique( $strings );
 	}
 
@@ -142,42 +118,6 @@ class PatternParser {
 
 		foreach ( $blocks as &$block ) {
 			$block = $this->block_parser_replace_strings( $block, $replacements );
-		}
-
-		foreach ( $this->pattern->categories as $slug => $category ) {
-			if ( is_string( $category ) ) {
-				if ( isset( $replacements[ $category ] ) ) {
-					$translated->categories[ $slug ] = $replacements[ $category ];
-				}
-			} else if ( is_array( $category ) ) {
-				$translated->categories[ $slug ] = array_merge(
-					$category,
-					[
-						'slug' => $replacements[ $category['slug'] ] ?? $category['slug'],
-						'title' => $replacements[ $category['title'] ] ?? $category['title'],
-						'description' => $replacements[ $category['description'] ] ?? $category['description'],
-					]
-				);
-			}
-		}
-
-		foreach ( $this->pattern->tags as $slug => $tag ) {
-			if ( ! in_array( $slug, $this->excluded_tags ) ) {
-				if ( is_string( $tag ) ) {
-					if ( isset( $replacements[ $tag ] ) ) {
-						$translated->tags[ $slug ] = $replacements[ $tag ];
-					}
-				} else if ( is_array( $tag ) ) {
-					$translated->tags[ $slug ] = array_merge(
-						$tag,
-						[
-							'slug' => $replacements[ $tag['slug'] ] ?? $tag['slug'],
-							'title' => $replacements[ $tag['title'] ] ?? $tag['title'],
-							'description' => $replacements[ $tag['description'] ] ?? $tag['description'],
-						]
-					);
-				}
-			}
 		}
 
 		// If we pass `serialize_blocks` a block that includes unicode characters in the
