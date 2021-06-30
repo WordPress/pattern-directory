@@ -3,8 +3,6 @@
 
 namespace WordPressdotorg\Pattern_Translations;
 
-require_once ABSPATH . '/wp-includes/pomo/po.php';
-
 require_once __DIR__ . '/parsers/BlockParser.php';
 require_once __DIR__ . '/parsers/BasicTextParser.php';
 require_once __DIR__ . '/parsers/ButtonParser.php';

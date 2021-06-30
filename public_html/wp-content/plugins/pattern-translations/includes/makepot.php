@@ -2,8 +2,6 @@
 
 namespace WordPressdotorg\Pattern_Translations;
 
-require_once ABSPATH . '/wp-includes/pomo/po.php';
-
 class PatternMakepot {
 	public $patterns;
 
@@ -16,6 +14,8 @@ class PatternMakepot {
 	}
 
 	public function makepo( $revision_time = null ) : \PO {
+		require_once ABSPATH . '/wp-includes/pomo/po.php';
+
 		$po = new \PO();
 
 		$po->set_header( 'PO-Revision-Date', gmdate( 'Y-m-d H:i:s', $revision_time ?? time() ) . '+0000' );

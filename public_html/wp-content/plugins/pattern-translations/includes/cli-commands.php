@@ -4,8 +4,6 @@ namespace WordPressdotorg\Pattern_Translations;
 use WP_CLI;
 use WP_CLI_Command;
 
-require_once( ABSPATH . '/wp-includes/pomo/po.php' );
-
 WP_CLI::add_command( 'patterns', __NAMESPACE__ . '\WP_CLI_Patterns' );
 
 /**
