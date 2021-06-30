@@ -118,7 +118,6 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 			exit( 1 );
 		}
 
-		// Also done by patterns lib SiteStore by default but the test that covers this doesn't work
 		$query['post_status'] = 'publish';
 
 		$patterns = Pattern::get_patterns( $query );
