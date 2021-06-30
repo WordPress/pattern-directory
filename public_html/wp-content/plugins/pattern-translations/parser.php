@@ -5,8 +5,8 @@ namespace WordPressdotorg\Pattern_Translations;
 
 require_once ABSPATH . '/wp-includes/pomo/po.php';
 
-require_once __DIR__ . '/parsers/BasicTextParser.php';
 require_once __DIR__ . '/parsers/BlockParser.php';
+require_once __DIR__ . '/parsers/BasicTextParser.php';
 require_once __DIR__ . '/parsers/ButtonParser.php';
 require_once __DIR__ . '/parsers/HeadingParser.php';
 require_once __DIR__ . '/parsers/NoopParser.php';
@@ -23,19 +23,22 @@ class PatternParser {
 		$this->pattern = $pattern;
 
 		$this->parsers = [
-			'core/paragraph' => new ParagraphParser(),
-			'core/heading' => new HeadingParser(),
-			'core/button' => new ButtonParser(),
-			'core/buttons' => new BasicTextParser(),
-			'core/list' => new BasicTextParser(),
-			'core/column' => new BasicTextParser(),
-			'core/columns' => new BasicTextParser(),
-			'core/cover' => new BasicTextParser(),
-			'core/spacer' => new NoopParser(),
-			'core/group' => new BasicTextParser(),
-			'core/image' => new BasicTextParser(),
-			'core/media-text' => new BasicTextParser(),
-			'core/separator' => new BasicTextParser(),
+			// Blocks that have custom parsers.
+			'core/paragraph'   => new ParagraphParser(),
+			'core/heading'     => new HeadingParser(),
+			'core/button'      => new ButtonParser(),
+			'core/spacer'      => new NoopParser(),
+
+			// Common core blocks that use the default parser.
+			'core/buttons'     => new BasicTextParser(),
+			'core/list'        => new BasicTextParser(),
+			'core/column'      => new BasicTextParser(),
+			'core/columns'     => new BasicTextParser(),
+			'core/cover'       => new BasicTextParser(),
+			'core/group'       => new BasicTextParser(),
+			'core/image'       => new BasicTextParser(),
+			'core/media-text'  => new BasicTextParser(),
+			'core/separator'   => new BasicTextParser(),
 			'core/social-link' => new BasicTextParser(),
 		];
 
