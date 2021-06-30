@@ -62,17 +62,16 @@ class PatternMakepot {
 		// Avoid attempting to import strings when no patterns are found.
 		// This is a precautionary check to ensure we don't accidentally remove all translations.
 		if ( empty( $this->patterns ) ) {
-			return __( 'No patterns found: skipping import.', 'glotpress' );
+			return 'No patterns found: skipping import.';
 		}
 
-		return 'Not yet available.';
+		// Load GlotPress for the API.
+		switch_to_blog( WPORG_TRANSLATE_BLOGID );
+		$this->load_glotpress();
 
-		switch_to_blog( TRANSLATE_BLOG_ID );
-		wpcom_glotpress_loader();
-
-		$project = \GP::$project->by_path( 'wpcom/block-patterns' );
+		$project = \GP::$project->by_path( GLOTPRESS_PROJECT );
 		if ( ! $project ) {
-			return __( 'Project not found!', 'glotpress' );
+			return 'Project not found!';
 		}
 
 		$po = $this->makepo();
@@ -99,8 +98,12 @@ class PatternMakepot {
 				);
 			}
 
+			restore_current_blog();
+
 			return $notice;
 		} else {
+			restore_current_blog();
+
 			return sprintf( 'dry-run: %s translations would be imported using the --save flag', count( $po->entries ) );
 		}
 	}
@@ -160,5 +163,29 @@ class PatternMakepot {
 		}
 
 		return $po;
+	}
+
+	/**
+	 * Load GlotPress so that we can interact with the GlotPress APIs.
+	 */
+	public function load_glotpress() {
+		// TODO: Figure out how to properly do the following stuff.
+		//       Maybe this needs to be run in the context of translate.w.org
+		//       and switch_to_site( PATTERN_DIRECTORY ) instead? But post type
+		//       would not be registered still.
+		//       Maybe this should be a two-part operation, Export all strings to
+		//       .po file, then import into GlotPress as an additional call.
+
+		$GLOBALS['gp_table_prefix'] = GLOTPRESS_TABLE_PREFIX;
+
+		// Load any GlotPress plugins as needed.
+		array_walk( get_option( 'active_plugins', [] ), function( $plugin ) {
+			include_once trailingslashit( WP_PLUGIN_DIR ) . $plugin;
+		} );
+
+		// Run the GlotPress init routines.
+		if ( ! did_action( 'gp_init' ) ) {
+			gp_init();
+		}
 	}
 }
