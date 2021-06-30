@@ -5,6 +5,8 @@ namespace WordPressdotorg\Pattern_Translations\Parsers;
 /*
  * Handle blocks with attributes present in the attributes that are also used
  * in a shortcode within the block content.
+ * 
+ * Example: new Parsers\ShortcodeBlock( [ 'subscribePlaceholder', 'submitButtonText' ] );
  */
 class ShortcodeBlock implements BlockParser {
 	use GetSetAttribute;
