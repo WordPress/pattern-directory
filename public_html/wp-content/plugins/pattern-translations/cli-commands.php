@@ -15,7 +15,7 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 	/**
 	 * Output json representation of the selected site patterns, optionally localized
 	 *
-	 * @example wp patterns json --site=wpcompatterns.wordpress.com --post=example
+	 * @example wp patterns json --post=example
 	 * @subcommand json
 	 * @synopsis [--post=<slug-or-id>] [--post-ids=<csv>] [--post-slugs=<csv>] [--all-posts] [--locale=<slug>]
 	 */
@@ -27,7 +27,7 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 	/**
 	 * Output the combined HTML of the selected patterns, optionally localized
 	 *
-	 * @example wp patterns html --site=wpcompatterns.wordpress.com --post=example
+	 * @example wp patterns html --post=example
 	 * @subcommand html
 	 * @synopsis [--post=<slug-or-id>] [--post-ids=<csv>] [--post-slugs=<csv>] [--all-posts] [--locale=<slug>]
 	 */
@@ -39,7 +39,7 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 	/**
 	 * Output the extracted strings of the selected patterns, optionally localized
 	 *
-	 * @example wp patterns strings --site=wpcompatterns.wordpress.com --post=example
+	 * @example wp patterns strings --post=example
 	 * @subcommand strings
 	 * @synopsis [--post=<slug-or-id>] [--post-ids=<csv>] [--post-slugs=<csv>] [--all-posts] [--locale=<slug>]
 	 */
@@ -59,7 +59,7 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 	/**
 	 * Output a .pot file for tranlsation
 	 *
-	 * @example wp patterns makepot --site=wpcompatterns.wordpress.com
+	 * @example wp patterns makepot
 	 * @subcommand makepot
 	 * @synopsis [--post=<slug-or-id>] [--post-ids=<csv>] [--post-slugs=<csv>] [--all-posts]
 	 */
@@ -77,7 +77,7 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 	/**
 	 * Import the selected patterns strings into glotpress
 	 *
-	 * @example wp patterns glotpress-import --site=wpcompatterns.wordpress.com
+	 * @example wp --url=https://translate.wordpress.org/ patterns glotpress-import
 	 * @subcommand glotpress-import
 	 * @synopsis [--post=<slug-or-id>] [--post-ids=<csv>] [--post-slugs=<csv>] [--all-posts] [--save]
 	 */
