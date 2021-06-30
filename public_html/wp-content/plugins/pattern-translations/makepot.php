@@ -11,11 +11,11 @@ class PatternMakepot {
 		$this->patterns = $patterns;
 	}
 
-	public function makepot( $revision_time = null, $comment = 'Example site content, non-literal translation is ok' ) : string {
+	public function makepot( $revision_time = null ) : string {
 		return $this->makepo( $revision_time, $comment )->export();
 	}
 
-	public function makepo( $revision_time = null, $comment = 'Example site content, non-literal translation is ok' ) : \PO {
+	public function makepo( $revision_time = null ) : \PO {
 		$po = new \PO();
 
 		$po->set_header( 'PO-Revision-Date', gmdate( 'Y-m-d H:i:s', $revision_time ?? time() ) . '+0000' );
@@ -24,14 +24,14 @@ class PatternMakepot {
 		$po->set_header( 'Content-Transfer-Encoding', '8bit' );
 		$po->set_header( 'X-Generator', 'wp_cli_patterns_makepot' );
 
-		foreach ( $this->entries( $comment ) as $entry ) {
+		foreach ( $this->entries() as $entry ) {
 			$po->add_entry( $entry );
 		}
 
 		return $po;
 	}
 
-	public function entries( $comment ) : array {
+	public function entries() : array {
 		$entries = [];
 
 		foreach ( $this->patterns as $pattern ) {
@@ -43,7 +43,7 @@ class PatternMakepot {
 					$entries[ $string ] = new \Translation_Entry(
 						[
 							'singular' => $string,
-							'extracted_comments' => $comment,
+							'extracted_comments' => "Found in the '{$pattern->title}' pattern.",
 							'references' => [],
 						]
 					);
