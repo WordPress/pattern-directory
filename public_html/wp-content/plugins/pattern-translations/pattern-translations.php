@@ -9,11 +9,11 @@ namespace WordPressdotorg\Pattern_Translations;
 
 const GLOTPRESS_PROJECT = 'disabled/patterns';
 
-require __DIR__ . '/pattern.php';
-require __DIR__ . '/parser.php';
-require __DIR__ . '/i18n.php';
-require __DIR__ . '/makepot.php';
+require __DIR__ . '/includes/pattern.php';
+require __DIR__ . '/includes/parser.php';
+require __DIR__ . '/includes/i18n.php';
+require __DIR__ . '/includes/makepot.php';
 
 if ( defined( 'WP_CLI' ) ) {
-	require __DIR__ . '/cli-commands.php';
+	require __DIR__ . '/includes/cli-commands.php';
 }
