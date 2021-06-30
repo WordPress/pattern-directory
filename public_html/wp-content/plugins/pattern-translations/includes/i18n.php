@@ -1,6 +1,5 @@
 <?php
 namespace WordPressdotorg\Pattern_Translations;
-use GlotPress_Translate_Bridge;
 
 /**
  * Translate an array of patterns into the current locale.
@@ -9,29 +8,7 @@ use GlotPress_Translate_Bridge;
  * @return array The translated pattern objects.
  */
 function translate_patterns( array $patterns ) : array {
-	$translated_patterns = [];
-
-	if ( 'en_US' === get_locale() ) {
-		return $patterns;
-	}
-
-	foreach ( $patterns as $pattern ) {
-		$parser = new PatternParser( $pattern );
-
-		$replacements = [];
-
-		foreach ( $parser->to_strings() as $string ) {
-			if ( 'strrev' === get_locale() ) {
-				$replacements[ $string ] = strrev( $string );
-			} else {
-				$replacements[ $string ] = GlotPress_Translate_Bridge::translate( $string, GLOTPRESS_PROJECT );
-			}
-		}
-
-		$translated_patterns[] = $parser->replace_strings_with_kses( $replacements );
-	}
-
-	return $translated_patterns;
+	return translate_patterns_to( $patterns, get_locale() );
 }
 
 /**
@@ -42,16 +19,7 @@ function translate_patterns( array $patterns ) : array {
  * @return array The translated pattern objects.
  */
 function translate_patterns_to( array $patterns, string $locale ) : array {
-	try {
-		switch_to_locale( $locale );
-
-		return translate_patterns( $patterns );
-	} finally {
-		restore_current_locale();
-	}
+	return array_walk( $patterns, function( $pattern ) use ( $locale ) {
+		return $pattern->to_locale( $locale );
+	} );
 }
-
-add_filter( 'get_available_languages', function( $languages ) {
-	$languages[] = 'strrev';
-	return $languages;
-} );

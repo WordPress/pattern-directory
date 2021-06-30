@@ -1,7 +1,7 @@
 <?php
-
 namespace WordPressdotorg\Pattern_Translations;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+use GlotPress_Translate_Bridge;
 
 class Pattern {
 	public $ID = null;
@@ -11,6 +11,51 @@ class Pattern {
 	public $html = '';
 	public $source_url = '';
 
+	public $locale = 'en_US'; // by default.
+
+	/**
+	 * Translate a Pattern into a specific locale.
+	 *
+	 * @param string $locale The locale to translate this Pattern to.
+	 * @return Pattern|false A new Pattern object upon success, or false if no translated fields were available.
+	 */
+	public function to_locale( string $locale ) /* : Pattern|bool */ {
+		if ( 'en_US' !== $this->locale ) {
+			// If we're not an English object, refetch the Pattern.
+			$translated = self::from_post( get_post( $this->ID ) );
+		} else {
+			$translated = clone $this;
+		}
+
+		switch_to_locale( $locale );
+
+		$parser = new PatternParser( $translated );
+
+		$translations = [];
+		$originals    = $parser->to_strings();
+		foreach ( $originals as $string ) {
+			$translations[ $string ] = apply_filters( 'gettext', GlotPress_Translate_Bridge::translate( $string, GLOTPRESS_PROJECT ), 'wporg-pattern' );
+		}
+
+		restore_current_locale();
+
+		// Are there any translations?
+		if ( array_keys( $translations ) === array_values( $translations ) ) {
+			return false;
+		}
+
+		$translated = $parser->replace_strings_with_kses( $replacements );
+		$translated->locale = $locale;
+
+		return $translated;
+	}
+
+	/**
+	 * Create a new Pattern object from a WP_Post object for translation purposes.
+	 *
+	 * @param \WP_Post $post The post object.
+	 * @return Pattern The Pattern object.
+	 */
 	public static function from_post( \WP_Post $post ) : Pattern {
 		$pattern              = new Pattern();
 		$pattern->ID          = $post->ID;
@@ -19,6 +64,7 @@ class Pattern {
 		$pattern->description = $post->wpop_description; // wpop_description Meta key
 		$pattern->html        = $post->post_content;
 		$pattern->source_url  = get_permalink( $post );
+		$pattern->locale      = 'en_US';
 
 		return $pattern;
 	}
