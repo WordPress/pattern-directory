@@ -69,6 +69,12 @@ class Pattern {
 		return $pattern;
 	}
 
+	/**
+	 * Fetch an array of Pattern objects based on a WP_Query query.
+	 *
+	 * @param array $args The WP_Query args.
+	 * @return array An array of Pattern objects.
+	 */
 	public static function get_patterns( array $args = [] ) : array {
 		$defaults = [
 			'post_type'      => POST_TYPE,
@@ -78,6 +84,18 @@ class Pattern {
 			'orderby'        => [
 				'post_date' => 'DESC',
 			],
+			// Only select en_US patterns that are marked as glotpress translatable.
+			'meta_query' => [
+				[
+					'key'   => 'wpop_locale',
+					'value' => 'en_US',
+				],
+				'relation' => 'AND',
+				[
+					'key'   => TRANSLATED_BY_GLOTPRESS_KEY,
+					'value' => 1,
+				],
+			]
 		];
 
 		$options = wp_parse_args( $args, $defaults );
