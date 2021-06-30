@@ -16,6 +16,7 @@ add_filter( 'jetpack_sync_post_meta_whitelist', __NAMESPACE__ . '\sync_pattern_m
 function sync_pattern_meta( $post_meta_safelist ) {
 	$post_meta_safelist[] = 'wpop_description';
 	$post_meta_safelist[] = 'wpop_viewport_width';
+	$post_meta_safelist[] = 'wpop_locale';
 
 	return $post_meta_safelist;
 }
