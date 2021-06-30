@@ -9,13 +9,10 @@ require_once __DIR__ . '/parsers/BasicTextParser.php';
 require_once __DIR__ . '/parsers/BlockParser.php';
 require_once __DIR__ . '/parsers/ButtonParser.php';
 require_once __DIR__ . '/parsers/HeadingParser.php';
-require_once __DIR__ . '/parsers/JetpackContactInfoAddressParser.php';
-require_once __DIR__ . '/parsers/JetpackContactInfoEmailParser.php';
-require_once __DIR__ . '/parsers/JetpackContactInfoPhoneParser.php';
 require_once __DIR__ . '/parsers/NoopParser.php';
 require_once __DIR__ . '/parsers/ParagraphParser.php';
-require_once __DIR__ . '/parsers/ShortcodeBlockParser.php';
-require_once __DIR__ . '/parsers/TextNodeParser.php';
+require_once __DIR__ . '/parsers/ShortcodeBlockParser.php'; // Unused
+require_once __DIR__ . '/parsers/TextNodeParser.php'; // Unused
 
 class PatternParser {
 	public $pattern;
@@ -40,18 +37,6 @@ class PatternParser {
 			'core/media-text' => new BasicTextParser(),
 			'core/separator' => new BasicTextParser(),
 			'core/social-link' => new BasicTextParser(),
-			'coblocks/dynamic-separator' => new BasicTextParser(),
-			'coblocks/gallery-masonry' => new BasicTextParser(),
-			'jetpack/subscriptions' => new ShortcodeBlockParser( [ 'subscribePlaceholder', 'submitButtonText' ] ),
-			'jetpack/submit-button' => new ShortcodeBlockParser( [ 'subscribePlaceholder', 'submitButtonText' ] ),
-			'jetpack/rating-star' => new BasicTextParser(),
-			'jetpack/layout-grid' => new BasicTextParser(),
-			'jetpack/layout-grid-column' => new BasicTextParser(),
-			'jetpack/business-hours' => new BasicTextParser(),
-			'jetpack/contact-info' => new BasicTextParser(),
-			'jetpack/email' => new JetpackContactInfoEmailParser(),
-			'jetpack/phone' => new JetpackContactInfoPhoneParser(),
-			'jetpack/address' => new JetpackContactInfoAddressParser(),
 		];
 
 		$this->fallback = new BasicTextParser();
