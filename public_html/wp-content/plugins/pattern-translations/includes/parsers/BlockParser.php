@@ -28,7 +28,15 @@ trait DomUtils {
 	}
 
 	private function removeHtml( string $html ) : string {
-		return preg_replace( [ '/^<html><head><meta http-equiv="Content-Type" content="text\/html; charset=utf-8"><\/head><body>/', '/<\/body><\/html>$/' ], '', $html );
+		return preg_replace(
+			[
+				'/^\s*<html><head><meta http-equiv="Content-Type" content="text\/html; charset=utf-8"><\/head><body>/sm',
+				// $dom->saveHTML() can have a trailing newline after the closing </html>, match to the real end of the document.
+				'/<\/body><\/html>\s*$/sm'
+			],
+			'',
+			$html
+		);
 	}
 
 	private function get_dom( string $html ) : \DOMDocument {
