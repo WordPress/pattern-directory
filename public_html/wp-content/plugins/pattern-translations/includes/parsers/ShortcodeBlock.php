@@ -77,9 +77,9 @@ class ShortcodeBlock implements BlockParser {
 			return $matches[0];
 		}
 
-		$new_value             = $replacements[ $current_value ];
-		$jetpack_property_name = $matches[1];
-		return "$jetpack_property_name=\"$new_value" . $matches[3];
+		$new_value = $replacements[ $current_value ];
+		$property  = $matches[1];
+		return "$property=\"$new_value" . $matches[3];
 	}
 }
 // phpcs:enable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
