@@ -251,7 +251,7 @@ function register_rest_fields() {
 	);
 
 	/*
-	 * Provide the raw content without requring the `edit` context.
+	 * Provide the raw content without requiring the `edit` context.
 	 *
 	 * We need the raw content because it contains the source code for blocks (the comment delimiters). The rendered
 	 * content is considered a "classic block", since it lacks these. The `edit` context would return both raw and
@@ -474,12 +474,23 @@ function filter_patterns_collection_params( $query_params ) {
 /**
  * Filter the arguments passed to the pattern query in the API.
  *
- * Uses the `author_name` passed in to the API to request patterns by an author slug, not just an ID.
- *
  * @param array           $args    Array of arguments to be passed to WP_Query.
  * @param WP_REST_Request $request The REST API request.
  */
 function filter_patterns_rest_query( $args, $request ) {
+	$locale = $request->get_param( 'locale' );
+
+	// Limit results to the requested locale.
+	// Workaround for https://core.trac.wordpress.org/ticket/47194.
+	if ( $locale ) {
+		$args['meta_query'][] = array(
+			'key'     => 'wpop_locale',
+			'value'   => $locale,
+			'compare' => '=',
+		);
+	}
+
+	// Use the `author_name` passed in to the API to request patterns by an author slug, not just an ID.
 	if ( isset( $request['author_name'] ) ) {
 		$user = get_user_by( 'slug', $request['author_name'] );
 		if ( $user ) {
