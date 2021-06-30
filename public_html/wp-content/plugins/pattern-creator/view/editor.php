@@ -10,24 +10,29 @@ get_header();
 
 // @todo Permissions TBD, see https://github.com/WordPress/pattern-directory/issues/30.
 
-$post_type_obj = get_post_type_object( POST_TYPE );
+$is_logged_in = is_user_logged_in();
+$can_edit     = current_user_can( 'edit_post', get_the_ID() );
 
 if ( is_singular( POST_TYPE ) ) {
 	$page_title   = __( 'Update a Block Pattern', 'wporg-patterns' );
-	if ( ! is_user_logged_in() ) {
+	$page_content = '';
+	if ( ! $is_logged_in ) {
 		$page_content = __( 'You need to be logged in to edit this block pattern.', 'wporg-patterns' );
-	} else {
+	} elseif ( ! $can_edit ) {
 		$page_content = __( "You need to be the pattern's author to edit this pattern.", 'wporg-patterns' );
 	}
 } else {
 	$page_title   = __( 'Submit a Block Pattern', 'wporg-patterns' );
-	$page_content = __( 'You need to be logged in to create a block pattern.', 'wporg-patterns' );
+	$page_content = '';
+	if ( ! $is_logged_in ) {
+		$page_content = __( 'You need to be logged in to create a block pattern.', 'wporg-patterns' );
+	}
 }
 ?>
 
 	<main id="main" class="site-main col-12" role="main">
 
-		<?php if ( ( is_singular( POST_TYPE ) && current_user_can( 'edit_post', get_the_ID() ) ) || current_user_can( $post_type_obj->cap->create_posts ) ) : ?>
+		<?php if ( ( is_singular( POST_TYPE ) && $can_edit ) || ( ! is_singular( POST_TYPE ) && $is_logged_in ) ) : ?>
 			<div id="block-pattern-creator"></div>
 		<?php else : ?>
 			<section class="no-results not-found">
