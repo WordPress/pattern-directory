@@ -99,15 +99,6 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 		$all_posts = isset( $args['all-posts'] );
 		$locale = $args['locale'] ?? false;
 
-		$store = new PatternStores();
-
-		if ( empty( $store ) ) {
-			WP_CLI::error( "No registered store" );
-			exit( 1 );
-		}
-
-		$patterns = [];
-
 		$query = [];
 
 		if ( false !== $post && ctype_digit( $post ) ) {
@@ -132,7 +123,7 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 		// Also done by patterns lib SiteStore by default but the test that covers this doesn't work
 		$query['post_status'] = 'publish';
 
-		$patterns = $store->get_patterns( $query );
+		$patterns = Pattern::get_patterns( $query );
 
 		if ( empty( $patterns ) ) {
 			WP_CLI::error( 'No patterns found for args: ' . json_encode( $args ) . ', query: ' . json_encode( $query ) );
