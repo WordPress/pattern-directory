@@ -115,8 +115,8 @@ class PatternMakepot {
 	 * We want to leave most originals active and only obsolete things when they're really no longer in use.
 	 */
 	public static function extend_imported_originals( $po, $project, $originals_by_key ) {
-		// Only prevent dropping originals for the wpcom/block-patterns project
-		if ( 'wpcom/block-patterns' !== $project->path ) {
+		// Only prevent dropping originals for the patterns project
+		if ( GLOTPRESS_PROJECT !== $project->path ) {
 			return $po;
 		}
 

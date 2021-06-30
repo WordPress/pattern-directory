@@ -7,6 +7,8 @@
  */
 namespace WordPressdotorg\Pattern_Translations;
 
+const GLOTPRESS_PROJECT = 'disabled/patterns';
+
 require __DIR__ . '/pattern-stores.php';
 require __DIR__ . '/parser.php';
 require __DIR__ . '/i18n.php';
