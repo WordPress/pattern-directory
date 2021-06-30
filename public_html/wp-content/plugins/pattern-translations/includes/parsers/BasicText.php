@@ -1,11 +1,8 @@
 <?php
-
-namespace WordPressdotorg\Pattern_Translations;
-
-require_once __DIR__ . '/BlockParser.php';
+namespace WordPressdotorg\Pattern_Translations\Parsers;
 
 // phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-class BasicTextParser implements BlockParser {
+class BasicText implements BlockParser {
 	use DomUtils;
 
 	public function to_strings( array $block ) : array {

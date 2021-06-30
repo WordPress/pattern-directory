@@ -10,7 +10,7 @@
  * @phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
  */
 
-namespace WordPressdotorg\Pattern_Translations;
+namespace WordPressdotorg\Pattern_Translations\Parsers;
 
 // A block transform is specific to a certain block type and contains
 // the know-how of how to both extract and replace strings
@@ -58,7 +58,6 @@ trait GetSetAttribute {
 		}
 	}
 }
-
 
 trait SwapTags {
 	// phpcs:disable Generic.Strings.UnnecessaryStringConcat.Found

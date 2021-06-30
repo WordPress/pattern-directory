@@ -1,15 +1,12 @@
 <?php
-
-namespace WordPressdotorg\Pattern_Translations;
-
-require_once __DIR__ . '/BlockParser.php';
+namespace WordPressdotorg\Pattern_Translations\Parsers;
 
 // phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 /*
  * Handle blocks with attributes present in the attributes that are also used
  * in a shortcode within the block content.
  */
-class ShortcodeBlockParser implements BlockParser {
+class ShortcodeBlock implements BlockParser {
 	use GetSetAttribute;
 
 	public $attribute_names = [];

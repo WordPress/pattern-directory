@@ -4,13 +4,13 @@
 namespace WordPressdotorg\Pattern_Translations;
 
 require_once __DIR__ . '/parsers/BlockParser.php';
-require_once __DIR__ . '/parsers/BasicTextParser.php';
-require_once __DIR__ . '/parsers/ButtonParser.php';
-require_once __DIR__ . '/parsers/HeadingParser.php';
-require_once __DIR__ . '/parsers/NoopParser.php';
-require_once __DIR__ . '/parsers/ParagraphParser.php';
-require_once __DIR__ . '/parsers/ShortcodeBlockParser.php'; // Unused
-require_once __DIR__ . '/parsers/TextNodeParser.php'; // Unused
+require_once __DIR__ . '/parsers/BasicText.php';
+require_once __DIR__ . '/parsers/Button.php';
+require_once __DIR__ . '/parsers/Heading.php';
+require_once __DIR__ . '/parsers/Noop.php';
+require_once __DIR__ . '/parsers/Paragraph.php';
+require_once __DIR__ . '/parsers/ShortcodeBlock.php'; // Unused
+require_once __DIR__ . '/parsers/TextNode.php'; // Unused
 
 class PatternParser {
 	public $pattern;
@@ -22,25 +22,25 @@ class PatternParser {
 
 		$this->parsers = [
 			// Blocks that have custom parsers.
-			'core/paragraph'   => new ParagraphParser(),
-			'core/heading'     => new HeadingParser(),
-			'core/button'      => new ButtonParser(),
-			'core/spacer'      => new NoopParser(),
+			'core/paragraph'   => new Parsers\Paragraph(),
+			'core/heading'     => new Parsers\Heading(),
+			'core/button'      => new Parsers\Button(),
+			'core/spacer'      => new Parsers\Noop(),
 
 			// Common core blocks that use the default parser.
-			'core/buttons'     => new BasicTextParser(),
-			'core/list'        => new BasicTextParser(),
-			'core/column'      => new BasicTextParser(),
-			'core/columns'     => new BasicTextParser(),
-			'core/cover'       => new BasicTextParser(),
-			'core/group'       => new BasicTextParser(),
-			'core/image'       => new BasicTextParser(),
-			'core/media-text'  => new BasicTextParser(),
-			'core/separator'   => new BasicTextParser(),
-			'core/social-link' => new BasicTextParser(),
+			'core/buttons'     => new Parsers\BasicText(),
+			'core/list'        => new Parsers\BasicText(),
+			'core/column'      => new Parsers\BasicText(),
+			'core/columns'     => new Parsers\BasicText(),
+			'core/cover'       => new Parsers\BasicText(),
+			'core/group'       => new Parsers\BasicText(),
+			'core/image'       => new Parsers\BasicText(),
+			'core/media-text'  => new Parsers\BasicText(),
+			'core/separator'   => new Parsers\BasicText(),
+			'core/social-link' => new Parsers\BasicText(),
 		];
 
-		$this->fallback = new BasicTextParser();
+		$this->fallback = new Parsers\BasicText();
 	}
 
 	public function block_parser_to_strings( array $block ) : array {

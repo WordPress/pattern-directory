@@ -1,16 +1,15 @@
 <?php
+namespace WordPressdotorg\Pattern_Translations\Parsers;
 
-namespace WordPressdotorg\Pattern_Translations;
-
-require_once __DIR__ . '/BlockParser.php';
-
-class HeadingParser implements BlockParser {
+class Paragraph implements BlockParser {
 	use GetSetAttribute;
 
 	public function to_strings( array $block ) : array {
 		$strings = $this->get_attribute( 'placeholder', $block );
 
-		if ( preg_match( '/<h[1-6][^>]*>(.+)<\/h[1-6]>/is', $block['innerHTML'], $matches ) ) {
+		$matches = [];
+
+		if ( preg_match( '/<p[^>]*>(.+)<\/p>/is', $block['innerHTML'], $matches ) ) {
 			if ( ! empty( $matches[1] ) ) {
 				$strings[] = $matches[1];
 			}
@@ -27,7 +26,7 @@ class HeadingParser implements BlockParser {
 
 		foreach ( $this->to_strings( $block ) as $original ) {
 			if ( ! empty( $original ) && isset( $replacements[ $original ] ) ) {
-				$regex = '#(<h[1-6][^>]*>)(' . preg_quote( $original, '/' ) . ')(<\/h[1-6]>)#is';
+				$regex = '#(<p[^>]*>)(' . preg_quote( $original, '/' ) . ')(<\/p>)#is';
 				$html  = preg_replace( $regex, '${1}' . addcslashes( $replacements[ $original ], '\\$' ) . '${3}', $html );
 			}
 		}
