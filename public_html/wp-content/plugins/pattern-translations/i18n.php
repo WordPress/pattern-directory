@@ -1,64 +1,37 @@
 <?php
 namespace WordPressdotorg\Pattern_Translations;
+use GlotPress_Translate_Bridge;
 
 class PatternsTranslator {
 	public $patterns;
 	public $locale;
 	public $domain;
 
-	public function __construct( array $patterns, string $locale, string $domain = 'default' ) {
+	public function __construct( array $patterns, string $locale ) {
 		$this->patterns = $patterns;
 		$this->locale   = $locale;
-		$this->domain   = $domain;
 	}
 
 	public function translate() : array {
-		return temporary_switch_to_locale(
-			$this->locale,
-			function () {
-				$this->extend_translations();
+		$translated_patterns = [];
 
-				$translated_patterns = [];
+		switch_to_locale( $this->locale );
 
-				foreach ( $this->patterns as $pattern ) {
-					$parser = new PatternParser( $pattern );
+		foreach ( $this->patterns as $pattern ) {
+			$parser = new PatternParser( $pattern );
 
-					$replacements = [];
+			$replacements = [];
 
-					foreach ( $parser->to_strings() as $string ) {
-						// We're using translate() here to avoid important warnings about passing variables
-						// because we think/hope we really know what we're doing and we're exposing the strings to i18n
-						// tooling elsewhere.
-						// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.NonSingularStringLiteralDomain
-						$replacements[ $string ] = translate( $string, $this->domain );
-					}
-
-					$translated_patterns[] = $parser->replace_strings_with_kses( $replacements );
-				}
-				return $translated_patterns;
+			foreach ( $parser->to_strings() as $string ) {
+				$replacements[ $string ] = GlotPress_Translate_Bridge::translate( $string, GLOTPRESS_PROJECT );
 			}
-		);
-	}
 
-	/*
-	 * Load translations from the https://translate.wordpress.com/projects/wpcom/block-patterns/ project
-	 * into the $domain domain.
-	 */
-	private function extend_translations() {
-		$current_translations = get_translations_for_domain( $this->domain );
-
-		if ( $current_translations && $current_translations->get_header( 'block-pattern-translations' ) ) {
-			return $current_translations;
-		};
-
-		$mofile = WP_LANG_DIR . '/block-patterns/' . $this->locale . '.mo';
-		$loaded = load_textdomain( $this->domain, $mofile );
-		if ( ! $loaded ) {
-			return false;
+			$translated_patterns[] = $parser->replace_strings_with_kses( $replacements );
 		}
 
-		$extended_translations = get_translations_for_domain( $this->domain );
-		$extended_translations->set_header( 'block-pattern-translations', 'loaded' );
-		return $extended_translations;
+		restore_current_locale();
+
+		return $translated_patterns;
 	}
+
 }
