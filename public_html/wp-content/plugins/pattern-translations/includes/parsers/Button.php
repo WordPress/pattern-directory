@@ -6,6 +6,7 @@ class Button implements BlockParser {
 	use DomUtils;
 	use SwapTags;
 	use GetSetAttribute;
+	use TextNodesXPath;
 
 	public function to_strings( array $block ) : array {
 		$strings = $this->get_attribute( 'placeholder', $block );
@@ -15,7 +16,7 @@ class Button implements BlockParser {
 		$dom   = $this->get_dom( $encoded_html );
 		$xpath = new \DOMXPath( $dom );
 
-		foreach ( $xpath->query( '//text()' ) as $text ) {
+		foreach ( $xpath->query( $this->text_nodes_xpath_query() ) as $text ) {
 			if ( trim( $text->nodeValue ) ) {
 				$strings[] = $this->decode_tags( $text->nodeValue );
 			}
@@ -32,7 +33,7 @@ class Button implements BlockParser {
 		$dom   = $this->get_dom( $encoded_html );
 		$xpath = new \DOMXPath( $dom );
 
-		foreach ( $xpath->query( '//text()' ) as $text ) {
+		foreach ( $xpath->query( $this->text_nodes_xpath_query() ) as $text ) {
 			if ( trim( $text->nodeValue ) && isset( $replacements[ $this->decode_tags( $text->nodeValue ) ] ) ) {
 				$text->parentNode->replaceChild(
 					$dom->createCDATASection(

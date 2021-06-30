@@ -4,6 +4,7 @@ namespace WordPressdotorg\Pattern_Translations\Parsers;
 // phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 class BasicText implements BlockParser {
 	use DomUtils;
+	use TextNodesXPath;
 
 	public function to_strings( array $block ) : array {
 		$dom   = $this->get_dom( $block['innerHTML'] );
@@ -11,7 +12,7 @@ class BasicText implements BlockParser {
 
 		$strings = [];
 
-		foreach ( $xpath->query( '//text()' ) as $text ) {
+		foreach ( $xpath->query( $this->text_nodes_xpath_query() ) as $text ) {
 			if ( trim( $text->nodeValue ) ) {
 				$strings[] = $text->nodeValue;
 			}
@@ -21,10 +22,11 @@ class BasicText implements BlockParser {
 	}
 
 	public function replace_strings( array $block, array $replacements ) : array {
-		$dom   = $this->get_dom( $block['innerHTML'] );
-		$xpath = new \DOMXPath( $dom );
+		$dom         = $this->get_dom( $block['innerHTML'] );
+		$xpath       = new \DOMXPath( $dom );
+		$xpath_query = $this->text_nodes_xpath_query();
 
-		foreach ( $xpath->query( '//text()' ) as $text ) {
+		foreach ( $xpath->query( $xpath_query ) as $text ) {
 			if ( trim( $text->nodeValue ) && isset( $replacements[ $text->nodeValue ] ) ) {
 				$text->parentNode->replaceChild( $dom->createCDATASection( $replacements[ $text->nodeValue ] ), $text );
 			}
@@ -37,7 +39,7 @@ class BasicText implements BlockParser {
 				$dom = $this->get_dom( $inner_content );
 				$xpath = new \DOMXPath( $dom );
 
-				$text_nodes = $xpath->query( '//text()' );
+				$text_nodes = $xpath->query( $xpath_query );
 
 				// Only update text matches that are found outside of HTML tags.
 				// This approach does not use $dom->saveHTML because innerContent includes
@@ -53,5 +55,6 @@ class BasicText implements BlockParser {
 
 		return $block;
 	}
+
 }
 // phpcs:enable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase

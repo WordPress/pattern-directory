@@ -89,3 +89,15 @@ trait SwapTags {
 	}
 	// phpcs:enable Generic.Strings.UnnecessaryStringConcat.Found
 }
+
+trait TextNodesXPath {
+	private $xpaths = [
+		'//text()',   // Visible Text nodes.
+		'//img/@alt', // Image alt="" text.
+		'//*/@title', // title="" text.
+	];
+
+	protected function text_nodes_xpath_query() {
+		return implode( ' | ', $this->xpaths );
+	}
+}
