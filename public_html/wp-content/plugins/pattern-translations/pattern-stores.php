@@ -47,7 +47,7 @@ class PatternStores {
 		$pattern->ID = $post->ID;
 		$pattern->title = $post->post_title;
 		$pattern->name = $post->post_name;
-		$pattern->description = $post->post_excerpt;
+		$pattern->description = $post->wpop_description; // wpop_description Meta key
 		$pattern->html = $post->post_content;
 		// Assume that the reference is relative to the home url of the site
 		// TODO: Just make GlotPress make_clickable() the references if it's got no path set.
