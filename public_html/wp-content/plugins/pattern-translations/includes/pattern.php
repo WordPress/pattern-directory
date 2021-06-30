@@ -12,6 +12,7 @@ class Pattern {
 	public $source_url = '';
 
 	public $locale = 'en_US'; // by default.
+	public $parent = false;
 
 	/**
 	 * Translate a Pattern into a specific locale.
@@ -19,12 +20,23 @@ class Pattern {
 	 * @param string $locale The locale to translate this Pattern to.
 	 * @return Pattern|false A new Pattern object upon success, or false if no translated fields were available.
 	 */
-	public function to_locale( string $locale ) /* : Pattern|bool */ {
+	public function to_locale( string $locale ) /* PHP8 : Pattern|bool */ {
 		if ( 'en_US' !== $this->locale ) {
-			// If we're not an English object, refetch the Pattern.
-			$translated = self::from_post( get_post( $this->ID ) );
+			if ( $this->parent && $this->parent->locale === 'en_US' ) {
+				$parent = $this->parent;
+			} else {
+				$parent = self::from_post( get_post( $this->ID ) );
+			}
 		} else {
-			$translated = clone $this;
+			$parent = $this;
+		}
+		$translated         = clone $parent;
+		$translated->parent = $parent;
+
+		// to convert from a Translated Pattern to en_US.
+		if ( 'en_US' === $locale ) {
+			$translated->parent = false;
+			return $translated;
 		}
 
 		switch_to_locale( $locale );
@@ -32,8 +44,7 @@ class Pattern {
 		$parser = new PatternParser( $translated );
 
 		$translations = [];
-		$originals    = $parser->to_strings();
-		foreach ( $originals as $string ) {
+		foreach ( $parser->to_strings() as $string ) {
 			$translations[ $string ] = apply_filters( 'gettext', GlotPress_Translate_Bridge::translate( $string, GLOTPRESS_PROJECT ), 'wporg-pattern' );
 		}
 
@@ -44,8 +55,28 @@ class Pattern {
 			return false;
 		}
 
-		$translated = $parser->replace_strings_with_kses( $replacements );
+		$translated         = $parser->replace_strings_with_kses( $translations );
 		$translated->locale = $locale;
+		// Reset the ID.
+		$translated->ID     = 0;
+
+		// Find the actual post ID of the translated pattern
+		$children = get_posts( [
+			'post_parent' => $parent->ID,
+			'post_type'   => POST_TYPE,
+			'post_status' => 'any',
+			'meta_query'  => [
+				[
+					'key'   => 'wpop_locale',
+					'value' => $locale,
+				]
+			]
+		] );
+		if ( $children ) {
+			$post = array_shift( $children );
+			$translated->ID   = $post->ID;
+			$translated->name = $post->post_name; // ???
+		}
 
 		return $translated;
 	}
@@ -61,7 +92,7 @@ class Pattern {
 		$pattern->ID          = $post->ID;
 		$pattern->title       = $post->post_title;
 		$pattern->name        = $post->post_name;
-		$pattern->description = $post->wpop_description; // wpop_description Meta key
+		$pattern->description = $post->wpop_description;
 		$pattern->html        = $post->post_content;
 		$pattern->source_url  = get_permalink( $post );
 		$pattern->locale      = 'en_US';
