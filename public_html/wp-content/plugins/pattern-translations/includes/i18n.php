@@ -15,13 +15,17 @@ function translate_patterns( array $patterns ) : array {
 		return $patterns;
 	}
 
-	foreach ( $this->patterns as $pattern ) {
+	foreach ( $patterns as $pattern ) {
 		$parser = new PatternParser( $pattern );
 
 		$replacements = [];
 
 		foreach ( $parser->to_strings() as $string ) {
-			$replacements[ $string ] = GlotPress_Translate_Bridge::translate( $string, GLOTPRESS_PROJECT );
+			if ( 'strrev' === get_locale() ) {
+				$replacements[ $string ] = strrev( $string );
+			} else {
+				$replacements[ $string ] = GlotPress_Translate_Bridge::translate( $string, GLOTPRESS_PROJECT );
+			}
 		}
 
 		$translated_patterns[] = $parser->replace_strings_with_kses( $replacements );
@@ -46,3 +50,8 @@ function translate_patterns_to( array $patterns, string $locale ) : array {
 		restore_current_locale();
 	}
 }
+
+add_filter( 'get_available_languages', function( $languages ) {
+	$languages[] = 'strrev';
+	return $languages;
+} );
