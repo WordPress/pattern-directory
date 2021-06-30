@@ -130,15 +130,8 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 			exit( 1 );
 		}
 
-		if ( false !== $locale ) {
-			$gp_locales = []; // TODO check locale dynamically.
-			if ( ! in_array( $locale, array_keys( $gp_locales ) ) ) {
-				WP_CLI::error( "Invalid locale $locale" );
-				exit( 1 );
-			}
-
-			$translator = new PatternsTranslator( $patterns, $locale );
-			$patterns   = $translator->translate();
+		if ( $locale ) {
+			$patterns = translate_patterns_to( $patterns, $locale );
 		}
 
 		return $patterns;
