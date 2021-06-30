@@ -15,6 +15,7 @@ require __DIR__ . '/includes/pattern.php';
 require __DIR__ . '/includes/parser.php';
 require __DIR__ . '/includes/i18n.php';
 require __DIR__ . '/includes/makepot.php';
+require __DIR__ . '/includes/cron.php';
 
 if ( defined( 'WP_CLI' ) ) {
 	require __DIR__ . '/includes/cli-commands.php';
