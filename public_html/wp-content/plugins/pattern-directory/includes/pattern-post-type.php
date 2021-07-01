@@ -540,9 +540,26 @@ function get_block_pattern( $post ) {
  * @return array
  */
 function set_pattern_caps( $user_caps ) {
+	// Set corresponding caps for all roles.
+	$cap_args = array(
+		'capability_type' => array( 'pattern', 'patterns' ),
+		'capabilities'    => array(),
+		'map_meta_cap'    => true,
+	);
+	$cap_map = (array) get_post_type_capabilities( (object) $cap_args );
+
+	foreach ( $user_caps as $cap => $bool ) {
+		if ( $bool && isset( $cap_map[ $cap ] ) ) {
+			$user_caps[ $cap_map[ $cap ] ] = true;
+		}
+	}
+
+	// Set caps to allow for front end pattern creation.
 	if ( is_user_logged_in() && ! is_admin() ) {
-		$user_caps['edit_patterns']   = true;
-		$user_caps['create_patterns'] = true;
+		$user_caps['create_patterns']         = true;
+		$user_caps['publish_patterns']        = true;
+		$user_caps['edit_patterns']           = true;
+		$user_caps['edit_published_patterns'] = true;
 	}
 
 	return $user_caps;
