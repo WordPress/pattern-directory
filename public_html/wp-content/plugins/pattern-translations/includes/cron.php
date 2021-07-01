@@ -38,9 +38,14 @@ add_action( 'pattern_import_to_glotpress', __NAMESPACE__ . '\pattern_import_to_g
  * This creates the "forked" patterns of a parent pattern when translations are available.
  */
 function pattern_import_translations_to_directory() {
-	foreach ( Pattern::get_patterns() as $pattern ) {
+	$patterns = Pattern::get_patterns();
+	$locales  = get_locales();
+
+	printf( "Processing %d Patterns in %d locales.\n", count( $patterns ), count( $locales ) );
+
+	foreach ( $patterns as $pattern ) {
 		echo "Processing {$pattern->name} / '{$pattern->title}'..\n";
-		foreach ( get_locales() as $gp_locale ) {
+		foreach ( $locales as $gp_locale ) {
 			$locale     = $gp_locale->wp_locale;
 			if ( ! $locale || 'en_US' === $locale ) {
 				continue;
@@ -48,13 +53,13 @@ function pattern_import_translations_to_directory() {
 
 			$translated = $pattern->to_locale( $locale );
 			if ( $translated ) {
-				echo "\t{$locale} - " . ( $pattern->ID ? 'Updating' : 'Creating' ) . " Translated pattern.\n";
+				echo "\t{$locale} - " . ( $translated->ID ? 'Updating' : 'Creating' ) . " Translated pattern.\n";
 				create_or_update_translated_pattern( $translated );
-			} elseif ( $pattern->ID ) {
-				// Translated pattern exists, but it's no longer translated.
-				echo "\t{$locale} - Translated Pattern exists, but we no longer have translations?\n";
 			} else {
 				echo "\t{$locale} - No Translations exist yet.\n";
+				// TODO: Note: There may exist a translated pattern using old strings.
+				//       Considering this as an edge-case that is unlikely and we don't
+				//       need to handle. Serving old Translated template is better in this case.
 			}
 		}
 	}
