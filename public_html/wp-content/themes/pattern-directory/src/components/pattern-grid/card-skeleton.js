@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from '@wordpress/element';
  */
 import { Skeleton, SkeletonWrapper } from '../skeleton';
 import IconHeartFilled from '../icons/heart-filled';
-import { getFrameHeight } from '../pattern-thumbnail/canvas';
+import getCardFrameHeight from '../../utils/get-card-frame-height';
 
 const CardSkeleton = () => {
 	const [ height, setHeight ] = useState();
@@ -16,7 +16,7 @@ const CardSkeleton = () => {
 
 	useEffect( () => {
 		if ( wrapper.current ) {
-			setHeight( `${ getFrameHeight( wrapper.current ) }px` );
+			setHeight( `${ getCardFrameHeight( wrapper.current.clientWidth ) }px` );
 		}
 	}, [ wrapper ] );
 
