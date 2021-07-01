@@ -44,14 +44,20 @@ class Pattern {
 		$parser = new PatternParser( $translated );
 
 		$translations = [];
+		$translated   = false;
 		foreach ( $parser->to_strings() as $string ) {
 			$translations[ $string ] = apply_filters( 'gettext', GlotPress_Translate_Bridge::translate( $string, GLOTPRESS_PROJECT ), 'wporg-pattern' );
+
+			// Consider any string change to be a translation.
+			if ( $string !== $translations[ $string ] ) {
+				$translated = true;
+			}
 		}
 
 		restore_current_locale();
 
 		// Are there any translations?
-		if ( array_keys( $translations ) === array_values( $translations ) ) {
+		if ( ! $translated ) {
 			return false;
 		}
 
