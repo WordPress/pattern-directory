@@ -40,7 +40,7 @@ const Pattern = ( { postId, userHasReported, loggedIn } ) => {
 				<PatternGrid
 					query={ { author: pattern.author, per_page: 3, exclude: postId } }
 					showPagination={ false }
-					before={
+					header={
 						<>
 							<h2>{ __( 'More from this designer', 'wporg-patterns' ) }</h2>
 							<AuthorDetails { ...pattern.author_meta } />

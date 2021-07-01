@@ -10,7 +10,7 @@ import { useSelect } from '@wordpress/data';
 import Pagination from './pagination';
 import { store as patternStore } from '../../store';
 
-function PatternGrid( { before, children, query, showPagination = true } ) {
+function PatternGrid( { header, children, query, showPagination = true } ) {
 	const { isLoading, posts, totalPages } = useSelect( ( select ) => {
 		const { getPatternTotalPagesByQuery, getPatternsByQuery, isLoadingPatternsByQuery } = select(
 			patternStore
@@ -25,7 +25,7 @@ function PatternGrid( { before, children, query, showPagination = true } ) {
 
 	return (
 		<>
-			{ posts.length ? before : null }
+			{ posts.length ? header : null }
 			<div className="pattern-grid">{ isLoading ? <Spinner /> : posts.map( children ) }</div>
 			{ showPagination && <Pagination totalPages={ totalPages } currentPage={ query?.page } /> }
 		</>
