@@ -11,7 +11,7 @@ add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
 add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'init', __NAMESPACE__ . '\register_post_statuses' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
-add_filter( 'allowed_block_types', __NAMESPACE__ . '\remove_disallowed_blocks', 10, 2 );
+add_filter( 'allowed_block_types_all', __NAMESPACE__ . '\remove_disallowed_blocks', 10, 2 );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
 add_filter( 'rest_' . POST_TYPE . '_collection_params', __NAMESPACE__ . '\filter_patterns_collection_params' );
 add_filter( 'rest_' . POST_TYPE . '_query', __NAMESPACE__ . '\filter_patterns_rest_query', 10, 2 );
@@ -406,12 +406,12 @@ function enqueue_editor_assets() {
 /**
  * Restrict the set of blocks allowed in block patterns.
  *
- * @param bool|array $allowed_block_types Array of block type slugs, or boolean to enable/disable all.
- * @param WP_Post    $post                The post resource data.
+ * @param bool|array              $allowed_block_types  Array of block type slugs, or boolean to enable/disable all.
+ * @param WP_Block_Editor_Context $block_editor_context The post resource data.
  *
  * @return bool|array A (possibly) filtered list of block types.
  */
-function remove_disallowed_blocks( $allowed_block_types, $post ) {
+function remove_disallowed_blocks( $allowed_block_types, $block_editor_context ) {
 	$disallowed_block_types = array(
 		// Remove blocks that don't make sense in Block Patterns
 		'core/freeform', // Classic block
@@ -421,7 +421,7 @@ function remove_disallowed_blocks( $allowed_block_types, $post ) {
 		'core/block', // Reusable blocks
 		'core/shortcode',
 	);
-	if ( POST_TYPE === $post->post_type ) {
+	if ( isset( $block_editor_context->post ) && POST_TYPE === $block_editor_context->post->post_type ) {
 		// This can be true if all block types are allowed, so to filter them we
 		// need to get the list of all registered blocks first.
 		if ( true === $allowed_block_types ) {
