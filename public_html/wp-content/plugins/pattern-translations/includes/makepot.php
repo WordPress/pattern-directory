@@ -82,8 +82,7 @@ class PatternMakepot {
 			remove_filter( 'gp_import_project_originals', [ $this, 'extend_imported_originals' ], 10, 3 );
 
 			$notice = sprintf(
-				/* translators: 1: number added, 2: number updated, 3: number fuzzied, 4: number obsoleted */
-				__( '%1$s new strings added, %2$s updated, %3$s fuzzied, and %4$s obsoleted.', 'glotpress' ),
+				'%1$s new strings added, %2$s updated, %3$s fuzzied, and %4$s obsoleted.',
 				$added,
 				$existing,
 				$fuzzied,
@@ -92,8 +91,7 @@ class PatternMakepot {
 
 			if ( $error ) {
 				$notice .= ' ' . sprintf(
-					/* translators: %s: number of errors */
-					_n( '%s new string was not imported due to an error.', '%s new strings were not imported due to an error.', $error, 'glotpress' ),
+					'%s new string(s) were not imported due to an error.',
 					$error
 				);
 			}
