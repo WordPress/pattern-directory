@@ -109,8 +109,10 @@ class Pattern {
 	public static function get_patterns( array $args = [] ) : array {
 		$defaults = [
 			'post_type'      => POST_TYPE,
-			// Note: this must be set for cli context, in isolated test context this is defaulted to 'publish'
-			'post_status'    => 'publish', // prevent leaking draft patterns to makepot etc
+			// Note: This must be set for cli context, in isolated test context this is defaulted to 'publish'
+			//       Prevents unexpected patterns in translations. Unlisted to ensure that specifically flagged
+			//       dotorg patterns are translated, even if temporarily unlisted.
+			'post_status'    => 'publish,unlisted',
 			'posts_per_page' => -1,
 			'orderby'        => [
 				'post_date' => 'DESC',
