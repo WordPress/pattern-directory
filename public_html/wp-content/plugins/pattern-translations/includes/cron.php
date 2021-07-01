@@ -1,5 +1,7 @@
 <?php
 namespace WordPressdotorg\Pattern_Translations\Cron;
+use WordPressdotorg\Pattern_Translations\{ Pattern, PatternMakepot };
+use function WordPressdotorg\Pattern_Translations\create_or_update_translated_pattern;
 use function WordPressdotorg\Locales\get_locales;
 
 /**
@@ -26,7 +28,7 @@ add_action( 'admin_init', __NAMESPACE__ . '\register_cron_tasks' );
 function pattern_import_to_glotpress() {
 	$patterns = Pattern::get_patterns();
 	$makepot  = new PatternMakepot( $patterns );
-	$makepot->import( true );
+	echo $makepot->import( true );
 }
 add_action( 'pattern_import_to_glotpress', __NAMESPACE__ . '\pattern_import_to_glotpress' );
 
@@ -37,10 +39,22 @@ add_action( 'pattern_import_to_glotpress', __NAMESPACE__ . '\pattern_import_to_g
  */
 function pattern_import_translations_to_directory() {
 	foreach ( Pattern::get_patterns() as $pattern ) {
+		echo "Processing {$pattern->name} / '{$pattern->title}'..\n";
 		foreach ( get_locales() as $gp_locale ) {
-			$translated = $pattern->to_locale( $gp_locale->wp_locale );
+			$locale     = $gp_locale->wp_locale;
+			if ( ! $locale || 'en_US' === $locale ) {
+				continue;
+			}
+
+			$translated = $pattern->to_locale( $locale );
 			if ( $translated ) {
+				echo "\t{$locale} - " . ( $pattern->ID ? 'Updating' : 'Creating' ) . " Translated pattern.\n";
 				create_or_update_translated_pattern( $translated );
+			} elseif ( $pattern->ID ) {
+				// Translated pattern exists, but it's no longer translated.
+				echo "\t{$locale} - Translated Pattern exists, but we no longer have translations?\n";
+			} else {
+				echo "\t{$locale} - No Translations exist yet.\n";
 			}
 		}
 	}
