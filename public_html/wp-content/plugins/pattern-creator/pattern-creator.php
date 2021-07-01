@@ -12,6 +12,7 @@
 
 namespace WordPressdotorg\Pattern_Creator;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+use WP_Block_Editor_Context;
 
 const AUTOSAVE_INTERVAL = 30;
 const IS_EDIT_VAR = 'edit-pattern';
@@ -104,9 +105,11 @@ function enqueue_assets() {
 		$post    = get_post( $post_id );
 	}
 
+	$block_editor_context = new WP_Block_Editor_Context( array( 'post' => $post ) );
+
 	$settings = array(
 		'alignWide'                            => true, // Support wide patterns.
-		'allowedBlockTypes'                    => apply_filters( 'allowed_block_types', true, $post ),
+		'allowedBlockTypes'                    => apply_filters( 'allowed_block_types_all', true, $block_editor_context ),
 		'disablePostFormats'                   => true,
 		'enableCustomFields'                   => false,
 		'titlePlaceholder'                     => __( 'Add pattern title', 'wporg-patterns' ),
