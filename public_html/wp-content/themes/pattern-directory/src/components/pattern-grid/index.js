@@ -33,7 +33,7 @@ function PatternGrid( { header, children, query, showPagination = true } ) {
 							.map( ( val, idx ) => <CardSkeleton key={ idx } /> )
 					: posts.map( children ) }
 			</div>
-			<Pagination totalPages={ totalPages } currentPage={ query?.page } />
+			{ showPagination && <Pagination totalPages={ totalPages } currentPage={ query?.page } /> }
 		</>
 	);
 }
