@@ -177,7 +177,8 @@ class PatternMakepot {
 		$GLOBALS['gp_table_prefix'] = GLOTPRESS_TABLE_PREFIX;
 
 		// Load any GlotPress plugins as needed.
-		array_walk( get_option( 'active_plugins', [] ), function( $plugin ) {
+		$plugins = get_option( 'active_plugins', [] );
+		array_walk( $plugins, function( $plugin ) {
 			include_once trailingslashit( WP_PLUGIN_DIR ) . $plugin;
 		} );
 
