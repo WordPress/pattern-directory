@@ -8,7 +8,7 @@
 namespace WordPressdotorg\Pattern_Translations;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
-const GLOTPRESS_PROJECT = 'disabled/patterns';
+const GLOTPRESS_PROJECT = 'patterns/core';
 const TRANSLATED_BY_GLOTPRESS_KEY = '_glotpress_translated';
 
 require __DIR__ . '/includes/pattern.php';
