@@ -62,6 +62,28 @@ function pattern_import_translations_to_directory() {
 				//       need to handle. Serving old Translated template is better in this case.
 			}
 		}
+
+		// Clear memory-heavy variables after each iteration of Patterns, to avoid object cache memory exhaustion.
+		clear_memory_heavy_variables();
 	}
 }
 add_action( 'pattern_import_translations_to_directory', __NAMESPACE__ . '\pattern_import_translations_to_directory' );
+
+/**
+ * Clear caches for memory management.
+ *
+ * @static
+ * @global \wpdb            $wpdb
+ * @global \WP_Object_Cache $wp_object_cache
+ */
+function clear_memory_heavy_variables() {
+	global $wpdb, $wp_object_cache;
+
+	$wpdb->queries = [];
+
+	if ( is_object( $wp_object_cache ) ) {
+		$wp_object_cache->cache          = [];
+		$wp_object_cache->group_ops      = [];
+		$wp_object_cache->memcache_debug = [];
+	}
+}
