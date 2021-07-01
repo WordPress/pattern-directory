@@ -33,16 +33,26 @@ function create_or_update_translated_pattern( Pattern $pattern ) {
 		'post_content' => $pattern->html,
 		'post_parent'  => $pattern->parent ? $pattern->parent->ID : 0,
 		'post_author'  => $pattern->parent ? get_post( $pattern->parent->ID )->post_author : 0,
-		'post_status'  => 'publish',
+		'post_status'  => $pattern->parent ? get_post( $pattern->parent->ID )->post_status : 'pending',
 		'meta_input'   => [
 			'wpop_description' => $pattern->description,
 			'wpop_locale'      => $pattern->locale,
-		]
+		],
 	];
 
 	if ( ! $args['ID'] ) {
 		unset( $args['ID'] );
 	}
 
-	return wp_insert_post( $args, true );
+	$post_id = wp_insert_post( $args, true );
+
+	// Copy the terms from the parent if required.
+	if ( $post_id && ! is_wp_error( $post_id ) && $pattern->parent ) {
+		foreach ( [ 'wporg-pattern-category', 'wporg-pattern-keyword' ] as $taxonomy ) {
+			$term_ids = wp_get_object_terms( $pattern->parent->ID, $taxonomy, [ 'fields' => 'ids' ] );
+			wp_set_object_terms( $post_id, $term_ids, $taxonomy );
+		}
+	}
+
+	return $post_id;
 }
