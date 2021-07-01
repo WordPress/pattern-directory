@@ -299,7 +299,7 @@ function register_rest_fields() {
 				return array(
 					'name'   => esc_html( get_the_author_meta( 'display_name' ) ),
 					'url'    => esc_url( home_url( '/author/' . get_the_author_meta( 'user_nicename' ) ) ),
-					'avatar' => get_avatar_url( $post['author'], array( 'size' => 36 ) ),
+					'avatar' => get_avatar_url( $post['author'], array( 'size' => 64 ) ),
 				);
 			},
 
