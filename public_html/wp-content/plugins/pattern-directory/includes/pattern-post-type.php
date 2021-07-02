@@ -556,7 +556,6 @@ function set_pattern_caps( $user_caps ) {
 
 	// Set caps to allow for front end pattern creation.
 	if ( is_user_logged_in() && ! is_admin() ) {
-		$user_caps['create_patterns']         = true;
 		$user_caps['publish_patterns']        = true;
 		$user_caps['edit_patterns']           = true;
 		$user_caps['edit_published_patterns'] = true;
