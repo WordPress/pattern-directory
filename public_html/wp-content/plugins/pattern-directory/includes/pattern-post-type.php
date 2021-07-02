@@ -25,7 +25,7 @@ function register_post_type_data() {
 	register_post_type(
 		POST_TYPE,
 		array(
-			'labels' => array(
+			'labels'          => array(
 				'name'                     => _x( 'Block Pattern', 'post type general name', 'wporg-patterns' ),
 				'singular_name'            => _x( 'Block Pattern', 'post type singular name', 'wporg-patterns' ),
 				'add_new'                  => _x( 'Add New', 'block pattern', 'wporg-patterns' ),
@@ -51,13 +51,13 @@ function register_post_type_data() {
 				'item_scheduled'           => __( 'Block pattern scheduled.', 'wporg-patterns' ),
 				'item_updated'             => __( 'Block pattern updated.', 'wporg-patterns' ),
 			),
-			'description'  => 'Stores publicly shared Block Patterns (predefined block layouts, ready to insert and tweak).',
-			'public'       => true,
-			'show_in_rest' => true,
-			'rewrite'      => array( 'slug' => 'pattern' ),
-			'supports'     => array( 'title', 'editor', 'author', 'custom-fields' ),
+			'description'     => 'Stores publicly shared Block Patterns (predefined block layouts, ready to insert and tweak).',
+			'public'          => true,
+			'show_in_rest'    => true,
+			'rewrite'         => array( 'slug' => 'pattern' ),
+			'supports'        => array( 'title', 'editor', 'author', 'custom-fields' ),
 			'capability_type' => array( 'pattern', 'patterns' ),
-			'map_meta_cap' => true,
+			'map_meta_cap'    => true,
 		)
 	);
 
