@@ -18,6 +18,7 @@
 	@media only screen and ( min-width: #{$breakpoint-medium + 1} ) {
 		margin: $gutter-default;
 		flex-direction: row;
+		height: 37px; // Stop Layout Shift
 
 		> form {
 			margin: 0;
