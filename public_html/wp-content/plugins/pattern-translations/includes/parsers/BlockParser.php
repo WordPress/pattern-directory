@@ -32,7 +32,7 @@ trait DomUtils {
 			[
 				'/^\s*<html><head><meta http-equiv="Content-Type" content="text\/html; charset=utf-8"><\/head><body>/sm',
 				// $dom->saveHTML() can have a trailing newline after the closing </html>, match to the real end of the document.
-				'/<\/body><\/html>\s*$/sm'
+				'/<\/body><\/html>\s*$/sm',
 			],
 			'',
 			$html
@@ -68,7 +68,6 @@ trait GetSetAttribute {
 }
 
 trait SwapTags {
-	// phpcs:disable Generic.Strings.UnnecessaryStringConcat.Found
 	private $safe_tags = [
 		'strong',
 		'em',
@@ -78,7 +77,7 @@ trait SwapTags {
 		foreach ( $this->safe_tags as $tag ) {
 			$raw_html = preg_replace(
 				'#(<' . $tag . '([^>]*)>)(.*)(</' . $tag . '>)#',
-				'{' . $tag . '$2' . '}$3' . '{/' . $tag . '}',
+				'{' . $tag . '$2' . '}$3' . '{/' . $tag . '}', // phpcs:ignore Generic.Strings.UnnecessaryStringConcat.Found
 				$raw_html
 			);
 		}
@@ -89,13 +88,12 @@ trait SwapTags {
 		foreach ( $this->safe_tags as $tag ) {
 			$encoded_html = preg_replace(
 				'#({' . $tag . '([^}]*)})(.*)({/' . $tag . '})#',
-				'<' . $tag . '$2' . '>$3' . '</' . $tag . '>',
+				'<' . $tag . '$2' . '>$3' . '</' . $tag . '>', // phpcs:ignore Generic.Strings.UnnecessaryStringConcat.Found
 				$encoded_html
 			);
 		}
 		return $encoded_html;
 	}
-	// phpcs:enable Generic.Strings.UnnecessaryStringConcat.Found
 }
 
 trait TextNodesXPath {

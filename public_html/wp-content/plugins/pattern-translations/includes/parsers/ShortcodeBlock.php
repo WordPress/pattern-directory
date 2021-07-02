@@ -1,11 +1,10 @@
 <?php
 namespace WordPressdotorg\Pattern_Translations\Parsers;
 
-// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 /*
  * Handle blocks with attributes present in the attributes that are also used
  * in a shortcode within the block content.
- * 
+ *
  * Example: new Parsers\ShortcodeBlock( [ 'subscribePlaceholder', 'submitButtonText' ] );
  */
 class ShortcodeBlock implements BlockParser {
@@ -82,4 +81,3 @@ class ShortcodeBlock implements BlockParser {
 		return "$property=\"$new_value" . $matches[3];
 	}
 }
-// phpcs:enable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase

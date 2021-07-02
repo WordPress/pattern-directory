@@ -117,7 +117,7 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 		} elseif ( false !== $post_slugs ) {
 			$query['post_name__in'] = explode( ',', $post_slugs );
 			$query['orderby'] = 'post_name__in'; // Ensure mostly repeatable
-		} elseif ( $all_posts ) {
+		} elseif ( $all_posts ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedElseif -- empty state OK.
 			// send it all
 		} else {
 			WP_CLI::error( 'A post selector is required, did you mean to add --all-posts to this command? ' );

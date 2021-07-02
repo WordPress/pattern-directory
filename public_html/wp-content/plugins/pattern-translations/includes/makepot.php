@@ -168,11 +168,11 @@ class PatternMakepot {
 	 */
 	public function load_glotpress() {
 		// TODO: Figure out how to properly do the following stuff.
-		//       Maybe this needs to be run in the context of translate.w.org
-		//       and switch_to_site( PATTERN_DIRECTORY ) instead? But post type
-		//       would not be registered still.
-		//       Maybe this should be a two-part operation, Export all strings to
-		//       .po file, then import into GlotPress as an additional call.
+		// Maybe this needs to be run in the context of translate.w.org
+		// and switch_to_site( PATTERN_DIRECTORY ) instead? But post type
+		// would not be registered still.
+		// Maybe this should be a two-part operation, Export all strings to
+		// .po file, then import into GlotPress as an additional call.
 
 		$GLOBALS['gp_table_prefix'] = GLOTPRESS_TABLE_PREFIX;
 

@@ -1,7 +1,6 @@
 <?php
 namespace WordPressdotorg\Pattern_Translations\Parsers;
 
-// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 class Button implements BlockParser {
 	use DomUtils;
 	use SwapTags;
@@ -53,4 +52,3 @@ class Button implements BlockParser {
 		return $block;
 	}
 }
-// phpcs:enable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase

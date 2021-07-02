@@ -1,7 +1,6 @@
 <?php
 namespace WordPressdotorg\Pattern_Translations\Parsers;
 
-// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 class TextNode implements BlockParser {
 	use DomUtils;
 
@@ -33,4 +32,3 @@ class TextNode implements BlockParser {
 		return parse_blocks( $this->removeHtml( $dom->saveHTML() ) )[0] ?? [];
 	}
 }
-// phpcs:enable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase

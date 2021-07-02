@@ -11,7 +11,7 @@ class Pattern {
 	public $html = '';
 	public $source_url = '';
 
-	public $locale = 'en_US'; // by default.
+	public $locale = 'en_US';
 	public $parent = false;
 
 	/**
@@ -22,7 +22,7 @@ class Pattern {
 	 */
 	public function to_locale( string $locale ) /* PHP8 : Pattern|bool */ {
 		if ( 'en_US' !== $this->locale ) {
-			if ( $this->parent && $this->parent->locale === 'en_US' ) {
+			if ( $this->parent && 'en_US' === $this->parent->locale ) {
 				$parent = $this->parent;
 			} else {
 				$parent = self::from_post( get_post( $this->ID ) );
@@ -75,8 +75,8 @@ class Pattern {
 				[
 					'key'   => 'wpop_locale',
 					'value' => $locale,
-				]
-			]
+				],
+			],
 		] );
 		if ( $children ) {
 			$post = array_shift( $children );
@@ -116,8 +116,8 @@ class Pattern {
 		$defaults = [
 			'post_type'      => POST_TYPE,
 			// Note: This must be set for cli context, in isolated test context this is defaulted to 'publish'
-			//       Prevents unexpected patterns in translations. Unlisted to ensure that specifically flagged
-			//       dotorg patterns are translated, even if temporarily unlisted.
+			// Prevents unexpected patterns in translations. Unlisted to ensure that specifically flagged
+			// dotorg patterns are translated, even if temporarily unlisted.
 			'post_status'    => 'publish,unlisted',
 			'posts_per_page' => -1,
 			'orderby'        => [
@@ -134,7 +134,7 @@ class Pattern {
 					'key'   => TRANSLATED_BY_GLOTPRESS_KEY,
 					'value' => 1,
 				],
-			]
+			],
 		];
 
 		$options = wp_parse_args( $args, $defaults );

@@ -1,7 +1,6 @@
 <?php
 namespace WordPressdotorg\Pattern_Translations\Parsers;
 
-// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 class BasicText implements BlockParser {
 	use DomUtils;
 	use TextNodesXPath;
@@ -57,4 +56,3 @@ class BasicText implements BlockParser {
 	}
 
 }
-// phpcs:enable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase

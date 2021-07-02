@@ -28,7 +28,7 @@ add_action( 'admin_init', __NAMESPACE__ . '\register_cron_tasks' );
 function pattern_import_to_glotpress() {
 	$patterns = Pattern::get_patterns();
 	$makepot  = new PatternMakepot( $patterns );
-	echo $makepot->import( true );
+	echo $makepot->import( true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 add_action( 'pattern_import_to_glotpress', __NAMESPACE__ . '\pattern_import_to_glotpress' );
 
@@ -44,7 +44,7 @@ function pattern_import_translations_to_directory() {
 	printf( "Processing %d Patterns in %d locales.\n", count( $patterns ), count( $locales ) );
 
 	foreach ( $patterns as $pattern ) {
-		echo "Processing {$pattern->name} / '{$pattern->title}'..\n";
+		echo "Processing {$pattern->name} / '{$pattern->title}'..\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		foreach ( $locales as $gp_locale ) {
 			$locale     = $gp_locale->wp_locale;
 			if ( ! $locale || 'en_US' === $locale ) {
@@ -53,13 +53,15 @@ function pattern_import_translations_to_directory() {
 
 			$translated = $pattern->to_locale( $locale );
 			if ( $translated ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				echo "\t{$locale} - " . ( $translated->ID ? 'Updating' : 'Creating' ) . " Translated pattern.\n";
 				create_or_update_translated_pattern( $translated );
 			} else {
+				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				echo "\t{$locale} - No Translations exist yet.\n";
 				// TODO: Note: There may exist a translated pattern using old strings.
-				//       Considering this as an edge-case that is unlikely and we don't
-				//       need to handle. Serving old Translated template is better in this case.
+				// Considering this as an edge-case that is unlikely and we don't
+				// need to handle. Serving old Translated template is better in this case.
 			}
 		}
 

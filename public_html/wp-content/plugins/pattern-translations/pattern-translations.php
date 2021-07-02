@@ -5,6 +5,7 @@
  * Plugin URI:  https://wordpress.org/patterns/
  * Text Domain: wporg-plugins
  */
+
 namespace WordPressdotorg\Pattern_Translations;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
