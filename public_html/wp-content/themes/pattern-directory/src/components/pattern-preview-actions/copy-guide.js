@@ -33,7 +33,7 @@ const CopyGuide = ( { onFinish } ) => {
 									</h3>
 									<p>
 										{ __(
-											'Patterns are really just text. And, just like you can copy and paste text, you can copy and paste patterns. Its really easy!',
+											'Patterns are really just text. And, just like you can copy and paste text, you can copy and paste patterns. It's really easy!',
 											'wporg-patterns'
 										) }
 									</p>
