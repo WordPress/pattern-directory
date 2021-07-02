@@ -8,8 +8,6 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 get_header();
 
-// @todo Permissions TBD, see https://github.com/WordPress/pattern-directory/issues/30.
-
 $is_logged_in = is_user_logged_in();
 $can_edit     = current_user_can( 'edit_post', get_query_var( PATTERN_ID_VAR ) );
 
