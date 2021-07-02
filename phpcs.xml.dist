@@ -87,16 +87,25 @@
 		<!-- print_r() is perfectly accepted in some circumstances, like WP_CLI commands. -->
 		<exclude name="WordPress.PHP.DevelopmentFunctions.error_log_print_r" />
 
-		<!-- Allow short ternary pattern -->
+		<!-- Allow short ternary pattern. -->
 		<exclude name="WordPress.PHP.DisallowShortTernary.Found" />
+
+		<!-- Allow short array syntax. -->
+		<exclude name="Generic.Arrays.DisallowShortArraySyntax.Found" />
 	</rule>
 
-	<!-- Ignore the CPT template filename, since it is based on the CPT name, and can't change. -->
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
-		<exclude-pattern>*/archive-wporg_workshop.php$</exclude-pattern>
-		<exclude-pattern>*/single-wporg_workshop.php$</exclude-pattern>
-		<exclude-pattern>*/taxonomy-wporg_lesson_category.php$</exclude-pattern>
-		<exclude-pattern>*/template-parts/component-post-card-footer-wporg_workshop.php$</exclude-pattern>
+		<!-- Ignore the block pattern parser files. -->
+		<exclude-pattern>*/pattern-translations/includes/parsers/*.php$</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.NamingConventions.ValidVariableName">
+		<properties>
+			<property name="customPropertiesWhitelist" type="array">
+				<element value="nodeValue"/>
+				<element value="parentNode"/>
+			</property>
+		</properties>
 	</rule>
 
 	<rule ref="WordPress-Docs">
@@ -133,6 +142,9 @@
 
 		<!-- Ignore punctuation at the end of comments. -->
 		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar" />
+
+		<!-- Ignore docs issues in block pattern parser files. -->
+		<exclude-pattern>*/pattern-translations/includes/*.php$</exclude-pattern>
 	</rule>
 
 	<rule ref="WordPress-Extra">
