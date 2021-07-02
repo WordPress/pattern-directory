@@ -8,7 +8,7 @@ import { Skeleton, SkeletonWrapper } from '../skeleton';
  */
 const PLACEHOLDER_COUNT = 7;
 
-const MennuSkeleton = () => {
+const MenuSkeleton = () => {
 	return (
 		<SkeletonWrapper style={ { flexDirection: 'row' } }>
 			{ Array( PLACEHOLDER_COUNT )
@@ -20,4 +20,4 @@ const MennuSkeleton = () => {
 	);
 };
 
-export default MennuSkeleton;
+export default MenuSkeleton;
