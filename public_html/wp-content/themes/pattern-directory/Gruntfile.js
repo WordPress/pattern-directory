@@ -1,4 +1,4 @@
-module.exports = function( grunt ) {
+module.exports = function ( grunt ) {
 	const isChild = 'wporg' !== grunt.file.readJSON( 'package.json' ).name;
 	const defaultWebpackConfig = require( '@wordpress/scripts/config/webpack.config' );
 
@@ -6,7 +6,7 @@ module.exports = function( grunt ) {
 		const files = {};
 		const components = [ 'settings', 'tools', 'generic', 'base', 'objects', 'components', 'utilities' ];
 
-		components.forEach( function( component ) {
+		components.forEach( function ( component ) {
 			const paths = [
 				'../wporg/css/' + component + '/**/*.scss',
 				'!../wporg/css/' + component + '/_' + component + '.scss',
@@ -39,6 +39,13 @@ module.exports = function( grunt ) {
 			},
 			dist: {
 				src: 'css/style.css',
+			},
+			rtl: {
+				options: {
+					processors: [ require( 'rtlcss' )() ],
+				},
+				src: 'css/style.css',
+				dest: 'css/style-rtl.css',
 			},
 		},
 
