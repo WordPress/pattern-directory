@@ -15,6 +15,7 @@ add_filter( 'allowed_block_types_all', __NAMESPACE__ . '\remove_disallowed_block
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
 add_filter( 'rest_' . POST_TYPE . '_collection_params', __NAMESPACE__ . '\filter_patterns_collection_params' );
 add_filter( 'rest_' . POST_TYPE . '_query', __NAMESPACE__ . '\filter_patterns_rest_query', 10, 2 );
+add_filter( 'user_has_cap', __NAMESPACE__ . '\set_pattern_caps' );
 
 
 /**
@@ -24,7 +25,7 @@ function register_post_type_data() {
 	register_post_type(
 		POST_TYPE,
 		array(
-			'labels' => array(
+			'labels'          => array(
 				'name'                     => _x( 'Block Pattern', 'post type general name', 'wporg-patterns' ),
 				'singular_name'            => _x( 'Block Pattern', 'post type singular name', 'wporg-patterns' ),
 				'add_new'                  => _x( 'Add New', 'block pattern', 'wporg-patterns' ),
@@ -50,11 +51,13 @@ function register_post_type_data() {
 				'item_scheduled'           => __( 'Block pattern scheduled.', 'wporg-patterns' ),
 				'item_updated'             => __( 'Block pattern updated.', 'wporg-patterns' ),
 			),
-			'description'  => 'Stores publicly shared Block Patterns (predefined block layouts, ready to insert and tweak).',
-			'public'       => true,
-			'show_in_rest' => true,
-			'rewrite'      => array( 'slug' => 'pattern' ),
-			'supports'     => array( 'title', 'editor', 'author', 'custom-fields' ),
+			'description'     => 'Stores publicly shared Block Patterns (predefined block layouts, ready to insert and tweak).',
+			'public'          => true,
+			'show_in_rest'    => true,
+			'rewrite'         => array( 'slug' => 'pattern' ),
+			'supports'        => array( 'title', 'editor', 'author', 'custom-fields' ),
+			'capability_type' => array( 'pattern', 'patterns' ),
+			'map_meta_cap'    => true,
 		)
 	);
 
@@ -70,6 +73,10 @@ function register_post_type_data() {
 			'rewrite'           => array(
 				'slug' => 'pattern-categories',
 			),
+			'capabilities' => array(
+				'assign_terms' => 'edit_patterns',
+				'edit_terms'   => 'edit_patterns',
+			),
 		)
 	);
 
@@ -84,6 +91,10 @@ function register_post_type_data() {
 			'show_admin_column' => true,
 			'rewrite'           => array(
 				'slug' => 'pattern-keywords',
+			),
+			'capabilities' => array(
+				'assign_terms' => 'edit_patterns',
+				'edit_terms'   => 'edit_patterns',
 			),
 
 			'labels' => array(
@@ -515,4 +526,40 @@ function get_block_pattern( $post ) {
 		return false;
 	}
 	return $pattern;
+}
+
+/**
+ * Give all logged in users caps for creating patterns and related taxonomies.
+ *
+ * This allows any user in the wp.org network to have these capabilities, without having to have an actual
+ * role on the pattern directory site. These caps are only given on the front end, though, because in WP Admin
+ * these same caps could allow unintended access.
+ *
+ * @param array $user_caps A list of primitive caps (keys) and whether user has them (boolean values).
+ *
+ * @return array
+ */
+function set_pattern_caps( $user_caps ) {
+	// Set corresponding caps for all roles.
+	$cap_args = array(
+		'capability_type' => array( 'pattern', 'patterns' ),
+		'capabilities'    => array(),
+		'map_meta_cap'    => true,
+	);
+	$cap_map = (array) get_post_type_capabilities( (object) $cap_args );
+
+	foreach ( $user_caps as $cap => $bool ) {
+		if ( $bool && isset( $cap_map[ $cap ] ) ) {
+			$user_caps[ $cap_map[ $cap ] ] = true;
+		}
+	}
+
+	// Set caps to allow for front end pattern creation.
+	if ( is_user_logged_in() && ! is_admin() ) {
+		$user_caps['publish_patterns']        = true;
+		$user_caps['edit_patterns']           = true;
+		$user_caps['edit_published_patterns'] = true;
+	}
+
+	return $user_caps;
 }
