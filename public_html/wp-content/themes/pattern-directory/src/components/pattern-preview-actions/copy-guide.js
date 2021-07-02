@@ -58,7 +58,7 @@ const CopyGuide = ( { onFinish } ) => {
 											<p>
 												{ createInterpolateElement(
 													__(
-														'Paste the contents of your clipboard by pressing both the <kbd>⌘</kbd> and <kbd>v</kbd> keys, or right-clicking and choose "Paste" from the menu.',
+														'Paste the contents of your clipboard by holding down <kbd>ctrl</kbd> control (Windows) or <kbd>⌘</kbd> command (Mac) and pressing the <kbd>v</kbd> key, or right-clicking and choose “Paste” from the menu.',
 														'wporg-patterns'
 													),
 													{
