@@ -114,7 +114,7 @@ const ViewportHeaderControl = () => {
 				icon={ null }
 				text={ sprintf(
 					/* translators: %s viewport width as css, ie: 100% */
-					__( `Width (%spx)`, 'wporg-patterns' ),
+					__( 'Width (%spx)', 'wporg-patterns' ),
 					viewportWidth
 				) }
 				popoverProps={ {
