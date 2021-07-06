@@ -65,10 +65,17 @@
 body:not(.home) {
 	.site-branding {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
 		justify-content: space-between;
 		font-size: 0.8125rem;
 		color: $color-white;
+
+		@include breakpoint( $breakpoint-medium ) {
+			*:first-child {
+				flex-grow: 1;
+			}
+		}
 
 		a {
 			color: $color-white;
@@ -81,6 +88,17 @@ body:not(.home) {
 
 		.is-current-page {
 			font-weight: 600;
+		}
+
+		.pattern-search {
+			margin-top: 1rem;
+			flex-basis: 100%;
+
+			@include breakpoint( $breakpoint-medium ) {
+				margin-top: 0;
+				margin-left: 1rem;
+				flex-basis: unset;
+			}
 		}
 	}
 }

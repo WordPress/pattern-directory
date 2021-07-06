@@ -72,8 +72,8 @@ get_template_part( 'header', 'wporg' );
 						) );
 						?>
 						
-						<?php get_search_form(); ?>
 					</nav><!-- #site-navigation -->
+					<?php get_search_form(); ?>
 				<?php endif; ?>
 			</div><!-- .site-branding -->
 		</header><!-- #masthead -->
