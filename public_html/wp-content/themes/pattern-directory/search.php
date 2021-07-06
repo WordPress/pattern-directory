@@ -12,7 +12,7 @@ namespace WordPressdotorg\Pattern_Directory\Theme;
 get_header();
 ?> 
 
-<div id="patterns__search" data-search-term="<?php echo get_search_query(); ?>"></div>
+<div id="patterns-search__container"></div>
 
 <?php
 get_footer();

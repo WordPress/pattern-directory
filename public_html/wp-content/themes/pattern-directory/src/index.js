@@ -36,7 +36,7 @@ for ( let i = 0; i < previewContainers.length; i++ ) {
 }
 
 // Load the patterns search package
-const patternContainer = document.getElementById( 'patterns__search' );
-if ( patternContainer ) {
-	render( <PatternsSearch />, patternContainer );
+const searchContainer = document.getElementById( 'patterns-search__container' );
+if ( searchContainer ) {
+	render( <PatternsSearch />, searchContainer );
 }
