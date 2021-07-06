@@ -6,6 +6,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import CategoryContextBar from '../category-context-bar';
 import PatternGrid from '../pattern-grid';
 import QueryMonitor from '../query-monitor';
 import PatternThumbnail from '../pattern-thumbnail';
@@ -18,6 +19,7 @@ const PatternsSearch = () => {
 	return (
 		<RouteProvider>
 			<QueryMonitor />
+			<CategoryContextBar />
 			<PatternGrid query={ query }>
 				{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } showAvatar /> }
 			</PatternGrid>

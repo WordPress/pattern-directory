@@ -1,23 +1,28 @@
 /**
+ * External dependencies
+ */
+import classnames from 'classnames';
+
+/**
  * WordPress dependencies
  */
 import { Spinner } from '@wordpress/components';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import { getQueryArg } from '@wordpress/url';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { useRoute } from '../../hooks';
-import { getCategoryFromPath } from '../../utils';
-import { getAllSearchMessage, getDefaultMessage, getDefaultSearchMessage, getLoadingMessage } from './messaging';
+import { getCategoryFromPath, getSearchTermFromPath } from '../../utils';
+import { getDefaultMessage, getLoadingMessage, getSearchMessage } from './messaging';
 import { store as patternStore } from '../../store';
 
 function CategoryContextBar() {
 	const { path } = useRoute();
 	const [ height, setHeight ] = useState();
-	const [ message, setMessage ] = useState( getLoadingMessage( 'All' ) );
+	const [ message, setMessage ] = useState();
 	const [ context ] = useState( {
 		title: '',
 		links: [],
@@ -44,25 +49,30 @@ function CategoryContextBar() {
 	);
 
 	useEffect( () => {
-		if ( ! category ) {
-			return;
-		}
-
+		// Show the loading message
 		if ( isLoadingPatterns ) {
-			setMessage( getLoadingMessage( category.name ) );
+			if ( category ) {
+				setMessage( getLoadingMessage( category.name ) );
+			} else {
+				setMessage( __( 'Loading patterns', 'wporg-patterns' ) );
+			}
+
 			return;
 		}
 
-		const searchTerm = getQueryArg( path, 'search' );
-
-		if ( searchTerm && ! isAllCategory ) {
-			setMessage( getDefaultSearchMessage( patterns.length, category.name, searchTerm ) );
-		} else if ( searchTerm && isAllCategory ) {
-			setMessage( getAllSearchMessage( patterns.length, searchTerm ) );
-		} else if ( ! isAllCategory ) {
-			setMessage( getDefaultMessage( category.count || 0, category.name ) );
-		} else {
+		// We don't show a message when viewing all categories
+		if ( isAllCategory ) {
 			setMessage( '' );
+			return;
+		}
+
+		if ( category ) {
+			setMessage( getDefaultMessage( category.count, category.name ) );
+		}
+
+		const searchTerm = getSearchTermFromPath( path );
+		if ( searchTerm.length > 0 ) {
+			setMessage( getSearchMessage( patterns.length, searchTerm ) );
 		}
 	}, [ category, isLoadingPatterns, patterns ] );
 
@@ -71,15 +81,16 @@ function CategoryContextBar() {
 		setHeight( _height );
 	}, [ message ] );
 
+	const classes = classnames( {
+		'category-context-bar__spinner': true,
+		'category-context-bar__spinner--is-hidden': ! isLoadingPatterns,
+	} );
+
 	return (
 		<header className="category-context-bar" style={ { height: `${ height }px` } }>
 			<div ref={ innerRef }>
 				<h2 className="category-context-bar__copy">
-					<span
-						className={ `category-context-bar__spinner ${
-							! isLoadingPatterns ? 'category-context-bar__spinner--is-hidden' : ''
-						}` }
-					>
+					<span className={ classes }>
 						<Spinner />
 					</span>
 					<span>{ message }</span>
