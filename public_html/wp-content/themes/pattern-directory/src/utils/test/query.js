@@ -79,7 +79,7 @@ describe( 'utils', () => {
 		it( 'should correctly return the search term', async () => {
 			expect( getSearchTermFromPath( '/search/header' ) ).toEqual( 'header' );
 			expect( getSearchTermFromPath( '/search/footer/' ) ).toEqual( 'footer' );
-			expect( getSearchTermFromPath( '/pattern-categories/search/sidebar' ) ).toEqual( 'sidebar' );
+			expect( getSearchTermFromPath( '/patterns/search/sidebar' ) ).toEqual( 'sidebar' );
 		} );
 	} );
 
