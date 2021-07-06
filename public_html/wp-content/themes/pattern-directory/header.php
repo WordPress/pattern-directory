@@ -30,7 +30,7 @@ get_template_part( 'header', 'wporg' );
 					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Pattern Directory', 'Site title', 'wporg-patterns' ); ?></a></h1>
 
 					<p class="site-description"><?php esc_html_e( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ); ?></p>
-					<?php get_search_form(array('redirect' => true)); ?>
+					<?php get_search_form(); ?>
 				<?php else : ?>
 					<div>
 						<a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
@@ -43,6 +43,12 @@ get_template_part( 'header', 'wporg' );
 								esc_html_e( 'Pattern Details', 'wporg-patterns' );
 							} else if ( is_singular() ) {
 								the_title();
+							} else if ( is_search() ) {
+								printf(
+									/* translators: Search query. */
+									esc_html__( 'Search Results for "%s"', 'wporg-patterns' ),
+									get_search_query()
+								);
 							} else {
 								the_archive_title();
 							}
