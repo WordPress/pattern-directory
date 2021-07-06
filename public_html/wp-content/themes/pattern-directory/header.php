@@ -46,7 +46,7 @@ get_template_part( 'header', 'wporg' );
 							} else if ( is_search() ) {
 								printf(
 									/* translators: Search query. */
-									esc_html__( 'Search Results for "%s"', 'wporg-patterns' ),
+									esc_html__( 'Search results for "%s"', 'wporg-patterns' ),
 									get_search_query()
 								);
 							} else {
