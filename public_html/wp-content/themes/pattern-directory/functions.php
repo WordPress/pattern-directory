@@ -18,8 +18,6 @@ add_filter( 'pre_handle_404', __NAMESPACE__ . '\bypass_404_page', 10, 2 );
 
 add_action( 'template_redirect', __NAMESPACE__ . '\rewrite_search_url' );
 
-
-
 /**
  * Sets up theme defaults and registers support for various WordPress features.
  *
