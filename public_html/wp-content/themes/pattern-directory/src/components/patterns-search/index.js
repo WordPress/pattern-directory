@@ -8,6 +8,7 @@ import { useSelect } from '@wordpress/data';
  */
 import PatternGrid from '../pattern-grid';
 import QueryMonitor from '../query-monitor';
+import PatternThumbnail from '../pattern-thumbnail';
 import { RouteProvider } from '../../hooks';
 import { store as patternStore } from '../../store';
 
@@ -17,7 +18,9 @@ const PatternsSearch = () => {
 	return (
 		<RouteProvider>
 			<QueryMonitor />
-			<PatternGrid query={ query } />
+			<PatternGrid query={ query }>
+				{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } showAvatar /> }
+			</PatternGrid>
 		</RouteProvider>
 	);
 };
