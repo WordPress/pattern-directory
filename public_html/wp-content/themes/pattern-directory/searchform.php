@@ -17,6 +17,7 @@ global $wp;
 		value="<?php echo get_search_query(); ?>"
 		name="s"
 		placeholder="<?php esc_html_e( 'Search patterns', 'wporg-patterns' ); ?>"
+		required
 	/>
 	<button type="submit" class="pattern-search__button">
 		<span class="screen-reader-text">
