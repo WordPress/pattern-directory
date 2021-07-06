@@ -13,7 +13,7 @@
  */
 
 namespace WordPressdotorg\Pattern_Directory\Theme;
-var_dump( is_search() );
+
 get_header();
 ?>
 
