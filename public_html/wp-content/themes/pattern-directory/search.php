@@ -14,7 +14,7 @@ get_header();
 global $wp_query;
 ?> 
 
-<div id="patterns-search__container" data-result-count="<?php echo $wp_query->found_posts; ?>"></div>
+<div id="patterns-search__container" data-result-count="<?php echo intval( $wp_query->found_posts ); ?>"></div>
 
 <?php
 get_footer();
