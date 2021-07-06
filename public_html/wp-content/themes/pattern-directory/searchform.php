@@ -7,7 +7,6 @@
  * @package WPBBP
  */
 
-global $wp;
 ?>
 <form role="search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>" class="pattern-search">
 	<label for="s" class="screen-reader-text"><?php echo esc_html( _x( 'Search for:', 'label', 'wporg-patterns' ) ); ?></label>
