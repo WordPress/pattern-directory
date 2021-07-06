@@ -38,5 +38,5 @@ for ( let i = 0; i < previewContainers.length; i++ ) {
 // Load the patterns search package
 const searchContainer = document.getElementById( 'patterns-search__container' );
 if ( searchContainer ) {
-	render( <PatternsSearch />, searchContainer );
+	render( <PatternsSearch { ...searchContainer.dataset } />, searchContainer );
 }

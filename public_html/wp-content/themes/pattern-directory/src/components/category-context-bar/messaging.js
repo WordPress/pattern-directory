@@ -58,8 +58,8 @@ export const getSearchMessage = ( count, searchTerm ) => {
 		sprintf(
 			/* translators: %1$d: number of patterns. %2$s search term.  */
 			_n(
-				'Showing %1$d pattern for "<b>%2$s</b>".',
-				'Showing %1$d patterns for "<b>%2$s</b>".',
+				'%1$d pattern found for <b>%2$s</b>',
+				'%1$d patterns found for <b>%2$s</b>',
 				count,
 				'wporg-patterns'
 			),

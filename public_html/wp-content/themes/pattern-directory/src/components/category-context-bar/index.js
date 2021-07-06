@@ -19,7 +19,7 @@ import { getCategoryFromPath, getSearchTermFromPath } from '../../utils';
 import { getDefaultMessage, getLoadingMessage, getSearchMessage } from './messaging';
 import { store as patternStore } from '../../store';
 
-function CategoryContextBar() {
+function CategoryContextBar( { resultCount } ) {
 	const { path } = useRoute();
 	const [ height, setHeight ] = useState();
 	const [ message, setMessage ] = useState();
@@ -72,7 +72,7 @@ function CategoryContextBar() {
 
 		const searchTerm = getSearchTermFromPath( path );
 		if ( searchTerm.length > 0 ) {
-			setMessage( getSearchMessage( patterns.length, searchTerm ) );
+			setMessage( getSearchMessage( resultCount, searchTerm ) );
 		}
 	}, [ category, isLoadingPatterns, patterns ] );
 
