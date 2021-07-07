@@ -67,8 +67,8 @@ function get_taxonomy_terms( $taxonomy ) {
 	while ( $page <= $total_pages ) {
 		if ( 'cli' === php_sapi_name() ) {
 			echo sprintf(
-				"Page %d... ",
-				$page
+				'Page %d... ',
+				$page // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			);
 		}
 
@@ -152,7 +152,7 @@ function main() {
 		if ( 'cli' === php_sapi_name() ) {
 			echo sprintf(
 				'%s... ',
-				$taxonomy['name']
+				$taxonomy['name'] // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			);
 		}
 
