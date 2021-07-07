@@ -60,7 +60,8 @@
 		"wp-coding-standards/wpcs": "2.*",
 		"phpcompatibility/phpcompatibility-wp": "*",
 		"wp-phpunit/wp-phpunit": "^5.4",
-		"phpunit/phpunit": "^7.5.20"
+		"phpunit/phpunit": "^7.5.20",
+		"rmccue/requests": "^1.8.1"
 	},
 	"scripts": {
 		"format": "phpcbf -p",
