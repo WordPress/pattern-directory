@@ -193,7 +193,7 @@ function main() {
 	}
 
 	$path = dirname( __DIR__ ) . '/extra';
-	if ( ! is_readable( $path ) ) {
+	if ( ! is_writeable( $path ) ) {
 		mkdir( $path );
 	}
 
