@@ -106,10 +106,10 @@ export const getPageFromPath = ( path ) => {
 };
 
 /**
- * Retrieve the page from a url path.
+ * Retrieve the search term from a url path.
  *
  * @param {string} path
- * @return {number} The page number.
+ * @return {string} The search term.
  */
 export const getSearchTermFromPath = ( path ) => {
 	return getValueFromPath( path, 'search' );
