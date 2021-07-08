@@ -24,19 +24,13 @@ function PatternPreview( { blockContent } ) {
 
 	const instanceId = useInstanceId( PatternPreview );
 	const [ width, setWidth ] = useState( window.innerWidth < INITIAL_WIDTH ? window.innerWidth : INITIAL_WIDTH );
-	const onDragChange = useCallback(
-		( delta, source ) =>
-			setWidth( ( value ) => {
-				const newVal = value + delta;
+	const onDragChange = useCallback( ( delta ) => setWidth( ( value ) => value + delta ), [ setWidth ] );
 
-				if ( source === 'keyboard' && delta > 0 ) {
-					return Math.max( newVal, MIN_PREVIEW_WIDTH );
-				}
-
-				return newVal;
-			} ),
-		[ setWidth ]
-	);
+	const onDragEnd = () => {
+		if ( width < MIN_PREVIEW_WIDTH ) {
+			setWidth( MIN_PREVIEW_WIDTH );
+		}
+	};
 
 	const availableWidths = useMemo( () => {
 		// Less than 480 wide.
@@ -94,6 +88,7 @@ function PatternPreview( { blockContent } ) {
 					label={ __( 'Drag to resize', 'wporg-patterns' ) }
 					className="is-left"
 					onDragChange={ onDragChange }
+					onDragEnd={ onDragEnd }
 					direction="left"
 					aria-describedby={ `pattern-preview__resize-help-${ instanceId }` }
 				/>
@@ -102,6 +97,7 @@ function PatternPreview( { blockContent } ) {
 					label={ __( 'Drag to resize', 'wporg-patterns' ) }
 					className="is-right"
 					onDragChange={ onDragChange }
+					onDragEnd={ onDragEnd }
 					direction="right"
 					aria-describedby={ `pattern-preview__resize-help-${ instanceId }` }
 				/>
