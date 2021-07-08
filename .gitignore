@@ -16,6 +16,7 @@
 # And specifically include our plugins & themes.
 !/public_html/wp-content/plugins/pattern-creator
 !/public_html/wp-content/plugins/pattern-directory
+!/public_html/wp-content/plugins/pattern-translations
 !/public_html/wp-content/themes/pattern-directory
 
 # Ignore built files inside our plugins & themes.
