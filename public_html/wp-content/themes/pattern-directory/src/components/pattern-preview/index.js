@@ -24,7 +24,19 @@ function PatternPreview( { blockContent } ) {
 
 	const instanceId = useInstanceId( PatternPreview );
 	const [ width, setWidth ] = useState( window.innerWidth < INITIAL_WIDTH ? window.innerWidth : INITIAL_WIDTH );
-	const onDragChange = useCallback( ( delta ) => setWidth( ( value ) => value + delta ), [ setWidth ] );
+	const onDragChange = useCallback(
+		( delta, source ) =>
+			setWidth( ( value ) => {
+				const newVal = value + delta;
+
+				if ( source === 'keyboard' && delta > 0 ) {
+					return Math.max( newVal, MIN_PREVIEW_WIDTH );
+				}
+
+				return newVal;
+			} ),
+		[ setWidth ]
+	);
 
 	const availableWidths = useMemo( () => {
 		// Less than 480 wide.

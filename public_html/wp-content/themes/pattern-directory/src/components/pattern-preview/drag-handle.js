@@ -12,7 +12,7 @@ function DragHandle( { label, className, onDragChange, direction = 'left', ...pr
 	const dragGestures = useDrag( ( { delta, dragging } ) => {
 		const multiplier = direction === 'left' ? -2 : 2;
 		if ( dragging ) {
-			onDragChange( delta[ 0 ] * multiplier );
+			onDragChange( delta[ 0 ] * multiplier, 'mouse' );
 		}
 	} );
 
@@ -20,12 +20,12 @@ function DragHandle( { label, className, onDragChange, direction = 'left', ...pr
 		const { keyCode } = event;
 
 		if ( ( direction === 'left' && keyCode === LEFT ) || ( direction === 'right' && keyCode === RIGHT ) ) {
-			onDragChange( 20 );
+			onDragChange( 20, 'keyboard' );
 		} else if (
 			( direction === 'left' && keyCode === RIGHT ) ||
 			( direction === 'right' && keyCode === LEFT )
 		) {
-			onDragChange( -20 );
+			onDragChange( -20, 'keyboard' );
 		}
 	};
 
