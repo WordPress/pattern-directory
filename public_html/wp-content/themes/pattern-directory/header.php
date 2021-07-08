@@ -37,7 +37,7 @@ get_template_part( 'header', 'wporg' );
 							<?php esc_html_e( 'All Patterns', 'wporg-patterns' ); ?>
 						</a>
 						<span class="sep">/</span>
-						<span class="is-current-page">
+						<span id="breadcrumb-part" class="is-current-page">
 							<?php
 							if ( is_singular( POST_TYPE ) ) {
 								esc_html_e( 'Pattern Details', 'wporg-patterns' );
