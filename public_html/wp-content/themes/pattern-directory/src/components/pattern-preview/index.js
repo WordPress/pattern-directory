@@ -24,10 +24,9 @@ function PatternPreview( { blockContent } ) {
 
 	const instanceId = useInstanceId( PatternPreview );
 	const [ width, setWidth ] = useState( window.innerWidth < INITIAL_WIDTH ? window.innerWidth : INITIAL_WIDTH );
-	const onDragChange = useCallback(
-		( delta ) => setWidth( ( value ) => Math.max( Math.floor( value + delta ), MIN_PREVIEW_WIDTH ) ),
-		[ setWidth ]
-	);
+	const onDragChange = useCallback( ( delta ) => setWidth( ( value ) => Math.floor( value + delta ) ), [
+		setWidth,
+	] );
 
 	const availableWidths = useMemo( () => {
 		// Less than 480 wide.
@@ -59,10 +58,11 @@ function PatternPreview( { blockContent } ) {
 
 	let currentOpt = false;
 	if ( ! availableWidths.some( ( opt ) => opt.value === width ) ) {
+		const displayWidth = Math.max( width, MIN_PREVIEW_WIDTH );
 		currentOpt = {
 			/* translators: %s is the width in pixels, ex 600. */
-			label: sprintf( __( 'Current (%spx)', 'wporg-patterns' ), width ),
-			value: width,
+			label: sprintf( __( 'Current (%spx)', 'wporg-patterns' ), displayWidth ),
+			value: displayWidth,
 		};
 	}
 
