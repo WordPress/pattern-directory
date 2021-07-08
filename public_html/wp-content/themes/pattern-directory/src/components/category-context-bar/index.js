@@ -19,7 +19,7 @@ import { getCategoryFromPath, getSearchTermFromPath } from '../../utils';
 import { getDefaultMessage, getLoadingMessage, getSearchMessage } from './messaging';
 import { store as patternStore } from '../../store';
 
-function CategoryContextBar( { resultCount } ) {
+function CategoryContextBar() {
 	const { path } = useRoute();
 	const [ height, setHeight ] = useState();
 	const [ message, setMessage ] = useState();
@@ -29,11 +29,15 @@ function CategoryContextBar( { resultCount } ) {
 	} );
 	const innerRef = useRef( null );
 
-	const { isAllCategory, category, isLoadingPatterns, patterns } = useSelect(
+	const { isAllCategory, category, count, isLoadingPatterns, patterns } = useSelect(
 		( select ) => {
-			const { getCategoryBySlug, getPatternsByQuery, isLoadingPatternsByQuery, getCurrentQuery } = select(
-				patternStore
-			);
+			const {
+				getCategoryBySlug,
+				getPatternsByQuery,
+				isLoadingPatternsByQuery,
+				getCurrentQuery,
+				getPatternTotalsByQuery,
+			} = select( patternStore );
 			const categorySlug = getCategoryFromPath( path );
 			const _category = getCategoryBySlug( categorySlug );
 			const query = getCurrentQuery();
@@ -43,6 +47,7 @@ function CategoryContextBar( { resultCount } ) {
 				isLoadingPatterns: isLoadingPatternsByQuery( query ),
 				patterns: query ? getPatternsByQuery( query ) : [],
 				category: _category,
+				count: getPatternTotalsByQuery( query ),
 			};
 		},
 		[ path ]
@@ -67,12 +72,12 @@ function CategoryContextBar( { resultCount } ) {
 		}
 
 		if ( category ) {
-			setMessage( getDefaultMessage( category.count, category.name ) );
+			setMessage( getDefaultMessage( count, category.name ) );
 		}
 
 		const searchTerm = getSearchTermFromPath( path );
 		if ( searchTerm.length > 0 ) {
-			setMessage( getSearchMessage( resultCount, searchTerm ) );
+			setMessage( getSearchMessage( count, searchTerm ) );
 		}
 	}, [ category, isLoadingPatterns, patterns ] );
 
