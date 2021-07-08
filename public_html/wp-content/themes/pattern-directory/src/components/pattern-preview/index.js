@@ -15,7 +15,7 @@ import DragHandle from './drag-handle';
 /* eslint-disable jsx-a11y/anchor-is-valid -- These are just placeholders. */
 
 const INITIAL_WIDTH = 960;
-const MIN_PREVIEW_WIDTH = 320;
+const MIN_PREVIEW_WIDTH = 280;
 
 function PatternPreview( { blockContent } ) {
 	const showViewportControl = useViewportMatch( 'mobile', '>=' );
@@ -24,9 +24,7 @@ function PatternPreview( { blockContent } ) {
 
 	const instanceId = useInstanceId( PatternPreview );
 	const [ width, setWidth ] = useState( window.innerWidth < INITIAL_WIDTH ? window.innerWidth : INITIAL_WIDTH );
-	const onDragChange = useCallback( ( delta ) => setWidth( ( value ) => Math.floor( value + delta ) ), [
-		setWidth,
-	] );
+	const onDragChange = useCallback( ( delta ) => setWidth( ( value ) => value + delta ), [ setWidth ] );
 
 	const availableWidths = useMemo( () => {
 		// Less than 480 wide.
@@ -58,7 +56,7 @@ function PatternPreview( { blockContent } ) {
 
 	let currentOpt = false;
 	if ( ! availableWidths.some( ( opt ) => opt.value === width ) ) {
-		const displayWidth = Math.max( width, MIN_PREVIEW_WIDTH );
+		const displayWidth = Math.max( Math.floor( width ), MIN_PREVIEW_WIDTH );
 		currentOpt = {
 			/* translators: %s is the width in pixels, ex 600. */
 			label: sprintf( __( 'Current (%spx)', 'wporg-patterns' ), displayWidth ),
