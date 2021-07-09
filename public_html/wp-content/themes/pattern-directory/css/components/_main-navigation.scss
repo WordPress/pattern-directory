@@ -14,7 +14,8 @@
 	}
 
 	&.toggled {
-		div.menu {
+		div.menu,
+		ul.menu {
 			position: absolute;
 			top: 57px;
 			right: 0;
