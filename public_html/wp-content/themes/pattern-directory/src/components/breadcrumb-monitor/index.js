@@ -3,6 +3,7 @@
  */
 import { useEffect } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -20,9 +21,10 @@ import { getCategoryFromPath, getValueFromPath } from '../../utils';
 const setBreadcrumbText = ( categoryName ) => {
 	const breadcrumb = document.getElementById( 'breadcrumb-part' );
 	if ( breadcrumb ) {
-		const split = breadcrumb.innerText.split( ':' );
+		// translators: %s is the category name.
+		const label = sprintf( __( 'Category: %s', 'wporg-patterns' ), categoryName );
 
-		breadcrumb.innerText = `${ split[ 0 ] }: ${ categoryName }`;
+		breadcrumb.innerText = label;
 	}
 };
 
