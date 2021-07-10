@@ -14,4 +14,7 @@ _x( 'Gallery', 'Categories term name', 'wporg-patterns' );
 _x( 'Header', 'Categories term name', 'wporg-patterns' );
 _x( 'Images', 'Categories term name', 'wporg-patterns' );
 _x( 'Text', 'Categories term name', 'wporg-patterns' );
+_x( 'Broken or Unusable', 'Flag Reasons term name', 'wporg-patterns' );
+_x( 'Copyrighted or Trademark Issue', 'Flag Reasons term name', 'wporg-patterns' );
 _x( 'Other', 'Flag Reasons term name', 'wporg-patterns' );
+_x( 'Rude, Crude, or Inappropriate', 'Flag Reasons term name', 'wporg-patterns' );
