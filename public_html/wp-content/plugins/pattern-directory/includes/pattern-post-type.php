@@ -4,6 +4,7 @@ namespace WordPressdotorg\Pattern_Directory\Pattern_Post_Type;
 
 use Error, WP_Block_Type_Registry;
 use function WordPressdotorg\Locales\{ get_locales, get_locales_with_english_names, get_locales_with_native_names };
+use function WordPressdotorg\Pattern_Directory\Favorite\get_favorite_count;
 
 const POST_TYPE = 'wporg-pattern';
 
@@ -290,11 +291,12 @@ function register_rest_fields() {
 		'favorite_count',
 		array(
 			'get_callback' => function() {
-				return 1;
+				return get_favorite_count( get_the_ID() );
 			},
 
 			'schema' => array(
-				'type'  => 'integer',
+				'type'    => 'integer',
+				'default' => 0,
 			),
 		)
 	);
