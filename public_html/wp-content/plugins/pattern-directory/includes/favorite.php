@@ -3,6 +3,7 @@
 namespace WordPressdotorg\Pattern_Directory\Favorite;
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\get_block_pattern;
 
+// Used for both the post meta (count of favorites) and user meta (list of pattern IDs).
 const META_KEY = 'wporg-pattern-favorites';
 
 /**
@@ -127,26 +128,26 @@ function get_raw_favorite_count( $post = 0 ) {
 /**
  * Update a given post's favorite count cache.
  *
- * @param mixed $value The post ID.
+ * @param mixed $post_id The post ID.
  */
-function update_favorite_cache( $value ) {
-	if ( ! is_numeric( $value ) ) {
+function update_favorite_cache( $post_id ) {
+	$count = get_raw_favorite_count( $post_id );
+	if ( ! is_int( $count ) ) {
 		return;
 	}
 
-	$count = get_raw_favorite_count( $value );
-	update_post_meta( $value, META_KEY, $count );
+	update_post_meta( $post_id, META_KEY, $count );
 }
 
 /**
  * Trigger the update of favorite count when a user favorites or unfavorites a pattern.
  *
  * @param int    $mid         The meta ID.
- * @param int    $object_id   ID of the object metadata is for.
+ * @param int    $user_id     User ID for this metadata.
  * @param string $meta_key    Metadata key.
- * @param mixed  $_meta_value Metadata value. Serialized if non-scalar.
+ * @param mixed  $_meta_value Metadata value. Serialized if non-scalar. Post ID(s).
  */
-function trigger_favorite_cache_update( $mid, $object_id, $meta_key, $_meta_value ) {
+function trigger_favorite_cache_update( $mid, $user_id, $meta_key, $_meta_value ) {
 	if ( META_KEY !== $meta_key ) {
 		return;
 	}
