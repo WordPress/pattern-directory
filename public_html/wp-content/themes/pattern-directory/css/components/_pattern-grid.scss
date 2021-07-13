@@ -1,3 +1,15 @@
+.pattern-grid__empty-header {
+	margin: 2rem auto 4rem;
+	max-width: 960px;
+	text-align: center;
+
+	h2 {
+		margin-top: 0;
+		font-weight: 700;
+		line-height: 1.2;
+	}
+}
+
 .pattern-grid {
 	display: grid;
 	margin: 1.5rem 1.5rem 4rem;
