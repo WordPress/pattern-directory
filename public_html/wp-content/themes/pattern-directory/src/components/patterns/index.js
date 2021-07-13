@@ -24,7 +24,7 @@ const Patterns = () => {
 		const posts = _query ? getPatternsByQuery( _query ) : [];
 
 		return {
-			isEmpty: ! isLoading && ! posts.length,
+			isEmpty: false === isLoading && ! posts.length,
 			query: _query,
 		};
 	} );
