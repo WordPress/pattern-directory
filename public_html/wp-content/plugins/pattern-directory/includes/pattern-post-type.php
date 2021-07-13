@@ -295,7 +295,8 @@ function register_rest_fields() {
 			},
 
 			'schema' => array(
-				'type'  => 'integer',
+				'type'    => 'integer',
+				'default' => 0,
 			),
 		)
 	);
