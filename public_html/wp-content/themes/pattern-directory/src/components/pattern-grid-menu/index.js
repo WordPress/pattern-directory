@@ -13,7 +13,7 @@ import Menu from '../menu';
 import { store as patternStore } from '../../store';
 import { useRoute } from '../../hooks';
 
-const PatternGridMenu = () => {
+const PatternGridMenu = ( { query } ) => {
 	const { path, update: updatePath } = useRoute();
 	const categorySlug = getCategoryFromPath( path );
 
@@ -24,6 +24,7 @@ const PatternGridMenu = () => {
 			isLoading: isLoadingCategories(),
 		};
 	} );
+
 	return (
 		<>
 			<nav className="pattern-grid-menu">
@@ -47,7 +48,7 @@ const PatternGridMenu = () => {
 					isLoading={ isLoading }
 				/>
 			</nav>
-			<CategoryContextBar />
+			<CategoryContextBar query={ query } />
 		</>
 	);
 };
