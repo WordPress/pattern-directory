@@ -1,0 +1,59 @@
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
+import { store as coreStore } from '@wordpress/core-data';
+import { store as patternStore } from '../../store';
+import { useSelect } from '@wordpress/data';
+
+/**
+ * Internal dependencies
+ */
+import PatternGrid from '../pattern-grid';
+import PatternGridMenu from '../pattern-grid-menu';
+import PatternThumbnail from '../pattern-thumbnail';
+import QueryMonitor from '../query-monitor';
+import { RouteProvider } from '../../hooks';
+
+const MyFavorites = () => {
+	const { favorites, isLoggedIn, query } = useSelect( ( select ) => ( {
+		favorites: select( patternStore ).getFavorites(),
+		isLoggedIn: !! select( coreStore ).getCurrentUser()?.id,
+		query: select( patternStore ).getCurrentQuery(),
+	} ) );
+
+	if ( ! isLoggedIn ) {
+		const loginUrl = addQueryArgs( wporgLoginUrl, { redirect_to: window.location } );
+		return (
+			<div className="entry-content">
+				<p>{ __( 'Please log in to view your favorite patterns.', 'wporg-patterns' ) }</p>
+				<a className="button button-primary" href={ loginUrl }>
+					{ __( 'Log in', 'wporg-patterns' ) }
+				</a>
+			</div>
+		);
+	}
+
+	if ( ! favorites.length ) {
+		return (
+			<div className="entry-content">
+				<p>{ __( 'You haven’t favorited any patterns yet.', 'wporg-patterns' ) }</p>
+			</div>
+		);
+	}
+
+	const modifiedQuery = { ...query, include: favorites };
+
+	return (
+		<RouteProvider>
+			<QueryMonitor />
+			<PatternGridMenu basePath="/favorites/" query={ modifiedQuery } />
+			<PatternGrid query={ modifiedQuery }>
+				{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } /> }
+			</PatternGrid>
+		</RouteProvider>
+	);
+};
+
+export default MyFavorites;

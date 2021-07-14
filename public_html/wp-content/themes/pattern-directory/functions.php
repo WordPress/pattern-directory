@@ -196,6 +196,7 @@ function pre_get_posts( $query ) {
  */
 function add_rewrite() {
 	add_rewrite_rule( '^my-patterns/[^/]+/?$', 'index.php?pagename=my-patterns', 'top' );
+	add_rewrite_rule( '^favorites/.+/?$', 'index.php?pagename=favorites', 'top' );
 }
 
 

@@ -8,6 +8,7 @@ import { render } from '@wordpress/element';
  */
 import Pattern from './components/pattern';
 import Patterns from './components/patterns';
+import MyFavorites from './components/my-favorites';
 import MyPatterns from './components/my-patterns';
 import PatternsSearch from './components/patterns-search';
 
@@ -18,9 +19,15 @@ if ( gridContainer ) {
 }
 
 // Load the preview into any awaiting preview container.
-const myGridContainer = document.getElementById( 'my-patterns__container' );
-if ( myGridContainer ) {
-	render( <MyPatterns />, myGridContainer );
+const myPatternsGridContainer = document.getElementById( 'my-patterns__container' );
+if ( myPatternsGridContainer ) {
+	render( <MyPatterns />, myPatternsGridContainer );
+}
+
+// Load the preview into any awaiting preview container.
+const myFavsGridContainer = document.getElementById( 'my-favorites__container' );
+if ( myFavsGridContainer ) {
+	render( <MyFavorites />, myFavsGridContainer );
 }
 
 // Load the preview into any awaiting preview container.
