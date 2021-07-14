@@ -44,6 +44,15 @@ $raw_block_content = get_the_content();
 					data-user-has-reported="<?php echo json_encode( $user_has_reported ); ?>"
 				></div><!-- .pattern__container -->
 
+				<div class="entry-content hide-if-pattern-loaded">
+					<?php the_content(); ?>
+
+					<hr />
+
+					<label for="pattern-code"><?php esc_html_e( 'Pattern Code', 'wporg-patterns' ); ?></label>
+					<textarea id="pattern-code" class="pattern-code"><?php echo esc_attr( $raw_block_content ); ?></textarea>
+				</div>
+
 			</article><!-- #post-## -->
 
 		<?php endwhile; ?>
