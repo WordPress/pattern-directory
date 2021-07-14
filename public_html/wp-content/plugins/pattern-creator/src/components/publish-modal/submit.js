@@ -96,7 +96,7 @@ export default function SubmitModal( { onSubmit, onClose } ) {
 						value={ description }
 						placeholder={ __( 'Describe the output of pattern', 'wporg-patterns' ) }
 						help={ __(
-							'The description is used to help users of assistive technology better understand the contents of your pattern.',
+							'The description is used to help users of assistive technology understand the content of your pattern.',
 							'wporg-patterns'
 						) }
 						onChange={ setDescription }
