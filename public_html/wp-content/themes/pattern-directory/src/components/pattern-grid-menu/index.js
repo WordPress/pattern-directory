@@ -8,6 +8,7 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import CategoryContextBar from '../category-context-bar';
+import PatternOrderSelect from '../pattern-order-select';
 import { getCategoryFromPath } from '../../utils';
 import Menu from '../menu';
 import { store as patternStore } from '../../store';
@@ -47,6 +48,7 @@ const PatternGridMenu = () => {
 					isLoading={ isLoading }
 				/>
 			</nav>
+			<PatternOrderSelect />
 			<CategoryContextBar />
 		</>
 	);
