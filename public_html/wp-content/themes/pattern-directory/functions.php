@@ -18,6 +18,9 @@ add_filter( 'pre_handle_404', __NAMESPACE__ . '\bypass_404_page', 10, 2 );
 
 add_action( 'template_redirect', __NAMESPACE__ . '\rewrite_search_url' );
 
+add_filter( 'rest_wporg-pattern_collection_params', __NAMESPACE__ . '\filter_add_rest_orderby_params', 10, 1 );
+add_filter( 'rest_wporg-pattern_query', __NAMESPACE__ . '\filter_rest_wporg_pattern_query', 10, 2 );
+
 /**
  * Sets up theme defaults and registers support for various WordPress features.
  *
@@ -251,4 +254,24 @@ function rewrite_search_url() {
 		wp_redirect( home_url( '/search/' ) . urlencode( trim( get_query_var( 's' ) ) ) . '/' );
 		exit();
 	}
+}
+
+/**
+ * Add orderby params to for wporg-pattern queries.
+ */
+function filter_add_rest_orderby_params( $params ) {
+	$params['orderby']['enum'][] = 'favorite_count';
+	return $params;
+}
+
+/**
+ * Updates wporg_pattern query when orderby is set.
+ */
+function filter_rest_wporg_pattern_query( $query_vars, $request ) {
+	$orderby = $request->get_param( 'orderby' );
+	if ( 'favorite_count' === $orderby ) {
+		$query_vars['orderby'] = 'meta_value_num';
+		$query_vars['meta_key'] = 'wporg-pattern-favorites';
+	}
+	return $query_vars;
 }

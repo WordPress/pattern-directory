@@ -11,8 +11,8 @@ import { addQueryArgs, getQueryArg } from '@wordpress/url';
 import { useRoute } from '../../hooks';
 
 const DEFAULT_ORDER_VALUES = [
-	{ label: 'Date', value: 'date' }, // Date is a WordPress default
-	{ label: 'Favorites', value: 'wpop_viewport_width' },
+	{ label: 'Newest', value: 'date' },
+	{ label: 'Favorites', value: 'favorite_count' },
 ];
 
 const PatternOrderSelect = () => {
