@@ -27,28 +27,30 @@ const PatternGridMenu = () => {
 	} );
 	return (
 		<>
-			<nav className="pattern-grid-menu">
-				<Menu
-					current={ categorySlug }
-					options={
-						categories
-							? categories.map( ( record ) => {
-									return {
-										value: `/${ getPath( record.link ) || '' }`,
-										slug: record.slug,
-										label: record.name,
-									};
-							  } )
-							: []
-					}
-					onClick={ ( event ) => {
-						event.preventDefault();
-						updatePath( event.target.pathname );
-					} }
-					isLoading={ isLoading }
-				/>
-			</nav>
-			<PatternOrderSelect />
+			<div className="pattern-grid-menu">
+				<nav>
+					<Menu
+						current={ categorySlug }
+						options={
+							categories
+								? categories.map( ( record ) => {
+										return {
+											value: `/${ getPath( record.link ) || '' }`,
+											slug: record.slug,
+											label: record.name,
+										};
+								  } )
+								: []
+						}
+						onClick={ ( event ) => {
+							event.preventDefault();
+							updatePath( event.target.pathname );
+						} }
+						isLoading={ isLoading }
+					/>
+				</nav>
+				<PatternOrderSelect />
+			</div>
 			<CategoryContextBar />
 		</>
 	);

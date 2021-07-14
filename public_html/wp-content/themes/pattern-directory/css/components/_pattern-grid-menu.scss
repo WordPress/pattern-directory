@@ -6,6 +6,15 @@
 	justify-content: space-between;
 	align-items: center;
 
+	> nav {
+		margin-bottom: $gutter-default;
+		width: 100%;
+	}
+
+	.pattern-select-control {
+		margin-bottom: $gutter-default;
+	}
+
 	.pattern-menu {
 		width: 100%;
 	}
@@ -26,9 +35,22 @@
 		}
 	}
 
+	@include breakpoint( $breakpoint-medium ) {
+		.pattern-select-control {
+			margin-bottom: 0;
+		}
+
+	}
+
 	@media only screen and ( min-width: #{$breakpoint-medium + 1} ) {
 		margin: $gutter-default;
 		flex-direction: row;
+
+		> nav {
+			margin-bottom: 0;
+			width: auto;
+		}
+
 
 		> form {
 			margin: 0;

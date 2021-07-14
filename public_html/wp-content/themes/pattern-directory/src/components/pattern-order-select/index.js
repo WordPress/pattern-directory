@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { SelectControl } from '@wordpress/components';
+import { useViewportMatch } from '@wordpress/compose';
 import { addQueryArgs, getQueryArg } from '@wordpress/url';
 
 /**
@@ -17,20 +18,23 @@ const DEFAULT_ORDER_VALUES = [
 
 const PatternOrderSelect = () => {
 	const { path, replace } = useRoute();
+	const hideLabel = useViewportMatch( 'medium', '>=' );
 
 	return (
-		<SelectControl
-			className="select-control"
-			label={ __( 'Order by', 'wporg-patterns' ) }
-			value={ getQueryArg( window.location.href, 'orderby' ) }
-			hideLabelFromVision={ true }
-			options={ DEFAULT_ORDER_VALUES }
-			onChange={ ( value ) => {
-				const newUrl = addQueryArgs( path, { orderby: value } );
+		<div className="pattern-select-control">
+			<SelectControl
+				label={ __( 'Order by', 'wporg-patterns' ) }
+				labelPosition="side"
+				hideLabelFromVision={ hideLabel }
+				value={ getQueryArg( window.location.href, 'orderby' ) }
+				options={ DEFAULT_ORDER_VALUES }
+				onChange={ ( value ) => {
+					const newUrl = addQueryArgs( path, { orderby: value } );
 
-				replace( newUrl );
-			} }
-		/>
+					replace( newUrl );
+				} }
+			/>
+		</div>
 	);
 };
 
