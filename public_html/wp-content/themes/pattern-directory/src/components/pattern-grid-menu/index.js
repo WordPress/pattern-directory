@@ -1,7 +1,6 @@
 /**
  * WordPress dependencies
  */
-import { getPath } from '@wordpress/url';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -13,7 +12,7 @@ import Menu from '../menu';
 import { store as patternStore } from '../../store';
 import { useRoute } from '../../hooks';
 
-const PatternGridMenu = ( { query } ) => {
+const PatternGridMenu = ( { basePath = '/', query } ) => {
 	const { path, update: updatePath } = useRoute();
 	const categorySlug = getCategoryFromPath( path );
 
@@ -34,7 +33,9 @@ const PatternGridMenu = ( { query } ) => {
 						categories
 							? categories.map( ( record ) => {
 									return {
-										value: `/${ getPath( record.link ) || '' }`,
+										value: record.slug
+											? `${ basePath }pattern-categories/${ record.slug }/`
+											: basePath,
 										slug: record.slug,
 										label: record.name,
 									};
