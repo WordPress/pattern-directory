@@ -6,6 +6,7 @@
 	"license": "GPL-2.0-or-later",
 	"scripts": {
 		"build": "wp-scripts build",
+		"dev": "NODE_ENV=development wp-scripts build",
 		"format:js": "wp-scripts format src -- --config=../../../../.prettierrc.js",
 		"lint:css": "wp-scripts lint-style style.css src",
 		"lint:js": "wp-scripts lint-js src",
