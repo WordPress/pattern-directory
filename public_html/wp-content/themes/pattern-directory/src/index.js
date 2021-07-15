@@ -32,6 +32,8 @@ for ( let i = 0; i < previewContainers.length; i++ ) {
 	render( <Pattern { ...props } />, container, () => {
 		// This callback is called after the render to unhide the container.
 		container.hidden = false;
+		const contentToHide = document.querySelectorAll( '.hide-if-pattern-loaded' );
+		contentToHide.forEach( ( elem ) => ( elem.hidden = true ) );
 	} );
 }
 
