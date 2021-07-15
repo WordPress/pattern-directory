@@ -20,6 +20,12 @@ jobs:
 
       - name: Build
         run: yarn workspaces run build
+
+      - name: Ignore .gitignore
+        run: |
+             rm package.lock
+             git add public_html/wp-content/themes/pattern-directory/css/* --force
+             git add public_html/wp-content/plugins/*/build --force
     
       - name: Commit and push
         # Using a specific hash here instead of a tagged version, for risk mitigation, since this action modifies our repo.
