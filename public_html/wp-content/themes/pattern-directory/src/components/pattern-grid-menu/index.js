@@ -16,6 +16,9 @@ const PatternGridMenu = ( { basePath = '/', query } ) => {
 	const { path, update: updatePath } = useRoute();
 	const categorySlug = getCategoryFromPath( path );
 
+	// Make sure the path is prefixed with the full site URL.
+	basePath = wporgPatternsUrl.site + basePath;
+
 	const { categories, isLoading } = useSelect( ( select ) => {
 		const { getCategories, isLoadingCategories } = select( patternStore );
 		return {
