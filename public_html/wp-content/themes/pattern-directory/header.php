@@ -27,10 +27,14 @@ get_template_part( 'header', 'wporg' );
 		<header id="masthead" class="site-header <?php echo is_home() ? 'home' : ''; ?>" role="banner">
 			<div class="site-branding">
 				<?php if ( is_home() ) : ?>
-					<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Patterns', 'Site title', 'wporg-patterns' ); ?></a></h1>
+					<div>
+						<h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home"><?php echo esc_html_x( 'Patterns', 'Site title', 'wporg-patterns' ); ?></a></h1>
 
-					<p class="site-description"><?php esc_html_e( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ); ?></p>
-					<?php get_search_form(); ?>
+						<p class="site-description"><?php esc_html_e( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ); ?></p>
+						<?php get_search_form(); ?>
+						<a class="site-link" href="<?php echo esc_url( home_url( '/my-favorites' ) ); ?>"><?php esc_html_e( 'My Favorites', 'wporg-patterns' ); ?></a>
+						<a class="site-link" href="<?php echo esc_url( home_url( '/my-patterns' ) ); ?>"><?php esc_html_e( 'My Patterns', 'wporg-patterns' ); ?></a>
+					</div>
 				<?php else : ?>
 					<div>
 						<a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
