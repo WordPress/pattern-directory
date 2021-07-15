@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
-import { store as coreStore } from '@wordpress/core-data';
 import { store as patternStore } from '../../store';
 import { useSelect } from '@wordpress/data';
 
@@ -17,14 +16,14 @@ import QueryMonitor from '../query-monitor';
 import { RouteProvider } from '../../hooks';
 
 const MyFavorites = () => {
-	const { favorites, isLoggedIn, query } = useSelect( ( select ) => ( {
+	const { favorites, query } = useSelect( ( select ) => ( {
 		favorites: select( patternStore ).getFavorites(),
-		isLoggedIn: !! select( coreStore ).getCurrentUser()?.id,
 		query: select( patternStore ).getCurrentQuery(),
 	} ) );
+	const isLoggedIn = !! wporgPatternsData.userId;
 
 	if ( ! isLoggedIn ) {
-		const loginUrl = addQueryArgs( wporgLoginUrl, { redirect_to: window.location } );
+		const loginUrl = addQueryArgs( wporgPatternsUrl.login, { redirect_to: window.location } );
 		return (
 			<div className="entry-content">
 				<p>{ __( 'Please log in to view your favorite patterns.', 'wporg-patterns' ) }</p>
