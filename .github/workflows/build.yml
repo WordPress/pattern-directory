@@ -1,0 +1,27 @@
+name: Build and push to build branch.
+
+on:
+  push:
+    branches:
+      - trunk
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build and Push
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install all dependencies
+        run: npm install && yarn
+
+      - name: Build
+        run: yarn workspaces run build
+    
+      - name: Commit and push
+        # Using a specific hash here instead of a tagged version, for risk mitigation, since this action modifies our repo.
+        uses: actions-js/push@4decc2887d2770f29177082be3c8b04d342f5b64
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: build
+          message: Build: ${{ GITHUB_SHA }})
