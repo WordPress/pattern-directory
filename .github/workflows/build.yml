@@ -23,7 +23,7 @@ jobs:
 
       - name: Ignore .gitignore
         run: |
-             rm package.lock
+             rm package-lock.json
              git add public_html/wp-content/themes/pattern-directory/css/* --force
              git add public_html/wp-content/plugins/*/build --force
     
