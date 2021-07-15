@@ -48,7 +48,7 @@ const MyFavorites = () => {
 	return (
 		<RouteProvider>
 			<QueryMonitor />
-			<PatternGridMenu basePath="/favorites/" query={ modifiedQuery } />
+			<PatternGridMenu basePath="/my-favorites/" query={ modifiedQuery } />
 			<PatternGrid query={ modifiedQuery }>
 				{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } /> }
 			</PatternGrid>

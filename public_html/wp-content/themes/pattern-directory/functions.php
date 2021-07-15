@@ -159,7 +159,7 @@ function body_class( $classes, $class ) {
 
 /**
  * Handle queries.
- * - My Patterns and Favories have "subpages" which should still show the root page.
+ * - My Patterns and My Favories have "subpages" which should still show the root page.
  * - Default & archive views should show patterns, not posts.
  *
  * @param \WP_Query $query The WordPress Query object.
@@ -175,7 +175,7 @@ function pre_get_posts( $query ) {
 	$pagename = $query->get( 'pagename' );
 	if ( $pagename ) {
 		list( $_pagename ) = explode( '/', $pagename );
-		if ( in_array( $_pagename, array( 'my-patterns', 'favorites' ) ) ) {
+		if ( in_array( $_pagename, array( 'my-patterns', 'my-favorites' ) ) ) {
 			// Need to get the page ID because this is set before `pre_get_posts` fires.
 			$page = get_page_by_path( $_pagename );
 			$query->set( 'pagename', $_pagename );
@@ -196,7 +196,7 @@ function pre_get_posts( $query ) {
  */
 function add_rewrite() {
 	add_rewrite_rule( '^my-patterns/[^/]+/?$', 'index.php?pagename=my-patterns', 'top' );
-	add_rewrite_rule( '^favorites/.+/?$', 'index.php?pagename=favorites', 'top' );
+	add_rewrite_rule( '^my-favorites/.+/?$', 'index.php?pagename=my-favorites', 'top' );
 }
 
 
