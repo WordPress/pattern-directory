@@ -40,7 +40,6 @@ $raw_block_content = get_the_content();
 					hidden
 					class="pattern__container"
 					data-post-id="<?php echo intval( get_the_ID() ); ?>"
-					data-logged-in="<?php echo json_encode( is_user_logged_in() ); ?>"
 					data-user-has-reported="<?php echo json_encode( $user_has_reported ); ?>"
 				></div><!-- .pattern__container -->
 
