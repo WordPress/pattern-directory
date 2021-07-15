@@ -151,11 +151,11 @@ function check_flag_threshold( $post_ID, $post, $update ) {
  *
  * TODO this isn't used anywhere on the front end, but maybe it should be cached?
  *
- * @param array $args Query args. 'orderby' and/or 'order'.
+ * @param array $args Optional. Query args. 'orderby' and/or 'order'.
  *
  * @return array
  */
-function get_pattern_ids_with_pending_flags( $args ) {
+function get_pattern_ids_with_pending_flags( $args = array() ) {
 	global $wpdb;
 
 	$args = wp_parse_args(
