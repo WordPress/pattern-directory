@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
-import { store as coreStore } from '@wordpress/core-data';
 import { store as patternStore } from '../../store';
 import { useSelect } from '@wordpress/data';
 
@@ -18,10 +17,10 @@ import { RouteProvider } from '../../hooks';
 
 const MyPatterns = () => {
 	const query = useSelect( ( select ) => select( patternStore ).getCurrentQuery() );
-	const author = useSelect( ( select ) => select( coreStore ).getCurrentUser()?.id );
+	const author = wporgPatternsData.userId;
 
 	if ( ! author ) {
-		const loginUrl = addQueryArgs( wporgLoginUrl, { redirect_to: window.location } );
+		const loginUrl = addQueryArgs( wporgPatternsUrl.login, { redirect_to: window.location } );
 		return (
 			<div className="entry-content">
 				<p>{ __( 'Please log in to view your patterns.', 'wporg-patterns' ) }</p>

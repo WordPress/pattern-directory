@@ -73,12 +73,30 @@ function enqueue_assets() {
 
 		wp_add_inline_script(
 			'wporg-pattern-script',
+			sprintf( "var wporgLocale = '%s';", wp_json_encode( get_locale() ) ),
+			'before'
+		);
+
+		wp_add_inline_script(
+			'wporg-pattern-script',
 			sprintf(
-				'var wporgAssetUrl = "%s", wporgSiteUrl = "%s", wporgLoginUrl = "%s", wporgLocale = \'%s\';',
-				esc_url( get_stylesheet_directory_uri() ),
-				esc_url( home_url() ),
-				esc_url( wp_login_url() ),
-				wp_json_encode( get_locale() )
+				"var wporgPatternsData = JSON.parse( decodeURIComponent( '%s' ) )",
+				rawurlencode( wp_json_encode( array(
+					'userId' => get_current_user_id(),
+				) ) ),
+			),
+			'before'
+		);
+
+		wp_add_inline_script(
+			'wporg-pattern-script',
+			sprintf(
+				"var wporgPatternsUrl = JSON.parse( decodeURIComponent( '%s' ) )",
+				rawurlencode( wp_json_encode( array(
+					'assets' => esc_url( get_stylesheet_directory_uri() ),
+					'site' => esc_url( home_url() ),
+					'login' => esc_url( wp_login_url() ),
+				) ) ),
 			),
 			'before'
 		);
