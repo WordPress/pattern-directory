@@ -125,7 +125,7 @@ function get_meta_field_schema() {
 /**
  * Register the post meta fields for the snapshot CPT.
  *
- * return void
+ * @return void
  */
 function register_meta_fields() {
 	$schema = get_meta_field_schema();
@@ -137,6 +137,8 @@ function register_meta_fields() {
 
 /**
  * Schedule the cron job to record a stats snapshot.
+ *
+ * @return void
  */
 function schedule_cron_job() {
 	if ( wp_next_scheduled( PATTERN_POST_TYPE . '_record_snapshot' ) ) {

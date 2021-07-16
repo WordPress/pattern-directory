@@ -24,8 +24,8 @@ function add_subpage() {
 
 	add_submenu_page(
 		$parent_slug,
-		__( 'Pattern Stats', 'revisions-extended' ),
-		__( 'Stats', 'revisions-extended' ),
+		__( 'Pattern Stats', 'wporg-patterns' ),
+		__( 'Stats', 'wporg-patterns' ),
 		$post_type_object->cap->edit_posts,
 		PATTERN_POST_TYPE . '-stats',
 		__NAMESPACE__ . '\render_subpage'
@@ -60,7 +60,7 @@ function render_subpage() {
 				<?php foreach ( $schema['properties'] as $field_name => $field_schema ) : ?>
 					<tr>
 						<td>
-							<abbr title="<?php echo esc_attr( $field_schema['description'] ) ?>">
+							<abbr title="<?php echo esc_attr( $field_schema['description'] ); ?>">
 								<?php echo esc_html( $field_name ); ?>
 							</abbr>
 						</td>
