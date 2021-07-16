@@ -33,7 +33,6 @@ get_template_part( 'header', 'wporg' );
 						<p class="site-description"><?php esc_html_e( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ); ?></p>
 						<?php get_search_form(); ?>
 						<a class="site-link" href="<?php echo esc_url( home_url( '/my-favorites' ) ); ?>"><?php esc_html_e( 'My favorites', 'wporg-patterns' ); ?></a>
-						<a class="site-link" href="<?php echo esc_url( home_url( '/my-patterns' ) ); ?>"><?php esc_html_e( 'My patterns', 'wporg-patterns' ); ?></a>
 					</div>
 				<?php else : ?>
 					<div>
