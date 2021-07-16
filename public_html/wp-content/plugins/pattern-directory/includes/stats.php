@@ -64,6 +64,18 @@ function get_meta_field_schema() {
 				'default'     => 0,
 				'single'      => true,
 			),
+			'count-patterns_publish-originals'         => array(
+				'description' => __( 'The total number of published original patterns (not translations or remixes).', 'wporg-patterns' ),
+				'type'        => 'integer',
+				'default'     => 0,
+				'single'      => true,
+			),
+			'count-patterns_publish-translations'         => array(
+				'description' => __( 'The total number of published pattern translations and remixes.', 'wporg-patterns' ),
+				'type'        => 'integer',
+				'default'     => 0,
+				'single'      => true,
+			),
 			'count-patterns_unlisted'        => array(
 				'description' => __( 'The total number of unlisted patterns.', 'wporg-patterns' ),
 				'type'        => 'integer',
@@ -229,6 +241,42 @@ function callback_count_patterns_publish() {
 	$patterns_by_status = wp_count_posts( PATTERN_POST_TYPE );
 
 	return $patterns_by_status->publish;
+}
+
+/**
+ * Count the total number of published original patterns (not translations or remixes).
+ *
+ * @return int
+ */
+function callback_count_patterns_publish_originals() {
+	$args = array(
+		'post_type'   => PATTERN_POST_TYPE,
+		'post_status' => 'publish',
+		'post_parent' => 0,
+		'numberposts' => 1,
+	);
+
+	$query = new \WP_Query( $args );
+
+	return $query->found_posts;
+}
+
+/**
+ * Count the total number of published pattern translations and remixes.
+ *
+ * @return int
+ */
+function callback_count_patterns_publish_translations() {
+	$args = array(
+		'post_type'           => PATTERN_POST_TYPE,
+		'post_status'         => 'publish',
+		'post_parent__not_in' => array( 0 ),
+		'numberposts'         => 1,
+	);
+
+	$query = new \WP_Query( $args );
+
+	return $query->found_posts;
 }
 
 /**
