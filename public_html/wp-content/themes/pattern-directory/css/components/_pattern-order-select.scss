@@ -9,4 +9,16 @@
 	select.components-select-control__input.components-select-control__input {
 		width: auto;
 	}
+
+	body.rtl & {
+		// Update the margin when using an RTL language, overrides a Gutenberg bug.
+		.components-input-control__container {
+
+			/*!rtl:ignore*/
+			margin-left: 0;
+
+			/*!rtl:ignore*/
+			margin-right: 8px;
+		}
+	}
 }
