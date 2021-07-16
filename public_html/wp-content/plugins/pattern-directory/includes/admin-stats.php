@@ -90,7 +90,7 @@ function render_subpage() {
 						<td>
 							<?php echo esc_html( $field_schema['description'] ); ?>
 						</td>
-						<td class="<?php if ( is_numeric( $data[ $field_name ] ) ) echo 'number'; ?>">
+						<td class="<?php echo ( is_numeric( $data[ $field_name ] ) ) ? 'number' : ''; ?>">
 							<?php if ( isset( $data[ $field_name ] ) ) : ?>
 								<?php if ( is_numeric( $data[ $field_name ] ) ) : ?>
 									<?php echo esc_html( number_format_i18n( $data[ $field_name ] ) ); ?>
