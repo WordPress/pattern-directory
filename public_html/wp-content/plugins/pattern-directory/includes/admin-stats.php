@@ -118,7 +118,7 @@ function render_subpage() {
 					<?php
 					printf(
 						'The next snapshot will be captured on %s.',
-						wp_date( 'r', $next_snapshot->timestamp )
+						esc_html( wp_date( 'r', $next_snapshot->timestamp ) )
 					);
 					?>
 				<?php else : ?>
