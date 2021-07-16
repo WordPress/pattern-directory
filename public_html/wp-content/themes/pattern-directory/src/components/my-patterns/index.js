@@ -12,7 +12,9 @@ import { useSelect } from '@wordpress/data';
 import Menu from './menu';
 import PatternGrid from '../pattern-grid';
 import PatternThumbnail from '../pattern-thumbnail';
+import PatternOrderSelect from '../pattern-order-select';
 import QueryMonitor from '../query-monitor';
+import MenuLayout from '../menu-layout';
 import { RouteProvider } from '../../hooks';
 
 const MyPatterns = () => {
@@ -48,7 +50,17 @@ const MyPatterns = () => {
 	return (
 		<RouteProvider>
 			<QueryMonitor />
-			<Menu />
+			<MenuLayout
+				left={ <Menu /> }
+				right={
+					<PatternOrderSelect
+						options={ [
+							{ label: __( 'Newest', 'wporg-patterns' ), value: 'date' },
+							{ label: __( 'Favorites', 'wporg-patterns' ), value: 'favorite_count' },
+						] }
+					/>
+				}
+			/>
 			{ isEmpty ? (
 				<div className="pattern-grid__empty-header">
 					<h2>{ __( 'Nothing found', 'wporg-patterns' ) }</h2>

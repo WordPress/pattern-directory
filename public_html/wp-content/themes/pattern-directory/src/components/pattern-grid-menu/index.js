@@ -1,12 +1,15 @@
 /**
  * WordPress dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import CategoryContextBar from '../category-context-bar';
+import PatternOrderSelect from '../pattern-order-select';
+import MenuLayout from '../menu-layout';
 import { getCategoryFromPath } from '../../utils';
 import Menu from '../menu';
 import { store as patternStore } from '../../store';
@@ -29,29 +32,41 @@ const PatternGridMenu = ( { basePath = '/', query } ) => {
 
 	return (
 		<>
-			<nav className="pattern-grid-menu">
-				<Menu
-					current={ categorySlug }
-					options={
-						categories
-							? categories.map( ( record ) => {
-									return {
-										value: record.slug
-											? `${ basePath }pattern-categories/${ record.slug }/`
-											: basePath,
-										slug: record.slug,
-										label: record.name,
-									};
-							  } )
-							: []
-					}
-					onClick={ ( event ) => {
-						event.preventDefault();
-						updatePath( event.target.pathname );
-					} }
-					isLoading={ isLoading }
-				/>
-			</nav>
+			<MenuLayout
+				left={
+					<nav>
+						<Menu
+							current={ categorySlug }
+							options={
+								categories
+									? categories.map( ( record ) => {
+											return {
+                                                value: record.slug
+                                                ? `${ basePath }pattern-categories/${ record.slug }/`
+                                                : basePath,
+												slug: record.slug,
+												label: record.name,
+											};
+									  } )
+									: []
+							}
+							onClick={ ( event ) => {
+								event.preventDefault();
+								updatePath( event.target.pathname );
+							} }
+							isLoading={ isLoading }
+						/>
+					</nav>
+				}
+				right={
+					<PatternOrderSelect
+						options={ [
+							{ label: __( 'Newest', 'wporg-patterns' ), value: 'date' },
+							{ label: __( 'Favorites', 'wporg-patterns' ), value: 'favorite_count' },
+						] }
+					/>
+				}
+			/>
 			<CategoryContextBar query={ query } />
 		</>
 	);

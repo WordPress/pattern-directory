@@ -1,0 +1,14 @@
+.pattern-select-control {
+
+	// Remove gutenberg margin
+	.components-base-control__field {
+		margin-bottom: 0;
+	}
+
+	// Gutenberg styles are causing an overflow issue.
+	// Over qualified to override other styles
+	select.components-select-control__input.components-select-control__input {
+		width: auto;
+	}
+}
+
