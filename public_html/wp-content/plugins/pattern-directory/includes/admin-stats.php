@@ -44,6 +44,16 @@ function render_subpage() {
 	$snapshots      = $snapshot_query->get_posts();
 
 	?>
+	<style>
+		.number {
+			font-weight: 700;
+			text-align: right;
+		}
+
+		.widefat.but-not-too-wide {
+			width: auto;
+		}
+	</style>
 	<div class="wrap">
 		<h1 class="wp-heading-inline">
 			<?php esc_html_e( 'Pattern Stats', 'wporg-patterns' ); ?>
@@ -57,16 +67,30 @@ function render_subpage() {
 			Right now
 		</h2>
 
-		<table class="widefat striped">
+		<table class="widefat but-not-too-wide striped">
+			<thead>
+				<tr>
+					<th>
+						Meta Key
+					</th>
+					<td>
+						Description
+					</td>
+					<td>
+						Value
+					</td>
+				</tr>
+			</thead>
 			<tbody>
 				<?php foreach ( $schema['properties'] as $field_name => $field_schema ) : ?>
 					<tr>
+						<th>
+							<code><?php echo esc_html( $field_name ); ?></code>
+						</th>
 						<td>
-							<abbr title="<?php echo esc_attr( $field_schema['description'] ); ?>">
-								<?php echo esc_html( $field_name ); ?>
-							</abbr>
+							<?php echo esc_html( $field_schema['description'] ); ?>
 						</td>
-						<td>
+						<td class="<?php if ( is_numeric( $data[ $field_name ] ) ) echo 'number'; ?>">
 							<?php if ( isset( $data[ $field_name ] ) ) : ?>
 								<?php if ( is_numeric( $data[ $field_name ] ) ) : ?>
 									<?php echo esc_html( number_format_i18n( $data[ $field_name ] ) ); ?>
@@ -88,7 +112,7 @@ function render_subpage() {
 
 		<p>Snapshot frequency is daily at 00:00 UTC.</p>
 
-		<table class="widefat striped">
+		<table class="widefat but-not-too-wide striped">
 			<tbody>
 				<tr>
 					<td>
