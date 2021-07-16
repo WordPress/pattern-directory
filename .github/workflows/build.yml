@@ -1,0 +1,50 @@
+name: Build and push to build branch.
+
+on:
+  push:
+    branches:
+      - trunk
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+
+      - name: Install all dependencies
+        run: |
+          composer install
+          yarn
+
+      - name: Ignore .gitignore
+        run: |
+             git add public_html/wp-content/themes/pattern-directory/css/* --force
+             git add public_html/wp-content/themes/pattern-directory/build --force || exit 0
+             git add public_html/wp-content/plugins/pattern-*/build --force
+    
+      - name: Commit and push
+        # Using a specific hash here instead of a tagged version, for risk mitigation, since this action modifies our repo.
+        uses: actions-js/push@4decc2887d2770f29177082be3c8b04d342f5b64
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: build
+          force: true
+          message: "Build: ${{ github.sha }}"
