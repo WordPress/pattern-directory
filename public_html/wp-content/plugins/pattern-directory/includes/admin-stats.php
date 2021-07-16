@@ -118,8 +118,8 @@ function render_subpage() {
 					<td>
 						Number of snapshots
 					</td>
-					<td>
-						<?php echo esc_html( $snapshot_query->found_posts ); ?>
+					<td class="number">
+						<?php echo esc_html( number_format_i18n( $snapshot_query->found_posts ) ); ?>
 					</td>
 				</tr>
 				<tr>
