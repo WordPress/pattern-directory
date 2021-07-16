@@ -2,7 +2,7 @@
 
 namespace WordPressdotorg\Pattern_Directory\Admin\Stats;
 
-use function WordPressdotorg\Pattern_Directory\Stats\{ get_meta_field_schema, get_snapshot_data };
+use function WordPressdotorg\Pattern_Directory\Stats\{ get_meta_field_schema, get_snapshot_data, get_snapshots };
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTERN_POST_TYPE;
 
 defined( 'WPINC' ) || die();
@@ -38,8 +38,10 @@ function add_subpage() {
  * @return void
  */
 function render_subpage() {
-	$schema = get_meta_field_schema();
-	$data   = get_snapshot_data();
+	$schema         = get_meta_field_schema();
+	$data           = get_snapshot_data();
+	$snapshot_query = get_snapshots( array(), true );
+	$snapshots      = $snapshot_query->get_posts();
 
 	?>
 	<div class="wrap">
@@ -52,7 +54,7 @@ function render_subpage() {
 		</p>
 
 		<h2>
-			Right now:
+			Right now
 		</h2>
 
 		<table class="widefat striped">
@@ -75,6 +77,56 @@ function render_subpage() {
 				<?php endforeach; ?>
 			</tbody>
 		</table>
+
+		<h2>
+			Snapshots
+		</h2>
+
+		<p>Snapshot frequency is daily at 00:00 UTC.</p>
+
+		<table class="widefat striped">
+			<tbody>
+				<tr>
+					<td>
+						Number of snapshots
+					</td>
+					<td>
+						<?php echo esc_html( $snapshot_query->found_posts ); ?>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						Earliest snapshot
+					</td>
+					<td>
+						<?php if ( $snapshot_query->found_posts > 0 ) : ?>
+							<?php echo esc_html( reset( $snapshots )->post_title ); ?>
+						<?php else : ?>
+							No data.
+						<?php endif; ?>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						Latest snapshot
+					</td>
+					<td>
+						<?php if ( $snapshot_query->found_posts > 0 ) : ?>
+							<?php echo esc_html( end( $snapshots )->post_title ); ?>
+						<?php else : ?>
+							No data.
+						<?php endif; ?>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<h2>
+			Export
+		</h2>
+		<p>
+			Coming soon! 🎉
+		</p>
 	</div>
 	<?php
 }

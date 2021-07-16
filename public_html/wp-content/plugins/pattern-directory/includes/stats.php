@@ -355,3 +355,33 @@ function callback_count_users_with_favorite() {
 
 	return count( $user_ids );
 }
+
+/**
+ * Get snapshot posts.
+ *
+ * @param array $args     Optional. Query args to refine the dataset.
+ * @param bool  $wp_query Optional. True to return the WP_Query object instead of an array of post objects.
+ *
+ * @return int[]|\WP_Post[]|\WP_Query
+ */
+function get_snapshots( $args = array(), $wp_query = false ) {
+	$args = wp_parse_args(
+		$args,
+		array(
+			'orderby'        => 'date',
+			'order'          => 'asc',
+			'posts_per_page' => 365,
+		)
+	);
+
+	$args['post_type']   = STATS_POST_TYPE;
+	$args['post_status'] = 'publish';
+
+	$query = new \WP_Query( $args );
+
+	if ( true === $wp_query ) {
+		return $query;
+	}
+
+	return $query->get_posts();
+}
