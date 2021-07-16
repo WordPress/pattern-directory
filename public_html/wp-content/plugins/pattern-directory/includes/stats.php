@@ -13,6 +13,7 @@ defined( 'WPINC' ) || die();
  * Constants.
  */
 const STATS_POST_TYPE = 'wporg-pattern-stats'; // Must be <= 20 characters.
+const VERSION         = 1; // Must be an integer.
 
 /**
  * Actions and filters.
@@ -45,6 +46,8 @@ function register_cpt() {
 
 /**
  * Define the post meta fields for the snapshot CPT.
+ *
+ * ⚠️ When you change the field schema, make sure you also bump up the VERSION constant at the top of this file.
  *
  * @return array
  */
@@ -130,6 +133,12 @@ function get_meta_field_schema() {
 				'default'     => 0,
 				'single'      => true,
 			),
+			'version'                        => array(
+				'description' => __( 'The version of the snapshot data schema.', 'wporg-patterns' ),
+				'type'        => 'integer',
+				'default'     => VERSION,
+				'single'      => true,
+			),
 		),
 	);
 }
@@ -203,10 +212,6 @@ function get_snapshot_data() {
 	$schema   = get_meta_field_schema();
 
 	foreach ( array_keys( $schema['properties'] ) as $field_name ) {
-		if ( 'elapsed-time' === $field_name ) {
-			continue;
-		}
-
 		$func = __NAMESPACE__ . '\\callback_' . str_replace( '-', '_', $field_name );
 
 		if ( is_callable( $func ) ) {
@@ -217,6 +222,7 @@ function get_snapshot_data() {
 	$elapsed_ms = round( microtime( true ) * 1000 ) - $start_ms;
 
 	$data['elapsed-time'] = (int) $elapsed_ms;
+	$data['version']      = VERSION;
 
 	return $data;
 }
