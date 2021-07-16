@@ -55,7 +55,7 @@ function render_subpage() {
 			Right now:
 		</h2>
 
-		<table class="striped">
+		<table class="widefat striped">
 			<tbody>
 				<?php foreach ( $schema['properties'] as $field_name => $field_schema ) : ?>
 					<tr>

@@ -113,7 +113,7 @@ function get_meta_field_schema() {
 				'single'      => true,
 			),
 			'elapsed-time'                   => array(
-				'description' => __( 'Number of seconds to generate the snapshot.', 'wporg-patterns' ),
+				'description' => __( 'Number of milliseconds to generate the snapshot.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'default'     => 0,
 				'single'      => true,
@@ -178,25 +178,25 @@ function record_snapshot() {
  * @return array
  */
 function get_snapshot_data() {
-	$data   = array();
-	$start  = time();
-	$schema = get_meta_field_schema();
+	$data     = array();
+	$start_ms = round( microtime( true ) * 1000 );
+	$schema   = get_meta_field_schema();
 
-	foreach ( array_keys( $schema ) as $field_name ) {
+	foreach ( array_keys( $schema['properties'] ) as $field_name ) {
 		if ( 'elapsed-time' === $field_name ) {
 			continue;
 		}
 
-		$func = str_replace( '-', '_', $field_name );
+		$func = __NAMESPACE__ . '\\callback_' . str_replace( '-', '_', $field_name );
 
 		if ( is_callable( $func ) ) {
-			$data[ $field_name ] = call_user_func( __NAMESPACE__ . "\\callback_$func" );
+			$data[ $field_name ] = call_user_func( $func );
 		}
 	}
 
-	$elapsed = time() - $start;
+	$elapsed_ms = round( microtime( true ) * 1000 ) - $start_ms;
 
-	$data['elapsed-time'] = $elapsed;
+	$data['elapsed-time'] = (int) $elapsed_ms;
 
 	return $data;
 }
@@ -335,7 +335,7 @@ function callback_count_users_with_favorite() {
 
 	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$user_ids = $wpdb->get_var( $wpdb->prepare(
+	$user_ids = $wpdb->get_col( $wpdb->prepare(
 		"
 		SELECT DISTINCT user_id
 		FROM {$wpdb->usermeta}
