@@ -188,14 +188,26 @@ function pre_get_posts( $query ) {
 }
 
 /**
- * Add the "My Patterns" status rewrites.
- * This will redirect `my-patterns/draft`, `my-patterns/pending` etc to use the My Patterns page.
+ * Add pattern rewrites.
+ * - Add the category endpoints to author archive URLs, ex: `/author/user/pattern-category/foo`, and `/author/user/pattern-category/foo/page/2`.
+ * - Redirect `my-patterns/draft`, `my-patterns/pending` etc to use the My Patterns page.
+ * - Redirect `my-favorites/pattern-categories/*` to use the My Favorites page.
  */
 function add_rewrite() {
+	add_rewrite_rule(
+		'^author/([^/]+)/pattern-categories/([^/]+)/?$',
+		'index.php?author_name=$matches[1]&wporg-pattern-category=$matches[2]',
+		'top'
+	);
+	add_rewrite_rule(
+		'^author/([^/]+)/pattern-categories/([^/]+)/page/?([0-9]{1,})/?$',
+		'index.php?author_name=$matches[1]&wporg-pattern-category=$matches[2]&paged=$matches[3]',
+		'top'
+	);
+
 	add_rewrite_rule( '^my-patterns/[^/]+/?$', 'index.php?pagename=my-patterns', 'top' );
 	add_rewrite_rule( '^my-favorites/.+/?$', 'index.php?pagename=my-favorites', 'top' );
 }
-
 
 /**
  * Use the index.php template for various WordPress views that would otherwise be handled by the parent theme.

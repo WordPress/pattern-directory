@@ -33,7 +33,10 @@ const Patterns = () => {
 		<RouteProvider>
 			<QueryMonitor />
 			<BreadcrumbMonitor />
-			<PatternGridMenu query={ query } />
+			<PatternGridMenu
+				basePath={ query?.author_name ? `/author/${ query.author_name }/` : '/' }
+				query={ query }
+			/>
 			{ isEmpty ? (
 				<>
 					<EmptyHeader />
