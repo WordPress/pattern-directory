@@ -162,7 +162,7 @@ function register_meta_fields() {
  * @return void
  */
 function schedule_cron_job() {
-	if ( defined( 'WPORG_SANDBOXED' ) ) {
+	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
 		return;
 	}
 
@@ -183,7 +183,7 @@ function schedule_cron_job() {
  * @return void
  */
 function record_snapshot() {
-	if ( defined( 'WPORG_SANDBOXED' ) ) {
+	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
 		return;
 	}
 
