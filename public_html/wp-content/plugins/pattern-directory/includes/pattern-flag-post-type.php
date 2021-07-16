@@ -153,7 +153,7 @@ function check_flag_threshold( $post_ID, $post, $update ) {
  *
  * @param array $args Optional. Query args. 'orderby' and/or 'order'.
  *
- * @return array
+ * @return int[]
  */
 function get_pattern_ids_with_pending_flags( $args = array() ) {
 	global $wpdb;
