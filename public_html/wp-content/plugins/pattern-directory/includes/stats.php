@@ -19,8 +19,8 @@ const STATS_POST_TYPE = 'wporg-pattern-stats'; // Must be <= 20 characters.
  */
 add_action( 'init', __NAMESPACE__ . '\register_cpt' );
 add_action( 'init', __NAMESPACE__ . '\register_meta_fields' );
-//add_action( 'init', __NAMESPACE__ . '\schedule_cron_job' );
-//add_action( PATTERN_POST_TYPE . '_record_snapshot', __NAMESPACE__ . '\record_snapshot' );
+add_action( 'init', __NAMESPACE__ . '\schedule_cron_job' );
+add_action( PATTERN_POST_TYPE . '_record_snapshot', __NAMESPACE__ . '\record_snapshot' );
 
 /**
  * Register a post type for storing snapshots.
@@ -141,6 +141,10 @@ function register_meta_fields() {
  * @return void
  */
 function schedule_cron_job() {
+	if ( defined( 'WPORG_SANDBOXED' ) ) {
+		return;
+	}
+
 	if ( wp_next_scheduled( PATTERN_POST_TYPE . '_record_snapshot' ) ) {
 		return;
 	}
@@ -158,6 +162,10 @@ function schedule_cron_job() {
  * @return void
  */
 function record_snapshot() {
+	if ( defined( 'WPORG_SANDBOXED' ) ) {
+		return;
+	}
+
 	$data = get_snapshot_data();
 
 	wp_insert_post(
