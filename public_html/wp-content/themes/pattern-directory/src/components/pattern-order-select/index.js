@@ -20,7 +20,7 @@ const PatternOrderSelect = ( { options } ) => {
 	}
 
 	return (
-		<div className="pattern-select-control">
+		<div className="pattern-order-select">
 			<SelectControl
 				label={ __( 'Order by', 'wporg-patterns' ) }
 				labelPosition="side"

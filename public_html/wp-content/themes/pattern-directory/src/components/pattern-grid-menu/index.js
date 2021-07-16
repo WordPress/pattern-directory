@@ -41,9 +41,9 @@ const PatternGridMenu = ( { basePath = '/', query } ) => {
 								categories
 									? categories.map( ( record ) => {
 											return {
-                                                value: record.slug
-                                                ? `${ basePath }pattern-categories/${ record.slug }/`
-                                                : basePath,
+												value: record.slug
+													? `${ basePath }pattern-categories/${ record.slug }/`
+													: basePath,
 												slug: record.slug,
 												label: record.name,
 											};
