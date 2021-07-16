@@ -68,7 +68,11 @@ function render_subpage() {
 						</td>
 						<td>
 							<?php if ( isset( $data[ $field_name ] ) ) : ?>
-								<?php echo esc_html( $data[ $field_name ] ); ?>
+								<?php if ( is_numeric( $data[ $field_name ] ) ) : ?>
+									<?php echo esc_html( number_format_i18n( $data[ $field_name ] ) ); ?>
+								<?php else : ?>
+									<?php echo esc_html( $data[ $field_name ] ); ?>
+								<?php endif; ?>
 							<?php else : ?>
 								Data missing.
 							<?php endif; ?>
