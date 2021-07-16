@@ -61,13 +61,13 @@ export function RouteProvider( { children } ) {
 	/**
 	 * Updates the path to the document location.
 	 */
-	const setPathOnBack = () => {
+	const setPathOnPop = () => {
 		setPath( document.location.href );
 	};
 
 	useEffect( () => {
 		// When the browser modifies the history, update our path.
-		window.addEventListener( 'popstate', setPathOnBack ); // eslint-disable-line @wordpress/no-global-event-listener
+		window.addEventListener( 'popstate', setPathOnPop ); // eslint-disable-line @wordpress/no-global-event-listener
 	}, [] );
 
 	return (
