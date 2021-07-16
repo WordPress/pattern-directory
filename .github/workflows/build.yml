@@ -37,7 +37,7 @@ jobs:
       - name: Ignore .gitignore
         run: |
              git add public_html/wp-content/themes/pattern-directory/css/* --force
-             git add public_html/wp-content/themes/pattern-directory/build --force
+             git add public_html/wp-content/themes/pattern-directory/build --force || exit 0
              git add public_html/wp-content/plugins/pattern-*/build --force
     
       - name: Commit and push
