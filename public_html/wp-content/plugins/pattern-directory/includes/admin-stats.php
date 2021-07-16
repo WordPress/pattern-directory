@@ -42,6 +42,7 @@ function render_subpage() {
 	$data           = get_snapshot_data();
 	$snapshot_query = get_snapshots( array(), true );
 	$snapshots      = $snapshot_query->get_posts();
+	$next_snapshot  = wp_get_scheduled_event( PATTERN_POST_TYPE . '_record_snapshot' );
 
 	?>
 	<style>
@@ -110,7 +111,21 @@ function render_subpage() {
 			Snapshots
 		</h2>
 
-		<p>Snapshot frequency is daily at 00:00 UTC.</p>
+		<p>
+			Snapshot frequency should be daily at around 00:00 UTC.
+			<strong>
+				<?php if ( $next_snapshot ) : ?>
+					<?php
+					printf(
+						'The next snapshot will be captured on %s.',
+						wp_date( 'r', $next_snapshot->timestamp )
+					);
+					?>
+				<?php else : ?>
+					No snapshot is currently scheduled.
+				<?php endif; ?>
+			</strong>
+		</p>
 
 		<table class="widefat but-not-too-wide striped">
 			<tbody>
