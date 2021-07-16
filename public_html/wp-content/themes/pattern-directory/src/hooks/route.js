@@ -59,7 +59,7 @@ export function RouteProvider( { children } ) {
 	};
 
 	/**
-	 * Updates the path to the document location.
+	 * Updates the path to the current browser path.
 	 */
 	const setPathOnPop = () => {
 		setPath( document.location.href );
