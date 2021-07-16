@@ -2,9 +2,9 @@
  * Wordpress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { addQueryArgs, getQueryArg } from '@wordpress/url';
 import { SelectControl } from '@wordpress/components';
 import { useViewportMatch } from '@wordpress/compose';
-import { addQueryArgs, getQueryArg } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -28,9 +28,7 @@ const PatternOrderSelect = ( { options } ) => {
 				value={ getQueryArg( window.location.href, 'orderby' ) }
 				options={ options }
 				onChange={ ( value ) => {
-					const newUrl = addQueryArgs( path, { orderby: value } );
-
-					replace( newUrl );
+					replace( addQueryArgs( path, { orderby: value } ) );
 				} }
 			/>
 		</div>

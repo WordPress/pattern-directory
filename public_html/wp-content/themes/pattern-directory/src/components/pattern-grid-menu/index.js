@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { getQueryString } from '@wordpress/url';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -18,6 +19,7 @@ import { useRoute } from '../../hooks';
 const PatternGridMenu = ( { basePath = '/', query } ) => {
 	const { path, update: updatePath } = useRoute();
 	const categorySlug = getCategoryFromPath( path );
+	const queryString = getQueryString( path ) ? '?' + getQueryString( path ) : '';
 
 	// Make sure the path is prefixed with the full site URL.
 	basePath = wporgPatternsUrl.site + basePath;
@@ -41,8 +43,8 @@ const PatternGridMenu = ( { basePath = '/', query } ) => {
 								? categories.map( ( record ) => {
 										return {
 											value: record.slug
-												? `${ basePath }pattern-categories/${ record.slug }/`
-												: basePath,
+												? `${ basePath }pattern-categories/${ record.slug }/${ queryString }`
+												: `${ basePath }${ queryString }`,
 											slug: record.slug,
 											label: record.name,
 										};
