@@ -4,6 +4,7 @@ namespace WordPressdotorg\Pattern_Directory\Admin\Patterns;
 
 use WP_Post, WP_Query;
 use function WordPressdotorg\Locales\get_locales_with_english_names;
+use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\get_pattern_ids_with_pending_flags;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTERN;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
@@ -192,34 +193,15 @@ function handle_pattern_list_table_views( WP_Query $query ) {
 		return;
 	}
 
-	global $wpdb;
-
 	$current_screen = get_current_screen();
 
 	if ( 'edit-' . PATTERN === $current_screen->id ) {
-		$orderby = $query->get( 'orderby', 'date' );
-		$order   = $query->get( 'order', 'desc' );
-
-		// For string interpolation.
-		$pattern = PATTERN;
-		$flag    = FLAG;
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-		$valid_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"
-				SELECT DISTINCT patterns.ID
-				FROM {$wpdb->posts} patterns
-					JOIN {$wpdb->posts} flags ON patterns.ID = flags.post_parent AND flags.post_type = '{$flag}' AND flags.post_status = 'pending'
-				WHERE patterns.post_type = '{$pattern}'
-				ORDER BY %s %s
-				",
-				$orderby,
-				$order
-			)
+		$args = array(
+			'orderby' => $query->get( 'orderby', 'date' ),
+			'order'   => $query->get( 'order', 'desc' ),
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$valid_ids = get_pattern_ids_with_pending_flags( $args );
 
 		if ( empty( $valid_ids ) ) {
 			$valid_ids = false;

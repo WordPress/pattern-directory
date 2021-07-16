@@ -145,3 +145,49 @@ function check_flag_threshold( $post_ID, $post, $update ) {
 		) );
 	}
 }
+
+/**
+ * Get a list of post IDs for patterns that have pending flags.
+ *
+ * TODO this isn't used anywhere on the front end, but maybe it should be cached?
+ *
+ * @param array $args Optional. Query args. 'orderby' and/or 'order'.
+ *
+ * @return int[]
+ */
+function get_pattern_ids_with_pending_flags( $args = array() ) {
+	global $wpdb;
+
+	$args = wp_parse_args(
+		$args,
+		array(
+			'orderby' => 'date',
+			'order'   => 'desc',
+		)
+	);
+
+	// For string interpolation.
+	$pattern = PATTERN;
+	$flag    = POST_TYPE;
+
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+	$pattern_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"
+			SELECT DISTINCT patterns.ID
+			FROM {$wpdb->posts} patterns
+				JOIN {$wpdb->posts} flags ON patterns.ID = flags.post_parent
+					AND flags.post_type = '{$flag}'
+				    AND flags.post_status = 'pending'
+			WHERE patterns.post_type = '{$pattern}'
+			ORDER BY %s %s
+			",
+			$args['orderby'],
+			$args['order']
+		)
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+	return $pattern_ids;
+}
