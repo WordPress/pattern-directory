@@ -14,7 +14,7 @@ import NavigationLayout from '../navigation-layout';
 import { store as patternStore } from '../../store';
 import { useRoute } from '../../hooks';
 
-const PatternGridMenu = () => {
+const PatternGridMenu = ( { basePath = '', ...props } ) => {
 	const { path, update: updatePath } = useRoute();
 	const { categorySlug, isLoading, options } = useSelect( ( select ) => {
 		const { getCategoryById, getCategories, getQueryFromUrl, getUrlFromQuery, isLoadingCategories } = select(
@@ -25,7 +25,10 @@ const PatternGridMenu = () => {
 		delete query.page;
 		const _options = ( getCategories() || [] ).map( ( cat ) => {
 			return {
-				value: getUrlFromQuery( { ...query, 'pattern-categories': cat.id } ),
+				value: getUrlFromQuery(
+					{ ...query, 'pattern-categories': cat.id },
+					wporgPatternsUrl.site + basePath
+				),
 				slug: cat.slug,
 				label: cat.name,
 			};
@@ -61,7 +64,7 @@ const PatternGridMenu = () => {
 					/>
 				}
 			/>
-			<CategoryContextBar />
+			<CategoryContextBar { ...props } />
 		</>
 	);
 };

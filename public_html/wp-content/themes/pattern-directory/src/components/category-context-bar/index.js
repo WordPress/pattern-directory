@@ -2,6 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
+import useDeepCompareEffect from 'use-deep-compare-effect';
 
 /**
  * WordPress dependencies
@@ -17,7 +18,7 @@ import { useRoute } from '../../hooks';
 import { getLoadingMessage, getMessage, getSearchMessage } from './messaging';
 import { store as patternStore } from '../../store';
 
-function ContextBar() {
+function ContextBar( props ) {
 	const { path } = useRoute();
 	const [ height, setHeight ] = useState();
 	const [ message, setMessage ] = useState();
@@ -32,7 +33,7 @@ function ContextBar() {
 			const { getCategoryById, getPatternTotalsByQuery, getQueryFromUrl, isLoadingPatternsByQuery } = select(
 				patternStore
 			);
-			const _query = getQueryFromUrl( path );
+			const _query = { ...getQueryFromUrl( path ), ...props.query };
 
 			return {
 				author: _query?.author_name,
@@ -42,10 +43,10 @@ function ContextBar() {
 				query: _query,
 			};
 		},
-		[ path ]
+		[ path, props.query ]
 	);
 
-	useEffect( () => {
+	useDeepCompareEffect( () => {
 		// Show the loading message
 		if ( isLoadingPatterns ) {
 			setMessage( getLoadingMessage( { category: category?.name, author: author } ) );
@@ -65,6 +66,11 @@ function ContextBar() {
 		}
 
 		setMessage( getMessage( { category: category?.name, author: author }, count ) );
+
+		// Remove the context message from favorites.
+		if ( query?.include && ! category ) {
+			setMessage( '' );
+		}
 	}, [ query, isLoadingPatterns ] );
 
 	useEffect( () => {
