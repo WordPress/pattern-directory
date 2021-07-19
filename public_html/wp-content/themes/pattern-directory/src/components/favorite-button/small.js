@@ -35,13 +35,14 @@ const FavoriteButtonSmall = ( { className, label, patternId } ) => {
 		}
 	}, [ isFavorite ] );
 
-	const baseClasses = classnames( className, 'pattern-favorite-button-small' );
-	const buttonClasses = classnames( baseClasses, 'button button-link', {
+	const buttonClasses = classnames( className, 'pattern-favorite-button-small', {
+		button: hasPermission,
+		'button-link': hasPermission,
 		'is-favorited': isFavorite,
 	} );
 
 	return ! hasPermission ? (
-		<span className={ baseClasses }>
+		<span className={ buttonClasses }>
 			<IconHeartFilled className="pattern-favorite-button__filled" />
 			<span>{ label }</span>
 		</span>
