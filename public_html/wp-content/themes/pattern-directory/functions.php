@@ -6,7 +6,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG_POST_TYPE;
 
 add_action( 'after_setup_theme', __NAMESPACE__ . '\setup' );
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets', 20 );
 add_action( 'wp_head', __NAMESPACE__ . '\generate_block_editor_styles_html' );
 add_action( 'body_class', __NAMESPACE__ . '\body_class', 10, 2 );
 add_action( 'pre_get_posts', __NAMESPACE__ . '\pre_get_posts' );
@@ -46,6 +46,8 @@ function enqueue_assets() {
 	$script_debug = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG;
 	$suffix       = $script_debug ? '' : '.min';
 
+	// Unregister the parent style so that the version & deps defined here are used.
+	wp_dequeue_style( 'wporg-style' );
 	wp_enqueue_style(
 		'wporg-style',
 		get_theme_file_uri( '/css/style.css' ),
