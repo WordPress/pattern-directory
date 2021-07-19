@@ -9,17 +9,15 @@ import classnames from 'classnames';
 import { Spinner } from '@wordpress/components';
 import { useEffect, useRef, useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { useRoute } from '../../hooks';
-import { getCategoryFromPath, getSearchTermFromPath } from '../../utils';
-import { getDefaultMessage, getLoadingMessage, getSearchMessage } from './messaging';
+import { getLoadingMessage, getMessage, getSearchMessage } from './messaging';
 import { store as patternStore } from '../../store';
 
-function CategoryContextBar( { query } ) {
+function ContextBar() {
 	const { path } = useRoute();
 	const [ height, setHeight ] = useState();
 	const [ message, setMessage ] = useState();
@@ -29,51 +27,45 @@ function CategoryContextBar( { query } ) {
 	} );
 	const innerRef = useRef( null );
 
-	const { isAllCategory, category, count, isLoadingPatterns } = useSelect(
+	const { author, category, count, isLoadingPatterns, query } = useSelect(
 		( select ) => {
-			const { getCategoryBySlug, isLoadingPatternsByQuery, getPatternTotalsByQuery } = select(
+			const { getCategoryById, getPatternTotalsByQuery, getQueryFromUrl, isLoadingPatternsByQuery } = select(
 				patternStore
 			);
-			const categorySlug = getCategoryFromPath( path );
-			const _category = getCategoryBySlug( categorySlug );
+			const _query = getQueryFromUrl( path );
 
 			return {
-				isAllCategory: _category && _category.id === -1,
-				isLoadingPatterns: isLoadingPatternsByQuery( query ),
-				category: _category,
-				count: getPatternTotalsByQuery( query ),
+				author: _query?.author_name,
+				category: getCategoryById( _query[ 'pattern-categories' ] ),
+				count: getPatternTotalsByQuery( _query ),
+				isLoadingPatterns: isLoadingPatternsByQuery( _query ),
+				query: _query,
 			};
 		},
-		[ path, query ]
+		[ path ]
 	);
 
 	useEffect( () => {
 		// Show the loading message
 		if ( isLoadingPatterns ) {
-			if ( category ) {
-				setMessage( getLoadingMessage( category.name ) );
-			} else {
-				setMessage( __( 'Loading patterns', 'wporg-patterns' ) );
-			}
-
+			setMessage( getLoadingMessage( { category: category?.name, author: author } ) );
 			return;
 		}
 
-		// We don't show a message when viewing all categories
-		if ( isAllCategory ) {
+		// We don't show a message when the query is empty.
+		if ( query && ! Object.keys( query ).length ) {
 			setMessage( '' );
 			return;
 		}
 
-		if ( category ) {
-			setMessage( getDefaultMessage( count, category.name ) );
-		}
-
-		const searchTerm = getSearchTermFromPath( path );
+		const searchTerm = query?.search || '';
 		if ( searchTerm.length > 0 ) {
 			setMessage( getSearchMessage( count, searchTerm ) );
+			return;
 		}
-	}, [ category, isLoadingPatterns ] );
+
+		setMessage( getMessage( { category: category?.name, author: author }, count ) );
+	}, [ query, isLoadingPatterns ] );
 
 	useEffect( () => {
 		const _height = message ? innerRef.current.offsetHeight : 0;
@@ -112,4 +104,4 @@ function CategoryContextBar( { query } ) {
 	);
 }
 
-export default CategoryContextBar;
+export default ContextBar;

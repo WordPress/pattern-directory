@@ -5,45 +5,109 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
 
 /**
- * Returns a message regarding current category filter status.
+ * Returns a message regarding current loading status.
  *
- * @param {number} count Number of patterns associated to the current category.
- * @param {string} categoryName The category name.
+ * @param {Object} data Message properties.
+ * @param {string} data.category The category name.
+ * @param {string} data.author The author's name.
+ *
  * @return {Object}
  */
-export const getDefaultMessage = ( count, categoryName ) => {
-	return createInterpolateElement(
-		sprintf(
-			/* translators: %1$d: number of patterns. %2$s category name. */
-			_n( '%1$d <b>%2$s</b> pattern.', '%1$d <b>%2$s</b> patterns.', count, 'wporg-patterns' ),
-			count,
-			categoryName,
-			'wporg-patterns'
-		),
-		{
-			b: <b />,
-		}
-	);
+export const getLoadingMessage = ( { category, author } ) => {
+	if ( category && author ) {
+		return createInterpolateElement(
+			sprintf(
+				/* translators: %1$s category name, %2$s author name. */
+				__( 'Loading <b>%1$s</b> patterns by %2$s.', 'wporg-patterns' ),
+				category,
+				author
+			),
+			{
+				b: <b />,
+			}
+		);
+	} else if ( category ) {
+		return createInterpolateElement(
+			sprintf(
+				/* translators: %s category name. */
+				__( 'Loading <b>%s</b> patterns.', 'wporg-patterns' ),
+				category
+			),
+			{
+				b: <b />,
+			}
+		);
+	} else if ( author ) {
+		return createInterpolateElement(
+			sprintf(
+				/* translators: %s author name. */
+				__( 'Loading patterns by <b>%s</b>.', 'wporg-patterns' ),
+				author
+			),
+			{
+				b: <b />,
+			}
+		);
+	}
+	return __( 'Loading patterns', 'wporg-patterns' );
 };
 
 /**
- * Returns a message regarding current loading status.
+ * Returns a message regarding the current filter status.
  *
- * @param {string} categoryName The category name.
+ * @param {Object} data Message properties.
+ * @param {string} data.category The category name.
+ * @param {string} data.author The author's name.
+ * @param {number} count Number of patterns associated to the current category.
+ *
  * @return {Object}
  */
-export const getLoadingMessage = ( categoryName ) => {
-	return createInterpolateElement(
-		sprintf(
-			/* translators: %s category name. */
-			__( 'Loading <b>%s</b> patterns.', 'wporg-patterns' ),
-			categoryName,
-			'wporg-patterns'
-		),
-		{
-			b: <b />,
-		}
-	);
+export const getMessage = ( { category, author }, count ) => {
+	if ( category && author ) {
+		return createInterpolateElement(
+			sprintf(
+				/* translators: %1$d: number of patterns, %2$s category name, %3$s author name. */
+				_n(
+					'%1$d <b>%2$s</b> pattern by %3$s.',
+					'%1$d <b>%2$s</b> patterns by %3$s.',
+					count,
+					'wporg-patterns'
+				),
+				count,
+				category,
+				author
+			),
+			{
+				b: <b />,
+			}
+		);
+	} else if ( category ) {
+		return createInterpolateElement(
+			sprintf(
+				/* translators: %1$d: number of patterns, %2$s category name. */
+				_n( '%1$d <b>%2$s</b> pattern.', '%1$d <b>%2$s</b> patterns.', count, 'wporg-patterns' ),
+				count,
+				category,
+				'wporg-patterns'
+			),
+			{
+				b: <b />,
+			}
+		);
+	} else if ( author ) {
+		return createInterpolateElement(
+			sprintf(
+				/* translators: %1$d: number of patterns, %2$s author name. */
+				_n( '%1$d pattern by <b>%2$s</b>.', '%1$d patterns by <b>%2$s</b>.', count, 'wporg-patterns' ),
+				count,
+				author
+			),
+			{
+				b: <b />,
+			}
+		);
+	}
+	return __( 'Loading patterns', 'wporg-patterns' );
 };
 
 /**
