@@ -481,6 +481,10 @@ function filter_patterns_collection_params( $query_params ) {
 		},
 	);
 
+	if ( isset( $query_params['orderby'] ) ) {
+		$query_params['orderby']['enum'][] = 'favorite_count';
+	}
+
 	return $query_params;
 }
 
@@ -512,6 +516,13 @@ function filter_patterns_rest_query( $args, $request ) {
 			$args['post__in'] = array( -1 );
 		}
 	}
+
+	$orderby = $request->get_param( 'orderby' );
+	if ( 'favorite_count' === $orderby ) {
+		$args['orderby'] = 'meta_value_num';
+		$args['meta_key'] = 'wporg-pattern-favorites';
+	}
+
 	return $args;
 }
 
