@@ -68,6 +68,10 @@ export function RouteProvider( { children } ) {
 	useEffect( () => {
 		// When the browser modifies the history, update our path.
 		window.addEventListener( 'popstate', setPathOnPop ); // eslint-disable-line @wordpress/no-global-event-listener
+
+		return () => {
+			window.removeEventListener( 'popstate', setPathOnPop ); // eslint-disable-line @wordpress/no-global-event-listener
+		};
 	}, [] );
 
 	return (
