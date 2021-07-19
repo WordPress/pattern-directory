@@ -69,7 +69,7 @@ function CategoryContextBar( { query } ) {
 			setMessage( getDefaultMessage( count, category.name ) );
 		}
 
-		const searchTerm = getSearchTermFromPath( path );
+		const searchTerm = decodeURI( getSearchTermFromPath( path ) );
 		if ( searchTerm.length > 0 ) {
 			setMessage( getSearchMessage( count, searchTerm ) );
 		}
