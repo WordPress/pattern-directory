@@ -7,7 +7,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import CategoryContextBar from '../category-context-bar';
+import ContextBar from '../context-bar';
 import PatternOrderSelect from '../pattern-order-select';
 import Menu from '../menu';
 import NavigationLayout from '../navigation-layout';
@@ -64,7 +64,7 @@ const PatternGridMenu = ( { basePath = '', ...props } ) => {
 					/>
 				}
 			/>
-			<CategoryContextBar { ...props } />
+			<ContextBar { ...props } />
 		</>
 	);
 };

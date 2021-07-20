@@ -79,22 +79,22 @@ function ContextBar( props ) {
 	}, [ message ] );
 
 	const classes = classnames( {
-		'category-context-bar__spinner': true,
-		'category-context-bar__spinner--is-hidden': ! isLoadingPatterns,
+		'context-bar__spinner': true,
+		'context-bar__spinner--is-hidden': ! isLoadingPatterns,
 	} );
 
 	return (
-		<header className="category-context-bar" style={ { height: `${ height }px` } }>
+		<header className="context-bar" style={ { height: `${ height }px` } }>
 			<div ref={ innerRef }>
-				<h2 className="category-context-bar__copy">
+				<h2 className="context-bar__copy">
 					<span className={ classes }>
 						<Spinner />
 					</span>
 					<span>{ message }</span>
 				</h2>
 				{ context.links && context.links.length > 0 && (
-					<div className="category-context-bar__links">
-						<h3 className="category-context-bar__title">{ context.title }</h3>
+					<div className="context-bar__links">
+						<h3 className="context-bar__title">{ context.title }</h3>
 
 						<ul>
 							{ context.links.map( ( i ) => (
