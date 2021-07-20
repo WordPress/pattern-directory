@@ -17,6 +17,7 @@ add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_direc
 add_filter( 'rest_' . POST_TYPE . '_collection_params', __NAMESPACE__ . '\filter_patterns_collection_params' );
 add_filter( 'rest_' . POST_TYPE . '_query', __NAMESPACE__ . '\filter_patterns_rest_query', 10, 2 );
 add_filter( 'user_has_cap', __NAMESPACE__ . '\set_pattern_caps' );
+add_filter( 'posts_orderby', __NAMESPACE__ . '\filter_orderby_locale', 10, 2 );
 
 
 /**
@@ -497,13 +498,15 @@ function filter_patterns_collection_params( $query_params ) {
 function filter_patterns_rest_query( $args, $request ) {
 	$locale = $request->get_param( 'locale' );
 
-	// Limit results to the requested locale.
-	// Workaround for https://core.trac.wordpress.org/ticket/47194.
+	// Prioritise results in the requested locale.
+	// Does not limit to only the requested locale, so as to provide results when no translations
+	// exist for the locale, or we do not recognise the locale.
 	if ( $locale ) {
-		$args['meta_query'][] = array(
+		$args['meta_query']['orderby_locale'] = array(
 			'key'     => 'wpop_locale',
-			'value'   => $locale,
-			'compare' => '=',
+			'compare' => 'IN',
+			// Order in value determines result order
+			'value'   => array( $locale, 'en_US' ),
 		);
 	}
 
@@ -524,6 +527,31 @@ function filter_patterns_rest_query( $args, $request ) {
 	}
 
 	return $args;
+}
+
+/**
+ * Filters the WP_Query orderby to prioritse the locale when required.
+ *
+ * @param string    $orderby The SQL orderby clause.
+ * @param \WP_Query $query   The WP_Query object.
+ * @return string The SQL orderby clause altered to prioritise locales if required.
+ */
+function filter_orderby_locale( $orderby, $query ) {
+	global $wpdb;
+
+	// If this query has the orderby_locale meta_query, sort by it.
+	if ( ! empty( $query->meta_query->queries['orderby_locale']['value'] ) ) {
+		$values      = array_reverse( $query->meta_query->queries['orderby_locale']['value'] );
+		$table_alias = $query->meta_query->get_clauses()['orderby_locale']['alias'];
+
+		$field_placeholders = implode( ', ', array_pad( array(), count( $values ), '%s' ) );
+		$locale_orderby     = $wpdb->prepare( "FIELD( {$table_alias}.meta_value, {$field_placeholders} ) DESC", $values ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// Order by matching the locale first, and then the queries order.
+		$orderby = "{$locale_orderby}, {$orderby}";
+	}
+
+	return $orderby;
 }
 
 /**
