@@ -100,7 +100,7 @@ function translate_page_title( $title, $post_id = null ) {
 	$post = get_post( $post_id );
 
 	if ( $post && 'page' === $post->post_type ) {
-		$title = translate_with_gettext_context( $post->post_title, 'Page Title', 'wporg-patterns' );
+		$title = translate_with_gettext_context( $post->post_title, 'Page title', 'wporg-patterns' );
 	}
 
 	return $title;
