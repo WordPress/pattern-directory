@@ -72,7 +72,7 @@ function register_post_type_data() {
 			'rest_base'         => 'pattern-categories',
 			'show_admin_column' => true,
 			'rewrite'           => array(
-				'slug' => 'pattern-categories',
+				'slug' => 'categories',
 			),
 			'capabilities' => array(
 				'assign_terms' => 'edit_patterns',
