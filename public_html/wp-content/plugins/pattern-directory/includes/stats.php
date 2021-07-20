@@ -235,6 +235,9 @@ function get_snapshot_data() {
 function callback_count_patterns() {
 	$patterns_by_status = (array) wp_count_posts( PATTERN_POST_TYPE );
 
+	// Exclude auto drafts since they aren't really pattern posts yet.
+	unset( $patterns_by_status['auto-draft'] );
+
 	return (int) array_sum( $patterns_by_status );
 }
 
