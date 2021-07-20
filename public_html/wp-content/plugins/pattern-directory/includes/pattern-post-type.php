@@ -497,14 +497,34 @@ function filter_patterns_collection_params( $query_params ) {
 function filter_patterns_rest_query( $args, $request ) {
 	$locale = $request->get_param( 'locale' );
 
-	// Limit results to the requested locale.
-	// Workaround for https://core.trac.wordpress.org/ticket/47194.
+	// Prioritise results in the requested locale.
+	// Does not limit to only the requested locale, so as to provide results when no translations
+	// exist for the locale, or we do not recognise the locale.
 	if ( $locale ) {
-		$args['meta_query'][] = array(
+		$args['meta_query']['wpop_locale'] = array(
 			'key'     => 'wpop_locale',
-			'value'   => $locale,
-			'compare' => '=',
+			'compare' => 'IN',
+			// Order in value determines result order
+			'value'   => array( $locale, 'en_US' ),
 		);
+
+		add_filter( 'posts_orderby', function( $orderby, $query ) use( $locale ) {
+			global $wpdb;
+
+			// If this query has the locale meta_query, sort by it.
+			if ( ! empty( $query->query['meta_query']['wpop_locale']['value'] ) ) {
+				$values      = array_reverse( $query->query['meta_query']['wpop_locale']['value'] );
+				$table_alias = $query->meta_query->get_clauses()['wpop_locale']['alias'];
+
+				$field_placeholders = implode( ', ', array_pad( array(), count( $values ), '%s' ) );
+				$locale_orderby     = $wpdb->prepare( "FIELD( {$table_alias}.meta_value, {$field_placeholders} ) DESC", $values );
+
+				// Order by matching the locale first, and then the queries order.
+				$orderby = "{$locale_orderby}, {$orderby}";
+			}
+
+			return $orderby;
+		}, 10, 2 );
 	}
 
 	// Use the `author_name` passed in to the API to request patterns by an author slug, not just an ID.
