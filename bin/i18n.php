@@ -111,7 +111,7 @@ function get_taxonomy_terms( $taxonomy ) {
  * @return array
  */
 function get_pages() {
-	$endpoint = ENDPOINT_BASE . 'pages' . '?per_page=100';
+	$endpoint = ENDPOINT_BASE . 'pages?per_page=100';
 
 	$response = Requests::get( $endpoint );
 
