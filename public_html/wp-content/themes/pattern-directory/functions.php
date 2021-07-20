@@ -54,6 +54,7 @@ function enqueue_assets() {
 		array( 'dashicons', 'open-sans' ),
 		filemtime( __DIR__ . '/css/style.css' )
 	);
+	wp_style_add_data( 'wporg-style', 'rtl', 'replace' );
 
 	$script_asset_path = dirname( __FILE__ ) . '/build/index.asset.php';
 	if ( file_exists( $script_asset_path ) ) {
