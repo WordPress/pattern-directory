@@ -90,6 +90,25 @@ function translate_term( $term ) {
 add_filter( 'get_term', __NAMESPACE__ . '\translate_term' );
 
 /**
+ * Translate the title of pages.
+ *
+ * @param string $title   The current title, ignored.
+ * @param int    $post_id The post_id of the page.
+ * @return string Possibly translated page title.
+ */
+function translate_page_title( $title, $post_id = null ) {
+	$post = get_post( $post_id );
+
+	if ( $post && 'page' === $post->post_type ) {
+		$title = translate_with_gettext_context( $post->post_title, 'Page Title', 'wporg-patterns' );
+	}
+
+	return $title;
+}
+add_filter( 'the_title', __NAMESPACE__ . '\translate_page_title', 1, 2 );
+add_filter( 'single_post_title', __NAMESPACE__ . '\translate_page_title', 1, 2 );
+
+/**
  * Set the correct locale context for API endpoints.
  *
  * For api.wordpress.org requests, the `locale` GET parameter is respected if set. Defaults to en_US otherwise.
