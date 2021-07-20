@@ -74,7 +74,7 @@ function get_meta_field_schema() {
 				'single'      => true,
 			),
 			'count-patterns_publish-translations'         => array(
-				'description' => __( 'The total number of published pattern translations and remixes.', 'wporg-patterns' ),
+				'description' => __( 'The total number of published pattern translations.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'default'     => 0,
 				'single'      => true,
@@ -276,8 +276,13 @@ function callback_count_patterns_publish_translations() {
 	$args = array(
 		'post_type'           => PATTERN_POST_TYPE,
 		'post_status'         => 'publish',
-		'post_parent__not_in' => array( 0 ),
 		'numberposts'         => 1,
+		'meta_query'          => array(
+			array(
+				'key'   => 'wpop_is_translation',
+				'value' => 1,
+			),
+		),
 	);
 
 	$query = new \WP_Query( $args );
