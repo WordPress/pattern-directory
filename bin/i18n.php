@@ -106,6 +106,29 @@ function get_taxonomy_terms( $taxonomy ) {
 }
 
 /**
+ * Get data about pages from a REST API endpoint.
+ *
+ * @return array
+ */
+function get_pages() {
+	$endpoint = ENDPOINT_BASE . 'pages?per_page=100';
+
+	$response = Requests::get( $endpoint );
+
+	if ( 200 !== $response->status_code ) {
+		die( 'Could not retrieve page list.' );
+	}
+
+	$pages = json_decode( $response->body, true );
+
+	if ( ! is_array( $pages ) ) {
+		die( 'Pages request returned unexpected data.' );
+	}
+
+	return $pages;
+}
+
+/**
  * Parse a link header from a WP REST API response into an array of prev/next URLs.
  *
  * @param string $link_header
@@ -189,6 +212,20 @@ function main() {
 				$description = addcslashes( $term['description'], "'" );
 				$file_content .= "_x( '{$description}', '$label term description', 'wporg-patterns' );\n";
 			}
+		}
+	}
+
+	if ( 'cli' === php_sapi_name() ) {
+		echo "\n";
+		echo "Retrieving pages...\n";
+	}
+
+	foreach ( get_pages() as $page ) {
+		$title = addcslashes( $page['title']['rendered'], "'" );
+		$file_content .= "_x( '{$title}', 'Page title', 'wporg-patterns' );\n";
+
+		if ( 'cli' === php_sapi_name() ) {
+			echo "$title\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
 
