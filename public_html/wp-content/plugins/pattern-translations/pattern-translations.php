@@ -31,13 +31,15 @@ function create_or_update_translated_pattern( Pattern $pattern ) {
 		'post_type'    => POST_TYPE,
 		'post_title'   => $pattern->title,
 		'post_name'    => $pattern->ID ? $pattern->name : ( $pattern->name . '-' . $pattern->locale ), // TODO: Translate the slug?
+		'post_date'    => $pattern->parent ? get_post( $pattern->parent->ID )->post_date : '',
 		'post_content' => $pattern->html,
 		'post_parent'  => $pattern->parent ? $pattern->parent->ID : 0,
 		'post_author'  => $pattern->parent ? get_post( $pattern->parent->ID )->post_author : 0,
 		'post_status'  => $pattern->parent ? get_post( $pattern->parent->ID )->post_status : 'pending',
 		'meta_input'   => [
-			'wpop_description' => $pattern->description,
-			'wpop_locale'      => $pattern->locale,
+			'wpop_description'    => $pattern->description,
+			'wpop_locale'         => $pattern->locale,
+			'wpop_is_translation' => true,
 		],
 	];
 
