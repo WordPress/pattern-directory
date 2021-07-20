@@ -47,7 +47,7 @@ function enqueue_assets() {
 	$suffix       = $script_debug ? '' : '.min';
 
 	// Unregister the parent style so that the version & deps defined here are used.
-	wp_dequeue_style( 'wporg-style' );
+	wp_deregister_style( 'wporg-style' );
 	wp_enqueue_style(
 		'wporg-style',
 		get_theme_file_uri( '/css/style.css' ),
