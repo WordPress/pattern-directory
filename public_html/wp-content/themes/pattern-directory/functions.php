@@ -184,8 +184,17 @@ function pre_get_posts( $query ) {
 		$query->set( 'post_type', array( POST_TYPE ) );
 		$query->set( 'post_status', array( 'publish' ) );
 
-		$query->set( 'meta_key', 'wpop_locale' );
-		$query->set( 'meta_value', get_locale() );
+		$query->set( 'meta_query', array(
+			'wpop_locale' => array(
+				'key'     => 'wpop_locale',
+				'compare' => 'IN',
+				// Order in value determines result order
+				'value'   => array( get_locale(), 'en_US' ),
+			),
+		) );
+
+		add_filter( 'posts_orderby', '\WordPressdotorg\Pattern_Directory\Pattern_Post_Type\filter_orderby_locale', 10, 2 );
+
 	}
 }
 
