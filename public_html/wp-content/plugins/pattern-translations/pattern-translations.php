@@ -34,17 +34,6 @@ if ( defined( 'WP_CLI' ) ) {
 function create_or_update_translated_pattern( Pattern $pattern ) {
 	$parent = get_post( $pattern->parent->ID );
 
-	$meta_input = array(
-		'wpop_locale'         => $pattern->locale,
-		'wpop_is_translation' => true,
-	);
-	if ( $pattern->description ) {
-		$meta_input['wpop_description'] = $pattern->description;
-	}
-	if ( $parent->wpop_viewport_width ) {
-		$meta_input['wpop_viewport_width'] = $parent->wpop_viewport_width;
-	}
-
 	$args = [
 		'ID'           => $pattern->ID,
 		'post_type'    => POST_TYPE,
@@ -55,7 +44,12 @@ function create_or_update_translated_pattern( Pattern $pattern ) {
 		'post_parent'  => $pattern->parent ? $pattern->parent->ID : 0,
 		'post_author'  => $pattern->parent ? $parent->post_author : 0,
 		'post_status'  => $pattern->parent ? $parent->post_status : 'pending',
-		'meta_input'   => $meta_input,
+		'meta_input'   => array(
+			'wpop_description'    => $pattern->description,
+			'wpop_locale'         => $pattern->locale,
+			'wpop_viewport_width' => $parent->wpop_viewport_width,
+			'wpop_is_translation' => true,
+		),
 	];
 
 	if ( ! $args['ID'] ) {
