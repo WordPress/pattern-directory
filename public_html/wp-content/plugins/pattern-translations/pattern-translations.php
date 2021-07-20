@@ -32,21 +32,30 @@ if ( defined( 'WP_CLI' ) ) {
  * Creates or updates a localised pattern.
  */
 function create_or_update_translated_pattern( Pattern $pattern ) {
+	$parent = get_post( $pattern->parent->ID );
+
+	$meta_input = array(
+		'wpop_locale'         => $pattern->locale,
+		'wpop_is_translation' => true,
+	);
+	if ( $pattern->description ) {
+		$meta_input['wpop_description'] = $pattern->description;
+	}
+	if ( $parent->wpop_viewport_width ) {
+		$meta_input['wpop_viewport_width'] = $parent->wpop_viewport_width;
+	}
+
 	$args = [
 		'ID'           => $pattern->ID,
 		'post_type'    => POST_TYPE,
 		'post_title'   => $pattern->title,
 		'post_name'    => $pattern->ID ? $pattern->name : ( $pattern->name . '-' . $pattern->locale ), // TODO: Translate the slug?
-		'post_date'    => $pattern->parent ? get_post( $pattern->parent->ID )->post_date : '',
+		'post_date'    => $pattern->parent ? $parent->post_date : '',
 		'post_content' => $pattern->html,
 		'post_parent'  => $pattern->parent ? $pattern->parent->ID : 0,
-		'post_author'  => $pattern->parent ? get_post( $pattern->parent->ID )->post_author : 0,
-		'post_status'  => $pattern->parent ? get_post( $pattern->parent->ID )->post_status : 'pending',
-		'meta_input'   => [
-			'wpop_description'    => $pattern->description,
-			'wpop_locale'         => $pattern->locale,
-			'wpop_is_translation' => true,
-		],
+		'post_author'  => $pattern->parent ? $parent->post_author : 0,
+		'post_status'  => $pattern->parent ? $parent->post_status : 'pending',
+		'meta_input'   => $meta_input,
 	];
 
 	if ( ! $args['ID'] ) {
