@@ -83,7 +83,7 @@ function translate_term( $term ) {
 	}
 
 	$i18n_context = TRANSLATED_TAXONOMIES[ $term->taxonomy ];
-	$term->name   = esc_html( translate_with_gettext_context( html_entity_decode( $term->name ), $i18n_context, 'wporg-patterns' ) );
+	$term->name   = esc_html( translate_with_gettext_context( html_entity_decode( $term->name ), $i18n_context, 'wporg-patterns' ) ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
 
 	return $term;
 }
