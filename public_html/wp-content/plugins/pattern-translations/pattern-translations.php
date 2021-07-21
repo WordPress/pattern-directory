@@ -47,12 +47,12 @@ function create_or_update_translated_pattern( Pattern $pattern ) {
 		'post_parent'  => $pattern->parent->ID ?? 0,
 		'post_author'  => $parent->post_author ?? 0,
 		'post_status'  => $parent->post_status ?? 'pending',
-		'meta_input'   => array(
+		'meta_input'   => [
 			'wpop_description'    => $pattern->description,
 			'wpop_locale'         => $pattern->locale,
 			'wpop_viewport_width' => $parent->wpop_viewport_width,
 			'wpop_is_translation' => true,
-		),
+		],
 	];
 
 	if ( ! $args['ID'] ) {
