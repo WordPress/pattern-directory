@@ -32,18 +32,21 @@ if ( defined( 'WP_CLI' ) ) {
  * Creates or updates a localised pattern.
  */
 function create_or_update_translated_pattern( Pattern $pattern ) {
-	$parent = get_post( $pattern->parent->ID );
+	$parent = false;
+	if ( $pattern->parent ) {
+		$parent = get_post( $pattern->parent->ID );
+	}
 
 	$args = [
 		'ID'           => $pattern->ID,
 		'post_type'    => POST_TYPE,
 		'post_title'   => $pattern->title,
 		'post_name'    => $pattern->ID ? $pattern->name : ( $pattern->name . '-' . $pattern->locale ), // TODO: Translate the slug?
-		'post_date'    => $pattern->parent ? $parent->post_date : '',
+		'post_date'    => $parent->post_date ?? '',
 		'post_content' => $pattern->html,
-		'post_parent'  => $pattern->parent ? $pattern->parent->ID : 0,
-		'post_author'  => $pattern->parent ? $parent->post_author : 0,
-		'post_status'  => $pattern->parent ? $parent->post_status : 'pending',
+		'post_parent'  => $pattern->parent->ID ?? 0,
+		'post_author'  => $parent->post_author ?? 0,
+		'post_status'  => $parent->post_status ?? 'pending',
 		'meta_input'   => array(
 			'wpop_description'    => $pattern->description,
 			'wpop_locale'         => $pattern->locale,
