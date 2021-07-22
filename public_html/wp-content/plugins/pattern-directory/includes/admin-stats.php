@@ -92,7 +92,7 @@ function get_snapshot_meta_data() {
 /**
  * Collect and validate the export form inputs.
  *
- * @return array|false|null
+ * @return array
  */
 function get_export_form_inputs() {
 	$date_filter = function( $string ) {
@@ -105,21 +105,23 @@ function get_export_form_inputs() {
 		return '';
 	};
 
-	return filter_input_array(
-		INPUT_POST,
-		array(
-			'start'    => array(
-				'filter'  => FILTER_CALLBACK,
-				'options' => $date_filter,
-			),
-			'end'      => array(
-				'filter'  => FILTER_CALLBACK,
-				'options' => $date_filter,
-			),
-			'action'   => FILTER_DEFAULT,
-			'_wpnonce' => FILTER_DEFAULT,
-		)
+	$input_config = array(
+		'start'    => array(
+			'filter'  => FILTER_CALLBACK,
+			'options' => $date_filter,
+		),
+		'end'      => array(
+			'filter'  => FILTER_CALLBACK,
+			'options' => $date_filter,
+		),
+		'action'   => FILTER_DEFAULT,
+		'_wpnonce' => FILTER_DEFAULT,
 	);
+
+	$defaults = array_fill_keys( array_keys( $input_config ), '' );
+	$inputs   = filter_input_array( INPUT_POST, $input_config );
+
+	return wp_parse_args( $inputs, $defaults );
 }
 
 /**
@@ -137,7 +139,7 @@ function handle_csv_export() {
 	$inputs = get_export_form_inputs();
 	$schema = get_meta_field_schema();
 
-	if ( ! $inputs || $action !== $inputs['action'] ) {
+	if ( $action !== $inputs['action'] ) {
 		return;
 	}
 
