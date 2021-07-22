@@ -8,6 +8,11 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTE
 defined( 'WPINC' ) || die();
 
 /**
+ * Constants.
+ */
+const EXPORT_ACTION = 'Export to CSV';
+
+/**
  * Actions and filters.
  */
 add_action( 'admin_menu', __NAMESPACE__ . '\add_subpage' );
@@ -44,7 +49,7 @@ function render_subpage() {
 	$snapshot_info = get_snapshot_meta_data();
 	$next_snapshot = wp_get_scheduled_event( PATTERN_POST_TYPE . '_record_snapshot' );
 	$inputs        = get_export_form_inputs();
-	$export_label  = 'Export to CSV';
+	$export_label  = EXPORT_ACTION;
 
 	require dirname( __DIR__ ) . '/views/admin-stats.php';
 }
@@ -126,7 +131,7 @@ function handle_csv_export() {
 	require_once __DIR__ . '/class-export-csv.php';
 	$csv = new \WordCamp\Utilities\Export_CSV();
 
-	$action = 'Export to CSV';
+	$action = EXPORT_ACTION;
 	$info   = get_snapshot_meta_data();
 	$inputs = get_export_form_inputs();
 	$schema = get_meta_field_schema();
@@ -159,7 +164,7 @@ function handle_csv_export() {
 		array_keys( $schema['properties'] )
 	) );
 
-	if ( ! wp_verify_nonce( $inputs['_wpnonce'], 'Export to CSV' ) ) {
+	if ( ! wp_verify_nonce( $inputs['_wpnonce'], EXPORT_ACTION ) ) {
 		$csv->error->add( 'invalid_nonce', 'Nonce failed. Try refreshing the screen.' );
 		$csv->emit_file();
 	}
