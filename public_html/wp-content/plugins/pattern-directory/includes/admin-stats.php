@@ -132,12 +132,23 @@ function handle_csv_export() {
 	$csv = new \WordCamp\Utilities\Export_CSV();
 
 	$action = EXPORT_ACTION;
+	$cpt    = get_post_type_object( PATTERN_POST_TYPE );
 	$info   = get_snapshot_meta_data();
 	$inputs = get_export_form_inputs();
 	$schema = get_meta_field_schema();
 
 	if ( ! $inputs || $action !== $inputs['action'] ) {
 		return;
+	}
+
+	if ( ! current_user_can( $cpt->cap->edit_posts ) ) {
+		$csv->error->add( 'no_permission', 'Sorry, you do not have permission to do this.' );
+		$csv->emit_file();
+	}
+
+	if ( ! wp_verify_nonce( $inputs['_wpnonce'], EXPORT_ACTION ) ) {
+		$csv->error->add( 'invalid_nonce', 'Nonce failed. Try refreshing the screen.' );
+		$csv->emit_file();
 	}
 
 	try {
@@ -163,11 +174,6 @@ function handle_csv_export() {
 		array( 'Date' ),
 		array_keys( $schema['properties'] )
 	) );
-
-	if ( ! wp_verify_nonce( $inputs['_wpnonce'], EXPORT_ACTION ) ) {
-		$csv->error->add( 'invalid_nonce', 'Nonce failed. Try refreshing the screen.' );
-		$csv->emit_file();
-	}
 
 	if ( $start_date < $earliest ) {
 		$csv->error->add(
