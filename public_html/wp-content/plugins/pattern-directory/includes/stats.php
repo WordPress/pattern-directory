@@ -430,9 +430,8 @@ function get_snapshots( $args = array(), $wp_query = false ) {
 	$args = wp_parse_args(
 		$args,
 		array(
-			'orderby'        => 'date',
-			'order'          => 'asc',
-			'posts_per_page' => 365,
+			'orderby' => 'date',
+			'order'   => 'asc',
 		)
 	);
 
