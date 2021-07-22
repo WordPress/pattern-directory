@@ -161,6 +161,7 @@ namespace WordPressdotorg\Pattern_Directory\Admin\Stats;
 						min="<?php echo esc_attr( $snapshot_info['earliest_date'] ); ?>"
 						max="<?php echo esc_attr( $snapshot_info['latest_date'] ); ?>"
 						value="<?php echo esc_attr( $inputs['start'] ); ?>"
+						required
 					/>
 				</div>
 
@@ -176,6 +177,7 @@ namespace WordPressdotorg\Pattern_Directory\Admin\Stats;
 						min="<?php echo esc_attr( $snapshot_info['earliest_date'] ); ?>"
 						max="<?php echo esc_attr( $snapshot_info['latest_date'] ); ?>"
 						value="<?php echo esc_attr( $inputs['end'] ); ?>"
+						required
 					/>
 				</div>
 			</fieldset>
