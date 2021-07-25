@@ -59,10 +59,6 @@
 }
 
 body:not(.home) {
-	.site-header {
-		margin-bottom: $gutter-default;
-	}
-
 	.site-branding {
 		display: flex;
 		flex-wrap: wrap;
