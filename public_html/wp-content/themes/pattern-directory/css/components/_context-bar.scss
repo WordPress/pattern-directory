@@ -1,5 +1,5 @@
 .context-bar {
-	margin: $gutter-default $gutter-default 0;
+	margin: 0 $gutter-default;
 	background: $color-gray-light-300;
 	border-radius: 2px;
 	font-size: 0.8125rem;
@@ -12,8 +12,12 @@
 		justify-content: space-between;
 	}
 
+	@media only screen and ( min-width: $breakpoint-medium ) {
+		margin: 0 $gutter-default;
+	}
+
 	@media only screen and ( min-width: $breakpoint-large ) {
-		margin: $gutter-default auto;
+		margin: 0 auto;
 		max-width: $size__site-main;
 	}
 
