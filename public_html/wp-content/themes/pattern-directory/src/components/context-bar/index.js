@@ -8,7 +8,7 @@ import useDeepCompareEffect from 'use-deep-compare-effect';
  * WordPress dependencies
  */
 import { Spinner } from '@wordpress/components';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useRef, useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -31,7 +31,6 @@ const isOnlySorting = ( query ) => {
 
 function ContextBar( props ) {
 	const { path } = useRoute();
-	const [ height, setHeight ] = useState();
 	const [ message, setMessage ] = useState();
 	const [ context ] = useState( {
 		title: '',
@@ -84,18 +83,13 @@ function ContextBar( props ) {
 		}
 	}, [ query, isLoadingPatterns ] );
 
-	useEffect( () => {
-		const _height = message ? innerRef.current.offsetHeight : 0;
-		setHeight( _height );
-	}, [ message ] );
-
 	const classes = classnames( {
 		'context-bar__spinner': true,
 		'context-bar__spinner--is-hidden': ! isLoadingPatterns,
 	} );
 
-	return (
-		<header className="context-bar" style={ { height: `${ height }px` } }>
+	return ! message ? null : (
+		<header className="context-bar">
 			<div ref={ innerRef }>
 				<h2 className="context-bar__copy">
 					<span className={ classes }>

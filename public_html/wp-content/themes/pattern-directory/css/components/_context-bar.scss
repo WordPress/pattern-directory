@@ -4,7 +4,6 @@
 	border-radius: 2px;
 	font-size: 0.8125rem;
 	overflow: auto;
-	height: 55px; // Prevent layout shifts
 
 	@media only screen and ( min-width: $breakpoint-large ) {
 		margin-left: auto;
