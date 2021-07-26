@@ -265,6 +265,10 @@ function rewrite_search_url() {
 		wp_redirect( home_url( '/search/' ) . urlencode( trim( get_query_var( 's' ) ) ) . '/' );
 		exit();
 	}
+	if ( preg_match( '/^my-favorites(.*)/', trim( $_SERVER['REQUEST_URI'], '/' ), $matches ) ) {
+		wp_redirect( home_url( '/favorites/' . $matches[1] . '/' ) );
+		exit();
+	}
 }
 
 /**
