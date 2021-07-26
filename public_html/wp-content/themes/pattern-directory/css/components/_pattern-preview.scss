@@ -20,11 +20,11 @@
 	max-width: 100vw;
 	min-width: 320px;
 
-	.pattern-preview__viewport-iframe {
+	.components-sandbox {
 		background: $color-white;
-		border: 1px solid $color-gray-light-400;
+		border: 0;
+		box-shadow: 0 0 0 1px $color-gray-light-400;
 		vertical-align: middle;
-		max-width: 100vw;
 	}
 
 	&:focus-within .pattern-preview__resize-help {
@@ -90,5 +90,17 @@
 
 	&:focus {
 		box-shadow: 0 1px 0 #0073aa, 0 0 2px 1px #33b3db;
+	}
+}
+
+.pattern-preview__canvas {
+	margin: 0 auto;
+	overflow: hidden;
+
+	.components-sandbox {
+		width: var(--wporg-pattern-preview--width) !important;
+		max-width: none !important;
+		transform: scale(var(--wporg-pattern-preview--scale)) !important;
+		transform-origin: top left;
 	}
 }

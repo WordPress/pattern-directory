@@ -38,7 +38,7 @@ function PatternPreview( { blockContent } ) {
 
 	let currentOpt = false;
 	if ( ! availableWidths.some( ( opt ) => opt.value === width ) ) {
-		const displayWidth = Math.max( Math.floor( width ), MIN_PREVIEW_WIDTH );
+		const displayWidth = Math.max( Math.floor( width ), MIN_PREVIEW_WIDTH ) - 40;
 		currentOpt = {
 			/* translators: %s is the width in pixels, ex 600. */
 			label: sprintf( __( 'Current (%spx)', 'wporg-patterns' ), displayWidth ),
@@ -68,7 +68,7 @@ function PatternPreview( { blockContent } ) {
 						aria-describedby={ `pattern-preview__resize-help-${ instanceId }` }
 					/>
 				) }
-				<Canvas html={ blockContent } />
+				<Canvas html={ blockContent } width={ width } />
 				{ showDragControls && (
 					<DragHandle
 						label={ __( 'Drag to resize', 'wporg-patterns' ) }
