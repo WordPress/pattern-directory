@@ -18,6 +18,17 @@ import { useRoute } from '../../hooks';
 import { getLoadingMessage, getMessage, getSearchMessage } from './messaging';
 import { store as patternStore } from '../../store';
 
+/**
+ * This checks to see if the query is only being sorted.
+ *
+ * @param {Object} query
+ * @param {string} query.orderby Sorting key, used to determine if there is sorting.
+ * @return {boolean} Set to true if the object is empty with a only sorting parameter.
+ */
+const isOnlySorting = ( query ) => {
+	return Object.keys( query ).length === 1 && query.orderby;
+};
+
 function ContextBar( props ) {
 	const { path } = useRoute();
 	const [ height, setHeight ] = useState();
@@ -54,7 +65,7 @@ function ContextBar( props ) {
 		}
 
 		// We don't show a message when the query is empty.
-		if ( query && ! Object.keys( query ).length ) {
+		if ( ( query && ! Object.keys( query ).length ) || isOnlySorting( query ) ) {
 			setMessage( '' );
 			return;
 		}
