@@ -58,85 +58,71 @@ function get_meta_field_schema() {
 			'count-patterns'                 => array(
 				'description' => __( 'The total number of pattern posts.', 'wporg-patterns' ),
 				'type'        => 'integer',
-				'default'     => 0,
 				'single'      => true,
 			),
 			'count-patterns_publish'         => array(
 				'description' => __( 'The total number of published patterns.', 'wporg-patterns' ),
 				'type'        => 'integer',
-				'default'     => 0,
 				'single'      => true,
 			),
 			'count-patterns_publish-originals'         => array(
 				'description' => __( 'The total number of published original patterns (not translations or remixes).', 'wporg-patterns' ),
 				'type'        => 'integer',
-				'default'     => 0,
 				'single'      => true,
 			),
 			'count-patterns_publish-translations'         => array(
 				'description' => __( 'The total number of published pattern translations.', 'wporg-patterns' ),
 				'type'        => 'integer',
-				'default'     => 0,
 				'single'      => true,
 			),
 			'count-patterns_unlisted'        => array(
 				'description' => __( 'The total number of unlisted patterns.', 'wporg-patterns' ),
 				'type'        => 'integer',
-				'default'     => 0,
 				'single'      => true,
 			),
 			'count-patterns_favorited'       => array(
 				'description' => __( 'The total number of patterns with at least one favorite.', 'wporg-patterns' ),
 				'type'        => 'integer',
-				'default'     => 0,
 				'single'      => true,
 			),
 			'count-patterns_flagged-pending' => array(
 				'description' => __( 'The total number of patterns with a pending flag.', 'wporg-patterns' ),
 				'type'        => 'integer',
-				'default'     => 0,
 				'single'      => true,
 			),
 			'count-favorites'                => array(
 				'description' => __( 'The total number of favorites.', 'wporg-patterns' ),
 				'type'        => 'integer',
-				'default'     => 0,
 				'single'      => true,
 			),
 			'count-flags'                    => array(
 				'description' => __( 'The total number of flags.', 'wporg-patterns' ),
 				'type'        => 'integer',
-				'default'     => 0,
 				'single'      => true,
 			),
 			'count-flags_pending'            => array(
 				'description' => __( 'The total number of pending flags.', 'wporg-patterns' ),
 				'type'        => 'integer',
-				'default'     => 0,
 				'single'      => true,
 			),
 			'count-flags_resolved'           => array(
 				'description' => __( 'The total number of resolved flags.', 'wporg-patterns' ),
 				'type'        => 'integer',
-				'default'     => 0,
 				'single'      => true,
 			),
 			'count-users_with-favorite'      => array(
 				'description' => __( 'The total number of users with at least one favorited pattern.', 'wporg-patterns' ),
 				'type'        => 'integer',
-				'default'     => 0,
 				'single'      => true,
 			),
 			'elapsed-time'                   => array(
 				'description' => __( 'Number of milliseconds to generate the snapshot.', 'wporg-patterns' ),
 				'type'        => 'integer',
-				'default'     => 0,
 				'single'      => true,
 			),
 			'version'                        => array(
 				'description' => __( 'The version of the snapshot data schema.', 'wporg-patterns' ),
 				'type'        => 'integer',
-				'default'     => VERSION,
 				'single'      => true,
 			),
 		),
@@ -430,9 +416,8 @@ function get_snapshots( $args = array(), $wp_query = false ) {
 	$args = wp_parse_args(
 		$args,
 		array(
-			'orderby'        => 'date',
-			'order'          => 'asc',
-			'posts_per_page' => 365,
+			'orderby' => 'date',
+			'order'   => 'asc',
 		)
 	);
 
