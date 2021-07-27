@@ -56,17 +56,22 @@ const MyFavorites = () => {
 		);
 	}
 
-	if ( isEmpty ) {
-		return <EmptyHeader />;
-	}
-
 	return (
 		<RouteProvider>
 			<QueryMonitor />
 			<PatternGridMenu basePath="/my-favorites/" query={ query } />
-			<PatternGrid query={ query }>
-				{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } showAvatar /> }
-			</PatternGrid>
+			{ isEmpty ? (
+				<>
+					<EmptyHeader />
+					<PatternGrid query={ { orderby: 'favorites', per_page: 6 } } showPagination={ false }>
+						{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } showAvatar /> }
+					</PatternGrid>
+				</>
+			) : (
+				<PatternGrid query={ query }>
+					{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } showAvatar /> }
+				</PatternGrid>
+			) }
 		</RouteProvider>
 	);
 };
