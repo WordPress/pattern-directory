@@ -41,6 +41,11 @@ const MyFavorites = () => {
 		};
 	} );
 
+	const mostFavoritedQuery = { orderby: 'favorite_count', per_page: 6 };
+	if ( query[ 'pattern-categories' ] ) {
+		mostFavoritedQuery[ 'pattern-categories' ] = query[ 'pattern-categories' ];
+	}
+
 	const isLoggedIn = !! wporgPatternsData.userId;
 
 	return (
@@ -56,7 +61,7 @@ const MyFavorites = () => {
 								{ __( 'Here’s a few of our favorite patterns', 'wporg-patterns' ) }
 							</h2>
 						}
-						query={ { orderby: 'favorite_count', per_page: 6 } }
+						query={ mostFavoritedQuery }
 						showPagination={ false }
 					>
 						{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } showAvatar /> }
