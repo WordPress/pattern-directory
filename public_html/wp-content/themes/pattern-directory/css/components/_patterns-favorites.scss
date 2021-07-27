@@ -2,8 +2,7 @@
 	display: flex;
 	justify-content: center;
 	flex-direction: column;
-	margin-top: 4rem;
-	margin-bottom: 4rem;
+	margin: 4rem 1rem;
 	padding-top: 4rem;
 	padding-bottom: 4rem;
 	min-height: 20rem;
@@ -12,6 +11,11 @@
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: contain;
+
+	@include breakpoint( $breakpoint-large ) {
+		margin-left: auto;
+		margin-right: auto;
+	}
 
 	.link-create-account {
 		font-size: 0.875rem;
