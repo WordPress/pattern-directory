@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { addQueryArgs } from '@wordpress/url';
 import { store as patternStore } from '../../store';
 import { useSelect } from '@wordpress/data';
 
@@ -44,26 +43,22 @@ const MyFavorites = () => {
 
 	const isLoggedIn = !! wporgPatternsData.userId;
 
-	if ( ! isLoggedIn ) {
-		const loginUrl = addQueryArgs( wporgPatternsUrl.login, { redirect_to: window.location } );
-		return (
-			<div className="entry-content">
-				<p>{ __( 'Please log in to view your favorite patterns.', 'wporg-patterns' ) }</p>
-				<a className="button button-primary" href={ loginUrl }>
-					{ __( 'Log in', 'wporg-patterns' ) }
-				</a>
-			</div>
-		);
-	}
-
 	return (
 		<RouteProvider>
 			<QueryMonitor />
-			<PatternGridMenu basePath="/my-favorites/" query={ query } />
-			{ isEmpty ? (
+			{ isLoggedIn && <PatternGridMenu basePath="/my-favorites/" query={ query } /> }
+			{ ! isLoggedIn || isEmpty ? (
 				<>
-					<EmptyHeader />
-					<PatternGrid query={ { orderby: 'favorites', per_page: 6 } } showPagination={ false }>
+					<EmptyHeader isLoggedIn={ isLoggedIn } />
+					<PatternGrid
+						header={
+							<h2 className="pattern-favorites__grid-title">
+								{ __( 'Here’s a few of our favorite patterns', 'wporg-patterns' ) }
+							</h2>
+						}
+						query={ { orderby: 'favorite_count', per_page: 6 } }
+						showPagination={ false }
+					>
 						{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } showAvatar /> }
 					</PatternGrid>
 				</>
