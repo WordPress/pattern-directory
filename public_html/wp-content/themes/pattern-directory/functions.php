@@ -267,7 +267,8 @@ function rewrite_urls() {
 		exit();
 	}
 	// Redirect old slug `my-favorites` to `favorites`, see WordPress/pattern-directory#332.
-	if ( preg_match( '/^my-favorites(.*)/', trim( $_SERVER['REQUEST_URI'], '/' ), $matches ) ) {
+	$path = str_replace( 'patterns/', '', trim( $_SERVER['REQUEST_URI'], '/' ) );
+	if ( preg_match( '/^my-favorites(.*)/', $path, $matches ) ) {
 		wp_redirect( home_url( '/favorites/' . $matches[1] . '/' ) );
 		exit();
 	}
