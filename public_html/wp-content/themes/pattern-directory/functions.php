@@ -15,7 +15,7 @@ add_action( 'pre_get_posts', __NAMESPACE__ . '\pre_get_posts' );
 add_filter( 'init', __NAMESPACE__ . '\add_rewrite' );
 
 add_filter( 'archive_template', __NAMESPACE__ . '\use_index_php_as_template' );
-add_action( 'template_redirect', __NAMESPACE__ . '\rewrite_search_url' );
+add_action( 'template_redirect', __NAMESPACE__ . '\rewrite_urls' );
 
 /**
  * Sets up theme defaults and registers support for various WordPress features.
@@ -256,15 +256,17 @@ function get_all_the_content( $post ) {
 }
 
 /**
- * Rewrites the search url from s={keyword} to /search/{keyword}.
+ * Set up redirects for the site.
  *
  * @return void
  */
-function rewrite_search_url() {
+function rewrite_urls() {
+	// Redirect searches to `/search/term`.
 	if ( is_search() && ! empty( $_GET['s'] ) ) {
 		wp_redirect( home_url( '/search/' ) . urlencode( trim( get_query_var( 's' ) ) ) . '/' );
 		exit();
 	}
+	// Redirect old slug `my-favorites` to `favorites`, see WordPress/pattern-directory#332.
 	if ( preg_match( '/^my-favorites(.*)/', trim( $_SERVER['REQUEST_URI'], '/' ), $matches ) ) {
 		wp_redirect( home_url( '/favorites/' . $matches[1] . '/' ) );
 		exit();
