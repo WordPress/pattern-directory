@@ -178,7 +178,7 @@ function pre_get_posts( $query ) {
 	$pagename = $query->get( 'pagename' );
 	if ( $pagename ) {
 		list( $_pagename ) = explode( '/', $pagename );
-		if ( in_array( $_pagename, array( 'my-patterns', 'my-favorites' ) ) ) {
+		if ( in_array( $_pagename, array( 'my-patterns', 'favorites' ) ) ) {
 			// Need to get the page ID because this is set before `pre_get_posts` fires.
 			$page = get_page_by_path( $_pagename );
 			$query->set( 'pagename', $_pagename );
@@ -206,7 +206,7 @@ function pre_get_posts( $query ) {
  */
 function add_rewrite() {
 	add_rewrite_rule( '^my-patterns/[^/]+/?$', 'index.php?pagename=my-patterns', 'top' );
-	add_rewrite_rule( '^my-favorites/.+/?$', 'index.php?pagename=my-favorites', 'top' );
+	add_rewrite_rule( '^favorites/.+/?$', 'index.php?pagename=favorites', 'top' );
 }
 
 
@@ -263,6 +263,10 @@ function get_all_the_content( $post ) {
 function rewrite_search_url() {
 	if ( is_search() && ! empty( $_GET['s'] ) ) {
 		wp_redirect( home_url( '/search/' ) . urlencode( trim( get_query_var( 's' ) ) ) . '/' );
+		exit();
+	}
+	if ( preg_match( '/^my-favorites(.*)/', trim( $_SERVER['REQUEST_URI'], '/' ), $matches ) ) {
+		wp_redirect( home_url( '/favorites/' . $matches[1] . '/' ) );
 		exit();
 	}
 }

@@ -51,7 +51,7 @@ const MyFavorites = () => {
 	return (
 		<RouteProvider>
 			<QueryMonitor />
-			{ isLoggedIn && <PatternGridMenu basePath="/my-favorites/" query={ query } /> }
+			{ isLoggedIn && <PatternGridMenu basePath="/favorites/" query={ query } /> }
 			{ ! isLoggedIn || isEmpty ? (
 				<>
 					<EmptyHeader isLoggedIn={ isLoggedIn } />
