@@ -98,6 +98,7 @@ function enqueue_assets() {
 					'assets' => esc_url( get_stylesheet_directory_uri() ),
 					'site' => esc_url( home_url() ),
 					'login' => esc_url( wp_login_url() ),
+					'register' => esc_url( wp_registration_url() ),
 				) ) ),
 			),
 			'before'
