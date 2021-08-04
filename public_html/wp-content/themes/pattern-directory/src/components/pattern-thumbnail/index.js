@@ -27,7 +27,6 @@ function getStatusLabel( pattern ) {
 
 function PatternThumbnail( { pattern, showAvatar } ) {
 	const statusLabel = getStatusLabel( pattern );
-
 	return (
 		<div className="pattern-grid__pattern">
 			<div className="pattern-grid__pattern-frame">
