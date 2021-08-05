@@ -20,13 +20,12 @@ const useInView = ( { element } ) => {
 		}
 
 		setWindowHeight( window.innerHeight );
-		isVisible(); // initial visible check
+		isVisible();
 		window.addEventListener( 'scroll', debounce( isVisible, 200 ) ); // eslint-disable-line @wordpress/no-global-event-listener
 
 		return () => window.removeEventListener( 'scroll', isVisible ); // eslint-disable-line @wordpress/no-global-event-listener
 	}, [ element ] );
 
-	// check element rect top
 	const isVisible = () => {
 		if ( ! element.current ) {
 			return;
