@@ -63,7 +63,7 @@ function should_handle_query( $handle_query, $query ) {
  */
 function modify_es_query_args( $es_query_args, $wp_query ) {
 	$user_query = $wp_query->get( 's' );
-	$locale     = $wp_query->get( 'meta_query' )['orderby_locale']['value']['0'];
+	$locales    = $wp_query->get( 'meta_query' )['orderby_locale']['value'];
 
 	jetpack_require_lib( 'jetpack-wpes-query-builder/jetpack-wpes-query-parser' );
 
@@ -81,36 +81,63 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 	$should_query = [
 		[
 			'multi_match' => [
-				'query'    => $user_query,
-				'fields'   => [ 'title_en' ],
-				'boost'    => 2,
-				'operator' => 'and',
+				'query'  => $user_query,
+				'fields' => [ 'title_en' ],
+				'boost'  => 2,
+				'type'   => 'phrase',
 			],
 		],
 
 		[
 			'multi_match' => [
-				/*
-				 * The `description_en` field in the ES index is actually `post_content`, but that's not
-				 * relevant in this context, since that's just sample contend. The `wpop_description`
-				 * field is the actual description that should be searched.
-				 */
-				'fields'   => [ 'meta.wpop_description.value' ],
-				'query'    => $user_query,
-				'boost'    => 1,
-				// todo not working. making this higher than title should boost p15 above p19 but it doesn't
-				'operator' => 'and',
+				// The `description_en` field in the ES index is actually `post_content`, but that's not
+				// relevant in this context, since that's just sample contend. The `wpop_description`
+				// field is the actual description that should be searched.
+				'fields' => [ 'meta.wpop_description.value' ],
+				'query'  => $user_query,
+				'boost'  => 1,
+				// todo isn't working, but find better example to test with
+				'type'   => 'phrase',
 			],
 		],
 	];
+
+	// Requests for a specific locale will still include `en_US` as a fallback.
+	if ( count( $locales ) > 1 ) {
+		$primary_locale = array_reduce( $locales, function( $carry, $item ) {
+			// This assumes there will only be 2 items in $locale.
+			if ( $item !== 'en_US' ) {
+				$carry = $item;
+			}
+
+			return $carry;
+		} );
+
+		// Boost the primary locale over the `en_US` fallback.
+		$should_query[] = [
+			'term' => [
+				'meta.wpop_locale.value.raw' => $primary_locale,
+				'boost'                      => 2,
+				// todo this only works some of the time. maybe need to `sort` by primary locale instead?
+				// or maybe it's ok in a search context to have some en_US results higher, if they match better?
+			],
+		];
+
+		$should_query[] = [
+			'term' => [
+				'meta.wpop_locale.value.raw' => 'en_US',
+				'boost'                      => 1,
+			],
+		];
+	}
 
 	$filter = [
 		'bool' => [
 			'must' => [
 				[ 'term' => [ 'post_type' => 'wporg-pattern' ] ],
-				[ 'term' => [ 'meta.wpop_locale.value.raw' => $locale ] ],
 				[ 'term' => [ 'taxonomy.wporg-pattern-keyword.slug' => 'core' ] ],
-			]
+				[ 'terms' => [ 'meta.wpop_locale.value.raw' => $locales ] ],
+			],
 		],
 	];
 
@@ -120,6 +147,14 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 
 	$es_query_args['query']  = $parser->build_query();
 	$es_query_args['filter'] = $parser->build_filter();
+
+	$es_query_args['sort'] = [
+		[
+			"_score" => [
+				"order" => "desc",
+			],
+		],
+	];
 
 	return $es_query_args;
 }
@@ -135,7 +170,7 @@ function log_aborted_queries( $reason, $data ) {
 		wp_send_json_error( array( 'jetpack_search_abort - ' . $reason, $data ) );
 
 	} else {
-			error_log( 'jetpack_search_abort - cc @iandunn, @tellyworth, @dd32 - ' . $reason . ' - ' . wp_json_encode( $data ), E_USER_ERROR );
+		error_log( 'jetpack_search_abort - cc @iandunn, @tellyworth, @dd32 - ' . $reason . ' - ' . wp_json_encode( $data ), E_USER_ERROR );
 	}
 }
 
@@ -143,7 +178,7 @@ function log_aborted_queries( $reason, $data ) {
  * Log when Jetpack gets an error running the query.
  *
  * This filter doesn't currently work, but should in the future.
- * @link https://github.com/Automattic/jetpack/issues/18888
+ * See https://github.com/Automattic/jetpack/issues/18888
  *
  * @param array $data
  */
@@ -152,6 +187,6 @@ function log_failed_queries( $data ) {
 		wp_send_json_error( array( 'failed_jetpack_search_query', $data ) );
 
 	} else {
-			error_log( 'failed_jetpack_search_query - cc @iandunn, @tellyworth, @dd32 - ' . wp_json_encode( $data ), E_USER_ERROR );
+		error_log( 'failed_jetpack_search_query - cc @iandunn, @tellyworth, @dd32 - ' . wp_json_encode( $data ), E_USER_ERROR );
 	}
 }
