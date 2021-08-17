@@ -18,11 +18,11 @@ function PatternThumbnail( { className, html } ) {
 	const [ frameHeight, setFrameHeight ] = useState( '1px' );
 	const [ frameScale, setFrameScale ] = useState( 0.3125 );
 	const isVisible = useInView( { element: wrapperRef } );
-	const [ loaded, setLoaded ] = useState( false );
+	const [ shouldLoad, setShouldLoad ] = useState( false );
 
 	useEffect( () => {
 		if ( isVisible ) {
-			setLoaded( true );
+			setShouldLoad( true );
 		}
 	}, [ isVisible ] );
 
@@ -67,11 +67,11 @@ function PatternThumbnail( { className, html } ) {
 				className="pattern-grid__preview-iframe"
 				style={ style }
 				bodyStyle={ 'overflow: hidden;' }
-				headHTML={ loaded ? window.__editorStyles.html : '' }
+				headHTML={ shouldLoad ? window.__editorStyles.html : '' }
 			>
 				<div
 					dangerouslySetInnerHTML={ {
-						__html: loaded ? html : '',
+						__html: shouldLoad ? html : '',
 					} }
 				/>
 			</Iframe>
