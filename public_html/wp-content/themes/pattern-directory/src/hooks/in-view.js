@@ -10,26 +10,33 @@ import { useEffect, useState } from '@wordpress/element';
 
 const useInView = ( { element } ) => {
 	const [ visible, setVisible ] = useState( null );
-	const [ windowHeight, setWindowHeight ] = useState(
-		typeof window !== 'undefined' ? window.innerHeight : null
-	);
 
 	useEffect( () => {
 		if ( ! element.current ) {
 			return;
 		}
 
-		setWindowHeight( window.innerHeight );
-		isVisible();
-		window.addEventListener( 'scroll', debounce( isVisible, 200 ) ); // eslint-disable-line @wordpress/no-global-event-listener
+		const debouncedIsVisible = debounce( isVisible, 200 );
 
-		return () => window.removeEventListener( 'scroll', isVisible ); // eslint-disable-line @wordpress/no-global-event-listener
+		// Initialize `isVisible`.
+		isVisible();
+
+		/* eslint-disable @wordpress/no-global-event-listener -- These are global events. */
+		window.addEventListener( 'scroll', debouncedIsVisible );
+		window.addEventListener( 'resize', debouncedIsVisible );
+
+		return () => {
+			window.removeEventListener( 'scroll', debouncedIsVisible );
+			window.addEventListener( 'resize', debouncedIsVisible );
+		};
+		/* eslint-enable @wordpress/no-global-event-listener */
 	}, [ element ] );
 
 	const isVisible = () => {
 		if ( ! element.current ) {
 			return;
 		}
+		const windowHeight = window.innerHeight;
 		const { top } = element.current.getBoundingClientRect();
 
 		if ( top >= 0 && top <= windowHeight ) {
