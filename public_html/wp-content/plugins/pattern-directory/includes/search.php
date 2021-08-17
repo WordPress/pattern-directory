@@ -6,6 +6,7 @@ use WP_Query, Jetpack_WPES_Search_Query_Parser;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 // Note: This depends on the Search module and custom index being enabled in `mu-plugins/main-network/site-patterns.php`.
+// There are e2e tests on the api.w.org endpoint, rather than unit tests in this plugin. Make sure you run those when making changes.
 
 add_filter( 'jetpack_search_should_handle_query', __NAMESPACE__ . '\should_handle_query', 10, 2 );
 add_filter( 'jetpack_search_es_query_args', __NAMESPACE__ . '\modify_es_query_args', 10, 2 );
@@ -63,7 +64,7 @@ function should_handle_query( $handle_query, $query ) {
  */
 function modify_es_query_args( $es_query_args, $wp_query ) {
 	$user_query = $wp_query->get( 's' );
-	$locales    = $wp_query->get( 'meta_query' )['orderby_locale']['value'];
+	$locales    = array_unique( $wp_query->get( 'meta_query' )['orderby_locale']['value'] );
 
 	jetpack_require_lib( 'jetpack-wpes-query-builder/jetpack-wpes-query-parser' );
 
@@ -91,12 +92,10 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 		[
 			'multi_match' => [
 				// The `description_en` field in the ES index is actually `post_content`, but that's not
-				// relevant in this context, since that's just sample contend. The `wpop_description`
+				// relevant in this context, since that's just sample content. The `wpop_description`
 				// field is the actual description that should be searched.
 				'fields' => [ 'meta.wpop_description.value' ],
 				'query'  => $user_query,
-				'boost'  => 1,
-				// todo isn't working, but find better example to test with
 				'type'   => 'phrase',
 			],
 		],
@@ -106,7 +105,7 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 	if ( count( $locales ) > 1 ) {
 		$primary_locale = array_reduce( $locales, function( $carry, $item ) {
 			// This assumes there will only be 2 items in $locale.
-			if ( $item !== 'en_US' ) {
+			if ( 'en_US' !== $item ) {
 				$carry = $item;
 			}
 
@@ -117,16 +116,14 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 		$should_query[] = [
 			'term' => [
 				'meta.wpop_locale.value.raw' => $primary_locale,
-				'boost'                      => 2,
-				// todo this only works some of the time. maybe need to `sort` by primary locale instead?
-				// or maybe it's ok in a search context to have some en_US results higher, if they match better?
 			],
 		];
 
 		$should_query[] = [
 			'term' => [
 				'meta.wpop_locale.value.raw' => 'en_US',
-				'boost'                      => 1,
+				'boost'                      => 0.00001,
+				// todo ^ isn't working
 			],
 		];
 	}
@@ -150,8 +147,8 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 
 	$es_query_args['sort'] = [
 		[
-			"_score" => [
-				"order" => "desc",
+			'_score' => [
+				'order' => 'desc',
 			],
 		],
 	];
@@ -168,7 +165,6 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 function log_aborted_queries( $reason, $data ) {
 	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
 		wp_send_json_error( array( 'jetpack_search_abort - ' . $reason, $data ) );
-
 	} else {
 		error_log( 'jetpack_search_abort - cc @iandunn, @tellyworth, @dd32 - ' . $reason . ' - ' . wp_json_encode( $data ), E_USER_ERROR );
 	}
@@ -185,7 +181,6 @@ function log_aborted_queries( $reason, $data ) {
 function log_failed_queries( $data ) {
 	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
 		wp_send_json_error( array( 'failed_jetpack_search_query', $data ) );
-
 	} else {
 		error_log( 'failed_jetpack_search_query - cc @iandunn, @tellyworth, @dd32 - ' . wp_json_encode( $data ), E_USER_ERROR );
 	}
