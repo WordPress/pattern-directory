@@ -21,16 +21,18 @@ const DocumentTitleMonitor = () => {
 		const authorName = wporgPatternsData.currentAuthorName || _query?.author_name;
 		const page = getPageFromPath( path );
 
-		const currentPath = removeQueryString( path );
-		const currentSection = currentPath.replace( '/patterns', '' ).split( '/' )[ 1 ] || '';
+		// Remove irrelvant content from the path: query string, site subdirectory.
+		const contentPath = removeQueryString( path ).replace( /^\/patterns/, '' );
+		// Get the first item after the `/`: categories, author, etc.
+		const section = contentPath.split( '/' )[ 1 ] || '';
 		const parts = [];
 
-		if ( 'categories' === currentSection && category ) {
+		if ( 'categories' === section && category ) {
 			parts.push(
 				/* translators: Taxonomy term name */
 				sprintf( __( 'Block Patterns: %s', 'wporg-patterns' ), category )
 			);
-		} else if ( 'author' === currentSection && authorName ) {
+		} else if ( 'author' === section && authorName ) {
 			parts.push(
 				/* translators: Author name */
 				sprintf( __( 'Block Patterns by %s', 'wporg-patterns' ), authorName )
