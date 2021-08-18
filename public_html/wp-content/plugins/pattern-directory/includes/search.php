@@ -116,6 +116,7 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 		$should_query[] = [
 			'term' => [
 				'meta.wpop_locale.value.raw' => $primary_locale,
+				'boost'                      => 2,
 			],
 		];
 
@@ -123,7 +124,7 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 			'term' => [
 				'meta.wpop_locale.value.raw' => 'en_US',
 				'boost'                      => 0.00001,
-				// todo ^ isn't working
+				// todo ^ isn't working. might not need the positive boost on $primary_locale once this works.
 			],
 		];
 	}
