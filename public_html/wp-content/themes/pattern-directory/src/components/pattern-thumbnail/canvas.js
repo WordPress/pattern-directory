@@ -67,7 +67,7 @@ function PatternThumbnail( { className, html } ) {
 				className="pattern-grid__preview-iframe"
 				style={ style }
 				bodyStyle={ 'overflow: hidden;' }
-				headHTML={ shouldLoad ? window.__editorStyles.html : '' }
+				headHTML={ window.__editorStyles.html }
 			>
 				<div
 					dangerouslySetInnerHTML={ {
