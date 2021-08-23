@@ -133,11 +133,23 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 		'bool' => [
 			'must' => [
 				[ 'term' => [ 'post_type' => 'wporg-pattern' ] ],
-				[ 'term' => [ 'taxonomy.wporg-pattern-keyword.slug' => 'core' ] ],
 				[ 'terms' => [ 'meta.wpop_locale.value.raw' => $locales ] ],
 			],
 		],
 	];
+
+	foreach ( $wp_query->get( 'tax_query' ) as $term ) {
+		$taxonomy = $term['taxonomy'];
+
+		// `wporg-pattern-flag-reason` is private.
+		if ( ! in_array( $taxonomy, array( 'wporg-pattern-category', 'wporg-pattern-keyword' ) ) ) {
+			continue;
+		}
+
+		$filter['bool']['must'][] = [
+			'terms' => [ "taxonomy.$taxonomy.term_id" => $term['terms'] ]
+		];
+	}
 
 	$parser->add_query( $must_query, 'must' );
 	$parser->add_query( $should_query, 'should' );
