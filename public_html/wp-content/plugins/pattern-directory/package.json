@@ -13,14 +13,14 @@
 		"start": "wp-scripts start pattern-post-type=./src/pattern-post-type.js"
 	},
 	"dependencies": {
-		"@wordpress/components": "14.1.2",
-		"@wordpress/compose": "4.1.1",
-		"@wordpress/data": "5.1.1",
-		"@wordpress/edit-post": "4.1.4",
-		"@wordpress/element": "3.1.1",
-		"@wordpress/i18n": "4.1.1",
-		"@wordpress/plugins": "3.1.1",
-		"@wordpress/scripts": "16.1.2"
+		"@wordpress/components": "16.0.0",
+		"@wordpress/compose": "5.0.1",
+		"@wordpress/data": "6.0.1",
+		"@wordpress/edit-post": "5.0.1",
+		"@wordpress/element": "4.0.0",
+		"@wordpress/i18n": "4.2.1",
+		"@wordpress/plugins": "4.0.1",
+		"@wordpress/scripts": "16.1.4"
 	},
 	"eslintConfig": {
 		"extends": "../../../../.eslintrc.js"

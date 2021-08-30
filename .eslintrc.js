@@ -150,6 +150,14 @@ module.exports = {
 		'jsdoc/require-returns-description': 'off',
 
 		/*
+		 * Allow any combination of linebreaks in JSDoc.
+		 */
+		'jsdoc/tag-lines': 'off',
+
+		// Temporarily off.
+		'jsdoc/check-line-alignment': 'off',
+
+		/*
 		 * Import our local prettier config to be used by the prettier rule.
 		 *
 		 * `wp-scripts lint-js` does this automatically, but local eslint (ex, in code editors) does not know the
