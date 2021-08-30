@@ -147,7 +147,7 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 		}
 
 		$filter['bool']['must'][] = [
-			'terms' => [ "taxonomy.$taxonomy.term_id" => $term['terms'] ]
+			'terms' => [ "taxonomy.$taxonomy.term_id" => $term['terms'] ],
 		];
 	}
 
