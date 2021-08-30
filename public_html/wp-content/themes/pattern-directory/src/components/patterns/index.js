@@ -1,6 +1,8 @@
 /**
  * WordPress dependencies
  */
+import { focus } from '@wordpress/dom';
+import { useRef } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -31,13 +33,28 @@ const Patterns = () => {
 			query: _query,
 		};
 	} );
+	const ref = useRef();
+	const onNavigation = () => {
+		if ( ! ref?.current ) {
+			return;
+		}
+
+		const tabStops = focus.tabbable.find( ref.current );
+		const target = tabStops[ tabStops.length - 1 ] || false;
+
+		if ( target ) {
+			target.focus();
+		}
+	};
 
 	return (
 		<RouteProvider>
 			<DocumentTitleMonitor />
 			<QueryMonitor />
 			<BreadcrumbMonitor />
-			{ isSearch ? <ContextBar query={ query } /> : <PatternGridMenu /> }
+			<div ref={ ref } className="patterns-header">
+				{ isSearch ? <ContextBar query={ query } /> : <PatternGridMenu onNavigation={ onNavigation } /> }
+			</div>
 			{ isEmpty ? (
 				<>
 					<EmptyHeader />
@@ -46,7 +63,7 @@ const Patterns = () => {
 					</PatternGrid>
 				</>
 			) : (
-				<PatternGrid query={ query }>
+				<PatternGrid query={ query } onNavigation={ onNavigation }>
 					{ ( post ) => <PatternThumbnail key={ post.id } pattern={ post } showAvatar /> }
 				</PatternGrid>
 			) }
