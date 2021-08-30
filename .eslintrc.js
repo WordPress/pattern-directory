@@ -154,9 +154,6 @@ module.exports = {
 		 */
 		'jsdoc/tag-lines': 'off',
 
-		// Temporarily off.
-		'jsdoc/check-line-alignment': 'off',
-
 		/*
 		 * Import our local prettier config to be used by the prettier rule.
 		 *

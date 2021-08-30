@@ -32,7 +32,7 @@ const SavePostModifier = () => {
 		 *
 		 * This function is still called by gutenberg for autosaving so we need to handle that case as well.
 		 *
-		 * @param {Object} props
+		 * @param {Object}  props
 		 * @param {boolean} props.isAutosave Whether autosave is calling this function.
 		 */
 		dispatch( store ).savePost = ( props ) => {
