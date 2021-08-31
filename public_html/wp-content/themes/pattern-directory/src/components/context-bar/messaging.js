@@ -128,7 +128,7 @@ export const getSearchMessage = ( count, searchTerm ) => {
 				'wporg-patterns'
 			),
 			count,
-			searchTerm,
+			searchTerm.replace( /\+/g, ' ' ),
 			'wporg-patterns'
 		),
 		{
