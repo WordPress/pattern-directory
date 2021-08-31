@@ -7,9 +7,10 @@ import useDeepCompareEffect from 'use-deep-compare-effect';
 /**
  * WordPress dependencies
  */
-import { useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import { Spinner } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -109,38 +110,36 @@ function ContextBar( props ) {
 		}
 	}, [ query, isLoadingPatterns ] );
 
-	const classes = classnames( {
+	const spinnerClassName = classnames( {
 		'context-bar__spinner': true,
 		'context-bar__spinner--is-hidden': ! isLoadingPatterns,
 	} );
 
 	return (
-		<header className="context-bar" aria-live="polite" aria-atomic="true" tabIndex="0">
-			{ ! message ? null : (
-				<>
-					<h2 className="context-bar__copy">
-						<span className={ classes }>
-							<Spinner />
-						</span>
-						<span>{ message }</span>
-						{ pageLabel && <span className="screen-reader-text">{ pageLabel }</span> }
-					</h2>
-					{ context.links && context.links.length > 0 && (
-						<div className="context-bar__links">
-							<h3 className="context-bar__title">{ context.title }</h3>
+		<div className={ message ? null : 'screen-reader-text' }>
+			<header className="context-bar" aria-live="polite" aria-atomic="true" tabIndex="0">
+				<h2 className="context-bar__copy">
+					<span className={ spinnerClassName }>
+						<Spinner />
+					</span>
+					<span>{ message || __( 'All patterns.', 'wporg-patterns' ) }</span>
+					{ pageLabel && <span className="screen-reader-text">{ pageLabel }</span> }
+				</h2>
+				{ context.links && context.links.length > 0 && (
+					<div className="context-bar__links">
+						<h3 className="context-bar__title">{ context.title }</h3>
 
-							<ul>
-								{ context.links.map( ( i ) => (
-									<li key={ i.href }>
-										<a href={ i.href }>{ i.label }</a>
-									</li>
-								) ) }
-							</ul>
-						</div>
-					) }
-				</>
-			) }
-		</header>
+						<ul>
+							{ context.links.map( ( i ) => (
+								<li key={ i.href }>
+									<a href={ i.href }>{ i.label }</a>
+								</li>
+							) ) }
+						</ul>
+					</div>
+				) }
+			</header>
+		</div>
 	);
 }
 
