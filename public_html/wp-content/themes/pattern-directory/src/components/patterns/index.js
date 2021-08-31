@@ -1,13 +1,12 @@
 /**
  * WordPress dependencies
  */
-import { focus } from '@wordpress/dom';
-import { useRef } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
+import BreadcrumbMonitor from '../breadcrumb-monitor';
 import ContextBar from '../context-bar';
 import DocumentTitleMonitor from '../document-title-monitor';
 import EmptyHeader from './empty-header';
@@ -15,10 +14,9 @@ import PatternGrid from '../pattern-grid';
 import PatternGridMenu from '../pattern-grid-menu';
 import PatternThumbnail from '../pattern-thumbnail';
 import QueryMonitor from '../query-monitor';
-import BreadcrumbMonitor from '../breadcrumb-monitor';
-
 import { RouteProvider } from '../../hooks';
 import { store as patternStore } from '../../store';
+import useFocusOnNavigation from '../../hooks/use-focus-on-navigation';
 
 const Patterns = () => {
 	const { isEmpty, isSearch, query } = useSelect( ( select ) => {
@@ -33,19 +31,7 @@ const Patterns = () => {
 			query: _query,
 		};
 	} );
-	const ref = useRef();
-	const onNavigation = () => {
-		if ( ! ref?.current ) {
-			return;
-		}
-
-		const tabStops = focus.tabbable.find( ref.current );
-		const target = tabStops[ tabStops.length - 1 ] || false;
-
-		if ( target ) {
-			target.focus();
-		}
-	};
+	const [ ref, onNavigation ] = useFocusOnNavigation();
 
 	return (
 		<RouteProvider>
