@@ -51,7 +51,9 @@ const PatternGridMenu = ( { basePath = '', onNavigation, ...props } ) => {
 						onClick={ ( event ) => {
 							event.preventDefault();
 							updatePath( event.target.pathname );
-							onNavigation();
+							if ( 'function' === typeof onNavigation ) {
+								onNavigation();
+							}
 						} }
 						isLoading={ isLoading }
 					/>
