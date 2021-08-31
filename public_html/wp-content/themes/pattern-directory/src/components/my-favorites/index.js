@@ -53,7 +53,7 @@ const MyFavorites = () => {
 	return (
 		<RouteProvider>
 			<QueryMonitor />
-			<div ref={ ref } className="patterns-header">
+			<div ref={ ref }>
 				{ isLoggedIn && (
 					<PatternGridMenu basePath="/favorites/" query={ query } onNavigation={ onNavigation } />
 				) }

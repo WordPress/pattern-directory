@@ -38,7 +38,7 @@ const Patterns = () => {
 			<DocumentTitleMonitor />
 			<QueryMonitor />
 			<BreadcrumbMonitor />
-			<div ref={ ref } className="patterns-header">
+			<div ref={ ref }>
 				{ isSearch ? <ContextBar query={ query } /> : <PatternGridMenu onNavigation={ onNavigation } /> }
 			</div>
 			{ isEmpty ? (
