@@ -7,7 +7,7 @@ import { focus } from '@wordpress/dom';
 /**
  * Hook used to focus the first tabbable element with a callback.
  *
- * @return {Array} Ref callback.
+ * @return {Array} Ref and callback.
  */
 export default function useFocusOnNavigation() {
 	const containerRef = useRef();
