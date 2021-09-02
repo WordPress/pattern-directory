@@ -15,7 +15,7 @@ Theme
 
 ## Try it out
 
-See the [root Readme for dev environment info.](../../../readme.md)
+See the [root Readme for dev environment info.](../../../../readme.md)
 
 Create some Block Patterns in wp-admin, `/wp-admin/post-new.php?post_type=wporg-pattern`.
 
