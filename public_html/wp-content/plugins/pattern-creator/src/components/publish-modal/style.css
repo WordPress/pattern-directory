@@ -1,16 +1,21 @@
-
-/* Overwrite @wordpress/components/modal styles */
-.pattern-modal .components-modal__content {
-	padding: 0;
+.pattern-modal {
+	width: 100%;
+	max-width: var(--modal-width);
+	min-height: 375px;
+	background-color: var(--modal-background);
+	color: #fff;
 }
 
 .pattern-modal .components-modal__header {
 	display: block;
 	position: absolute;
-	margin: 0;
-	padding: 0;
 	top: 8px;
 	right: 8px;
+	left: auto;
+	margin: 0;
+	padding: 0;
+	width: auto;
+	height: auto;
 	background: transparent;
 	border-bottom: none;
 }
@@ -24,14 +29,13 @@
 	position: initial;
 }
 
-/* Done overwrites */
-.pattern-modal {
-	margin: 0 auto;
-	width: 100%;
-	max-width: var(--modal-width);
-	height: 375px;
-	background-color: var(--modal-background);
-	color: #fff;
+.pattern-modal .components-modal__content {
+	padding: 0;
+	margin-top: 0;
+}
+
+.pattern-modal .components-modal__content::before {
+	margin-bottom: 0;
 }
 
 .pattern-modal__checkbox-list {
