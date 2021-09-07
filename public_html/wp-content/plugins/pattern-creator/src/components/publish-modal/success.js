@@ -21,10 +21,18 @@ export default function PublishedModal( { onClose } ) {
 					<Button isPrimary onClick={ onClose }>
 						{ __( 'Close', 'wporg-patterns' ) }
 					</Button>
-					<Button className="pattern-modal__link" isLink href={ `${ wporgSiteUrl }/new-pattern` }>
+					<Button
+						className="pattern-modal__link"
+						isLink
+						href={ `${ wporgBlockPattern.siteUrl }/new-pattern` }
+					>
 						{ __( 'Create another pattern', 'wporg-patterns' ) }
 					</Button>
-					<Button className="pattern-modal__link" isLink href={ `${ wporgSiteUrl }/my-patterns` }>
+					<Button
+						className="pattern-modal__link"
+						isLink
+						href={ `${ wporgBlockPattern.siteUrl }/my-patterns` }
+					>
 						{ __( 'View my patterns', 'wporg-patterns' ) }
 					</Button>
 				</div>

@@ -45,8 +45,7 @@
 	"eslintConfig": {
 		"extends": "../../../../.eslintrc.js",
 		"globals": {
-			"wporgBlockPattern": "readonly",
-			"wporgSiteUrl": "readonly"
+			"wporgBlockPattern": "readonly"
 		}
 	},
 	"stylelint": {
