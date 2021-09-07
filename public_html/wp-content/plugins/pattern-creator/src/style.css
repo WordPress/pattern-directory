@@ -113,3 +113,8 @@ body.is-fullscreen-mode .interface-interface-skeleton {
 	color: #757575;
 	margin: 0 0.5rem 1rem;
 }
+
+/* Override theme styles */
+.edit-post-sidebar__panel-tabs ul {
+	margin: 0;
+}
