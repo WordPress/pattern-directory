@@ -1,28 +1,31 @@
 /**
  * WordPress dependencies
  */
-import { dispatch, select } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
 import { store } from '@wordpress/edit-post';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import WelcomeGuide, { GUIDE_ID } from '../components/welcome-guide';
 
+function WelcomeGuidePlugin() {
+	const isCoreActive = useSelect( ( select ) => select( store ).isFeatureActive( 'welcomeGuide' ) );
+	const { toggleFeature } = useDispatch( store );
+	useEffect( () => {
+		if ( isCoreActive ) {
+			toggleFeature( 'welcomeGuide' );
+		}
+		toggleFeature( GUIDE_ID );
+	}, [ isCoreActive ] );
+
+	return <WelcomeGuide />;
+}
+
 registerPlugin( 'welcome-guide-plugin', {
 	render: () => {
-		// Turn off the default welcome guide
-		if ( select( store ).isFeatureActive( 'welcomeGuide' ) ) {
-			dispatch( store ).toggleFeature( 'welcomeGuide' );
-		}
-
-		const features = select( store ).getPreference( 'features' );
-
-		if ( features[ GUIDE_ID ] === undefined ) {
-			dispatch( store ).toggleFeature( GUIDE_ID );
-		}
-
-		return <WelcomeGuide />;
+		return <WelcomeGuidePlugin />;
 	},
 } );
