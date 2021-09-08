@@ -3,24 +3,23 @@
  */
 import { Guide } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { store as editPostStore } from '@wordpress/edit-post';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { ImageCollectionImage, PatternEditorImage, PatternsImage } from './images';
-import './style.css';
+import { store as patternStore } from '../../store';
 
 /**
  * Module constants
  */
-export const GUIDE_ID = 'wporgWelcomeGuide';
+export const GUIDE_ID = 'patternWelcomeGuide';
 
 export default function WelcomeGuide() {
-	const isActive = useSelect( ( select ) => select( editPostStore ).isFeatureActive( GUIDE_ID ), [] );
+	const isActive = useSelect( ( select ) => select( patternStore ).isFeatureActive( GUIDE_ID ), [] );
 
-	const { toggleFeature } = useDispatch( editPostStore );
+	const { toggleFeature } = useDispatch( patternStore );
 
 	if ( ! isActive ) {
 		return null;

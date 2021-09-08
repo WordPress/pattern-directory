@@ -1,46 +1,47 @@
 /**
- * External dependencies
+ * WordPress dependencies
  */
-import apiFetch from '@wordpress/api-fetch';
-import domReady from '@wordpress/dom-ready';
-import { initializeEditor } from '@wordpress/edit-post';
-import { unregisterBlockType } from '@wordpress/blocks';
-import '@wordpress/format-library';
+import { registerCoreBlocks } from '@wordpress/block-library';
+import { render, unmountComponentAtNode } from '@wordpress/element';
+/* eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK. */
+import { __experimentalFetchLinkSuggestions as fetchLinkSuggestions } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
  */
-import { filterEndpoints } from './api-middleware';
+import './store';
+import Editor from './components/editor';
+import './style.scss';
 
-// The order of these panels matter since Gutenberg currently doesn't have a way to order panels.
-import './plugins/category-settings-panel';
-import './plugins/keyword-settings-panel';
-import './plugins/block-scope-settings-panel';
+/**
+ * Reinitializes the editor after the user chooses to reboot the editor after
+ * an unhandled error occurs, replacing previously mounted editor element using
+ * an initial state from prior to the crash.
+ *
+ * @param {Element} target   DOM node in which editor is rendered.
+ * @param {?Object} settings Editor settings object.
+ */
+export function reinitializeEditor( target, settings ) {
+	unmountComponentAtNode( target );
+	const reboot = reinitializeEditor.bind( null, target, settings );
+	render( <Editor initialSettings={ settings } onError={ reboot } />, target );
+}
 
-import './plugins/gutenberg-feature-remover';
-import './plugins/main-dashboard-button';
-import './plugins/save-post-modifier';
-import './plugins/update-inspector-panel-text';
-import './plugins/viewport-header-control';
-import './plugins/welcome-guide-plugin';
-import './style.css';
+/**
+ * Initializes the pattern editor screen.
+ *
+ * @param {string} id              ID of the root element to render the screen in.
+ * @param {Object} settings        Editor settings.
+ * @param {number} settings.postId ID of the current post.
+ */
+export function initialize( id, { postId, ...settings } ) {
+	settings.__experimentalFetchLinkSuggestions = ( search, searchOptions ) =>
+		fetchLinkSuggestions( search, searchOptions, settings );
 
-// Set up API middleware.
-apiFetch.use( filterEndpoints );
+	const target = document.getElementById( id );
+	const reboot = reinitializeEditor.bind( null, target, settings );
 
-new Promise( ( resolve ) => {
-	domReady( () => {
-		resolve(
-			initializeEditor(
-				'block-pattern-creator',
-				'wporg-pattern',
-				wporgBlockPattern.postId,
-				wporgBlockPattern.settings,
-				{}
-			)
-		);
-	} );
-} ).then( () => {
-	// After the editor is initialized, we can set up any block customizations.
-	unregisterBlockType( 'core/shortcode' );
-} );
+	registerCoreBlocks();
+
+	render( <Editor initialSettings={ settings } onError={ reboot } postId={ postId } />, target );
+}
