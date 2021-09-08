@@ -63,6 +63,14 @@ body.is-fullscreen-mode .interface-interface-skeleton {
 	color: #fff;
 }
 
+.edit-post-visual-editor__post-title-wrapper {
+	overflow: auto;
+}
+
+.edit-post-visual-editor__post-title-wrapper .editor-post-title {
+	margin: 32px auto;
+}
+
 .editor-post-title__input {
 	text-align: center;
 	font-weight: 400 !important;
@@ -112,4 +120,9 @@ body.is-fullscreen-mode .interface-interface-skeleton {
 	font-size: 13px;
 	color: #757575;
 	margin: 0 0.5rem 1rem;
+}
+
+/* Override theme styles */
+.edit-post-sidebar__panel-tabs ul {
+	margin: 0;
 }
