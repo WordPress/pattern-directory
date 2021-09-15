@@ -126,6 +126,25 @@ function register_post_type_data() {
 
 	register_post_meta(
 		POST_TYPE,
+		'wpop_keywords',
+		array(
+			'type'              => 'string',
+			'description'       => 'A comma-separated list of keywords for this pattern',
+			'single'            => true,
+			'default'           => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type'      => 'string',
+					'maxLength' => 360,
+				),
+			),
+		)
+	);
+
+	register_post_meta(
+		POST_TYPE,
 		'wpop_description',
 		array(
 			'type'              => 'string',

@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { PanelBody, PanelRow, TextControl, TextareaControl } from '@wordpress/components';
+import { FormTokenField, PanelBody, PanelRow, TextControl, TextareaControl } from '@wordpress/components';
 import { store as editorStore } from '@wordpress/editor';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useCallback } from '@wordpress/element';
@@ -11,12 +11,18 @@ import { useCallback } from '@wordpress/element';
  * Internal dependencies
  */
 import PatternCategoriesControl from '../../pattern-categories-control';
+import { KEYWORD_SLUG } from '../../../store';
+
+const DESCRIPTION_SLUG = 'wpop_description';
 
 function PatternSettings() {
-	const { title, meta, selectedCategories } = useSelect( ( select ) => {
+	const { description, keywords, meta, title, selectedCategories } = useSelect( ( select ) => {
 		const { getEditedPostAttribute } = select( editorStore );
+		const _meta = getEditedPostAttribute( 'meta' ) || {};
 		return {
-			meta: getEditedPostAttribute( 'meta' ) || {},
+			meta: _meta,
+			description: _meta[ DESCRIPTION_SLUG ],
+			keywords: _meta[ KEYWORD_SLUG ].split( ', ' ).filter( ( item ) => item.length ),
 			title: getEditedPostAttribute( 'title' ) || '',
 			selectedCategories: getEditedPostAttribute( 'pattern-categories' ),
 		};
@@ -32,6 +38,10 @@ function PatternSettings() {
 	const setCategories = useCallback( ( value ) => {
 		editPost( { 'pattern-categories': value } );
 	} );
+	const setKeywords = useCallback( ( value ) => {
+		const keywordsString = value.join( ', ' );
+		editPost( { meta: { ...meta, [ KEYWORD_SLUG ]: keywordsString } } );
+	} );
 
 	return (
 		<>
@@ -46,7 +56,7 @@ function PatternSettings() {
 							'The description is used to help users of assistive technology understand the content of your pattern.',
 							'wporg-patterns'
 						) }
-						value={ meta.wpop_description }
+						value={ description }
 						onChange={ setDescription }
 					/>
 				</PanelRow>
@@ -60,8 +70,19 @@ function PatternSettings() {
 				</p>
 				<PatternCategoriesControl selectedTerms={ selectedCategories } setTerms={ setCategories } />
 			</PanelBody>
-			<PanelBody title={ __( 'Keywords', 'wporg-patterns' ) } initialOpen={ false }>
-				<p>Maybe existing component, free text?</p>
+			<PanelBody title={ __( 'Keywords', 'wporg-patterns' ) }>
+				<p>
+					{ __(
+						'Adding keywords will help people find your pattern when searching and browsing.',
+						'wporg-patterns'
+					) }
+				</p>
+				<FormTokenField
+					title={ __( 'Keywords', 'wporg-patterns' ) }
+					value={ keywords || [] }
+					onChange={ setKeywords }
+					tokenizeOnSpace={ false }
+				/>
 			</PanelBody>
 			<PanelBody title={ __( 'Block scope', 'wporg-patterns' ) } initialOpen={ false }>
 				<p>Select based on whats in use?</p>
