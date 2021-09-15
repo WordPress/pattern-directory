@@ -45,7 +45,7 @@ const SettingsHeader = ( { sidebarName } ) => {
 				>
 					{
 						// translators: Text label for the Template Settings Sidebar tab.
-						__( 'Template', 'wporg-patterns' )
+						__( 'Pattern', 'wporg-patterns' )
 					}
 				</Button>
 			</li>
