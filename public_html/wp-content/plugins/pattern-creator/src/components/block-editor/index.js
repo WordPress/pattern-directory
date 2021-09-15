@@ -17,6 +17,7 @@ import {
 	__unstableUseTypingObserver as useTypingObserver,
 } from '@wordpress/block-editor';
 /* eslint-enable @wordpress/no-unsafe-wp-apis */
+import { PostTitle, VisualEditorGlobalKeyboardShortcuts } from '@wordpress/editor';
 import { useMergeRefs } from '@wordpress/compose';
 
 /**
@@ -60,6 +61,10 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 				<BlockInspector />
 			</SidebarInspectorFill>
 			<BlockTools className="pattern-visual-editor" __unstableContentRef={ contentRef }>
+				<VisualEditorGlobalKeyboardShortcuts />
+				<div className="pattern-visual-editor__post-title-wrapper">
+					<PostTitle />
+				</div>
 				<Iframe
 					style={ resizedCanvasStyles }
 					head={ <EditorStyles styles={ settings.styles } /> }
