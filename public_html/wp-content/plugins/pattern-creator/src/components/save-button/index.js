@@ -60,7 +60,11 @@ export default function SaveButton() {
 		if ( isDisabled ) {
 			return;
 		}
-		setShowModal( true );
+		if ( isPublished ) {
+			onSuccess();
+		} else {
+			setShowModal( true );
+		}
 	};
 
 	const onSuccess = () => {
