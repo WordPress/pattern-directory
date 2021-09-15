@@ -5,29 +5,24 @@ import { __ } from '@wordpress/i18n';
 import { PanelBody, PanelRow, TextControl, TextareaControl } from '@wordpress/components';
 import { store as editorStore } from '@wordpress/editor';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useEffect, useState } from '@wordpress/element';
+import { useCallback } from '@wordpress/element';
 
 function PatternSettings() {
-	const { postTitle, meta } = useSelect( ( select ) => {
+	const { title, meta } = useSelect( ( select ) => {
 		const { getEditedPostAttribute } = select( editorStore );
 		return {
 			meta: getEditedPostAttribute( 'meta' ) || {},
-			postTitle: getEditedPostAttribute( 'title' ) || '',
+			title: getEditedPostAttribute( 'title' ) || '',
 		};
 	} );
-	const [ title, setTitle ] = useState( postTitle );
-	const [ description, setDescription ] = useState( meta.wpop_description );
 
 	const { editPost } = useDispatch( editorStore );
-	useEffect( () => {
-		editPost( {
-			meta: {
-				...meta,
-				wpop_description: description,
-			},
-			title: title,
-		} );
-	}, [ title, description ] );
+	const setTitle = useCallback( ( value ) => {
+		editPost( { title: value } );
+	} );
+	const setDescription = useCallback( ( value ) => {
+		editPost( { meta: { ...meta, wpop_description: value } } );
+	} );
 
 	return (
 		<>
@@ -42,7 +37,7 @@ function PatternSettings() {
 							'The description is used to help users of assistive technology understand the content of your pattern.',
 							'wporg-patterns'
 						) }
-						value={ description }
+						value={ meta.wpop_description }
 						onChange={ setDescription }
 					/>
 				</PanelRow>
