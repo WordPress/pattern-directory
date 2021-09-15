@@ -20,7 +20,7 @@ export const storeConfig = {
 	persist: [ 'preferences' ],
 };
 
-export { POST_TYPE } from './constants';
+export { POST_TYPE, CATEGORY_SLUG } from './constants';
 
 export const store = createReduxStore( STORE_NAME, storeConfig );
 

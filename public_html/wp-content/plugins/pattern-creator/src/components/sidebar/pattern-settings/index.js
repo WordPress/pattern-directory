@@ -7,12 +7,18 @@ import { store as editorStore } from '@wordpress/editor';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useCallback } from '@wordpress/element';
 
+/**
+ * Internal dependencies
+ */
+import PatternCategoriesControl from '../../pattern-categories-control';
+
 function PatternSettings() {
-	const { title, meta } = useSelect( ( select ) => {
+	const { title, meta, selectedCategories } = useSelect( ( select ) => {
 		const { getEditedPostAttribute } = select( editorStore );
 		return {
 			meta: getEditedPostAttribute( 'meta' ) || {},
 			title: getEditedPostAttribute( 'title' ) || '',
+			selectedCategories: getEditedPostAttribute( 'pattern-categories' ),
 		};
 	} );
 
@@ -22,6 +28,9 @@ function PatternSettings() {
 	} );
 	const setDescription = useCallback( ( value ) => {
 		editPost( { meta: { ...meta, wpop_description: value } } );
+	} );
+	const setCategories = useCallback( ( value ) => {
+		editPost( { 'pattern-categories': value } );
 	} );
 
 	return (
@@ -42,8 +51,14 @@ function PatternSettings() {
 					/>
 				</PanelRow>
 			</PanelBody>
-			<PanelBody title={ __( 'Categories', 'wporg-patterns' ) } initialOpen={ false }>
-				<p>Maybe existing component?</p>
+			<PanelBody title={ __( 'Categories', 'wporg-patterns' ) }>
+				<p>
+					{ __(
+						'Patterns are grouped into defined categories to help people browse.',
+						'wporg-patterns'
+					) }
+				</p>
+				<PatternCategoriesControl selectedTerms={ selectedCategories } setTerms={ setCategories } />
 			</PanelBody>
 			<PanelBody title={ __( 'Keywords', 'wporg-patterns' ) } initialOpen={ false }>
 				<p>Maybe existing component, free text?</p>
