@@ -51,11 +51,7 @@ export default function Header() {
 		};
 	}, [] );
 
-	const {
-		__experimentalSetPreviewDeviceType: setPreviewDeviceType,
-		setIsInserterOpened,
-		setIsListViewOpened,
-	} = useDispatch( patternStore );
+	const { setPreviewDeviceType, setIsInserterOpened, setIsListViewOpened } = useDispatch( patternStore );
 
 	const isLargeViewport = useViewportMatch( 'medium' );
 
