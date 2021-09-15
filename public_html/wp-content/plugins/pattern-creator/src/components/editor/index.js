@@ -74,7 +74,7 @@ function Editor( { initialSettings, onError, postId } ) {
 			hasReducedUI: false,
 			__experimentalLocalAutosaveInterval: 30,
 			__experimentalSetIsInserterOpened: setIsInserterOpened,
-			allowedBlockTypes: [ 'core/paragraph', 'core/heading', 'core/image' ],
+			// @todo Add a filter over allowedBlockTypes.
 		};
 
 		return result;
