@@ -1,0 +1,177 @@
+$modal-height: 375px;
+
+.submission-modal {
+	width: 100%;
+	max-width: 600px;
+	min-height: $modal-height;
+	background-color: $gray-900;
+	color: $white;
+
+	.components-modal__header {
+		display: block;
+		position: absolute;
+		top: $grid-unit-10;
+		right: $grid-unit-10;
+		left: auto;
+		margin: 0;
+		padding: 0;
+		width: auto;
+		height: auto;
+		background: transparent;
+		border-bottom: none;
+	}
+
+	.components-modal__header-heading-container {
+		display: none;
+	}
+
+	/* This is the close button */
+	.components-modal__header > button {
+		position: initial;
+	}
+
+	.components-modal__content {
+		padding: 0;
+		margin-top: 0;
+	}
+
+	.components-modal__content::before {
+		margin-bottom: 0;
+	}
+
+	&.is-published {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 350px;
+
+		background-image: url(./components/submission-modal/images/triangle.svg), url(./components/submission-modal/images/circle.svg), url(./components/submission-modal/images/square.svg);
+		background-repeat: no-repeat, no-repeat, no-repeat;
+		background-position: left -30% bottom -60%, left 45% bottom -110%, right -30% bottom -110%;
+		background-size: 250px;
+
+		> div {
+			margin-bottom: $grid-unit-20;
+			height: initial;
+		}
+	}
+}
+
+.submission-modal__page {
+	display: grid;
+	grid-template-columns: 30% 70%;
+	margin: 0 auto;
+	height: $modal-height;
+	color: #32373c;
+
+	fieldset {
+		margin: 0;
+		padding: 0;
+		border: 0;
+	}
+
+	.is-published & {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: $grid-unit-20;
+		color: $white;
+		width: 60%;
+
+		.submission-modal__content {
+			width: 100%;
+			padding: 0;
+			flex-direction: row;
+			flex-wrap: wrap;
+			background: transparent;
+		}
+	}
+}
+
+.submission-modal__sidebar {
+	padding: $grid-unit-20;
+	background-image: url(./components/submission-modal/images/triangle.svg), url(./components/submission-modal/images/circle.svg), url(./components/submission-modal/images/square.svg);
+	background-repeat: no-repeat, no-repeat, no-repeat;
+	background-position: center top -22.5%, center center, center bottom -30%;
+	background-size: 150px;
+}
+
+.submission-modal__title {
+	margin: 0;
+	color: #fff;
+	font-size: 1.5rem;
+	line-height: normal;
+}
+
+.submission-modal__title-sidebar {
+	margin: $grid-unit-10 0 0 0;
+	text-align: right;
+}
+
+.submission-modal__content {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	background: $white;
+	padding: $grid-unit-20 $grid-unit-40 $grid-unit-40;
+}
+
+.submission-modal__copy {
+	font-size: 0.875rem;
+}
+
+.submission-modal__link {
+	color: currentColor !important;
+}
+
+.submission-modal__page label:not(.components-checkbox-control__label),
+.submission-modal__subtitle {
+	margin-top: 0;
+	margin-bottom: $grid-unit-10;
+	font-size: 0.8125rem;
+	font-weight: 600;
+}
+
+.submission-modal__checkbox-list {
+	display: grid;
+	grid-template-columns: 50% 50%;
+	grid-gap: $grid-unit-05;
+	padding-top: $grid-unit-10;
+	margin: 0;
+
+	li {
+		list-style: none;
+	}
+}
+
+.submission-modal__control {
+	margin-bottom: $grid-unit-20 !important;
+
+	.components-base-control__help {
+		margin: 0;
+	}
+}
+
+.submission-modal__footer {
+	display: flex;
+	justify-content: space-between;
+}
+
+.submission-modal__button {
+	width: 125px;
+	justify-content: center;
+}
+
+.submission-modal__button:disabled {
+	background: #ccc !important;
+}
+
+/* This is the close button */
+.submission-modal .components-modal__header > button,
+.submission-modal .components-modal__header > button:active {
+	background: #fff;
+	color: #000;
+}
+
+/* Done overwrites */

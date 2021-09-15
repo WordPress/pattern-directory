@@ -88,10 +88,21 @@ function pattern_creator_init() {
 	);
 	wp_set_script_translations( 'wporg-pattern-creator-script', 'wporg-pattern-creator' );
 
+	wp_add_inline_script(
+		'wp-pattern-creator',
+		sprintf(
+			'var wporgBlockPattern = JSON.parse( decodeURIComponent( \'%s\' ) );',
+			rawurlencode( wp_json_encode( array(
+				'siteUrl'    => esc_url( home_url() ),
+			) ) )
+		),
+		'before'
+	);
+
 	wp_enqueue_style(
 		'wp-pattern-creator',
 		plugins_url( 'build/style-index.css', __FILE__ ),
-		array(),
+		array( 'wp-components' ),
 		filemtime( "$dir/build/style-index.css" )
 	);
 
