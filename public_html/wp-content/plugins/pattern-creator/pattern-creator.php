@@ -181,7 +181,7 @@ function rewrite_for_pattern_editing() {
 add_action( 'init', __NAMESPACE__ . '\rewrite_for_pattern_editing' );
 
 /**
- * Call footer things.
+ * Inject the editor styles into the page.
  */
 function wp_footer_creator() {
 	if ( ! should_load_creator() ) {
@@ -191,3 +191,19 @@ function wp_footer_creator() {
 	gutenberg_extend_block_editor_styles_html();
 }
 add_action( 'wp_footer', __NAMESPACE__ . '\wp_footer_creator' );
+
+
+/**
+ * Always disable the admin bar on the creator page.
+ *
+ * @param bool $show_admin_bar Whether the admin bar should be shown. Default false.
+ * @return bool Filtered value.
+ */
+function show_admin_bar( $show_admin_bar ) {
+	if ( ! should_load_creator() ) {
+		return $show_admin_bar;
+	}
+
+	return false;
+}
+add_filter( 'show_admin_bar', __NAMESPACE__ . '\show_admin_bar' );

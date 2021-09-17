@@ -114,6 +114,7 @@ function Editor( { initialSettings, onError, postId } ) {
 						<KeyboardShortcuts.Register />
 						<SidebarComplementaryAreaFills />
 						<InterfaceSkeleton
+							className="pattern-interface"
 							labels={ interfaceLabels }
 							secondarySidebar={ secondarySidebar() }
 							sidebar={ sidebarIsOpened && <ComplementaryArea.Slot scope="wporg/pattern-creator" /> }
