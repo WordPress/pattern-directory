@@ -6,25 +6,25 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-import { useCallback, useRef } from '@wordpress/element';
-import { useViewportMatch } from '@wordpress/compose';
+import { __, _x } from '@wordpress/i18n';
 /* eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK. */
 import { __experimentalPreviewOptions as PreviewOptions, ToolSelector } from '@wordpress/block-editor';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { Button, VisuallyHidden } from '@wordpress/components';
+import { Icon, arrowLeft, listView, plus } from '@wordpress/icons';
 import { PinnedItems } from '@wordpress/interface';
-import { __, _x } from '@wordpress/i18n';
-import { listView, plus } from '@wordpress/icons';
-import { Button } from '@wordpress/components';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
+import { useCallback, useRef } from '@wordpress/element';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { useViewportMatch } from '@wordpress/compose';
 
 /**
  * Internal dependencies
  */
 import MoreMenu from './more-menu';
-import SaveButton from '../save-button';
-import UndoButton from './undo-redo/undo';
 import RedoButton from './undo-redo/redo';
+import SaveButton from '../save-button';
 import { store as patternStore } from '../../store';
+import UndoButton from './undo-redo/undo';
 
 const preventDefault = ( event ) => {
 	event.preventDefault();
@@ -74,7 +74,11 @@ export default function Header() {
 
 	return (
 		<div className={ classes }>
-			<div className="pattern-header__start">
+			<div className="pattern-header_start">
+				<a className="main-dashboard-button" href={ wporgBlockPattern.siteUrl }>
+					<Icon icon={ arrowLeft } />
+					<VisuallyHidden>{ __( 'Pattern Directory', 'wporg-patterns' ) }</VisuallyHidden>
+				</a>
 				<div className="pattern-header__toolbar">
 					<Button
 						ref={ inserterButton }

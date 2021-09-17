@@ -85,7 +85,7 @@ function PatternSettings() {
 				/>
 			</PanelBody>
 			<PanelBody title={ __( 'Block scope', 'wporg-patterns' ) } initialOpen={ false }>
-				<p>Select based on whats in use?</p>
+				<p>Coming Soon…</p>
 			</PanelBody>
 		</>
 	);

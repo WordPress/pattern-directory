@@ -141,6 +141,59 @@ body.is-navigation-sidebar-open {
 	}
 }
 
+.main-dashboard-button {
+	display: flex;
+	align-items: center;
+	align-self: stretch;
+	justify-content: center;
+	border: none;
+	background: $gray-900;
+	color: $white;
+	fill: currentColor;
+	border-radius: 0;
+	height: $header-height + $border-width;
+	width: $header-height;
+	position: relative;
+	margin-bottom: - $border-width;
+
+	&:hover,
+	&:active,
+	&:visited {
+		color: $white;
+	}
+
+	&:focus {
+		box-shadow: none;
+	}
+
+	&::before {
+		transition: box-shadow 0.1s ease;
+
+		@include reduce-motion("transition");
+		content: "";
+		display: block;
+		position: absolute;
+		top: 9px;
+		right: 9px;
+		bottom: 9px;
+		left: 9px;
+		border-radius: $radius-block-ui + $border-width + $border-width;
+		box-shadow: inset 0 0 0 var(--wp-admin-border-width-focus) $gray-900;
+	}
+
+	// Hover color.
+	&:hover::before {
+		box-shadow: inset 0 0 0 var(--wp-admin-border-width-focus) $gray-700;
+	}
+
+	// Lightened spot color focus.
+	&:focus::before {
+		box-shadow:
+			inset 0 0 0 var(--wp-admin-border-width-focus) rgba($white, 0.1),
+			inset 0 0 0 var(--wp-admin-border-width-focus) var(--wp-admin-theme-color);
+	}
+}
+
 .pattern-header.has-reduced-ui {
 
 	@include break-small () {
