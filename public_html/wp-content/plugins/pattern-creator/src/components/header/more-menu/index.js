@@ -46,6 +46,11 @@ const MoreMenu = () => (
 						messageDeactivated={ __( 'Spotlight mode deactivated', 'wporg-patterns' ) }
 					/>
 					<FeatureToggle
+						feature="reducedUI"
+						label={ __( 'Reduced the interface', 'wporg-patterns' ) }
+						info={ __( 'Compacts options and outlines in the toolbar.', 'wporg-patterns' ) }
+					/>
+					<FeatureToggle
 						feature="patternWelcomeGuide"
 						label={ __( 'Welcome guide', 'wporg-patterns' ) }
 					/>

@@ -42,15 +42,22 @@ const interfaceLabels = {
 
 function Editor( { initialSettings, onError, postId } ) {
 	const { isInserterOpen, isListViewOpen, post, sidebarIsOpened, settings } = useSelect( ( select ) => {
-		const { isInserterOpened, isListViewOpened, getSettings } = select( patternStore );
+		const { isInserterOpened, isListViewOpened, getSettings, isFeatureActive, getPreviewDeviceType } = select(
+			patternStore
+		);
 		const { getEntityRecord } = select( coreStore );
+
+		const _settings = getSettings();
+		_settings.focusMode = isFeatureActive( 'focusMode' );
+		_settings.hasFixedToolbar = isFeatureActive( 'fixedToolbar' ) || getPreviewDeviceType() !== 'Desktop';
+		_settings.hasReducedUI = isFeatureActive( 'reducedUI' );
 
 		return {
 			isInserterOpen: isInserterOpened(),
 			isListViewOpen: isListViewOpened(),
 			post: getEntityRecord( 'postType', POST_TYPE, postId ),
 			sidebarIsOpened: !! select( interfaceStore ).getActiveComplementaryArea( patternStore.name ),
-			settings: getSettings(),
+			settings: _settings,
 		};
 	}, [] );
 	const { setIsInserterOpened, updateSettings } = useDispatch( patternStore );
@@ -69,9 +76,7 @@ function Editor( { initialSettings, onError, postId } ) {
 	const editorSettings = useMemo( () => {
 		const result = {
 			...settings,
-			hasFixedToolbar: false,
-			focusMode: false,
-			hasReducedUI: false,
+			fullscreenMode: true,
 			__experimentalLocalAutosaveInterval: 30,
 			__experimentalSetIsInserterOpened: setIsInserterOpened,
 			// @todo Add a filter over allowedBlockTypes.

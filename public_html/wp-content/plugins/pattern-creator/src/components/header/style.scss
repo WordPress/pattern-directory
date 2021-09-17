@@ -9,14 +9,6 @@ $header-toolbar-min-width: 335px;
 	width: 100%;
 	justify-content: space-between;
 
-	body.is-fullscreen-mode & {
-		padding-left: 60px;
-		transition: padding-left 20ms linear;
-		transition-delay: 80ms;
-
-		@include reduce-motion("transition");
-	}
-
 	.pattern-header_start,
 	.pattern-header_end {
 		display: flex;
@@ -146,6 +138,25 @@ body.is-navigation-sidebar-open {
 
 	@include break-small() {
 		padding-right: $grid-unit-20;
+	}
+}
+
+.pattern-header.has-reduced-ui {
+
+	@include break-small () {
+		// Apply transition to every button but the first one.
+		.pattern-header__toolbar > * + .components-button,
+		.pattern-header__toolbar > * + .components-dropdown > [aria-expanded="false"] {
+			transition: opacity 0.1s linear;
+
+			@include reduce-motion("transition");
+		}
+
+		// Zero out opacity unless hovered.
+		&:not(:hover) .pattern-header__toolbar > * + .components-button,
+		&:not(:hover) .pattern-header__toolbar > * + .components-dropdown > [aria-expanded="false"] {
+			opacity: 0;
+		}
 	}
 }
 

@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import classnames from 'classnames';
+
+/**
  * WordPress dependencies
  */
 import { useCallback, useRef } from '@wordpress/element';
@@ -11,8 +16,6 @@ import { __, _x } from '@wordpress/i18n';
 import { listView, plus } from '@wordpress/icons';
 import { Button } from '@wordpress/components';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
-import { store as coreStore } from '@wordpress/core-data';
-import { store as editorStore } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -21,7 +24,7 @@ import MoreMenu from './more-menu';
 import SaveButton from '../save-button';
 import UndoButton from './undo-redo/undo';
 import RedoButton from './undo-redo/redo';
-import { POST_TYPE, store as patternStore } from '../../store';
+import { store as patternStore } from '../../store';
 
 const preventDefault = ( event ) => {
 	event.preventDefault();
@@ -29,27 +32,23 @@ const preventDefault = ( event ) => {
 
 export default function Header() {
 	const inserterButton = useRef();
-	const { deviceType, isInserterOpen, isListViewOpen, listViewShortcut } = useSelect( ( select ) => {
-		const { getPreviewDeviceType, isInserterOpened, isListViewOpened } = select( patternStore );
-		const { getCurrentPostId } = select( editorStore );
-		const { getEditedEntityRecord } = select( coreStore );
-		const { getShortcutRepresentation } = select( keyboardShortcutsStore );
+	const { deviceType, hasReducedUI, isInserterOpen, isListViewOpen, listViewShortcut } = useSelect(
+		( select ) => {
+			const { getPreviewDeviceType, isFeatureActive, isInserterOpened, isListViewOpened } = select(
+				patternStore
+			);
+			const { getShortcutRepresentation } = select( keyboardShortcutsStore );
 
-		const postId = getCurrentPostId();
-		const record = getEditedEntityRecord( 'postType', POST_TYPE, postId );
-		const _entityTitle = record?.slug;
-		const _isLoaded = !! postId;
-
-		return {
-			deviceType: getPreviewDeviceType(),
-			entityTitle: _entityTitle,
-			isLoaded: _isLoaded,
-			template: record,
-			isInserterOpen: isInserterOpened(),
-			isListViewOpen: isListViewOpened(),
-			listViewShortcut: getShortcutRepresentation( 'core/edit-site/toggle-list-view' ),
-		};
-	}, [] );
+			return {
+				deviceType: getPreviewDeviceType(),
+				hasReducedUI: isFeatureActive( 'reducedUI' ),
+				isInserterOpen: isInserterOpened(),
+				isListViewOpen: isListViewOpened(),
+				listViewShortcut: getShortcutRepresentation( 'core/edit-site/toggle-list-view' ),
+			};
+		},
+		[]
+	);
 
 	const { setPreviewDeviceType, setIsInserterOpened, setIsListViewOpened } = useDispatch( patternStore );
 
@@ -69,9 +68,13 @@ export default function Header() {
 		isListViewOpen,
 	] );
 
+	const classes = classnames( 'pattern-header', {
+		'has-reduced-ui': hasReducedUI,
+	} );
+
 	return (
-		<div className="pattern-header">
-			<div className="pattern-header_start">
+		<div className={ classes }>
+			<div className="pattern-header__start">
 				<div className="pattern-header__toolbar">
 					<Button
 						ref={ inserterButton }
