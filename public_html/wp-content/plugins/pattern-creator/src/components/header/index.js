@@ -22,7 +22,7 @@ import { useViewportMatch } from '@wordpress/compose';
  */
 import MoreMenu from './more-menu';
 import RedoButton from './undo-redo/redo';
-import SaveButton from '../save-button';
+import { SaveButton, SaveDraftButton } from '../save-button';
 import { store as patternStore } from '../../store';
 import UndoButton from './undo-redo/undo';
 
@@ -115,6 +115,7 @@ export default function Header() {
 
 			<div className="pattern-header_end">
 				<div className="pattern-header__actions">
+					<SaveDraftButton />
 					<PreviewOptions deviceType={ deviceType } setDeviceType={ setPreviewDeviceType } />
 					<SaveButton />
 					<PinnedItems.Slot scope="wporg/pattern-creator" />

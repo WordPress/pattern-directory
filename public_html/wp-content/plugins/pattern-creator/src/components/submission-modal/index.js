@@ -6,13 +6,13 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
+import { __ } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import { Button, CheckboxControl, Modal, TextControl, TextareaControl } from '@wordpress/components';
 import { store as editorStore } from '@wordpress/editor';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useRef, useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
-import { addQueryArgs } from '@wordpress/url';
 
 const ForwardButton = ( { children, disabled, onClick } ) => (
 	<Button className="pattern-modal-publish__button" isPrimary disabled={ disabled } onClick={ onClick }>
@@ -22,19 +22,17 @@ const ForwardButton = ( { children, disabled, onClick } ) => (
 
 export default function SubmissionModal( { isPublished, onSubmit, onClose } ) {
 	// Get current post defaults
-	const { postTitle, patternCategories, meta } = useSelect( ( select ) => {
+	const { meta, postCategories, postTitle } = useSelect( ( select ) => {
 		return {
 			meta: select( editorStore ).getEditedPostAttribute( 'meta' ),
 			postTitle: select( editorStore ).getEditedPostAttribute( 'title' ),
-			patternCategories: select( editorStore ).getEditedPostAttribute( 'pattern-categories' ),
+			postCategories: select( editorStore ).getEditedPostAttribute( 'pattern-categories' ),
 		};
 	} );
-
 	const { editPost } = useDispatch( editorStore );
-
 	const [ title, setTitle ] = useState( postTitle );
 	const [ description, setDescription ] = useState( meta.wpop_description );
-	const [ selectedCategories, setSelectedCategories ] = useState( patternCategories );
+	const [ selectedCategories, setSelectedCategories ] = useState( postCategories );
 	const [ categories, setCategories ] = useState( [] );
 	const [ currentPage, setCurrentPage ] = useState( 0 );
 	const container = useRef();
