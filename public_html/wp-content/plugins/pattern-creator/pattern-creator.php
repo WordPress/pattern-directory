@@ -109,7 +109,7 @@ function pattern_creator_init() {
 	/** Load in admin post functions for `get_default_post_to_edit`. */
 	require_once ABSPATH . 'wp-admin/includes/post.php';
 
-	if ( is_singular( POST_TYPE ) ) {
+	if ( is_singular( POST_TYPE ) || is_editing_pattern() ) {
 		$post_id = is_editing_pattern() ? $post_id = get_query_var( PATTERN_ID_VAR ) : get_the_ID();
 		$post    = get_post( $post_id );
 	} else {
@@ -168,15 +168,6 @@ add_filter( 'template_include', __NAMESPACE__ . '\inject_editor_template' );
  */
 function rewrite_for_pattern_editing() {
 	add_rewrite_rule( '^pattern/(\d+)/edit', 'index.php?pagename=new-pattern&' . PATTERN_ID_VAR . '=$matches[1]', 'top' );
-
-	if (
-		'edit' === filter_input( INPUT_GET, 'action' )
-		&& POST_TYPE === get_post_type( filter_input( INPUT_GET, 'post' ) )
-		&& ! is_admin()
-	) {
-		wp_safe_redirect( home_url( '/pattern/' . absint( $_GET['post'] ) . '/edit' ) );
-		exit;
-	}
 }
 add_action( 'init', __NAMESPACE__ . '\rewrite_for_pattern_editing' );
 

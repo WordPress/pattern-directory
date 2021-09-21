@@ -32,7 +32,7 @@ import KeyboardShortcuts from '../keyboard-shortcuts';
 import ListViewSidebar from '../secondary-sidebar/list-view-sidebar';
 import { POST_TYPE, store as patternStore } from '../../store';
 import { SidebarComplementaryAreaFills } from '../sidebar';
-// import URLQueryController from '../url-query-controller';
+import UrlController from '../url-controller';
 import WelcomeGuide from '../welcome-guide';
 
 const interfaceLabels = {
@@ -110,6 +110,7 @@ function Editor( { initialSettings, onError, postId } ) {
 				<EditorProvider settings={ editorSettings } post={ post }>
 					<ErrorBoundary onError={ onError }>
 						<FullscreenMode isActive />
+						<UrlController postId={ postId } />
 						<UnsavedChangesWarning />
 						<KeyboardShortcuts.Register />
 						<SidebarComplementaryAreaFills />
