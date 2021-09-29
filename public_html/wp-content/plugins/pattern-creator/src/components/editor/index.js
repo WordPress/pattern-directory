@@ -20,6 +20,7 @@ import {
 	UnsavedChangesWarning,
 } from '@wordpress/editor';
 import { Notice, Popover, SlotFillProvider } from '@wordpress/components';
+import { ShortcutProvider } from '@wordpress/keyboard-shortcuts';
 
 /**
  * Internal dependencies
@@ -105,7 +106,7 @@ function Editor( { initialSettings, onError, postId } ) {
 	};
 
 	return (
-		<>
+		<ShortcutProvider>
 			<SlotFillProvider>
 				<EditorProvider settings={ editorSettings } post={ post }>
 					<ErrorBoundary onError={ onError }>
@@ -150,7 +151,7 @@ function Editor( { initialSettings, onError, postId } ) {
 					</ErrorBoundary>
 				</EditorProvider>
 			</SlotFillProvider>
-		</>
+		</ShortcutProvider>
 	);
 }
 export default Editor;

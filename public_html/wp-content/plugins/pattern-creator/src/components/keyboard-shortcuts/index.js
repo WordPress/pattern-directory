@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { useCallback, useEffect } from '@wordpress/element';
+import { useEffect } from '@wordpress/element';
 import { store as keyboardShortcutsStore, useShortcut } from '@wordpress/keyboard-shortcuts';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
@@ -25,47 +25,31 @@ function KeyboardShortcuts() {
 	const { setIsListViewOpened } = useDispatch( patternStore );
 	const { enableComplementaryArea, disableComplementaryArea } = useDispatch( interfaceStore );
 
-	useShortcut(
-		'core/edit-site/undo',
-		( event ) => {
-			undo();
-			event.preventDefault();
-		},
-		{ bindGlobal: true }
-	);
+	useShortcut( 'core/edit-site/undo', ( event ) => {
+		undo();
+		event.preventDefault();
+	} );
 
-	useShortcut(
-		'core/edit-site/redo',
-		( event ) => {
-			redo();
-			event.preventDefault();
-		},
-		{ bindGlobal: true }
-	);
+	useShortcut( 'core/edit-site/redo', ( event ) => {
+		redo();
+		event.preventDefault();
+	} );
 
-	useShortcut(
-		'core/edit-site/toggle-list-view',
-		useCallback( () => {
-			setIsListViewOpened( ! isListViewOpen );
-		}, [ isListViewOpen, setIsListViewOpened ] ),
-		{ bindGlobal: true }
-	);
+	useShortcut( 'core/edit-site/toggle-list-view', () => {
+		setIsListViewOpened( ! isListViewOpen );
+	} );
 
-	useShortcut(
-		'core/edit-site/toggle-block-settings-sidebar',
-		( event ) => {
-			// This shortcut has no known clashes, but use preventDefault to prevent any
-			// obscure shortcuts from triggering.
-			event.preventDefault();
+	useShortcut( 'core/edit-site/toggle-block-settings-sidebar', ( event ) => {
+		// This shortcut has no known clashes, but use preventDefault to prevent any
+		// obscure shortcuts from triggering.
+		event.preventDefault();
 
-			if ( isBlockInspectorOpen ) {
-				disableComplementaryArea( STORE_NAME );
-			} else {
-				enableComplementaryArea( STORE_NAME, SIDEBAR_BLOCK );
-			}
-		},
-		{ bindGlobal: true }
-	);
+		if ( isBlockInspectorOpen ) {
+			disableComplementaryArea( STORE_NAME );
+		} else {
+			enableComplementaryArea( STORE_NAME, SIDEBAR_BLOCK );
+		}
+	} );
 
 	return null;
 }
