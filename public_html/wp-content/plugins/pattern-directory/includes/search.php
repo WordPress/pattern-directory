@@ -138,17 +138,20 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 		],
 	];
 
-	foreach ( $wp_query->get( 'tax_query' ) as $term ) {
-		$taxonomy = $term['taxonomy'];
+	$tax_query = $wp_query->get( 'tax_query' );
+	if ( $tax_query ) {
+		foreach ( $tax_query as $term ) {
+			$taxonomy = $term['taxonomy'];
 
-		// `wporg-pattern-flag-reason` is private.
-		if ( ! in_array( $taxonomy, array( 'wporg-pattern-category', 'wporg-pattern-keyword' ) ) ) {
-			continue;
+			// `wporg-pattern-flag-reason` is private.
+			if ( ! in_array( $taxonomy, array( 'wporg-pattern-category', 'wporg-pattern-keyword' ) ) ) {
+				continue;
+			}
+
+			$filter['bool']['must'][] = [
+				'terms' => [ "taxonomy.$taxonomy.term_id" => $term['terms'] ],
+			];
 		}
-
-		$filter['bool']['must'][] = [
-			'terms' => [ "taxonomy.$taxonomy.term_id" => $term['terms'] ],
-		];
 	}
 
 	$parser->add_query( $must_query, 'must' );
