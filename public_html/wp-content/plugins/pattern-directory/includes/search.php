@@ -179,7 +179,7 @@ function log_aborted_queries( $reason, $data ) {
 	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
 		wp_send_json_error( array( 'jetpack_search_abort - ' . $reason, $data ) );
 	} else {
-		error_log( 'jetpack_search_abort - cc @iandunn, @tellyworth, @dd32 - ' . $reason . ' - ' . wp_json_encode( $data ), E_USER_ERROR );
+		trigger_error( 'jetpack_search_abort - ' . $reason . ' - ' . wp_json_encode( $data ), E_USER_WARNING );
 	}
 }
 
@@ -195,6 +195,6 @@ function log_failed_queries( $data ) {
 	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
 		wp_send_json_error( array( 'failed_jetpack_search_query', $data ) );
 	} else {
-		error_log( 'failed_jetpack_search_query - cc @iandunn, @tellyworth, @dd32 - ' . wp_json_encode( $data ), E_USER_ERROR );
+		trigger_error( 'failed_jetpack_search_query - ' . wp_json_encode( $data ), E_USER_WARNING );
 	}
 }
