@@ -182,7 +182,7 @@ function log_aborted_queries( $reason, $data ) {
 	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
 		wp_send_json_error( array( 'jetpack_search_abort - ' . $reason, $data ) );
 	} else {
-		trigger_error( 'jetpack_search_abort - ' . $reason . ' - ' . wp_json_encode( $data ), E_USER_WARNING );
+		trigger_error( 'jetpack_search_abort - ' . $reason . ' - ' . wp_json_encode( $data ), E_USER_WARNING ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 }
 
