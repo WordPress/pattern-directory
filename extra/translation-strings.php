@@ -10,6 +10,7 @@
 
 _x( 'Buttons', 'Categories term name', 'wporg-patterns' );
 _x( 'Columns', 'Categories term name', 'wporg-patterns' );
+_x( 'Featured', 'Categories term name', 'wporg-patterns' );
 _x( 'Gallery', 'Categories term name', 'wporg-patterns' );
 _x( 'Header', 'Categories term name', 'wporg-patterns' );
 _x( 'Images', 'Categories term name', 'wporg-patterns' );
