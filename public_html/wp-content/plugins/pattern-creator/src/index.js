@@ -1,17 +1,22 @@
 /**
  * WordPress dependencies
  */
-import { registerCoreBlocks } from '@wordpress/block-library';
-import { render, unmountComponentAtNode } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 /* eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK. */
 import { __experimentalFetchLinkSuggestions as fetchLinkSuggestions } from '@wordpress/core-data';
+import { registerCoreBlocks } from '@wordpress/block-library';
+import { render, unmountComponentAtNode } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import './store';
 import Editor from './components/editor';
+import { filterEndpoints } from './api-middleware';
 import './style.scss';
+
+// Set up API middleware.
+apiFetch.use( filterEndpoints );
 
 /**
  * Reinitializes the editor after the user chooses to reboot the editor after
