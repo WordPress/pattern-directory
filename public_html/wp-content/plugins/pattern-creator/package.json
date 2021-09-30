@@ -10,7 +10,8 @@
 		"format:js": "wp-scripts format src -- --config=../../../../.prettierrc.js",
 		"lint:css": "wp-scripts lint-style style.css src",
 		"lint:js": "wp-scripts lint-js src",
-		"start": "wp-scripts start"
+		"start": "wp-scripts start",
+		"test:unit": "wp-scripts test-unit-js"
 	},
 	"devDependencies": {
 		"@wordpress/dependency-extraction-webpack-plugin": "3.2.1",
