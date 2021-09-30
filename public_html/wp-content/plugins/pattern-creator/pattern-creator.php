@@ -18,8 +18,6 @@ const AUTOSAVE_INTERVAL = 30;
 const IS_EDIT_VAR = 'edit-pattern';
 const PATTERN_ID_VAR = 'pattern-id';
 
-define( 'GUTENBERG_DEVELOPMENT_MODE', true );
-
 /**
  * Check the conditions of the page to determine if the editor should load.
  * - It should be a single pattern page.
