@@ -1,7 +1,3 @@
-/* eslint-disable sort-imports */
-/* eslint-disable import/no-unresolved */
-/* eslint-disable @wordpress/no-unsafe-wp-apis */
-
 /**
  * Returns an action object used to toggle a feature flag.
  *

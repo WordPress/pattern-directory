@@ -10,7 +10,7 @@ import createSelector from 'rememo';
 import { store as coreStore } from '@wordpress/core-data';
 import { createRegistrySelector } from '@wordpress/data';
 import {
-	/* eslint-disable @wordpress/no-unsafe-wp-apis */
+	/* eslint-disable-next-line @wordpress/no-unsafe-wp-apis */
 	__unstableSerializeAndClean,
 	getDefaultBlockName,
 	getFreeformContentHandlerName,

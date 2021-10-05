@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { setIsListViewOpened, setPage, toggleFeature } from '../actions';
+import { setIsListViewOpened, toggleFeature } from '../actions';
 
 describe( 'actions', () => {
 	describe( 'toggleFeature', () => {
@@ -11,28 +11,6 @@ describe( 'actions', () => {
 				type: 'TOGGLE_FEATURE',
 				feature: feature,
 			} );
-		} );
-	} );
-
-	describe( 'setPage', () => {
-		// eslint-disable-next-line jest/no-disabled-tests
-		it.skip( 'should yield the FIND_TEMPLATE control and return the SET_PAGE action', () => {
-			const page = { path: '/' };
-
-			// eslint-disable-next-line id-length
-			const it = setPage( page );
-			expect( it.next().value ).toEqual( {
-				type: '@@data/RESOLVE_SELECT',
-				storeKey: 'core',
-				selectorName: '__experimentalGetTemplateForLink',
-				args: [ page.path ],
-			} );
-			expect( it.next( { id: 'tt1-blocks//single' } ).value ).toEqual( {
-				type: 'SET_PAGE',
-				page: page,
-				templateId: 'tt1-blocks//single',
-			} );
-			expect( it.next().done ).toBe( true );
 		} );
 	} );
 
