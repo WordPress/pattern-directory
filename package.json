@@ -6,10 +6,10 @@
 	"license": "GPL-2.0-or-later",
 	"private": true,
 	"dependencies": {
-		"@wordpress/env": "4.1.0",
+		"@wordpress/env": "4.1.1",
 		"@wordpress/scripts": "16.1.4",
 		"@wordpress/stylelint-config": "19.1.0",
-		"eslint-plugin-jsdoc": "36.0.8"
+		"eslint-plugin-jsdoc": "36.1.0"
 	},
 	"scripts": {
 		"create": "composer install && ./bin/index.sh",
