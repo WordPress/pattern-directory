@@ -195,4 +195,5 @@ function show_admin_bar( $show_admin_bar ) {
 
 	return false;
 }
-add_filter( 'show_admin_bar', __NAMESPACE__ . '\show_admin_bar' );
+// Priority needs to be over 1000 to override `logged-out-admin-bar`.
+add_filter( 'show_admin_bar', __NAMESPACE__ . '\show_admin_bar', 1001 );
