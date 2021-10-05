@@ -10,12 +10,14 @@
 		"format:js": "wp-scripts format src -- --config=../../../../.prettierrc.js",
 		"lint:css": "wp-scripts lint-style style.css src",
 		"lint:js": "wp-scripts lint-js src",
-		"start": "wp-scripts start"
+		"start": "wp-scripts start",
+		"test:unit": "wp-scripts test-unit-js"
 	},
 	"devDependencies": {
 		"@wordpress/dependency-extraction-webpack-plugin": "3.2.1",
 		"@wordpress/scripts": "16.1.4",
 		"autoprefixer": "10.3.7",
+		"deep-freeze": "0.0.1",
 		"postcss-custom-properties": "12.0.0"
 	},
 	"dependencies": {
@@ -36,11 +38,14 @@
 		"@wordpress/i18n": "4.2.2",
 		"@wordpress/icons": "5.0.2",
 		"@wordpress/interface": "4.1.0",
+		"@wordpress/keyboard-shortcuts": "3.0.2",
+		"@wordpress/keycodes": "3.2.2",
 		"@wordpress/plugins": "4.0.2",
 		"@wordpress/primitives": "3.0.1",
 		"@wordpress/url": "3.2.2",
 		"classnames": "2.3.1",
-		"lodash": "4.17.21"
+		"lodash": "4.17.21",
+		"rememo": "4.0.0"
 	},
 	"eslintConfig": {
 		"extends": "../../../../.eslintrc.js",

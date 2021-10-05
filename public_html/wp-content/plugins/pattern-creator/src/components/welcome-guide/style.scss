@@ -1,0 +1,61 @@
+
+.pattern-creator-welcome-guide {
+	max-width: 320px;
+}
+
+.pattern-creator-welcome-guide__image {
+	margin-bottom: $grid-unit-10; /* Pushes the dot controls away */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #1d2327;
+	height: 240px;
+	overflow: hidden;
+}
+
+/* Change circle indicator color */
+.pattern-creator-welcome-guide .components-guide__page-control [aria-current="step"] circle {
+	fill: var(--wp-admin-theme-color);
+}
+
+/* Change the close button color */
+.pattern-creator-welcome-guide .components-modal__header button {
+	background: #000;
+	color: #fff;
+}
+
+/* Change the link color */
+.pattern-creator-welcome-guide .components-button.components-guide__forward-button {
+	color: var(--wp-admin-theme-color);
+}
+
+.pattern-creator-welcome-guide__image svg {
+	position: absolute;
+}
+
+.pattern-creator-welcome-guide__title,
+.pattern-creator-welcome-guide p {
+	margin: 0;
+	padding: 0 $grid-unit-40;
+}
+
+.pattern-creator-welcome-guide__title {
+	margin: $grid-unit-20 0;
+	font-size: 20px;
+	font-weight: 600;
+	line-height: normal;
+}
+
+.pattern-creator-welcome-guide p {
+	margin-bottom: $grid-unit-20;
+	font-size: 14px;
+}
+
+.pattern-creator-welcome-guide__link {
+	margin-top: $grid-unit-10;
+	display: block;
+}
+
+.pattern-creator-welcome-guide .components-guide__footer > button {
+	padding: $grid-unit-10 $grid-unit-15;
+}

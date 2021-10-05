@@ -93,3 +93,6 @@ jobs:
 
     - name: Run unit tests on theme data store
       run:  yarn workspace wporg-pattern-directory-theme test:unit
+
+    - name: Run unit tests on the pattern creator
+      run:  yarn workspace wporg-pattern-creator test:unit

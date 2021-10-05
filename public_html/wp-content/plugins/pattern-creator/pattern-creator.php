@@ -57,132 +57,98 @@ function add_query_var( $query_vars ) {
 add_filter( 'query_vars', __NAMESPACE__ . '\add_query_var' );
 
 /**
- * Register & load the assets.
+ * Register & load the assets, initialize pattern creator.
  *
  * @throws \Error If the build files don't exist.
  */
-function enqueue_assets() {
+function pattern_creator_init() {
+	global $editor_styles;
+
 	if ( ! should_load_creator() ) {
 		return;
 	}
 
 	wp_deregister_style( 'wporg-style' );
 
-	do_action( 'enqueue_block_editor_assets' );
-
-	/** Load in admin post functions for `get_default_post_to_edit`. */
-	require_once ABSPATH . 'wp-admin/includes/post.php';
-
 	$dir = dirname( __FILE__ );
-
 	$script_asset_path = "$dir/build/index.asset.php";
 	if ( ! file_exists( $script_asset_path ) ) {
 		throw new \Error( 'You need to run `yarn start` or `yarn build` for the Pattern Creator.' );
 	}
 
 	$script_asset = require( $script_asset_path );
-	wp_register_script(
-		'wporg-pattern-creator-script',
+	wp_enqueue_script(
+		'wp-pattern-creator',
 		plugins_url( 'build/index.js', __FILE__ ),
 		$script_asset['dependencies'],
 		$script_asset['version'],
 		true
 	);
-
 	wp_set_script_translations( 'wporg-pattern-creator-script', 'wporg-pattern-creator' );
 
-	if ( is_singular( POST_TYPE ) ) {
-		$post_id = get_the_ID();
+	wp_add_inline_script(
+		'wp-pattern-creator',
+		sprintf(
+			'var wporgBlockPattern = JSON.parse( decodeURIComponent( \'%s\' ) );',
+			rawurlencode( wp_json_encode( array(
+				'siteUrl'    => esc_url( home_url() ),
+			) ) )
+		),
+		'before'
+	);
+
+	wp_enqueue_style(
+		'wp-pattern-creator',
+		plugins_url( 'build/style-index.css', __FILE__ ),
+		array( 'wp-components' ),
+		filemtime( "$dir/build/style-index.css" )
+	);
+
+	/** Load in admin post functions for `get_default_post_to_edit`. */
+	require_once ABSPATH . 'wp-admin/includes/post.php';
+
+	if ( is_singular( POST_TYPE ) || is_editing_pattern() ) {
+		$post_id = is_editing_pattern() ? $post_id = get_query_var( PATTERN_ID_VAR ) : get_the_ID();
 		$post    = get_post( $post_id );
 	} else {
 		$post    = get_default_post_to_edit( POST_TYPE, true );
 		$post_id = $post->ID;
 	}
 
-	// Update the post id if we're editing a pattern.
-	if ( should_load_creator() && is_editing_pattern() ) {
-		$post_id = get_query_var( PATTERN_ID_VAR );
-		$post    = get_post( $post_id );
-	}
-
-	$block_editor_context = new WP_Block_Editor_Context( array( 'post' => $post ) );
-
-	$settings = array(
-		'alignWide'                            => true, // Support wide patterns.
-		'allowedBlockTypes'                    => apply_filters( 'allowed_block_types_all', true, $block_editor_context ),
-		'disablePostFormats'                   => true,
-		'enableCustomFields'                   => false,
-		'titlePlaceholder'                     => __( 'Add pattern title', 'wporg-patterns' ),
-		'bodyPlaceholder'                      => __( 'Start writing or type / to choose a block', 'wporg-patterns' ),
-		'isRTL'                                => is_rtl(),
-		'autosaveInterval'                     => AUTOSAVE_INTERVAL,
-		'maxUploadFileSize'                    => 0,
-		'richEditingEnabled'                   => user_can_richedit(),
+	$custom_settings = array(
+		'postId'                               => $post_id,
+		'siteUrl'                              => site_url(),
+		'postsPerPage'                         => get_option( 'posts_per_page' ),
+		'styles'                               => gutenberg_get_editor_styles(),
 		'__experimentalBlockPatterns'          => array(),
 		'__experimentalBlockPatternCategories' => array(),
+	);
+	$editor_context = new WP_Block_Editor_Context( array( 'post' => $post ) );
+	$settings       = gutenberg_get_block_editor_settings( $custom_settings, $editor_context );
 
-		// Editor features -  @todo Re-enable later?
-		'disableCustomColors'                  => true,
-		'disableCustomFontSizes'               => true,
-		'disableCustomGradients'               => true,
-		'enableCustomLineHeight'               => false,
-		'enableCustomUnits'                    => false,
+	gutenberg_initialize_editor(
+		'block-pattern-creator',
+		'pattern-creator',
+		array(
+			'preload_paths'    => array(),
+			'initializer_name' => 'initialize',
+			'editor_settings'  => $settings,
+		)
 	);
 
 	wp_add_inline_script(
-		'wporg-pattern-creator-script',
-		sprintf(
-			'var wporgBlockPattern = JSON.parse( decodeURIComponent( \'%s\' ) );',
-			rawurlencode( wp_json_encode( array(
-				'siteUrl'    => esc_url( home_url() ),
-				'settings'   => $settings,
-				'postId'     => $post_id,
-				'categories' => get_terms(
-					'wporg-pattern-category',
-					array(
-						'hide_empty' => false,
-						'fields' => 'id=>name',
-					)
-				),
-			) ) )
-		),
-		'before'
+		'wp-blocks',
+		sprintf( 'wp.blocks.setCategories( %s );', wp_json_encode( get_block_categories( $post ) ) ),
+		'after'
 	);
 
-	wp_enqueue_script( 'wporg-pattern-creator-script' );
-
-	wp_register_style(
-		'wporg-pattern-creator-style',
-		plugins_url( 'build/style-index.css', __FILE__ ),
-		array(
-			'wp-edit-post',
-			'wp-format-library',
-		),
-		filemtime( "$dir/build/style-index.css" )
-	);
-
-	// Postbox is only registered if `is_admin`, so we need to intentionally add it.
-	wp_enqueue_script(
-		'postbox',
-		admin_url( 'js/postbox.min.js' ),
-		array( 'jquery-ui-sortable', 'wp-a11y' ),
-		get_bloginfo( 'version' ),
-		true
-	);
-	wp_enqueue_style( 'dashicons' );
-	wp_enqueue_style( 'common' );
-	wp_enqueue_style( 'forms' );
-	wp_enqueue_style( 'dashboard' );
-	wp_enqueue_style( 'media' );
-	wp_enqueue_style( 'admin-menu' );
-	wp_enqueue_style( 'admin-bar' );
-	wp_enqueue_style( 'nav-menus' );
-	wp_enqueue_style( 'l10n' );
-	wp_enqueue_style( 'buttons' );
-	wp_enqueue_style( 'wp-edit-post' );
-	wp_enqueue_style( 'wporg-pattern-creator-style' );
+	wp_enqueue_script( 'wp-edit-site' );
+	wp_enqueue_script( 'wp-format-library' );
+	wp_enqueue_style( 'wp-edit-site' );
+	wp_enqueue_style( 'wp-format-library' );
+	wp_enqueue_media();
 }
-add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets', 20 );
+add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\pattern_creator_init', 20 );
 
 /**
  * Bypass WordPress template system to load only our editor app.
@@ -200,15 +166,34 @@ add_filter( 'template_include', __NAMESPACE__ . '\inject_editor_template' );
  */
 function rewrite_for_pattern_editing() {
 	add_rewrite_rule( '^pattern/(\d+)/edit', 'index.php?pagename=new-pattern&' . PATTERN_ID_VAR . '=$matches[1]', 'top' );
-
-	if (
-		'edit' === filter_input( INPUT_GET, 'action' )
-		&& POST_TYPE === get_post_type( filter_input( INPUT_GET, 'post' ) )
-		&& ! is_admin()
-	) {
-		wp_safe_redirect( home_url( '/pattern/' . absint( $_GET['post'] ) . '/edit' ) );
-		exit;
-	}
 }
 add_action( 'init', __NAMESPACE__ . '\rewrite_for_pattern_editing' );
 
+/**
+ * Inject the editor styles into the page.
+ */
+function wp_footer_creator() {
+	if ( ! should_load_creator() ) {
+		return;
+	}
+
+	gutenberg_extend_block_editor_styles_html();
+}
+add_action( 'wp_footer', __NAMESPACE__ . '\wp_footer_creator' );
+
+
+/**
+ * Always disable the admin bar on the creator page.
+ *
+ * @param bool $show_admin_bar Whether the admin bar should be shown. Default false.
+ * @return bool Filtered value.
+ */
+function show_admin_bar( $show_admin_bar ) {
+	if ( ! should_load_creator() ) {
+		return $show_admin_bar;
+	}
+
+	return false;
+}
+// Priority needs to be over 1000 to override `logged-out-admin-bar`.
+add_filter( 'show_admin_bar', __NAMESPACE__ . '\show_admin_bar', 1001 );

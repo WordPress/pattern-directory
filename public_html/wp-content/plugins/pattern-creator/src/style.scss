@@ -1,0 +1,19 @@
+/* Base styles */
+@import "~@wordpress/base-styles/colors";
+@import "~@wordpress/base-styles/variables";
+@import "~@wordpress/base-styles/mixins";
+@import "~@wordpress/base-styles/breakpoints";
+@import "~@wordpress/base-styles/animations";
+@import "~@wordpress/base-styles/z-index";
+@import "~@wordpress/base-styles/default-custom-properties";
+
+/* Components */
+@import "./components/block-editor/style.scss";
+@import "./components/editor/style.scss";
+@import "./components/header/style.scss";
+@import "./components/header/more-menu/style.scss";
+@import "./components/secondary-sidebar/style.scss";
+@import "./components/sidebar/style.scss";
+@import "./components/sidebar/settings-header/style.scss";
+@import "./components/submission-modal/style.scss";
+@import "./components/welcome-guide/style.scss";

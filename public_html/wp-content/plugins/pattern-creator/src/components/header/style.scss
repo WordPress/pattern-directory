@@ -1,0 +1,232 @@
+$header-toolbar-min-width: 335px;
+
+.pattern-header {
+	align-items: center;
+	background-color: $white;
+	display: flex;
+	height: $header-height;
+	box-sizing: border-box;
+	width: 100%;
+	justify-content: space-between;
+
+	.pattern-header_start,
+	.pattern-header_end {
+		display: flex;
+	}
+
+	.pattern-header_center {
+		display: flex;
+		align-items: center;
+		height: 100%;
+		// Flex items will, by default, refuse to shrink below a minimum
+		// intrinsic width. In order to shrink this flexbox item, and
+		// subsequently truncate child text, we set an explicit min-width.
+		// See https://dev.w3.org/csswg/css-flexbox/#min-size-auto
+		min-width: 0;
+	}
+
+	.pattern-header_end {
+		justify-content: flex-end;
+	}
+}
+
+// Keeps the document title centered when the sidebar is open
+body.is-navigation-sidebar-open {
+	.pattern-header {
+		padding-left: 0;
+		transition: padding-left 20ms linear;
+		transition-delay: 0ms;
+
+		@include reduce-motion("transition");
+	}
+}
+
+// Centred document title on small screens with sidebar open
+@media ( max-width: #{ ($break-large - 1) } ) {
+	body.is-navigation-sidebar-open .pattern-header {
+		.pattern-header-toolbar__inserter-toggle ~ .components-button,
+		.pattern-header_end .components-button:not(.is-primary) {
+			display: none;
+		}
+
+		.pattern-save-button__button {
+			margin-right: 0;
+		}
+	}
+}
+
+.pattern-header__toolbar {
+	display: flex;
+	align-items: center;
+	padding-left: $grid-unit-10;
+
+	@include break-small() {
+		padding-left: $grid-unit-30;
+	}
+
+	@include break-wide() {
+		padding-right: $grid-unit-10;
+	}
+
+	.pattern-header-toolbar__inserter-toggle {
+		margin-right: $grid-unit-10;
+		min-width: $grid-unit-40;
+		width: $grid-unit-40;
+		height: $grid-unit-40;
+		padding: 0;
+
+		svg {
+			transition: transform cubic-bezier(0.165, 0.84, 0.44, 1) 0.2s;
+
+			@include reduce-motion("transition");
+		}
+
+		&.is-pressed {
+			svg {
+				transform: rotate(45deg);
+			}
+		}
+	}
+}
+
+.pattern-header__toolbar-switchers {
+	align-items: center;
+	display: flex;
+}
+
+.pattern-header__toolbar-switchers-separator {
+	margin: 0 -6px 0;
+}
+
+/**
+ * Buttons in the Toolbar
+ */
+
+.pattern-header__actions {
+	display: inline-flex;
+	align-items: center;
+	flex-wrap: wrap;
+	padding-right: $grid-unit-05;
+
+	.interface-pinned-items {
+		display: none;
+
+		@include break-medium() {
+			display: inline-flex;
+		}
+	}
+
+	// Adjust button paddings to scale better to mobile.
+	.editor-post-saved-state,
+	.components-button.components-button {
+		margin-right: $grid-unit-05;
+
+		@include break-small() {
+			margin-right: $grid-unit-15;
+		}
+	}
+
+	.editor-post-saved-state,
+	.components-button.is-tertiary {
+		padding: 0 #{$grid-unit-15 * 0.5};
+	}
+
+	.pattern-more-menu .components-button,
+	.interface-pinned-items .components-button {
+		margin-right: 0;
+	}
+
+	@include break-small() {
+		padding-right: $grid-unit-20;
+	}
+}
+
+.main-dashboard-button {
+	display: flex;
+	align-items: center;
+	align-self: stretch;
+	justify-content: center;
+	border: none;
+	background: $gray-900;
+	color: $white;
+	fill: currentColor;
+	border-radius: 0;
+	height: $header-height + $border-width;
+	width: $header-height;
+	position: relative;
+	margin-bottom: - $border-width;
+
+	&:hover,
+	&:active,
+	&:visited {
+		color: $white;
+	}
+
+	&:focus {
+		box-shadow: none;
+	}
+
+	&::before {
+		transition: box-shadow 0.1s ease;
+
+		@include reduce-motion("transition");
+		content: "";
+		display: block;
+		position: absolute;
+		top: 9px;
+		right: 9px;
+		bottom: 9px;
+		left: 9px;
+		border-radius: $radius-block-ui + $border-width + $border-width;
+		box-shadow: inset 0 0 0 var(--wp-admin-border-width-focus) $gray-900;
+	}
+
+	// Hover color.
+	&:hover::before {
+		box-shadow: inset 0 0 0 var(--wp-admin-border-width-focus) $gray-700;
+	}
+
+	// Lightened spot color focus.
+	&:focus::before {
+		box-shadow:
+			inset 0 0 0 var(--wp-admin-border-width-focus) rgba($white, 0.1),
+			inset 0 0 0 var(--wp-admin-border-width-focus) var(--wp-admin-theme-color);
+	}
+}
+
+.pattern-header.has-reduced-ui {
+
+	@include break-small () {
+		// Apply transition to every button but the first one.
+		.pattern-header__toolbar > * + .components-button,
+		.pattern-header__toolbar > * + .components-dropdown > [aria-expanded="false"] {
+			transition: opacity 0.1s linear;
+
+			@include reduce-motion("transition");
+		}
+
+		// Zero out opacity unless hovered.
+		&:not(:hover) .pattern-header__toolbar > * + .components-button,
+		&:not(:hover) .pattern-header__toolbar > * + .components-dropdown > [aria-expanded="false"] {
+			opacity: 0;
+		}
+	}
+}
+
+.pattern-header__actions-more-menu {
+	margin-left: -4px;
+
+	// The padding and margin of the more menu is intentionally non-standard.
+	.components-icon-button {
+		padding: 8px 2px;
+		width: auto;
+	}
+
+	@include break-small() {
+		margin-left: 4px;
+
+		.components-icon-button {
+			padding: 8px 4px;
+		}
+	}
+}
