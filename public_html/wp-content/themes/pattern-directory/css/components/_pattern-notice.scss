@@ -69,3 +69,11 @@
 	padding-right: $gutter-default;
 	min-height: $gutter-default * 2;
 }
+
+.pattern__status-notice-modal.pattern__status-notice-modal {
+	max-width: $gutter-default * 14;
+
+	p {
+		line-height: 1.6;
+	}
+}

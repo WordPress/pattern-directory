@@ -41,7 +41,11 @@ export default function ( { pattern } ) {
 						</p>
 					</Notice>
 					{ showModal && (
-						<Modal title={ __( 'Review Pending', 'wporg-patterns' ) } onRequestClose={ closeModal }>
+						<Modal
+							title={ __( 'Review Pending', 'wporg-patterns' ) }
+							onRequestClose={ closeModal }
+							className="pattern__status-notice-modal"
+						>
 							<p>
 								{ __(
 									'All patterns submitted to WordPress.org are subject to both automated and manual approval. It might take a few days for your pattern to be approved.',
@@ -83,7 +87,11 @@ export default function ( { pattern } ) {
 						</p>
 					</Notice>
 					{ showModal && (
-						<Modal title={ __( 'Drafts', 'wporg-patterns' ) } onRequestClose={ closeModal }>
+						<Modal
+							title={ __( 'Drafts', 'wporg-patterns' ) }
+							onRequestClose={ closeModal }
+							className="pattern__status-notice-modal"
+						>
 							<p>
 								{ __(
 									'Patterns can be saved as a draft which can be submitted for approval at any time. This allows you to save your design and come back to it later to submit.',
@@ -119,7 +127,11 @@ export default function ( { pattern } ) {
 						</p>
 					</Notice>
 					{ showModal && (
-						<Modal title={ __( 'Declined', 'wporg-patterns' ) } onRequestClose={ closeModal }>
+						<Modal
+							title={ __( 'Declined', 'wporg-patterns' ) }
+							onRequestClose={ closeModal }
+							className="pattern__status-notice-modal"
+						>
 							<p>
 								{ __(
 									'WordPress.org has chosen to decline listing your pattern for the following reason:',
