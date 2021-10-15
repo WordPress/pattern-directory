@@ -63,3 +63,9 @@
 	}
 }
 
+.pattern__status-notice {
+	margin-top: 0;
+	padding-left: $gutter-default;
+	padding-right: $gutter-default;
+	min-height: $gutter-default * 2;
+}

@@ -14,6 +14,7 @@ import PatternPreview from '../pattern-preview';
 import PatternPreviewActions from '../pattern-preview-actions';
 import PatternThumbnail from '../pattern-thumbnail';
 import ReportPatternButton from '../report-pattern-button';
+import StatusNotice from './status-notice';
 import { store as patternStore } from '../../store';
 
 const Pattern = ( { postId, userHasReported } ) => {
@@ -41,6 +42,7 @@ const Pattern = ( { postId, userHasReported } ) => {
 	return (
 		<>
 			<header className="entry-header">
+				<StatusNotice pattern={ pattern } />
 				<h1 className="entry-title">{ decodeEntities( pattern.title.rendered ) }</h1>
 				<div className="pattern__categories">
 					{ categories.map( ( { id, name, link } ) => (
