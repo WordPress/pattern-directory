@@ -54,7 +54,7 @@ export default function ( { pattern } ) {
 							</p>
 							<p>
 								{ __(
-									'Reviewers look for content that may be problematic (copyright or trademark issues) and wether your pattern works as intended.',
+									'Reviewers look for content that may be problematic (copyright or trademark issues) and whether your pattern works as intended.',
 									'wporg-patterns'
 								) }
 							</p>
