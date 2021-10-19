@@ -71,6 +71,11 @@ function validate_content( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
+	// If post_content does not exist, this is just an update to an existing pattern.
+	if ( ! isset( $prepared_post->post_content ) ) {
+		return $prepared_post;
+	}
+
 	$content = $prepared_post->post_content;
 	if ( ! $content ) {
 		return new \WP_Error(
