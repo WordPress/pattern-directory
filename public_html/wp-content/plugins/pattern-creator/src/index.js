@@ -11,6 +11,7 @@ import { render, unmountComponentAtNode } from '@wordpress/element';
  * Internal dependencies
  */
 import './store';
+import './hooks/media';
 import Editor from './components/editor';
 import { filterEndpoints } from './api-middleware';
 import './style.scss';
