@@ -5,7 +5,7 @@ export default function ( options, next ) {
 	options.path = options.path.replace( 'per_page=-1', 'per_page=50' );
 
 	// Load images with the view context, seems to work
-	if ( 0 === options.path.indexOf( '/wp/v2/media/' ) ) {
+	if ( 0 === options.path.indexOf( '/wp/v2/media' ) ) {
 		options.path = options.path.replace( 'context=edit', 'context=view' );
 	}
 
