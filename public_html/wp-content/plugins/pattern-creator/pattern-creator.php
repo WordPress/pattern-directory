@@ -91,7 +91,8 @@ function pattern_creator_init() {
 		sprintf(
 			'var wporgBlockPattern = JSON.parse( decodeURIComponent( \'%s\' ) );',
 			rawurlencode( wp_json_encode( array(
-				'siteUrl'    => esc_url( home_url() ),
+				'defaultStatus' => 'publish',
+				'siteUrl'       => esc_url( home_url() ),
 			) ) )
 		),
 		'before'

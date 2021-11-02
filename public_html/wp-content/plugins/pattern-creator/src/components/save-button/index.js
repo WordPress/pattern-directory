@@ -22,43 +22,42 @@ import { store as patternStore } from '../../store';
 export { default as SaveDraftButton } from './draft';
 
 export function SaveButton() {
-	const { isDirty, isSaving, isAutoSaving, isSaveable, isPublished, hasPublishAction } = useSelect(
-		( select ) => {
-			const { __experimentalGetDirtyEntityRecords } = select( coreStore );
-			const {
-				isAutosavingPost,
-				isSavingPost,
-				isCurrentPostPublished,
-				getCurrentPost,
-				getCurrentPostId,
-			} = select( editorStore );
-			const { isPatternSaveable } = select( patternStore );
+	const {
+		currentStatus,
+		isDirty,
+		isSaving,
+		isAutoSaving,
+		isSaveable,
+		isPublished,
+		isPublishedOrPending,
+		notices,
+		publishStatus,
+	} = useSelect( ( select ) => {
+		const { __experimentalGetDirtyEntityRecords } = select( coreStore );
+		const { isAutosavingPost, isSavingPost, getCurrentPost, getCurrentPostId } = select( editorStore );
+		const { isPatternSaveable } = select( patternStore );
 
-			const dirtyEntityRecords = __experimentalGetDirtyEntityRecords();
-			const _isAutoSaving = isAutosavingPost();
-			return {
-				isDirty: dirtyEntityRecords.length > 0,
-				isSaving: isSavingPost() || _isAutoSaving,
-				isAutoSaving: _isAutoSaving,
-				isSaveable: isPatternSaveable( getCurrentPostId() ),
-				isPublished: isCurrentPostPublished(),
-				hasPublishAction: get( getCurrentPost(), [ '_links', 'wp:action-publish' ], false ),
-			};
-		}
-	);
+		const dirtyEntityRecords = __experimentalGetDirtyEntityRecords();
+		const _isAutoSaving = isAutosavingPost();
+		const _post = getCurrentPost();
+		const hasPublishAction = get( _post, [ '_links', 'wp:action-publish' ], false );
+		return {
+			currentStatus: _post.status,
+			isDirty: dirtyEntityRecords.length > 0,
+			isSaving: isSavingPost() || _isAutoSaving,
+			isAutoSaving: _isAutoSaving,
+			isSaveable: isPatternSaveable( getCurrentPostId() ),
+			isPublished: 'publish' === _post.status,
+			isPublishedOrPending: [ 'pending', 'publish' ].includes( _post.status ),
+			publishStatus: hasPublishAction ? wporgBlockPattern.defaultStatus : 'pending',
+		};
+	} );
 	const { editPost, savePost } = useDispatch( editorStore );
 	const [ showModal, setShowModal ] = useState( false );
 
 	// Button is disabled when not saveable, when it's already saving, or if the draft post is not dirty.
 	// A draft post can be published without any local changes (the modal will catch if there is no content).
-	const isDisabled = ! isSaveable || isSaving || ( ! isDirty && isPublished );
-
-	let publishStatus;
-	if ( ! hasPublishAction ) {
-		publishStatus = 'pending';
-	} else {
-		publishStatus = 'publish';
-	}
+	const isDisabled = ! isSaveable || isSaving || ( ! isDirty && isPublishedOrPending );
 
 	const onClick = () => {
 		if ( isDisabled ) {
@@ -80,9 +79,9 @@ export function SaveButton() {
 		<>
 			{ showModal && (
 				<SubmissionModal
-					isPublished={ isPublished }
-					onSubmit={ onSuccess }
 					onClose={ () => setShowModal( false ) }
+					onSubmit={ onSuccess }
+					status={ currentStatus }
 				/>
 			) }
 			<Button
@@ -90,7 +89,7 @@ export function SaveButton() {
 				className="pattern-save-button__button"
 				aria-disabled={ isDisabled }
 				disabled={ isDisabled }
-				isBusy={ ! isAutoSaving && isSaving && isPublished }
+				isBusy={ ! isAutoSaving && isSaving && isPublishedOrPending }
 				onClick={ isDisabled ? undefined : onClick }
 			>
 				{ isPublished ? __( 'Update', 'wporg-patterns' ) : __( 'Submit', 'wporg-patterns' ) }
