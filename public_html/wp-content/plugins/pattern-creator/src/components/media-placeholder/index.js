@@ -42,6 +42,7 @@ export default function MediaPlaceholder( {
 		);
 	};
 
+	// @todo Check if allowedTypes includes images, show "sorry not yet" if not.
 	const [ firstAllowedType ] = allowedTypes;
 	const isOneType = 1 === allowedTypes.length;
 	const isAudio = isOneType && 'audio' === firstAllowedType;

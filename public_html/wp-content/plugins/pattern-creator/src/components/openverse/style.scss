@@ -1,0 +1,14 @@
+.pattern-openverse__modal {
+	width: 90vw;
+	min-height: 90vh;
+}
+
+.pattern-openverse__title {
+	margin-top: 0;
+}
+
+.pattern-openverse__grid {
+	grid-gap: 24px;
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+}
