@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Spinner } from '@wordpress/components';
+import { Button, Spinner } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 
@@ -17,7 +17,7 @@ function formatImageObject( item ) {
 		mime: '',
 		type: '',
 		subtype: '',
-		id: item.id,
+		id: null,
 		url: item.url,
 		alt: '',
 		link: '',
@@ -102,11 +102,16 @@ export default function OpenverseGrid( { filterValue, onSelect } ) {
 			</h1>
 			<div className="pattern-openverse__grid">
 				{ items.map( ( item ) => (
-					<div key={ item.id } onClick={ () => onSelect( formatImageObject( item ) ) }>
+					<Button
+						key={ item.id }
+						className="pattern-openverse__grid-item"
+						onClick={ () => onSelect( formatImageObject( item ) ) }
+					>
 						<img src={ item.thumbnail } alt="" />
-					</div>
+					</Button>
 				) ) }
 			</div>
+			<p>Pagination…</p>
 		</div>
 	);
 }

@@ -11,4 +11,11 @@
 	grid-gap: 24px;
 	display: grid;
 	grid-template-columns: repeat(4, 1fr);
+
+	.pattern-openverse__grid-item {
+		height: auto;
+		padding: 0;
+		background: $gray-100;
+		border: 1px solid $gray-300;
+	}
 }
