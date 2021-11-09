@@ -18,7 +18,7 @@ const ForwardButton = ( { children, disabled, onClick } ) => (
 
 const getStatusMessage = ( status ) => {
 	switch ( status ) {
-		case 'published':
+		case 'publish':
 			return __(
 				'Your pattern is published. Your new design is now available to everyone.',
 				'wporg-patterns'
