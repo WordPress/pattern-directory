@@ -13,32 +13,33 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { store as patternStore } from '../../store';
 
 export default function SaveDraftButton() {
-	const { isDirty, isSaving, isAutoSaving, isSaveable, isPublished } = useSelect( ( select ) => {
+	const { isDirty, isSaving, isAutoSaving, isSaveable, isPublishedOrPending } = useSelect( ( select ) => {
 		const { __experimentalGetDirtyEntityRecords } = select( coreStore );
-		const { isAutosavingPost, isSavingPost, isCurrentPostPublished, getCurrentPostId } = select( editorStore );
+		const { isAutosavingPost, isSavingPost, getCurrentPost, getCurrentPostId } = select( editorStore );
 		const { isPatternSaveable } = select( patternStore );
 
 		const dirtyEntityRecords = __experimentalGetDirtyEntityRecords();
 		const _isAutoSaving = isAutosavingPost();
+		const _post = getCurrentPost();
 		return {
 			isDirty: dirtyEntityRecords.length > 0,
 			isSaving: isSavingPost() || _isAutoSaving,
 			isAutoSaving: _isAutoSaving,
 			isSaveable: isPatternSaveable( getCurrentPostId() ),
-			isPublished: isCurrentPostPublished(),
+			isPublishedOrPending: [ 'pending', 'publish' ].includes( _post.status ),
 		};
 	} );
 	const { editPost, savePost } = useDispatch( editorStore );
 
 	// Button is disabled when not saveable, when it's already saving, or if the draft post is not dirty.
 	// A published post can be switched to draft without any local changes.
-	const isDisabled = ! isSaveable || isSaving || ( ! isDirty && ! isPublished );
+	const isDisabled = ! isSaveable || isSaving || ( ! isDirty && ! isPublishedOrPending );
 
 	const onClick = () => {
 		if ( isDisabled ) {
 			return;
 		}
-		if ( isPublished ) {
+		if ( isPublishedOrPending ) {
 			editPost( { status: 'draft' }, { undoIgnore: true } );
 			savePost();
 		} else {
@@ -56,7 +57,9 @@ export default function SaveDraftButton() {
 				isBusy={ ! isAutoSaving && isSaving }
 				onClick={ isDisabled ? undefined : onClick }
 			>
-				{ isPublished ? __( 'Switch to draft', 'wporg-patterns' ) : __( 'Save draft', 'wporg-patterns' ) }
+				{ isPublishedOrPending
+					? __( 'Switch to draft', 'wporg-patterns' )
+					: __( 'Save draft', 'wporg-patterns' ) }
 			</Button>
 		</>
 	);
