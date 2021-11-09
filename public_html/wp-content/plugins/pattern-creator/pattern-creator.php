@@ -91,7 +91,6 @@ function pattern_creator_init() {
 		sprintf(
 			'var wporgBlockPattern = JSON.parse( decodeURIComponent( \'%s\' ) );',
 			rawurlencode( wp_json_encode( array(
-				'defaultStatus' => 'publish',
 				'siteUrl'       => esc_url( home_url() ),
 			) ) )
 		),
@@ -126,6 +125,8 @@ function pattern_creator_init() {
 	);
 	$editor_context = new WP_Block_Editor_Context( array( 'post' => $post ) );
 	$settings       = gutenberg_get_block_editor_settings( $custom_settings, $editor_context );
+
+	$settings['defaultStatus'] = get_option( 'wporg-pattern-default_status', 'publish' );
 
 	gutenberg_initialize_editor(
 		'block-pattern-creator',

@@ -30,17 +30,17 @@ export function SaveButton() {
 		isSaveable,
 		isPublished,
 		isPublishedOrPending,
-		notices,
 		publishStatus,
 	} = useSelect( ( select ) => {
 		const { __experimentalGetDirtyEntityRecords } = select( coreStore );
 		const { isAutosavingPost, isSavingPost, getCurrentPost, getCurrentPostId } = select( editorStore );
-		const { isPatternSaveable } = select( patternStore );
+		const { isPatternSaveable, getSettings } = select( patternStore );
 
 		const dirtyEntityRecords = __experimentalGetDirtyEntityRecords();
 		const _isAutoSaving = isAutosavingPost();
 		const _post = getCurrentPost();
 		const hasPublishAction = get( _post, [ '_links', 'wp:action-publish' ], false );
+		const settings = getSettings();
 		return {
 			currentStatus: _post.status,
 			isDirty: dirtyEntityRecords.length > 0,
@@ -49,7 +49,7 @@ export function SaveButton() {
 			isSaveable: isPatternSaveable( getCurrentPostId() ),
 			isPublished: 'publish' === _post.status,
 			isPublishedOrPending: [ 'pending', 'publish' ].includes( _post.status ),
-			publishStatus: hasPublishAction ? wporgBlockPattern.defaultStatus : 'pending',
+			publishStatus: hasPublishAction ? settings.defaultStatus : 'pending',
 		};
 	} );
 	const { editPost, savePost } = useDispatch( editorStore );
