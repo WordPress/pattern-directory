@@ -20,20 +20,20 @@ import OpenverseGrid from './grid';
 
 /* addToGallery, allowedTypes, gallery, multiple, value */
 function OpenverseExplorer( { onSelect } ) {
-	const [ filterValue, setFilterValue ] = useState( '' );
+	const [ searchTerm, setSearchTerm ] = useState( '' );
 
 	return (
 		<StyleProvider document={ document }>
 			<Grid className="pattern-openverse__container" columns={ 2 } gap={ 6 } templateColumns="240px auto">
 				<div>
 					<SearchControl
-						onChange={ setFilterValue }
-						value={ filterValue }
+						onChange={ setSearchTerm }
+						value={ searchTerm }
 						label={ __( 'Search for patterns', 'wporg-patterns' ) }
 						placeholder={ __( 'Search', 'wporg-patterns' ) }
 					/>
 				</div>
-				<OpenverseGrid filterValue={ filterValue } onSelect={ onSelect } />
+				<OpenverseGrid searchTerm={ searchTerm } onSelect={ onSelect } />
 			</Grid>
 		</StyleProvider>
 	);

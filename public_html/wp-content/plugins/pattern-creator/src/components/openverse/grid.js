@@ -25,9 +25,9 @@ function formatImageObject( item ) {
 	};
 }
 
-export default function OpenverseGrid( { filterValue, onSelect } ) {
-	const [ debouncedValue, _setDebouncedValue ] = useState( filterValue );
-	const setDebouncedValue = useDebounce( _setDebouncedValue, 500 );
+export default function OpenverseGrid( { searchTerm, onSelect } ) {
+	const [ debouncedSearchTerm, _setDebouncedSearchTerm ] = useState( searchTerm );
+	const setDebouncedSearchTerm = useDebounce( _setDebouncedSearchTerm, 500 );
 
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ items, setItems ] = useState( [] );
@@ -36,12 +36,12 @@ export default function OpenverseGrid( { filterValue, onSelect } ) {
 
 	// Set up a debounced search term, so we don't query constantly while someone is typing.
 	useEffect( () => {
-		setDebouncedValue( filterValue );
-	}, [ filterValue ] );
+		setDebouncedSearchTerm( searchTerm );
+	}, [ searchTerm ] );
 
 	useEffect( () => {
 		setIsLoading( true );
-		fetchImages( debouncedValue, {
+		fetchImages( debouncedSearchTerm, {
 			onSuccess: ( data ) => {
 				setIsLoading( false );
 				setItems( data.results );
@@ -53,7 +53,7 @@ export default function OpenverseGrid( { filterValue, onSelect } ) {
 				setTotal( 0 );
 			},
 		} );
-	}, [ debouncedValue ] );
+	}, [ debouncedSearchTerm ] );
 
 	if ( isLoading ) {
 		return (
@@ -67,11 +67,11 @@ export default function OpenverseGrid( { filterValue, onSelect } ) {
 		return (
 			<div>
 				<h1 className="pattern-openverse__title">
-					{ filterValue.length
+					{ debouncedSearchTerm.length
 						? sprintf(
 								/* translators: %s: media search query */
-								__( 'No results found for "%2$s"', 'wporg-patterns' ),
-								filterValue
+								__( 'No results found for "%s"', 'wporg-patterns' ),
+								debouncedSearchTerm
 						  )
 						: __( 'No results found', 'wporg-patterns' ) }
 				</h1>
@@ -82,7 +82,7 @@ export default function OpenverseGrid( { filterValue, onSelect } ) {
 	return (
 		<div>
 			<h1 className="pattern-openverse__title">
-				{ filterValue.length
+				{ debouncedSearchTerm.length
 					? sprintf(
 							/* translators: %d: number of results. %s: media search query */
 							_n(
@@ -92,7 +92,7 @@ export default function OpenverseGrid( { filterValue, onSelect } ) {
 								'wporg-patterns'
 							),
 							total,
-							filterValue
+							debouncedSearchTerm
 					  )
 					: sprintf(
 							/* translators: %d: number of results. */
