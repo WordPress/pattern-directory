@@ -82,7 +82,6 @@ describe( 'selectors', () => {
 				focusMode: true,
 				hasFixedToolbar: true,
 				__experimentalSetIsInserterOpened: setInserterOpened,
-				mediaUpload: expect.any( Function ),
 			} );
 		} );
 	} );
