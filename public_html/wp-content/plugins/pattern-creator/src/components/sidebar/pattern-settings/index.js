@@ -2,7 +2,14 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { FormTokenField, PanelBody, PanelRow, TextControl, TextareaControl } from '@wordpress/components';
+import {
+	ExternalLink,
+	FormTokenField,
+	PanelBody,
+	PanelRow,
+	TextControl,
+	TextareaControl,
+} from '@wordpress/components';
 import { store as editorStore } from '@wordpress/editor';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useCallback } from '@wordpress/element';
@@ -16,15 +23,18 @@ import { KEYWORD_SLUG } from '../../../store';
 const DESCRIPTION_SLUG = 'wpop_description';
 
 function PatternSettings() {
-	const { description, keywords, meta, title, selectedCategories } = useSelect( ( select ) => {
-		const { getEditedPostAttribute } = select( editorStore );
+	const { description, keywords, link, meta, selectedCategories, status, title } = useSelect( ( select ) => {
+		const { getCurrentPost, getEditedPostAttribute } = select( editorStore );
 		const _meta = getEditedPostAttribute( 'meta' ) || {};
+		const _post = getCurrentPost();
 		return {
-			meta: _meta,
 			description: _meta[ DESCRIPTION_SLUG ],
 			keywords: _meta[ KEYWORD_SLUG ].split( ', ' ).filter( ( item ) => item.length ),
-			title: getEditedPostAttribute( 'title' ) || '',
+			link: _post.link,
+			meta: _meta,
 			selectedCategories: getEditedPostAttribute( 'pattern-categories' ),
+			status: _post.status,
+			title: getEditedPostAttribute( 'title' ) || '',
 		};
 	} );
 
@@ -45,7 +55,7 @@ function PatternSettings() {
 
 	return (
 		<>
-			<PanelBody title={ __( 'Title & Description', 'wporg-patterns' ) } initialOpen>
+			<PanelBody initialOpen>
 				<PanelRow>
 					<TextControl label={ __( 'Title', 'wporg-patterns' ) } value={ title } onChange={ setTitle } />
 				</PanelRow>
@@ -60,6 +70,14 @@ function PatternSettings() {
 						onChange={ setDescription }
 					/>
 				</PanelRow>
+				{ [ 'pending', 'publish' ].includes( status ) && (
+					<div className="pattern-sidebar__preview-link">
+						<h3 className="pattern-sidebar__preview-link-label">
+							{ __( 'View pattern', 'wporg-patterns' ) }
+						</h3>
+						<ExternalLink href={ link }>{ link }</ExternalLink>
+					</div>
+				) }
 			</PanelBody>
 			<PanelBody title={ __( 'Categories', 'wporg-patterns' ) }>
 				<p>
