@@ -12,7 +12,7 @@ import { MediaUpload, MediaUploadCheck } from '@wordpress/block-editor';
 
 export default function MediaPlaceholder( {
 	addToGallery,
-	allowedTypes,
+	allowedTypes = [],
 	className,
 	children,
 	disableMediaButtons,
@@ -42,8 +42,26 @@ export default function MediaPlaceholder( {
 		);
 	};
 
+	const [ firstAllowedType ] = allowedTypes;
+	const isOneType = 1 === allowedTypes.length;
+	const isAudio = isOneType && 'audio' === firstAllowedType;
+	const isImage = isOneType && 'image' === firstAllowedType;
+	const isVideo = isOneType && 'video' === firstAllowedType;
+
 	const defaultRenderPlaceholder = ( content ) => {
-		const title = labels.title || __( 'Media', 'wporg-patterns' );
+		let title = labels.title;
+		if ( title === undefined ) {
+			if ( isAudio ) {
+				title = __( 'Audio', 'wporg-patterns' );
+			} else if ( isImage ) {
+				title = __( 'Image', 'wporg-patterns' );
+			} else if ( isVideo ) {
+				title = __( 'Video', 'wporg-patterns' );
+			} else {
+				title = __( 'Media', 'wporg-patterns' );
+			}
+		}
+
 		const instructions = __(
 			"Patterns are required to use our collection of license-free media. You won't be able to upload or link to any other media in your patterns.",
 			'wporg-patterns'
@@ -81,12 +99,12 @@ export default function MediaPlaceholder( {
 			value={ Array.isArray( value ) ? value.map( ( { id } ) => id ) : value.id }
 			render={ ( { open } ) => (
 				<Button
-					variant="tertiary"
+					variant="primary"
 					onClick={ () => {
 						open();
 					} }
 				>
-					{ __( 'Pattern Media Library', 'wporg-patterns' ) }
+					{ __( 'Media Library', 'wporg-patterns' ) }
 				</Button>
 			) }
 		/>
