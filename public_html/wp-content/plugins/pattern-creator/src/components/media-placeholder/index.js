@@ -22,7 +22,6 @@ export default function MediaPlaceholder( {
 	mediaPreview,
 	multiple = false,
 	notices,
-	onDoubleClick,
 	onSelect,
 	placeholder,
 	style,
@@ -32,17 +31,12 @@ export default function MediaPlaceholder( {
 		return null;
 	}
 
-	const onlyAllowsImages = () => {
-		if ( ! allowedTypes || allowedTypes.length === 0 ) {
-			return false;
-		}
-
-		return allowedTypes.every(
-			( allowedType ) => allowedType === 'image' || allowedType.startsWith( 'image/' )
-		);
-	};
-
-	// @todo Check if allowedTypes includes images, show "sorry not yet" if not.
+	const onlyAllowsImages = allowedTypes?.every(
+		( allowedType ) => allowedType === 'image' || allowedType.startsWith( 'image/' )
+	);
+	const allowsImages = allowedTypes?.some(
+		( allowedType ) => allowedType === 'image' || allowedType.startsWith( 'image/' )
+	);
 	const [ firstAllowedType ] = allowedTypes;
 	const isOneType = 1 === allowedTypes.length;
 	const isAudio = isOneType && 'audio' === firstAllowedType;
@@ -52,10 +46,10 @@ export default function MediaPlaceholder( {
 	const defaultRenderPlaceholder = ( content ) => {
 		let title = labels.title;
 		if ( title === undefined ) {
-			if ( isAudio ) {
-				title = __( 'Audio', 'wporg-patterns' );
-			} else if ( isImage ) {
+			if ( isImage ) {
 				title = __( 'Image', 'wporg-patterns' );
+			} else if ( isAudio ) {
+				title = __( 'Audio', 'wporg-patterns' );
 			} else if ( isVideo ) {
 				title = __( 'Video', 'wporg-patterns' );
 			} else {
@@ -63,10 +57,13 @@ export default function MediaPlaceholder( {
 			}
 		}
 
-		const instructions = __(
+		let instructions = __(
 			"Patterns are required to use our collection of license-free media. You won't be able to upload or link to any other media in your patterns.",
 			'wporg-patterns'
 		);
+		if ( ! allowsImages ) {
+			instructions = __( 'The pattern directory does not support this media type yet.', 'wporg-patterns' );
+		}
 
 		const placeholderClassName = classnames( 'block-editor-media-placeholder', className, {
 			'is-appender': isAppender,
@@ -79,21 +76,20 @@ export default function MediaPlaceholder( {
 				instructions={ instructions }
 				className={ placeholderClassName }
 				notices={ notices }
-				onDoubleClick={ onDoubleClick }
 				preview={ mediaPreview }
 				style={ style }
 			>
-				{ content }
+				{ allowsImages && content }
 				{ children }
 			</Placeholder>
 		);
 	};
 	const renderPlaceholder = placeholder ?? defaultRenderPlaceholder;
 
-	const mediaLibraryButton = (
+	const content = renderPlaceholder(
 		<MediaUpload
 			addToGallery={ addToGallery }
-			gallery={ multiple && onlyAllowsImages() }
+			gallery={ multiple && onlyAllowsImages }
 			multiple={ multiple }
 			onSelect={ onSelect }
 			allowedTypes={ allowedTypes }
@@ -110,7 +106,5 @@ export default function MediaPlaceholder( {
 			) }
 		/>
 	);
-
-	const content = renderPlaceholder( mediaLibraryButton );
 	return <MediaUploadCheck fallback={ content }>{ content }</MediaUploadCheck>;
 }
