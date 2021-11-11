@@ -13,12 +13,17 @@
 		"start": "wp-scripts start pattern-post-type=./src/pattern-post-type.js"
 	},
 	"dependencies": {
+		"@wordpress/a11y": "3.2.3",
+		"@wordpress/api-fetch": "5.2.5",
 		"@wordpress/components": "17.0.0",
 		"@wordpress/compose": "5.0.2",
+		"@wordpress/core-data": "4.0.6",
 		"@wordpress/data": "6.1.0",
 		"@wordpress/edit-post": "5.0.2",
+		"@wordpress/editor": "12.0.4",
 		"@wordpress/element": "4.0.1",
 		"@wordpress/i18n": "4.2.2",
+		"@wordpress/notices": "3.2.6",
 		"@wordpress/plugins": "4.0.2",
 		"@wordpress/scripts": "16.1.4"
 	},
