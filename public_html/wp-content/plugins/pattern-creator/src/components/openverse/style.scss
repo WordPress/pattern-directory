@@ -19,3 +19,18 @@
 		border: 1px solid $gray-300;
 	}
 }
+
+.pattern-openverse__actions {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: $grid-unit-20 $grid-unit-40;
+	background: $white;
+	border-top: 1px solid $gray-300;
+	text-align: right;
+
+	button + button {
+		margin-left: $grid-unit-20;
+	}
+}

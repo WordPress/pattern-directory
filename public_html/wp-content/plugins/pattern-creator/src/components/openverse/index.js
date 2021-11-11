@@ -18,8 +18,7 @@ import { useState } from '@wordpress/element';
  */
 import OpenverseGrid from './grid';
 
-/* addToGallery, allowedTypes, gallery, multiple, value */
-function OpenverseExplorer( { onSelect } ) {
+function OpenverseExplorer( { onClose, ...props } ) {
 	const [ searchTerm, setSearchTerm ] = useState( '' );
 
 	return (
@@ -33,7 +32,7 @@ function OpenverseExplorer( { onSelect } ) {
 						placeholder={ __( 'Search', 'wporg-patterns' ) }
 					/>
 				</div>
-				<OpenverseGrid searchTerm={ searchTerm } onSelect={ onSelect } />
+				<OpenverseGrid searchTerm={ searchTerm } onClose={ onClose } { ...props } />
 			</Grid>
 		</StyleProvider>
 	);
@@ -41,20 +40,22 @@ function OpenverseExplorer( { onSelect } ) {
 
 export default function OpenverseGallery( { render, ...props } ) {
 	const [ showModal, setShowModal ] = useState( false );
+	const handleOpen = () => setShowModal( true );
+	const handleClose = () => setShowModal( false );
 
 	return (
 		<>
 			{ render( {
-				open: () => setShowModal( true ),
+				open: handleOpen,
 			} ) }
 			{ showModal && (
 				<Modal
 					className="pattern-openverse__modal"
 					title={ __( 'Openverse Media', 'wporg-patterns' ) }
 					closeLabel={ __( 'Close', 'wporg-patterns' ) }
-					onRequestClose={ () => setShowModal( false ) }
+					onRequestClose={ handleClose }
 				>
-					<OpenverseExplorer { ...props } />
+					<OpenverseExplorer onClose={ handleClose } { ...props } />
 				</Modal>
 			) }
 		</>

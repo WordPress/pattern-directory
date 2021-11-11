@@ -2,7 +2,15 @@
  * WordPress dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Button, Spinner } from '@wordpress/components';
+import {
+	/* eslint-disable @wordpress/no-unsafe-wp-apis -- Composite is OK. */
+	Button,
+	__unstableComposite as Composite,
+	__unstableCompositeItem as CompositeItem,
+	Spinner,
+	__unstableUseCompositeState as useCompositeState,
+	/* eslint-enable @wordpress/no-unsafe-wp-apis */
+} from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 
@@ -15,7 +23,7 @@ function formatImageObject( item ) {
 	return {
 		sizes: [],
 		mime: '',
-		type: '',
+		type: 'image',
 		subtype: '',
 		id: null,
 		url: item.url,
@@ -25,12 +33,14 @@ function formatImageObject( item ) {
 	};
 }
 
-export default function OpenverseGrid( { searchTerm, onSelect } ) {
+/* addToGallery, allowedTypes, gallery, value */
+export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple, ...props } ) {
 	const [ debouncedSearchTerm, _setDebouncedSearchTerm ] = useState( searchTerm );
 	const setDebouncedSearchTerm = useDebounce( _setDebouncedSearchTerm, 500 );
 
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ items, setItems ] = useState( [] );
+	const [ selected, setSelected ] = useState( [] );
 	const [ total, setTotal ] = useState( 0 );
 	const hasItems = items.length > 0;
 
@@ -54,6 +64,18 @@ export default function OpenverseGrid( { searchTerm, onSelect } ) {
 			},
 		} );
 	}, [ debouncedSearchTerm ] );
+
+	const handleSelect = () => {
+		if ( ! selected || ! selected.length ) {
+			return;
+		}
+
+		if ( multiple ) {
+			onSelect( selected.map( formatImageObject ) );
+		} else {
+			onSelect( formatImageObject( selected[ 0 ] ) );
+		}
+	};
 
 	if ( isLoading ) {
 		return (
@@ -100,18 +122,52 @@ export default function OpenverseGrid( { searchTerm, onSelect } ) {
 							total
 					  ) }
 			</h1>
-			<div className="pattern-openverse__grid">
-				{ items.map( ( item ) => (
-					<Button
+			<OpenverseGridItems items={ items } selected={ selected } onSelect={ setSelected } />
+			<p>Pagination…</p>
+			<div className="pattern-openverse__actions">
+				<Button variant="secondary" onClick={ onClose }>
+					{ __( 'Cancel', 'wporg-patterns' ) }
+				</Button>
+				<Button variant="primary" onClick={ handleSelect }>
+					{ __( 'Add media', 'wporg-patterns' ) }
+				</Button>
+			</div>
+		</div>
+	);
+}
+
+function OpenverseGridItems( { items, selected, onSelect } ) {
+	const composite = useCompositeState();
+
+	if ( ! items.length ) {
+		return null;
+	}
+
+	return (
+		<Composite
+			{ ...composite }
+			className="pattern-openverse__grid"
+			role="listbox"
+			aria-label={ __( 'Openverse Media', 'wporg-patterns' ) }
+		>
+			{ items.map( ( item ) => {
+				return (
+					<CompositeItem
 						key={ item.id }
+						role="option"
+						as={ Button }
+						{ ...composite }
 						className="pattern-openverse__grid-item"
-						onClick={ () => onSelect( formatImageObject( item ) ) }
+						onClick={ ( event ) => {
+							event.preventDefault();
+							onSelect( [ ...selected, item ] );
+						} }
+						label={ item.title }
 					>
 						<img src={ item.thumbnail } alt="" />
-					</Button>
-				) ) }
-			</div>
-			<p>Pagination…</p>
-		</div>
+					</CompositeItem>
+				);
+			} ) }
+		</Composite>
 	);
 }
