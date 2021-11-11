@@ -73,7 +73,10 @@ const UnlistModal = ( { onClose, onSubmit } ) => {
 		} );
 	}, [] );
 
-	const submittedText = __( 'Your internal note has been saved.', 'wporg-patterns' );
+	const submittedText = __(
+		'The pattern has been unlisted, and your internal note has been saved.',
+		'wporg-patterns'
+	);
 
 	const handleSubmit = ( event ) => {
 		event.preventDefault();
@@ -95,7 +98,7 @@ const UnlistModal = ( { onClose, onSubmit } ) => {
 
 		sendUnlistedNote( {
 			url: apiUrl,
-			note: `${ reason.label } — ${ details }`,
+			note: `UNLISTED: ${ reason.label } — ${ details }`,
 			onSuccess: () => {
 				if ( 'function' === typeof onSubmit ) {
 					onSubmit( selectedOption );
