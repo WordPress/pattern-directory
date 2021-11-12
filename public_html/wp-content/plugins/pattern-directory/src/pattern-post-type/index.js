@@ -1,8 +1,7 @@
 /**
  * Internal dependencies
  */
-import UnlistButton from './unlist-button';
-import UnlistNotice from './unlist-notice';
+import { UnlistButton, UnlistNotice } from './unlist-button';
 import PatternDetails from './details';
 
 const PluginWrapper = () => {
