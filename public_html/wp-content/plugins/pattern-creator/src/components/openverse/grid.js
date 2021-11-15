@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import classnames from 'classnames';
+
+/**
  * WordPress dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
@@ -151,13 +156,17 @@ function OpenverseGridItems( { items, selected, onSelect } ) {
 			aria-label={ __( 'Openverse Media', 'wporg-patterns' ) }
 		>
 			{ items.map( ( item ) => {
+				const classes = classnames( {
+					'pattern-openverse__grid-item': true,
+					'is-selected': selected.includes( item ),
+				} );
 				return (
 					<CompositeItem
 						key={ item.id }
 						role="option"
 						as={ Button }
 						{ ...composite }
-						className="pattern-openverse__grid-item"
+						className={ classes }
 						onClick={ ( event ) => {
 							event.preventDefault();
 							onSelect( [ ...selected, item ] );
