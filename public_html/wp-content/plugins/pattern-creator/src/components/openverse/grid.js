@@ -16,7 +16,7 @@ import {
 	__unstableUseCompositeState as useCompositeState,
 	/* eslint-enable @wordpress/no-unsafe-wp-apis */
 } from '@wordpress/components';
-import { useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 
 /**
@@ -30,7 +30,7 @@ function formatImageObject( item ) {
 		mime: '',
 		type: 'image',
 		subtype: '',
-		id: null,
+		id: null, // @todo Passing item.id triggers an API request to media/[id], but leaving this out makes the `value` prop null (so replacing a selected image does not stay selected), `addToGallery` is null even when gallery items exist, etc.
 		url: item.url,
 		alt: '',
 		link: '',
@@ -38,8 +38,8 @@ function formatImageObject( item ) {
 	};
 }
 
-/* addToGallery, allowedTypes, gallery, value */
-export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple, ...props } ) {
+/* other props: addToGallery, allowedTypes, gallery, value */
+export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple } ) {
 	const [ debouncedSearchTerm, _setDebouncedSearchTerm ] = useState( searchTerm );
 	const setDebouncedSearchTerm = useDebounce( _setDebouncedSearchTerm, 500 );
 
@@ -70,7 +70,7 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 		} );
 	}, [ debouncedSearchTerm ] );
 
-	const handleSelect = () => {
+	const onCommitSelected = useCallback( () => {
 		if ( ! selected || ! selected.length ) {
 			return;
 		}
@@ -80,7 +80,20 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 		} else {
 			onSelect( formatImageObject( selected[ 0 ] ) );
 		}
-	};
+
+		onClose();
+	}, [ selected, multiple ] );
+
+	const onClick = useCallback(
+		( newValue ) => {
+			if ( multiple ) {
+				setSelected( [ ...selected, newValue ] );
+			} else {
+				setSelected( [ newValue ] );
+			}
+		},
+		[ selected, multiple ]
+	);
 
 	if ( isLoading ) {
 		return (
@@ -127,13 +140,13 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 							total
 					  ) }
 			</h1>
-			<OpenverseGridItems items={ items } selected={ selected } onSelect={ setSelected } />
+			<OpenverseGridItems items={ items } selected={ selected } onSelect={ onClick } />
 			<p>Pagination…</p>
 			<div className="pattern-openverse__actions">
 				<Button variant="secondary" onClick={ onClose }>
 					{ __( 'Cancel', 'wporg-patterns' ) }
 				</Button>
-				<Button variant="primary" onClick={ handleSelect }>
+				<Button variant="primary" onClick={ onCommitSelected }>
 					{ __( 'Add media', 'wporg-patterns' ) }
 				</Button>
 			</div>
@@ -169,7 +182,7 @@ function OpenverseGridItems( { items, selected, onSelect } ) {
 						className={ classes }
 						onClick={ ( event ) => {
 							event.preventDefault();
-							onSelect( [ ...selected, item ] );
+							onSelect( item );
 						} }
 						label={ item.title }
 					>
