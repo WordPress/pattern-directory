@@ -35,6 +35,7 @@
 		"@wordpress/editor": "12.0.6",
 		"@wordpress/element": "4.0.4",
 		"@wordpress/format-library": "3.0.9",
+		"@wordpress/hooks": "3.2.2",
 		"@wordpress/i18n": "4.2.4",
 		"@wordpress/icons": "6.1.1",
 		"@wordpress/interface": "4.1.5",

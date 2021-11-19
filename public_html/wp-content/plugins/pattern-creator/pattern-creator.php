@@ -197,3 +197,17 @@ function show_admin_bar( $show_admin_bar ) {
 }
 // Priority needs to be over 1000 to override `logged-out-admin-bar`.
 add_filter( 'show_admin_bar', __NAMESPACE__ . '\show_admin_bar', 1001 );
+
+/**
+ * Filter out `upload_files` from all non-admin users.
+ *
+ * @param bool[] $allcaps Array of key/value pairs where keys represent a capability name
+ *                        and boolean values represent whether the user has that capability.
+ */
+function disallow_uploads( $allcaps ) {
+	if ( ! isset( $allcaps['manage_options'] ) ) {
+		$allcaps['upload_files'] = false;
+	}
+	return $allcaps;
+}
+add_filter( 'user_has_cap', __NAMESPACE__ . '\disallow_uploads' );

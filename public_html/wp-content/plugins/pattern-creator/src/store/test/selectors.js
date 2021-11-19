@@ -1,24 +1,10 @@
 /**
- * WordPress dependencies
- */
-import { store as coreDataStore } from '@wordpress/core-data';
-
-/**
  * Internal dependencies
  */
-import {
-	getCanUserCreateMedia,
-	getSettings,
-	isFeatureActive,
-	isInserterOpened,
-	isListViewOpened,
-} from '../selectors';
+import { getSettings, isFeatureActive, isInserterOpened, isListViewOpened } from '../selectors';
 
 describe( 'selectors', () => {
 	const canUser = jest.fn( () => true );
-	getCanUserCreateMedia.registry = {
-		select: jest.fn( () => ( { canUser } ) ),
-	};
 
 	describe( 'isFeatureActive', () => {
 		it( 'is tolerant to an undefined features preference', () => {
@@ -65,14 +51,6 @@ describe( 'selectors', () => {
 		} );
 	} );
 
-	describe( 'getCanUserCreateMedia', () => {
-		it( "selects `canUser( 'create', 'media' )` from the core store", () => {
-			expect( getCanUserCreateMedia() ).toBe( true );
-			expect( getCanUserCreateMedia.registry.select ).toHaveBeenCalledWith( coreDataStore );
-			expect( canUser ).toHaveBeenCalledWith( 'create', 'media' );
-		} );
-	} );
-
 	describe( 'getSettings', () => {
 		it( "returns the settings when the user can't create media", () => {
 			canUser.mockReturnValueOnce( false );
@@ -104,7 +82,6 @@ describe( 'selectors', () => {
 				focusMode: true,
 				hasFixedToolbar: true,
 				__experimentalSetIsInserterOpened: setInserterOpened,
-				mediaUpload: expect.any( Function ),
 			} );
 		} );
 	} );

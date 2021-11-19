@@ -3695,7 +3695,7 @@
     "@wordpress/url" "^3.3.1"
     lodash "^4.17.21"
 
-"@wordpress/hooks@^3.2.2":
+"@wordpress/hooks@3.2.2", "@wordpress/hooks@^3.2.2":
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/@wordpress/hooks/-/hooks-3.2.2.tgz#15062a10ca729569d02db8d45fc349b85ad1757e"
   integrity sha512-MlFWyu2ttJhmzDFBVWPRwZwIMqQdHFZTjFWFWm50NlzUzIJ3gEtNA95mHNtav1Fone24N+I2YkaYMNb6PEPTyA==

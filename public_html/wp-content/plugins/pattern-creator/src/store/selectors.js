@@ -15,7 +15,6 @@ import {
 	getDefaultBlockName,
 	getFreeformContentHandlerName,
 } from '@wordpress/blocks';
-// import { uploadMedia } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
@@ -56,17 +55,6 @@ export function getPreviewDeviceType( state ) {
 }
 
 /**
- * Returns whether the current user can create media or not.
- *
- * @param {Object} state Global application state.
- *
- * @return {Object} Whether the current user can create media or not.
- */
-export const getCanUserCreateMedia = createRegistrySelector( ( select ) => () =>
-	select( coreStore ).canUser( 'create', 'media' )
-);
-
-/**
  * Returns the settings, taking into account active features and permissions.
  *
  * @param {Object}   state             Global application state.
@@ -84,16 +72,9 @@ export const getSettings = createSelector(
 			__experimentalSetIsInserterOpened: setIsInserterOpen,
 		};
 
-		const canUserCreateMedia = getCanUserCreateMedia( state );
-		if ( ! canUserCreateMedia ) {
-			return settings;
-		}
-
-		settings.mediaUpload = () => {};
 		return settings;
 	},
 	( state ) => [
-		getCanUserCreateMedia( state ),
 		state.settings,
 		isFeatureActive( state, 'focusMode' ),
 		isFeatureActive( state, 'fixedToolbar' ),
