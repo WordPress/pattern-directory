@@ -56,6 +56,14 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 
 	useEffect( () => {
 		setIsLoading( true );
+
+		if ( ! debouncedSearchTerm ) {
+			setIsLoading( false );
+			setItems( [] );
+			setTotal( 0 );
+			return;
+		}
+
 		fetchImages( debouncedSearchTerm, {
 			onSuccess: ( data ) => {
 				setIsLoading( false );
@@ -117,17 +125,28 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 		);
 	}
 
+	if ( ! debouncedSearchTerm.length ) {
+		return (
+			<div className="pattern-openverse__collection-notice">
+				<p>
+					{ __(
+						'Patterns are required to use our collection of license-free media provided by Openverse. You won’t be able to upload or link to any other videos in your patterns.',
+						'wporg-patterns'
+					) }
+				</p>
+			</div>
+		);
+	}
+
 	if ( ! hasItems ) {
 		return (
 			<div>
 				<h1 className="pattern-openverse__title">
-					{ debouncedSearchTerm.length
-						? sprintf(
-								/* translators: %s: media search query */
-								__( 'No results found for "%s"', 'wporg-patterns' ),
-								debouncedSearchTerm
-						  )
-						: __( 'No results found', 'wporg-patterns' ) }
+					{ sprintf(
+						/* translators: %s: media search query */
+						__( 'No results found for "%s"', 'wporg-patterns' ),
+						debouncedSearchTerm
+					) }
 				</h1>
 			</div>
 		);

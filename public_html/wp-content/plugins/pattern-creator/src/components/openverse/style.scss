@@ -1,16 +1,60 @@
 .pattern-openverse__modal {
 	width: 90vw;
 	min-height: 90vh;
+
+	.components-modal__header {
+		border: none;
+	}
+
+	.components-modal__header-heading {
+		display: flex;
+		width: 100%;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.pattern-openverse__modal-title {
+		width: 100%;
+	}
+
+	.pattern-openverse__powered-by {
+		display: block;
+		height: 40px;
+		width: 140px;
+		background: url(./components/openverse/powered-by-openverse.png) no-repeat center;
+		background-size: contain;
+	}
+}
+
+.pattern-openverse__search {
+	margin-left: auto;
+	margin-right: auto;
+	max-width: 28rem;
+	text-align: center;
+}
+
+.pattern-openverse__search-suggestions {
+	strong,
+	button.components-button.is-link {
+		margin-right: 0.5rem;
+
+		&:last-child {
+			margin-right: 0;
+		}
+	}
 }
 
 .pattern-openverse__title {
-	margin-top: 0;
+	margin-top: $grid-unit-40;
+	margin-bottom: $grid-unit-40;
+	font-size: 1rem;
+	text-align: center;
 }
 
 .pattern-openverse__grid {
-	grid-gap: 24px;
+	grid-gap: $grid-unit-30;
 	display: grid;
-	grid-template-columns: repeat(4, 1fr);
+	grid-template-columns: repeat(5, 1fr);
 
 	.pattern-openverse__grid-item {
 		height: auto;
@@ -26,6 +70,19 @@
 			border: 1px solid var(--wp-admin-theme-color);
 			box-shadow: 0 0 0 var(--wp-admin-border-width-focus) var(--wp-admin-theme-color);
 		}
+	}
+}
+
+.pattern-openverse__collection-notice {
+	position: absolute;
+	bottom: $grid-unit-40;
+	left: 0;
+	right: 0;
+
+	p {
+		margin: 0 auto;
+		max-width: 32rem;
+		text-align: center;
 	}
 }
 
