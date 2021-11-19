@@ -86,8 +86,22 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 
 	const onClick = useCallback(
 		( newValue ) => {
+			const index = selected.indexOf( newValue );
 			if ( multiple ) {
-				setSelected( [ ...selected, newValue ] );
+				// Value already in list, remove it.
+				if ( -1 !== index ) {
+					setSelected( [
+						...selected.slice( 0, index ),
+						...selected.slice( index + 1, selected.length ),
+					] );
+				} else {
+					setSelected( [ ...selected, newValue ] );
+				}
+				return;
+			}
+			// Value already in list, but not multiple, so set to empty array.
+			if ( -1 !== index ) {
+				setSelected( [] );
 			} else {
 				setSelected( [ newValue ] );
 			}
