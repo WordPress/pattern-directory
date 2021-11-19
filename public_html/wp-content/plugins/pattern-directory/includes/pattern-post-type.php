@@ -233,9 +233,7 @@ function register_post_type_data() {
 			'type'              => 'string',
 			'description'       => 'The ID of a flag reason, used to indicate why a pattern was unlisted.',
 			'single'            => true,
-			'sanitize_callback' => function( $value, $key, $type ) {
-				return preg_replace( '/[^0-9]/', '', $value );
-			},
+			'sanitize_callback' => 'sanitize_text_field',
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
 			'show_in_rest'      => array(
 				'schema' => array(
