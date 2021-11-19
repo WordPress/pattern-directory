@@ -10,22 +10,23 @@
 		"format:js": "wp-scripts format src -- --config=../../../../.prettierrc.js",
 		"lint:css": "wp-scripts lint-style src",
 		"lint:js": "wp-scripts lint-js src",
-		"start": "wp-scripts start pattern-post-type=./src/pattern-post-type.js"
+		"start": "wp-scripts start pattern-post-type=./src/pattern-post-type.js",
+		"test:unit": "echo \"No JS tests.\""
 	},
 	"dependencies": {
-		"@wordpress/a11y": "3.2.3",
-		"@wordpress/api-fetch": "5.2.5",
-		"@wordpress/components": "17.0.0",
-		"@wordpress/compose": "5.0.2",
-		"@wordpress/core-data": "4.0.6",
-		"@wordpress/data": "6.1.0",
-		"@wordpress/edit-post": "5.0.2",
-		"@wordpress/editor": "12.0.4",
-		"@wordpress/element": "4.0.1",
-		"@wordpress/i18n": "4.2.2",
-		"@wordpress/notices": "3.2.6",
-		"@wordpress/plugins": "4.0.2",
-		"@wordpress/scripts": "16.1.4"
+		"@wordpress/a11y": "3.2.4",
+		"@wordpress/api-fetch": "5.2.6",
+		"@wordpress/components": "19.0.3",
+		"@wordpress/compose": "5.0.6",
+		"@wordpress/core-data": "4.0.7",
+		"@wordpress/data": "6.1.4",
+		"@wordpress/edit-post": "5.0.9",
+		"@wordpress/editor": "12.0.6",
+		"@wordpress/element": "4.0.4",
+		"@wordpress/i18n": "4.2.4",
+		"@wordpress/notices": "3.2.7",
+		"@wordpress/plugins": "4.0.6",
+		"@wordpress/scripts": "19.2.1"
 	},
 	"eslintConfig": {
 		"extends": "../../../../.eslintrc.js"
