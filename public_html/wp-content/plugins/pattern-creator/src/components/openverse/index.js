@@ -75,7 +75,7 @@ export default function OpenverseGallery( { render, ...props } ) {
 							</span>
 							<span
 								className="pattern-openverse__powered-by"
-								aria-label={ __( 'Powered by OpenVerse', 'wporg-patterns' ) }
+								aria-label={ __( 'Powered by Openverse', 'wporg-patterns' ) }
 							/>
 						</>
 					}
