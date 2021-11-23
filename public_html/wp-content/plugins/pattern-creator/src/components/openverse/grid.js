@@ -1,21 +1,8 @@
 /**
- * External dependencies
- */
-import classnames from 'classnames';
-
-/**
  * WordPress dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import {
-	/* eslint-disable @wordpress/no-unsafe-wp-apis -- Composite is OK. */
-	Button,
-	__unstableComposite as Composite,
-	__unstableCompositeItem as CompositeItem,
-	Spinner,
-	__unstableUseCompositeState as useCompositeState,
-	/* eslint-enable @wordpress/no-unsafe-wp-apis */
-} from '@wordpress/components';
+import { Button, Spinner } from '@wordpress/components';
 import { useCallback, useEffect, useState } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 
@@ -23,6 +10,8 @@ import { useDebounce } from '@wordpress/compose';
  * Internal dependencies
  */
 import { fetchImages } from './utils';
+import OpenverseGridActions from './grid-actions';
+import OpenverseGridItems from './grid-items';
 
 function formatImageObject( item ) {
 	return {
@@ -153,7 +142,7 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 	}
 
 	return (
-		<div>
+		<div className="pattern-openverse__grid">
 			<h1 className="pattern-openverse__title">
 				{ debouncedSearchTerm.length
 					? sprintf(
@@ -175,54 +164,20 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 			</h1>
 			<OpenverseGridItems items={ items } selected={ selected } onSelect={ onClick } />
 			<p>Pagination…</p>
-			<div className="pattern-openverse__actions">
-				<Button variant="secondary" onClick={ onClose }>
-					{ __( 'Cancel', 'wporg-patterns' ) }
-				</Button>
-				<Button variant="primary" onClick={ onCommitSelected }>
-					{ __( 'Add media', 'wporg-patterns' ) }
-				</Button>
-			</div>
+			<OpenverseGridActions
+				items={ selected }
+				onClear={ () => setSelected( [] ) }
+				actions={
+					<>
+						<Button variant="secondary" onClick={ onClose }>
+							{ __( 'Cancel', 'wporg-patterns' ) }
+						</Button>
+						<Button variant="primary" onClick={ onCommitSelected }>
+							{ __( 'Add media', 'wporg-patterns' ) }
+						</Button>
+					</>
+				}
+			/>
 		</div>
-	);
-}
-
-function OpenverseGridItems( { items, selected, onSelect } ) {
-	const composite = useCompositeState();
-
-	if ( ! items.length ) {
-		return null;
-	}
-
-	return (
-		<Composite
-			{ ...composite }
-			className="pattern-openverse__grid"
-			role="listbox"
-			aria-label={ __( 'Openverse Media', 'wporg-patterns' ) }
-		>
-			{ items.map( ( item ) => {
-				const classes = classnames( {
-					'pattern-openverse__grid-item': true,
-					'is-selected': selected.includes( item ),
-				} );
-				return (
-					<CompositeItem
-						key={ item.id }
-						role="option"
-						as={ Button }
-						{ ...composite }
-						className={ classes }
-						onClick={ ( event ) => {
-							event.preventDefault();
-							onSelect( item );
-						} }
-						label={ item.title }
-					>
-						<img src={ item.thumbnail } alt="" />
-					</CompositeItem>
-				);
-			} ) }
-		</Composite>
 	);
 }
