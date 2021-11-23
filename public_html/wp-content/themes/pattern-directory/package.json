@@ -15,7 +15,7 @@
 		"build:css": "grunt css",
 		"build:js": "grunt js",
 		"dev": "grunt",
-		"lint:css": "wp-scripts lint-style css",
+		"lint:css": "wp-scripts lint-style 'css/**/*.scss'",
 		"lint:js": "wp-scripts lint-js src",
 		"format:js": "wp-scripts format src -- --config=../../../../.prettierrc.js",
 		"test:unit": "wp-scripts test-unit-js",

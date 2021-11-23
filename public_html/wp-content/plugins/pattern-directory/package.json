@@ -8,7 +8,7 @@
 		"build": "wp-scripts build pattern-post-type=./src/pattern-post-type.js",
 		"dev": "NODE_ENV=development wp-scripts build pattern-post-type=./src/pattern-post-type.js",
 		"format:js": "wp-scripts format src -- --config=../../../../.prettierrc.js",
-		"lint:css": "wp-scripts lint-style src",
+		"lint:css": "wp-scripts lint-style 'src/**/*.scss'",
 		"lint:js": "wp-scripts lint-js src",
 		"start": "wp-scripts start pattern-post-type=./src/pattern-post-type.js",
 		"test:unit": "echo \"No JS tests.\""
