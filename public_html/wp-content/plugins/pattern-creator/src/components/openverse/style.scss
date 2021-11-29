@@ -64,8 +64,9 @@
 		height: 13rem;
 		padding: 0;
 		background: $gray-100;
-		border: 1px solid $gray-300;
+		border: none;
 		overflow: hidden;
+		position: relative;
 
 		img {
 			height: 100%;
@@ -73,9 +74,43 @@
 			object-fit: cover;
 		}
 
+		// The inset border needs to be on `::after`, otherwise it's hidden by the image.
+		&::after {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+		}
+
 		&.is-selected {
-			border-color: var(--wp-admin-theme-color);
-			box-shadow: 0 0 0 var(--wp-admin-border-width-focus) var(--wp-admin-theme-color);
+			&::after {
+				box-shadow: inset 0 0 0 3px $black;
+			}
+
+			&::before {
+				content: "";
+				position: absolute;
+				top: 6px;
+				right: 6px;
+				width: 1.5rem;
+				height: 1.5rem;
+				background-color: var(--wp-admin-theme-color);
+				// stylelint-disable-next-line function-url-quotes
+				background-image: url("data:image/svg+xml,%3Csvg width='25' height='24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m18.127 7.53-6.75 9.08-3.915-2.91' stroke='%23fff' stroke-width='1.5'/%3E%3C/svg%3E%0A");
+				background-repeat: none;
+				background-position: center;
+				border: 1px solid $white;
+			}
+		}
+
+		&:focus {
+			box-shadow: 0 0 0 3px var(--wp-admin-theme-color);
+
+			&::after {
+				box-shadow: inset 0 0 0 3px $white;
+			}
 		}
 	}
 }
