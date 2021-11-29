@@ -16,7 +16,7 @@ import {
 	/* eslint-enable @wordpress/no-unsafe-wp-apis */
 } from '@wordpress/components';
 
-export default function OpenverseGridItems( { items, selected, onSelect } ) {
+export default function OpenverseGridItems( { items, multiple, selected, onSelect } ) {
 	const composite = useCompositeState();
 
 	if ( ! items.length ) {
@@ -29,6 +29,7 @@ export default function OpenverseGridItems( { items, selected, onSelect } ) {
 			className="pattern-openverse__grid-items"
 			role="listbox"
 			aria-label={ __( 'Openverse Media', 'wporg-patterns' ) }
+			aria-multiselectable={ multiple }
 		>
 			{ items.map( ( item ) => {
 				const classes = classnames( {
@@ -47,6 +48,7 @@ export default function OpenverseGridItems( { items, selected, onSelect } ) {
 							event.preventDefault();
 							onSelect( item );
 						} }
+						aria-selected={ selected.includes( item ) }
 					>
 						<img src={ item.thumbnail } alt={ item.title } />
 					</CompositeItem>

@@ -162,7 +162,7 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 							total
 					  ) }
 			</h1>
-			<OpenverseGridItems items={ items } selected={ selected } onSelect={ onClick } />
+			<OpenverseGridItems items={ items } multiple={ multiple } selected={ selected } onSelect={ onClick } />
 			<p>Pagination…</p>
 			<OpenverseGridActions
 				items={ selected }
