@@ -148,18 +148,18 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 					? sprintf(
 							/* translators: %d: number of results. %s: media search query */
 							_n(
-								'%1$d result found for "%2$s"',
-								'%1$d results found for "%2$s"',
+								'%1$s result found for "%2$s"',
+								'%1$s results found for "%2$s"',
 								total,
 								'wporg-patterns'
 							),
-							total,
+							new Intl.NumberFormat().format( total ),
 							debouncedSearchTerm
 					  )
 					: sprintf(
 							/* translators: %d: number of results. */
-							_n( '%1$d result found', '%1$d results found', total, 'wporg-patterns' ),
-							total
+							_n( '%1$s result found', '%1$s results found', total, 'wporg-patterns' ),
+							new Intl.NumberFormat().format( total )
 					  ) }
 			</h1>
 			<OpenverseGridItems items={ items } multiple={ multiple } selected={ selected } onSelect={ onClick } />
