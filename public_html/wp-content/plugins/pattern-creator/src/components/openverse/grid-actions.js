@@ -22,9 +22,7 @@ export default function OpenverseGridActions( { actions, items, onClear } ) {
 						</Button>
 					</div>
 					{ items.map( ( item ) => (
-						<>
-							<img key={ item.id } src={ item.thumbnail } alt={ item.title } />
-						</>
+						<img key={ `thumb-${ item.id }` } src={ item.thumbnail } alt={ item.title } />
 					) ) }
 				</div>
 			) : null }
