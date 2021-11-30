@@ -16,6 +16,11 @@ import {
 	/* eslint-enable @wordpress/no-unsafe-wp-apis */
 } from '@wordpress/components';
 
+// Helper function to match an item from a list by ID.
+function includesById( list = [], item = {} ) {
+	return !! list.find( ( { id } ) => id === item.id );
+}
+
 export default function OpenverseGridItems( { items, multiple, selected, onSelect } ) {
 	const composite = useCompositeState();
 
@@ -34,7 +39,7 @@ export default function OpenverseGridItems( { items, multiple, selected, onSelec
 			{ items.map( ( item ) => {
 				const classes = classnames( {
 					'pattern-openverse__grid-item': true,
-					'is-selected': selected.includes( item ),
+					'is-selected': includesById( selected, item ),
 				} );
 				return (
 					<CompositeItem
@@ -48,7 +53,7 @@ export default function OpenverseGridItems( { items, multiple, selected, onSelec
 							event.preventDefault();
 							onSelect( item );
 						} }
-						aria-selected={ selected.includes( item ) }
+						aria-selected={ includesById( selected, item ) }
 					>
 						<img src={ item.thumbnail } alt={ item.title } />
 					</CompositeItem>
