@@ -151,6 +151,10 @@
 		text-decoration: none;
 	}
 
+	&:focus {
+		box-shadow: 0 0 0 var(--wp-admin-border-width-focus) var(--wp-admin-theme-color);
+	}
+
 	&[aria-current="page"] {
 		border: 1px solid $gray-200;
 		background: $gray-900;
