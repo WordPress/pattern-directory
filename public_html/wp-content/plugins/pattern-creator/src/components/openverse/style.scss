@@ -115,6 +115,71 @@
 	}
 }
 
+.pattern-openverse__pagination {
+	margin: 1.5rem 1.5rem 4rem;
+}
+
+.pattern-openverse__pagination-list {
+	display: flex;
+	margin: 0;
+	list-style: none;
+	justify-content: center;
+	align-items: center;
+	gap: 0.25rem;
+
+	@include break-small() {
+		gap: 0.75rem;
+	}
+}
+
+.pattern-openverse__pagination-item {
+	display: inline-block;
+}
+
+.pattern-openverse__pagination-link.components-button.is-secondary {
+	display: inline-block;
+	padding: 0.5rem;
+	background: $white;
+	border: 1px solid $gray-300;
+	border-radius: 2px;
+	box-shadow: none;
+	line-height: 1;
+	text-decoration: none;
+
+	&:hover,
+	&:active {
+		text-decoration: none;
+	}
+
+	&[aria-current="page"] {
+		border: 1px solid $gray-200;
+		background: $gray-900;
+		color: $white;
+	}
+
+	@include break-small() {
+		padding: 0.75rem;
+	}
+}
+
+@media (max-width: #{ ($break-small) }) {
+	.pattern-openverse__pagination-item-previous-page,
+	.pattern-openverse__pagination-item-next-page {
+		.pattern-openverse__pagination-link span[aria-hidden] {
+			display: none;
+		}
+	}
+
+	.pattern-openverse__pagination-item-previous-page .pattern-openverse__pagination-link::before {
+		content: "<";
+	}
+
+	.pattern-openverse__pagination-item-next-page .pattern-openverse__pagination-link::before {
+		content: ">";
+	}
+}
+
+
 .pattern-openverse__collection-notice {
 	position: absolute;
 	bottom: $grid-unit-40;

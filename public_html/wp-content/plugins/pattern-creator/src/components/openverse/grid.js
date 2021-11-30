@@ -12,6 +12,7 @@ import { useDebounce } from '@wordpress/compose';
 import { fetchImages } from './utils';
 import OpenverseGridActions from './grid-actions';
 import OpenverseGridItems from './grid-items';
+import OpenversePagination from './pagination';
 
 function formatImageObject( item ) {
 	return {
@@ -30,42 +31,45 @@ function formatImageObject( item ) {
 /* other props: addToGallery, allowedTypes, gallery, value */
 export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple } ) {
 	const [ debouncedSearchTerm, _setDebouncedSearchTerm ] = useState( searchTerm );
+	const [ page, setPage ] = useState( 1 );
 	const setDebouncedSearchTerm = useDebounce( _setDebouncedSearchTerm, 500 );
 
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ items, setItems ] = useState( [] );
 	const [ selected, setSelected ] = useState( [] );
 	const [ total, setTotal ] = useState( 0 );
+	const [ totalPages, setTotalPages ] = useState( 0 );
 	const hasItems = items.length > 0;
+
+	function setResults( results = [], resultsTotal = 0, pageCount = 0 ) {
+		setIsLoading( false );
+		setItems( results );
+		setTotal( resultsTotal );
+		setTotalPages( pageCount );
+	}
 
 	// Set up a debounced search term, so we don't query constantly while someone is typing.
 	useEffect( () => {
 		setDebouncedSearchTerm( searchTerm );
 	}, [ searchTerm ] );
 
+	// When the search changes, reset back to page 1, and trigger a search.
+	useEffect( () => {
+		setPage( 1 );
+	}, [ debouncedSearchTerm ] );
+
 	useEffect( () => {
 		setIsLoading( true );
 
 		if ( ! debouncedSearchTerm ) {
-			setIsLoading( false );
-			setItems( [] );
-			setTotal( 0 );
+			setResults();
 			return;
 		}
 
-		fetchImages( debouncedSearchTerm, {
-			onSuccess: ( data ) => {
-				setIsLoading( false );
-				setItems( data.results );
-				setTotal( data.result_count );
-			},
-			onError: () => {
-				setIsLoading( false );
-				setItems( [] );
-				setTotal( 0 );
-			},
-		} );
-	}, [ debouncedSearchTerm ] );
+		fetchImages( { searchTerm: debouncedSearchTerm, page: page } )
+			.then( ( data ) => setResults( data.results, data.result_count, data.page_count ) )
+			.catch( () => setResults() );
+	}, [ debouncedSearchTerm, page ] );
 
 	const onCommitSelected = useCallback( () => {
 		if ( ! selected || ! selected.length ) {
@@ -163,7 +167,11 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 					  ) }
 			</h1>
 			<OpenverseGridItems items={ items } multiple={ multiple } selected={ selected } onSelect={ onClick } />
-			<p>Pagination…</p>
+			<OpenversePagination
+				currentPage={ page }
+				totalPages={ totalPages }
+				onNavigation={ ( newValue ) => setPage( newValue ) }
+			/>
 			<OpenverseGridActions
 				items={ selected }
 				onClear={ () => setSelected( [] ) }
