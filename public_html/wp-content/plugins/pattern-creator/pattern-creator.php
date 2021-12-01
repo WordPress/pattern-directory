@@ -115,6 +115,8 @@ function pattern_creator_init() {
 	} else {
 		$post    = get_default_post_to_edit( POST_TYPE, true );
 		$post_id = $post->ID;
+		// Set up the default locale.
+		update_post_meta( $post_id, 'wpop_locale', 'en_US' );
 	}
 
 	$custom_settings = array(
