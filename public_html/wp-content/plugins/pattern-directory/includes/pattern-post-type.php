@@ -537,7 +537,7 @@ function filter_patterns_rest_query( $args, $request ) {
 	// Prioritise results in the requested locale.
 	// Does not limit to only the requested locale, so as to provide results when no translations
 	// exist for the locale, or we do not recognise the locale.
-	if ( $locale ) {
+	if ( $locale && is_string( $locale ) ) {
 		$args['meta_query']['orderby_locale'] = array(
 			'key'     => 'wpop_locale',
 			'compare' => 'IN',
