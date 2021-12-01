@@ -64,7 +64,12 @@ function should_handle_query( $handle_query, $query ) {
  */
 function modify_es_query_args( $es_query_args, $wp_query ) {
 	$user_query = $wp_query->get( 's' );
-	$locales    = array_unique( $wp_query->get( 'meta_query' )['orderby_locale']['value'] );
+	$meta_query = $wp_query->get( 'meta_query' );
+	$locales    = [ 'en_US' ];
+
+	if ( ! empty( $meta_query['orderby_locale']['value'] ) ) {
+		$locales = array_unique( $meta_query['orderby_locale']['value'] );
+	}
 
 	jetpack_require_lib( 'jetpack-wpes-query-builder/jetpack-wpes-query-parser' );
 
