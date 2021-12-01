@@ -102,9 +102,6 @@ function PatternSettings() {
 					tokenizeOnSpace={ false }
 				/>
 			</PanelBody>
-			<PanelBody title={ __( 'Block scope', 'wporg-patterns' ) } initialOpen={ false }>
-				<p>Coming Soon…</p>
-			</PanelBody>
 		</>
 	);
 }
