@@ -16,17 +16,17 @@
 	"dependencies": {
 		"@wordpress/a11y": "3.2.4",
 		"@wordpress/api-fetch": "5.2.6",
-		"@wordpress/components": "19.0.3",
+		"@wordpress/components": "19.1.1",
 		"@wordpress/compose": "5.0.6",
-		"@wordpress/core-data": "4.0.7",
+		"@wordpress/core-data": "4.0.8",
 		"@wordpress/data": "6.1.4",
-		"@wordpress/edit-post": "5.0.9",
-		"@wordpress/editor": "12.0.6",
+		"@wordpress/edit-post": "5.0.13",
+		"@wordpress/editor": "12.0.10",
 		"@wordpress/element": "4.0.4",
 		"@wordpress/i18n": "4.2.4",
 		"@wordpress/notices": "3.2.7",
 		"@wordpress/plugins": "4.0.6",
-		"@wordpress/scripts": "19.2.1"
+		"@wordpress/scripts": "19.2.2"
 	},
 	"eslintConfig": {
 		"extends": "../../../../.eslintrc.js"
