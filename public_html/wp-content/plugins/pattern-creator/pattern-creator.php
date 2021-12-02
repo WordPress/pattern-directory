@@ -19,6 +19,7 @@ const IS_EDIT_VAR = 'edit-pattern';
 const PATTERN_ID_VAR = 'pattern-id';
 
 require_once __DIR__ . '/includes/admin.php';
+require_once __DIR__ . '/includes/mock-blocks.php';
 
 /**
  * Check the conditions of the page to determine if the editor should load.
