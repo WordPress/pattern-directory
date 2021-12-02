@@ -1,0 +1,231 @@
+.pattern-openverse__modal {
+	width: 90vw;
+	min-height: 90vh;
+
+	.components-modal__header {
+		border: none;
+	}
+
+	.components-modal__header-heading {
+		display: flex;
+		width: 100%;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.pattern-openverse__modal-title {
+		width: 100%;
+	}
+
+	.pattern-openverse__powered-by {
+		display: block;
+		height: 40px;
+		width: 140px;
+		background: url(./components/openverse/powered-by-openverse.png) no-repeat center;
+		background-size: contain;
+	}
+}
+
+.pattern-openverse__search {
+	margin-left: auto;
+	margin-right: auto;
+	max-width: 28rem;
+	text-align: center;
+}
+
+.pattern-openverse__search-suggestions {
+	strong,
+	button.components-button.is-link {
+		margin-right: 0.5rem;
+
+		&:last-child {
+			margin-right: 0;
+		}
+	}
+}
+
+.pattern-openverse__title {
+	margin-top: $grid-unit-40;
+	margin-bottom: $grid-unit-40;
+	font-size: 1rem;
+	text-align: center;
+}
+
+.pattern-openverse__grid {
+	padding-bottom: 45px; // footer height (69px) - modal footer padding (24px).
+}
+
+.pattern-openverse__grid-items {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+	grid-gap: $grid-unit-30;
+
+	.pattern-openverse__grid-item {
+		height: 13rem;
+		padding: 0;
+		background: $gray-100;
+		border: none;
+		overflow: hidden;
+		position: relative;
+
+		img {
+			height: 100%;
+			width: 100%;
+			object-fit: cover;
+		}
+
+		// The inset border needs to be on `::after`, otherwise it's hidden by the image.
+		&::after {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+		}
+
+		&.is-selected {
+			&::after {
+				box-shadow: inset 0 0 0 3px $black;
+			}
+
+			&::before {
+				content: "";
+				position: absolute;
+				top: 6px;
+				right: 6px;
+				width: 1.5rem;
+				height: 1.5rem;
+				background-color: var(--wp-admin-theme-color);
+				// stylelint-disable-next-line function-url-quotes
+				background-image: url("data:image/svg+xml,%3Csvg width='25' height='24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m18.127 7.53-6.75 9.08-3.915-2.91' stroke='%23fff' stroke-width='1.5'/%3E%3C/svg%3E%0A");
+				background-repeat: none;
+				background-position: center;
+				border: 1px solid $white;
+			}
+		}
+
+		&:focus {
+			box-shadow: 0 0 0 3px var(--wp-admin-theme-color);
+
+			&::after {
+				box-shadow: inset 0 0 0 3px $white;
+			}
+		}
+	}
+}
+
+.pattern-openverse__pagination {
+	margin: 1.5rem 1.5rem 4rem;
+}
+
+.pattern-openverse__pagination-list {
+	display: flex;
+	margin: 0;
+	list-style: none;
+	justify-content: center;
+	align-items: center;
+	gap: 0.25rem;
+
+	@include break-small() {
+		gap: 0.75rem;
+	}
+}
+
+.pattern-openverse__pagination-item {
+	display: inline-block;
+}
+
+.pattern-openverse__pagination-link.components-button.is-secondary {
+	display: inline-block;
+	padding: 0.5rem;
+	background: $white;
+	border: 1px solid $gray-300;
+	border-radius: 2px;
+	box-shadow: none;
+	line-height: 1;
+	text-decoration: none;
+
+	&:hover,
+	&:active {
+		text-decoration: none;
+	}
+
+	&:focus {
+		box-shadow: 0 0 0 var(--wp-admin-border-width-focus) var(--wp-admin-theme-color);
+	}
+
+	&[aria-current="page"] {
+		border: 1px solid $gray-200;
+		background: $gray-900;
+		color: $white;
+	}
+
+	@include break-small() {
+		padding: 0.75rem;
+	}
+}
+
+@media (max-width: #{ ($break-small) }) {
+	.pattern-openverse__pagination-item-previous-page,
+	.pattern-openverse__pagination-item-next-page {
+		.pattern-openverse__pagination-link span[aria-hidden] {
+			display: none;
+		}
+	}
+
+	.pattern-openverse__pagination-item-previous-page .pattern-openverse__pagination-link::before {
+		content: "<";
+	}
+
+	.pattern-openverse__pagination-item-next-page .pattern-openverse__pagination-link::before {
+		content: ">";
+	}
+}
+
+
+.pattern-openverse__collection-notice {
+	position: absolute;
+	bottom: $grid-unit-40;
+	left: 0;
+	right: 0;
+
+	p {
+		margin: 0 auto;
+		max-width: 32rem;
+		text-align: center;
+	}
+}
+
+.pattern-openverse__footer {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	display: grid;
+	grid-template-columns: 1fr max-content;
+	padding: $grid-unit-20 $grid-unit-40;
+	background: rgba($white, 0.9);
+}
+
+.pattern-openverse__footer-selected {
+	display: flex;
+	gap: $grid-unit-20;
+
+	img {
+		max-height: 36px;
+		align-self: center;
+	}
+}
+
+.pattern-openverse__footer-selected-label {
+	margin: 0;
+}
+
+.pattern-openverse__footer-actions {
+	text-align: right;
+
+	button + button {
+		margin-left: $grid-unit-20;
+	}
+}
