@@ -8,7 +8,7 @@ class Openverse_Client {
 	/**
 	 * @var string The option key where the cache is saved in the database.
 	 */
-	const CACHE_KEY = 'openverse_search';
+	const CACHE_KEY = 'ov-request';
 
 	/**
 	 * @var string The option key where the cache is saved in the database.
