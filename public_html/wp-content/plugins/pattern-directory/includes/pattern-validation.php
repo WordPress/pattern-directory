@@ -40,6 +40,12 @@ function is_not_empty_block( $block ) {
 		}
 	}
 
+	// Allow dynamic blocks, which contain no content and maybe no attributes.
+	$allowed_empty = [ 'core/archives', 'core/calendar', 'core/latest-posts', 'core/separator', 'core/spacer', 'core/tag-cloud' ];
+	if ( in_array( $block['blockName'], $allowed_empty ) ) {
+		return true;
+	}
+
 	// Check if the attributes are different from the default attributes.
 	$block_attrs = $block_type->prepare_attributes_for_render( $block['attrs'] );
 	$default_attrs = $block_type->prepare_attributes_for_render( array() );
