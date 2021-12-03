@@ -193,7 +193,7 @@ class Openverse_Client {
 
 		$data = json_decode( $body );
 		if ( null === $data ) {
-			return new WP_Error( 'invalid-openverse-response', __( 'The Openverse API response is malformed.', 'wporg-patterns' ) );
+			return new WP_Error( 'invalid-openverse-response', 'The Openverse API response is malformed.' );
 		}
 
 		return $data;
