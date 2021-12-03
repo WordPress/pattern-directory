@@ -137,9 +137,10 @@ class Openverse_Client {
 			return new WP_Error( 'invalid-ov-token-response', __( 'The token generation response is malformed.', 'wporg-patterns' ) );
 		}
 
-		// Invalidate the token 5 minutes early, just in case.
-		$token['expires_at'] = time() + $token['expires_in'] - 5 * MINUTE_IN_SECONDS;
+		// Invalidate the token a minute early, ensures that any requests around the "expiry" succeed as long as the request is made within a minute of the token validation being run.
+		$token['expires_at'] = time() + $token['expires_in'] - MINUTE_IN_SECONDS;
 		update_option( self::TOKEN_OPTION_KEY, $token );
+		delete_option( self::TOKEN_OPTION_KEY . '_refresh' );
 
 		return $token['access_token'];
 	}
