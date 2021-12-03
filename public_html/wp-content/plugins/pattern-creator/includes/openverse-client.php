@@ -64,7 +64,7 @@ class Openverse_Client {
 	 * Check if token exists and has not expired.
 	 *
 	 * @param array $token Token object.
-	 * @return bool
+	 * @return bool|int False upon failure, seconds remaining for token on success.
 	 */
 	public function is_valid_token( $token ) {
 		if ( ! isset( $token['access_token'] ) || ! $token['access_token'] ) {
