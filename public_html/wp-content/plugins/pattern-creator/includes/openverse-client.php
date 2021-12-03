@@ -90,7 +90,7 @@ class Openverse_Client {
 		if ( $token_life >= 5 * MINUTE_IN_SECONDS ) {
 			return $token['access_token'];
 		}
-		
+
 		$being_refreshed = get_option( self::TOKEN_OPTION_KEY . '_refresh' );
 		if ( $being_refreshed > time() - MINUTE_IN_SECONDS ) {
 			// Return stale token if possible.
@@ -183,7 +183,7 @@ class Openverse_Client {
 		if ( 200 !== $response_code ) {
 			return new WP_Error(
 				'invalid-openverse-request',
-				sprintf(  'The Openverse API request failed with a %s error.', $response_code )
+				sprintf( 'The Openverse API request failed with a %s error.', $response_code )
 			);
 		}
 
@@ -221,13 +221,13 @@ class Openverse_Client {
 				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 					return $results;
 				}
-			
+
 				// Log the error
-				trigger_error( $results->get_error_code(), E_USER_WARNING );
+				trigger_error( $results->get_error_code(), E_USER_WARNING ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 				// Set a short timeout to avoid hammering the API during outages.
 				set_transient( $cache_key, [], 0.5 * MINUTE_IN_SECONDS );
-		
+
 				return new WP_Error(
 					'search-request-failed',
 					__( 'The search API provider is currently experiencing an error. Try again in a few seconds', 'wporg-patterns' ) // Publicly facing human-readable error.
