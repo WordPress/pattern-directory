@@ -216,7 +216,21 @@ class Openverse_Client {
 		if ( false === $results ) {
 			$results = $this->fetch_results();
 			if ( is_wp_error( $results ) ) {
-				return $results;
+				// During development, return the upstream error.
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					return $results;
+				}
+			
+				// Log the error
+				trigger_error( $results->get_error_code(), E_USER_WARNING );
+
+				// Set a short timeout to avoid hammering the API during outages.
+				set_transient( $cache_key, [], 0.5 * MINUTE_IN_SECONDS );
+		
+				return new WP_Error(
+					'search-request-failed',
+					__( 'The search API provider is currently experiencing an error. Try again in a few seconds', 'wporg-patterns' ) // Publicly facing human-readable error.
+				);
 			}
 			set_transient( $cache_key, $results, $ttl );
 		}
