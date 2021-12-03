@@ -182,7 +182,7 @@ class Openverse_Client {
 		if ( 200 !== $response_code ) {
 			return new WP_Error(
 				'invalid-openverse-request',
-				sprintf( __( 'The Openverse API request failed with a %s error.', 'wporg-patterns' ), $response_code )
+				sprintf(  'The Openverse API request failed with a %s error.', $response_code )
 			);
 		}
 
