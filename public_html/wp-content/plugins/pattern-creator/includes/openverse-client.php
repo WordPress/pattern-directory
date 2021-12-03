@@ -86,9 +86,27 @@ class Openverse_Client {
 	 */
 	public function get_oauth_token() {
 		$token = get_option( self::TOKEN_OPTION_KEY, array() );
-		if ( $this->is_valid_token( $token ) ) {
+		$token_life = $this->is_valid_token( $token );
+		if ( $token_life >= 5 * MINUTE_IN_SECONDS ) {
 			return $token['access_token'];
 		}
+		
+		$being_refreshed = get_option( self::TOKEN_OPTION_KEY . '_refresh' );
+		if ( $being_refreshed > time() - MINUTE_IN_SECONDS ) {
+			// Return stale token if possible.
+			if ( $token_life ) {
+				return $token['access_token'];
+			}
+
+			// Token has expired, and we're still refreshing the token, which means it's failed multiple times in a row.
+			return new WP_Error(
+				'invalid-ov-token-refresh',
+				'The token refresh process is locked, and we have no almost-expiring tokens.'
+			);
+		}
+
+		// Lock token refresh
+		update_option( self::TOKEN_OPTION_KEY . '_refresh', time() );
 
 		$response = wp_remote_post( $this->url . '/v1/auth_tokens/token/', array(
 			'body' => array(
