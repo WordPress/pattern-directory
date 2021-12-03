@@ -134,7 +134,7 @@ class Openverse_Client {
 
 		$token = json_decode( $body, true ); // Second param returns decoded value as assoc array.
 		if ( null === $token ) {
-			return new WP_Error( 'invalid-ov-token-response', __( 'The token generation response is malformed.', 'wporg-patterns' ) );
+			return new WP_Error( 'invalid-ov-token-response', 'The token generation response is malformed.' );
 		}
 
 		// Invalidate the token a minute early, ensures that any requests around the "expiry" succeed as long as the request is made within a minute of the token validation being run.
