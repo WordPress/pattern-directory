@@ -169,6 +169,7 @@ class Openverse_Client {
 		$response = wp_remote_get(
 			$url,
 			array(
+				'timeout' => 15,
 				'headers' => array(
 					'Authorization' => 'Bearer ' . $auth_token,
 				),
