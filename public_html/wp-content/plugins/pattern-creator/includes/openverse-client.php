@@ -76,7 +76,7 @@ class Openverse_Client {
 		if ( time() >= $token['expires_at'] ) {
 			return false;
 		}
-		return true;
+		return time() - $token['expires_at'];
 	}
 
 	/**
