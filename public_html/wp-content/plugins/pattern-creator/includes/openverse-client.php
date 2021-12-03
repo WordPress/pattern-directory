@@ -123,7 +123,7 @@ class Openverse_Client {
 		if ( 200 !== $response_code ) {
 			return new WP_Error(
 				'invalid-ov-token-request',
-				sprintf( __( 'The token generation request failed with a %s error.', 'wporg-patterns' ), $response_code )
+				sprintf( 'The token generation request failed with a %s error.', $response_code )
 			);
 		}
 
