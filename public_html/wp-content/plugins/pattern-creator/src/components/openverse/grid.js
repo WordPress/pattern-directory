@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { Button, Spinner } from '@wordpress/components';
+import { Button, Notice, Spinner } from '@wordpress/components';
 import { useCallback, useEffect, useState } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 
@@ -32,6 +32,7 @@ function formatImageObject( item ) {
 export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple } ) {
 	const [ debouncedSearchTerm, _setDebouncedSearchTerm ] = useState( searchTerm );
 	const [ page, setPage ] = useState( 1 );
+	const [ error, setError ] = useState( null );
 	const setDebouncedSearchTerm = useDebounce( _setDebouncedSearchTerm, 500 );
 
 	const [ isLoading, setIsLoading ] = useState( false );
@@ -62,13 +63,20 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 		setIsLoading( true );
 
 		if ( ! debouncedSearchTerm ) {
+			setError( null );
 			setResults();
 			return;
 		}
 
 		fetchImages( { searchTerm: debouncedSearchTerm, page: page } )
-			.then( ( data ) => setResults( data.results, data.result_count, data.page_count ) )
-			.catch( () => setResults() );
+			.then( ( data ) => {
+				setError( null );
+				setResults( data.results, data.total, data.totalPages );
+			} )
+			.catch( ( err ) => {
+				setError( err );
+				setResults();
+			} );
 	}, [ debouncedSearchTerm, page ] );
 
 	const onCommitSelected = useCallback( () => {
@@ -115,6 +123,14 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 			<div>
 				<Spinner />
 			</div>
+		);
+	}
+
+	if ( error ) {
+		return (
+			<Notice className="pattern-openverse__error" status="error" isDismissible={ false }>
+				<p>{ error.message }</p>
+			</Notice>
 		);
 	}
 

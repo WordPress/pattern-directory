@@ -44,6 +44,10 @@
 	}
 }
 
+.pattern-openverse__error {
+	margin-top: $grid-unit-40;
+}
+
 .pattern-openverse__title {
 	margin-top: $grid-unit-40;
 	margin-bottom: $grid-unit-40;
@@ -182,7 +186,6 @@
 		content: ">";
 	}
 }
-
 
 .pattern-openverse__collection-notice {
 	position: absolute;
