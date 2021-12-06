@@ -81,6 +81,7 @@ class Openverse_REST_Controller extends WP_REST_Controller {
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		return array(
+			'id' => sanitize_text_field( $item->id ),
 			'title' => sanitize_text_field( $item->title ),
 			'url' => esc_url( $item->url ),
 			'thumbnail' => esc_url( $item->thumbnail ),
