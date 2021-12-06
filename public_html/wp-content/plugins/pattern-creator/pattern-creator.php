@@ -218,3 +218,14 @@ function disallow_uploads( $allcaps ) {
 	return $allcaps;
 }
 add_filter( 'user_has_cap', __NAMESPACE__ . '\disallow_uploads' );
+
+/**
+ * Set up any custom endpoints.
+ */
+function rest_api_init() {
+	require_once __DIR__ . '/includes/openverse-client.php';
+	require_once __DIR__ . '/includes/openverse-rest-controller.php';
+	$controller = new \Openverse_REST_Controller();
+	$controller->register_routes();
+}
+add_action( 'rest_api_init', __NAMESPACE__ . '\rest_api_init' );
