@@ -75,27 +75,11 @@ function Editor( { initialSettings, onError, postId } ) {
 	}, [] );
 
 	const editorSettings = useMemo( () => {
-		const allowedBlockTypes = settings.allowedBlockTypes || [];
-		const disallowedBlockTypes = [
-			'core/navigation-area',
-			'core/navigation',
-			'core/navigation-link',
-			'core/navigation-submenu',
-			'core/page-list',
-			'core/template-part',
-			'core/site-logo',
-			'core/site-tagline',
-			'core/site-title',
-		];
-
 		const result = {
 			...settings,
 			fullscreenMode: true,
 			__experimentalLocalAutosaveInterval: 30,
 			__experimentalSetIsInserterOpened: setIsInserterOpened,
-			allowedBlockTypes: allowedBlockTypes.filter(
-				( blockTypeName ) => ! disallowedBlockTypes.includes( blockTypeName )
-			),
 		};
 
 		return result;

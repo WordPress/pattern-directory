@@ -470,6 +470,15 @@ function remove_disallowed_blocks( $allowed_block_types, $block_editor_context )
 		'core/nextpage',
 		'core/block', // Reusable blocks
 		'core/shortcode',
+		'core/navigation-area',
+		'core/navigation',
+		'core/navigation-link',
+		'core/navigation-submenu',
+		'core/page-list',
+		'core/template-part',
+		'core/site-logo',
+		'core/site-tagline',
+		'core/site-title',
 	);
 	if ( isset( $block_editor_context->post ) && POST_TYPE === $block_editor_context->post->post_type ) {
 		// This can be true if all block types are allowed, so to filter them we
