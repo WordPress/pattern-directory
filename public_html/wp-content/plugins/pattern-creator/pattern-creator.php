@@ -24,15 +24,15 @@ require_once __DIR__ . '/includes/mock-blocks.php';
 /**
  * Check the conditions of the page to determine if the editor should load.
  * - It should be a single pattern page.
- * - The current user can edit it.
  * - The query variable is present.
+ *
+ * Permissions are checked in the template itself, so the correct status/login messages can be shown.
  *
  * @return boolean
  */
 function should_load_creator() {
 	global $wp_query;
 	$is_editor = $wp_query->is_singular( POST_TYPE ) && false !== $wp_query->get( IS_EDIT_VAR, false );
-	// @todo Should this be a page template? Something else?
 	$is_new = is_page( 'new-pattern' );
 	return $is_editor || $is_new;
 }

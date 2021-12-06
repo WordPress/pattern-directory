@@ -14,7 +14,7 @@ add_filter( 'body_class', function( $classes ) {
 get_header();
 
 $is_logged_in = is_user_logged_in();
-$can_edit     = current_user_can( 'edit_post', get_query_var( PATTERN_ID_VAR ) );
+$can_edit     = current_user_can( 'edit_pattern', get_query_var( PATTERN_ID_VAR ) );
 
 $current_page_query_args = array( 'pagename' => 'new-pattern' );
 if ( get_query_var( PATTERN_ID_VAR ) ) {
