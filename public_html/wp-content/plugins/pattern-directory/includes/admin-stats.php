@@ -209,6 +209,7 @@ function handle_csv_export() {
 
 	$query_args = array(
 		'order' => 'asc',
+		'posts_per_page' => -1,
 		'date_query' => array(
 			array(
 				'after'     => $start_date->format( 'Y-m-d' ),
