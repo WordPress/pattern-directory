@@ -67,6 +67,7 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 				</div>
 				<Iframe
 					style={ resizedCanvasStyles }
+					assets={ settings.__unstableResolvedAssets }
 					head={ <EditorStyles styles={ settings.styles } /> }
 					ref={ ref }
 					contentRef={ mergedRefs }

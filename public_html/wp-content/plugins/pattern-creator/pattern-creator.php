@@ -129,7 +129,7 @@ function pattern_creator_init() {
 		'__experimentalBlockPatternCategories' => array(),
 	);
 	$editor_context = new WP_Block_Editor_Context( array( 'post' => $post ) );
-	$settings       = gutenberg_get_block_editor_settings( $custom_settings, $editor_context );
+	$settings       = get_block_editor_settings( $custom_settings, $editor_context );
 
 	$settings['defaultStatus'] = get_option( 'wporg-pattern-default_status', 'publish' );
 
@@ -175,19 +175,6 @@ function rewrite_for_pattern_editing() {
 	add_rewrite_rule( '^pattern/(\d+)/edit', 'index.php?pagename=new-pattern&' . PATTERN_ID_VAR . '=$matches[1]', 'top' );
 }
 add_action( 'init', __NAMESPACE__ . '\rewrite_for_pattern_editing' );
-
-/**
- * Inject the editor styles into the page.
- */
-function wp_footer_creator() {
-	if ( ! should_load_creator() ) {
-		return;
-	}
-
-	gutenberg_extend_block_editor_styles_html();
-}
-add_action( 'wp_footer', __NAMESPACE__ . '\wp_footer_creator' );
-
 
 /**
  * Always disable the admin bar on the creator page.
