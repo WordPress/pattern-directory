@@ -91,13 +91,13 @@ function PatternSettings() {
 			<PanelBody title={ __( 'Keywords', 'wporg-patterns' ) }>
 				<p>
 					{ __(
-						'Adding keywords will help people find your pattern when searching and browsing.',
+						'Keywords are words or short phrases that will help people find your pattern. There is a maximum of 10 keywords.',
 						'wporg-patterns'
 					) }
 				</p>
 				<FormTokenField
-					title={ __( 'Keywords', 'wporg-patterns' ) }
 					value={ keywords || [] }
+					maxLength={ 10 }
 					onChange={ setKeywords }
 					tokenizeOnSpace={ false }
 				/>

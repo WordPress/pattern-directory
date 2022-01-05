@@ -100,7 +100,7 @@ function register_post_type_data() {
 			),
 
 			'labels' => array(
-				'name'                       => _x( 'Keywords', 'taxonomy general name', 'wporg-patterns' ),
+				'name'                       => _x( 'Keywords (Internal)', 'taxonomy general name', 'wporg-patterns' ),
 				'singular_name'              => _x( 'Keyword', 'taxonomy singular name', 'wporg-patterns' ),
 				'search_items'               => __( 'Search Keywords', 'wporg-patterns' ),
 				'popular_items'              => __( 'Popular Keywords', 'wporg-patterns' ),

@@ -24,6 +24,7 @@ add_action( 'failed_jetpack_search_query', __NAMESPACE__ . '\log_failed_queries'
  */
 function sync_pattern_meta( $post_meta_safelist ) {
 	$post_meta_safelist[] = 'wpop_description';
+	$post_meta_safelist[] = 'wpop_keywords';
 	$post_meta_safelist[] = 'wpop_viewport_width';
 	$post_meta_safelist[] = 'wpop_locale';
 
