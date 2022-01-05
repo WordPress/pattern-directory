@@ -5,6 +5,8 @@
 
 namespace WordPressdotorg\Pattern_Creator\MockBlocks;
 
+use WP_Block_Supports;
+
 defined( 'WPINC' ) || die();
 
 add_action( 'render_block_core/archives', __NAMESPACE__ . '\render_archives', 10, 3 );
@@ -49,7 +51,12 @@ function render_archives( $block_content, $block, $block_instance ) {
 
 		$class .= ' wp-block-archives-dropdown';
 		$classnames = esc_attr( $class );
+
+		// Required to prevent `block_to_render` from being null in `get_block_wrapper_attributes`.
+		$parent = WP_Block_Supports::$block_to_render;
+		WP_Block_Supports::$block_to_render = $block;
 		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => $classnames ) );
+		WP_Block_Supports::$block_to_render = $parent;
 
 		return sprintf(
 			'<div %1$s>%2$s</div>',
@@ -157,7 +164,12 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
 	if ( $attributes['displayExcerpt'] ) {
 		$classnames[] = 'has-excerpts';
 	}
+
+	// Required to prevent `block_to_render` from being null in `get_block_wrapper_attributes`.
+	$parent = WP_Block_Supports::$block_to_render;
+	WP_Block_Supports::$block_to_render = $block;
 	$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => implode( ' ', $classnames ) ) );
+	WP_Block_Supports::$block_to_render = $parent;
 
 	return sprintf(
 		'<ol %1$s>%2$s</ol>',
