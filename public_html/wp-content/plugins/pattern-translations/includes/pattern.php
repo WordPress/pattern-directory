@@ -99,6 +99,7 @@ class Pattern {
 		$pattern->title       = $post->post_title;
 		$pattern->name        = $post->post_name;
 		$pattern->description = $post->wpop_description;
+		$pattern->keywords    = $post->wpop_keywords;
 		$pattern->html        = $post->post_content;
 		$pattern->source_url  = get_permalink( $post );
 		$pattern->locale      = 'en_US';

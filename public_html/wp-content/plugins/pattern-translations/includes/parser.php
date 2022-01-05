@@ -79,6 +79,11 @@ class PatternParser {
 			$strings[] = $this->pattern->description;
 		}
 
+		if ( ! empty( $this->pattern->keywords ) ) {
+			$keywords = explode( ', ', $this->pattern->keywords );
+			$strings = array_merge( $strings, $keywords );
+		}
+
 		foreach ( $blocks as $block ) {
 			$strings = array_merge( $strings, $this->block_parser_to_strings( $block ) );
 		}
@@ -99,6 +104,12 @@ class PatternParser {
 		$translated = clone $this->pattern;
 		$translated->title = $replacements[ $translated->title ] ?? $translated->title;
 		$translated->description = $replacements[ $translated->description ] ?? $translated->description;
+
+		$translated_keywords = [];
+		foreach ( explode( ', ', $translated->keywords ) as $keyword ) {
+			$translated_keywords[] = $replacements[ $keyword ] ?? $keyword;
+		}
+		$translated->keywords = implode( ', ', $translated_keywords );
 
 		$blocks = parse_blocks( $translated->html );
 
