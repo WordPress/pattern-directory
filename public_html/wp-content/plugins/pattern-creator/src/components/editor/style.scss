@@ -1,6 +1,14 @@
 .pattern-interface {
 	// This should always be 0, because we never have an admin bar to contend with.
 	top: 0 !important;
+	z-index: 1;
+}
+
+// Push the global header & footer behind the creator UI.
+.wp-block-group.global-footer,
+.wp-block-group.global-header {
+	position: relative;
+	z-index: -1;
 }
 
 .pattern-visual-editor {

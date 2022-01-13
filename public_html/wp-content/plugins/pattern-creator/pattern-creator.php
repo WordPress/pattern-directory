@@ -67,7 +67,7 @@ add_filter( 'query_vars', __NAMESPACE__ . '\add_query_var' );
 function pattern_creator_init() {
 	global $editor_styles;
 
-	if ( ! should_load_creator() ) {
+	if ( ! should_load_creator() || ! is_user_logged_in() ) {
 		return;
 	}
 
