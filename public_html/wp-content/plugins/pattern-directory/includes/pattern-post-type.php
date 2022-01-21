@@ -9,6 +9,7 @@ use function WordPressdotorg\Pattern_Directory\Favorite\get_favorite_count;
 const POST_TYPE = 'wporg-pattern';
 
 add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
+add_filter( 'rest_' . POST_TYPE . '_item_schema', __NAMESPACE__ . '\update_schema' );
 add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'init', __NAMESPACE__ . '\register_post_statuses' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
@@ -242,6 +243,23 @@ function register_post_type_data() {
 			),
 		)
 	);
+}
+
+/**
+ * Add the "parent" to the pattern endpoint.
+ *
+ * This takes advantage of page behavior in `WP_REST_Posts_Controller`, which will output the parent ID if the
+ * schema contains the parent property. It also checks that the ID referenced is a valid post.
+ *
+ * @param array $schema Item schema data.
+ */
+function update_schema( $schema ) {
+	$schema['properties']['parent'] = array(
+		'description' => __( 'The ID for the original English pattern.', 'wporg-patterns' ),
+		'type'        => 'integer',
+		'context'     => array( 'view', 'edit' ),
+	);
+	return $schema;
 }
 
 /**
