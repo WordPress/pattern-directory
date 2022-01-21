@@ -179,15 +179,15 @@
         },
         {
             "name": "wpackagist-plugin/gutenberg",
-            "version": "12.3.0",
+            "version": "12.4.1",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/gutenberg/",
-                "reference": "tags/12.3.0"
+                "reference": "tags/12.4.1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/gutenberg.12.3.0.zip"
+                "url": "https://downloads.wordpress.org/plugin/gutenberg.12.4.1.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -2323,7 +2323,7 @@
         },
         {
             "name": "wp-phpunit/wp-phpunit",
-            "version": "5.8.2",
+            "version": "5.8.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-phpunit/wp-phpunit.git",
