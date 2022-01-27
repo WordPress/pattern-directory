@@ -369,6 +369,21 @@ function register_rest_fields() {
 			),
 		)
 	);
+
+	// Add the parent pattern (English original) to the endpoint.
+	// We only need to set the schema. `WP_REST_Posts_Controller` will output the parent ID if the
+	// schema contains the parent property. It also checks that the ID referenced is a valid post.
+	register_rest_field(
+		POST_TYPE,
+		'parent',
+		array(
+			'schema' => array(
+				'description' => __( 'The ID for the original English pattern.', 'wporg-patterns' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+			),
+		)
+	);
 }
 
 /**
