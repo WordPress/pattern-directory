@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f2e1464952983e106110b2a8db2f8a69",
+    "content-hash": "2a8001ff49cbb363f2c98d0807a1728f",
     "packages": [
         {
             "name": "composer/installers",
@@ -212,6 +212,46 @@
             },
             "type": "wordpress-plugin",
             "homepage": "https://wordpress.org/plugins/wordpress-importer/"
+        },
+        {
+            "name": "wporg/wporg-mu-plugins",
+            "version": "dev-trunk",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/WordPress/wporg-mu-plugins.git",
+                "reference": "91ffd976062f657736202013a31ba7073011a4e9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/91ffd976062f657736202013a31ba7073011a4e9",
+                "reference": "91ffd976062f657736202013a31ba7073011a4e9",
+                "shasum": ""
+            },
+            "require": {
+                "composer/installers": "~1.0"
+            },
+            "require-dev": {
+                "wporg/wporg-repo-tools": "dev-trunk"
+            },
+            "default-branch": true,
+            "type": "wordpress-muplugin",
+            "extra": {
+                "sync-svn": {
+                    "main-branch": "trunk",
+                    "paths": {
+                        "mu-plugins/": "https://dotorg.svn.wordpress.org/wordpress/website/wp-content/mu-plugins/pub-sync/"
+                    }
+                }
+            },
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "description": "`mu-plugins` for the WordPress.org network",
+            "support": {
+                "source": "https://github.com/WordPress/wporg-mu-plugins/tree/trunk",
+                "issues": "https://github.com/WordPress/wporg-mu-plugins/issues"
+            },
+            "time": "2022-02-01T20:47:21+00:00"
         }
     ],
     "packages-dev": [
@@ -2323,16 +2363,16 @@
         },
         {
             "name": "wp-phpunit/wp-phpunit",
-            "version": "5.8.3",
+            "version": "5.9.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-phpunit/wp-phpunit.git",
-                "reference": "0cefcc49fd8a7e8c2f8d755e314532441618aee5"
+                "reference": "02d98f9d5f15442489b5d98c1f4c486901e3e110"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-phpunit/wp-phpunit/zipball/0cefcc49fd8a7e8c2f8d755e314532441618aee5",
-                "reference": "0cefcc49fd8a7e8c2f8d755e314532441618aee5",
+                "url": "https://api.github.com/repos/wp-phpunit/wp-phpunit/zipball/02d98f9d5f15442489b5d98c1f4c486901e3e110",
+                "reference": "02d98f9d5f15442489b5d98c1f4c486901e3e110",
                 "shasum": ""
             },
             "type": "library",
@@ -2367,7 +2407,7 @@
                 "issues": "https://github.com/wp-phpunit/issues",
                 "source": "https://github.com/wp-phpunit/wp-phpunit"
             },
-            "time": "2021-11-10T19:49:29+00:00"
+            "time": "2022-01-25T20:37:14+00:00"
         },
         {
             "name": "yoast/phpunit-polyfills",
@@ -2433,7 +2473,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "wporg/wporg-mu-plugins": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

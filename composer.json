@@ -47,6 +47,10 @@
 					}
 				}
 			]
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:WordPress/wporg-mu-plugins.git"
 		}
 	],
 	"require": {
@@ -54,7 +58,8 @@
 		"wpackagist-plugin/gutenberg": "*",
 		"wpackagist-plugin/wordpress-importer": "*",
 		"wordpress-meta/wporg": "1",
-		"wordpress-meta/pub": "1"
+		"wordpress-meta/pub": "1",
+		"wporg/wporg-mu-plugins": "dev-trunk"
 	},
 	"require-dev": {
 		"dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
