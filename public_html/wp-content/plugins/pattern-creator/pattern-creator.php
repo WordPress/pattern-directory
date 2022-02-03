@@ -128,6 +128,8 @@ function pattern_creator_init() {
 		'__experimentalBlockPatterns'          => array(),
 		'__experimentalBlockPatternCategories' => array(),
 	);
+
+	wp_deregister_script( 'wporg-global-header-script' );
 	$editor_context = new WP_Block_Editor_Context( array( 'post' => $post ) );
 	$settings       = get_block_editor_settings( $custom_settings, $editor_context );
 
