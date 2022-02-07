@@ -42,6 +42,14 @@ class Capabilities_Test extends WP_UnitTestCase {
 
 	protected $subscriber_caps = array();
 
+	protected $granted_caps = array(
+		'edit_patterns'             => true,
+		'edit_published_patterns'   => true,
+		'publish_patterns'          => true,
+		'delete_patterns'           => true,
+		'delete_published_patterns' => true,
+	);
+
 	/**
 	 * Set up shared fixtures.
 	 */
@@ -225,14 +233,7 @@ class Capabilities_Test extends WP_UnitTestCase {
 		wp_set_current_user( self::$user_contributor );
 
 		$caps = $this->merge_caps( $this->contributor_caps, $this->admin_editor_caps );
-		$front_end_caps = array_merge(
-			$caps,
-			array(
-				'edit_patterns'           => true,
-				'edit_published_patterns' => true,
-				'publish_patterns'        => true,
-			)
-		);
+		$front_end_caps = array_merge( $caps, $this->granted_caps );
 
 		// Test front end caps.
 		foreach ( $front_end_caps as $cap => $expected_result ) {
@@ -261,14 +262,7 @@ class Capabilities_Test extends WP_UnitTestCase {
 		wp_set_current_user( self::$user_subscriber );
 
 		$caps = $this->merge_caps( $this->subscriber_caps, $this->admin_editor_caps );
-		$front_end_caps = array_merge(
-			$caps,
-			array(
-				'edit_patterns'           => true,
-				'edit_published_patterns' => true,
-				'publish_patterns'        => true,
-			)
-		);
+		$front_end_caps = array_merge( $caps, $this->granted_caps );
 
 		// Test front end caps.
 		foreach ( $front_end_caps as $cap => $expected_result ) {
