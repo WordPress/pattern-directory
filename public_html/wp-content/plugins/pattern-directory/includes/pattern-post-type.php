@@ -649,6 +649,8 @@ function set_pattern_caps( $user_caps ) {
 	);
 	$cap_map = (array) get_post_type_capabilities( (object) $cap_args );
 
+	// Users should have the same permissions for patterns as posts, for example,
+	// if they have `edit_posts`, they should be granted `edit_patterns`, and so on.
 	foreach ( $user_caps as $cap => $bool ) {
 		if ( $bool && isset( $cap_map[ $cap ] ) ) {
 			$user_caps[ $cap_map[ $cap ] ] = true;
@@ -657,9 +659,13 @@ function set_pattern_caps( $user_caps ) {
 
 	// Set caps to allow for front end pattern creation.
 	if ( is_user_logged_in() && ! is_admin() ) {
-		$user_caps['publish_patterns']        = true;
-		$user_caps['edit_patterns']           = true;
-		$user_caps['edit_published_patterns'] = true;
+		$user_caps['read']                       = true;
+		$user_caps['publish_patterns']           = true;
+		$user_caps['edit_patterns']              = true;
+		$user_caps['edit_published_patterns']    = true;
+		$user_caps['delete_patterns']            = true;
+		$user_caps['delete_published_patterns']  = true;
+		// Note that `edit_others_patterns` & `delete_others_patterns` are separate capabilities.
 	}
 
 	return $user_caps;
