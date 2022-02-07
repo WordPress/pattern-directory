@@ -16,6 +16,7 @@ class Capabilities_Test extends WP_UnitTestCase {
 	protected static $user_author;
 	protected static $user_contributor;
 	protected static $user_subscriber;
+	protected static $user_not_on_site;
 	protected static $pattern_id_1;
 	protected static $pattern_id_2;
 	protected static $post_id;
@@ -80,6 +81,15 @@ class Capabilities_Test extends WP_UnitTestCase {
 			)
 		);
 
+		// Create a user, then remove it from the current site.
+		self::$user_not_on_site = $factory->user->create(
+			array(
+				'role' => 'author',
+			)
+		);
+		global $current_site;
+		remove_user_from_blog( self::$user_not_on_site, $current_site->id );
+
 		self::$pattern_id_1 = $factory->post->create(
 			array(
 				'post_type'   => POST_TYPE,
@@ -89,7 +99,7 @@ class Capabilities_Test extends WP_UnitTestCase {
 		self::$pattern_id_2 = $factory->post->create(
 			array(
 				'post_type'   => POST_TYPE,
-				'post_author' => self::$user_subscriber,
+				'post_author' => self::$user_not_on_site,
 			)
 		);
 		self::$post_id = $factory->post->create();
@@ -108,6 +118,7 @@ class Capabilities_Test extends WP_UnitTestCase {
 		wp_delete_user( self::$user_author );
 		wp_delete_user( self::$user_contributor );
 		wp_delete_user( self::$user_subscriber );
+		wp_delete_user( self::$user_not_on_site );
 	}
 
 	/**
@@ -313,8 +324,39 @@ class Capabilities_Test extends WP_UnitTestCase {
 	/**
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\set_pattern_caps()
 	 */
-	public function test_subscriber_edit_other_pattern() {
-		wp_set_current_user( self::$user_subscriber );
+	public function test_pattern_caps_user_not_on_site() {
+		wp_set_current_user( self::$user_not_on_site );
+
+		$caps = $this->merge_caps( array(), $this->admin_editor_caps );
+		$front_end_caps = array_merge( $caps, $this->granted_caps );
+
+		// Test front end caps.
+		foreach ( $front_end_caps as $cap => $expected_result ) {
+			$this->assertEquals(
+				$expected_result,
+				current_user_can( $cap ),
+				sprintf( 'Failed on front end for %s', $cap )
+			);
+		}
+		$this->assertTrue( current_user_can( 'read' ), 'Failed on front end for read' );
+
+		// Test back end caps.
+		$this->set_admin_screen();
+		foreach ( $caps as $cap => $expected_result ) {
+			$this->assertEquals(
+				$expected_result,
+				current_user_can( $cap ),
+				sprintf( 'Failed on back end for %s', $cap )
+			);
+		}
+		$this->assertFalse( current_user_can( 'read' ), 'Failed on back end for read' );
+	}
+
+	/**
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\set_pattern_caps()
+	 */
+	public function test_user_not_on_site_cant_edit_other_pattern() {
+		wp_set_current_user( self::$user_not_on_site );
 
 		// Test front end.
 		$this->assertFalse(
@@ -333,8 +375,8 @@ class Capabilities_Test extends WP_UnitTestCase {
 	/**
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\set_pattern_caps()
 	 */
-	public function test_subscriber_edit_own_pattern() {
-		wp_set_current_user( self::$user_subscriber );
+	public function test_user_not_on_site_can_edit_own_pattern() {
+		wp_set_current_user( self::$user_not_on_site );
 
 		// Test front end.
 		$this->assertTrue(
@@ -353,8 +395,8 @@ class Capabilities_Test extends WP_UnitTestCase {
 	/**
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\set_pattern_caps()
 	 */
-	public function test_subscriber_edit_other_post_type() {
-		wp_set_current_user( self::$user_subscriber );
+	public function test_user_not_on_site_cant_edit_other_post_type() {
+		wp_set_current_user( self::$user_not_on_site );
 
 		// Test front end.
 		$this->assertFalse(
