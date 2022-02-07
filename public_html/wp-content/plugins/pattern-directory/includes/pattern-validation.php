@@ -5,6 +5,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content', 10, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_status', 11, 2 );
 
 /**
  * Strip out basic HTML to get at the manually-entered content in block content.
@@ -153,6 +154,48 @@ function validate_title( $prepared_post, $request ) {
 		return new \WP_Error(
 			'rest_pattern_empty_title',
 			__( 'A pattern title is required.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	return $prepared_post;
+}
+
+/**
+ * Validate the pattern status.
+ *
+ * Ensures patterns created via the API have either a non-public status (draft, unlisted),
+ * or they use the chosen status set in /wp-admin/options-general.php?page=wporg-pattern-creator.
+ */
+function validate_status( $prepared_post, $request ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	$target_status = isset( $request['status'] ) ? $request['status'] : '';
+
+	// Drafts or unlisted patterns are OK.
+	if ( in_array( $target_status, [ 'draft', 'auto-draft', 'unlisted' ] ) ) {
+		return $prepared_post;
+	}
+
+	$current_status = get_post_status( $prepared_post->ID );
+
+	// No validation needed if there's no status change.
+	if ( $target_status === $current_status || '' === $target_status ) {
+		return $prepared_post;
+	}
+
+	$default_status = get_option( 'wporg-pattern-default_status', 'publish' );
+
+	// Make sure the target status is the expected status (publish or pending).
+	if ( $target_status !== $default_status ) {
+		return new \WP_Error(
+			'rest_pattern_invalid_status',
+			sprintf(
+				__( 'Invalid post status. Status must be %s.', 'wporg-patterns' ),
+				$default_status
+			),
 			array( 'status' => 400 )
 		);
 	}
