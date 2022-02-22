@@ -120,7 +120,7 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 
 	if ( isLoading ) {
 		return (
-			<div>
+			<div className="pattern-openverse__loader">
 				<Spinner />
 			</div>
 		);
