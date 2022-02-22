@@ -118,9 +118,9 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 		[ selected, multiple ]
 	);
 
-	if ( isLoading ) {
+	if ( true ) {
 		return (
-			<div className="pattern-openverse__loader">
+			<div>
 				<Spinner />
 			</div>
 		);
