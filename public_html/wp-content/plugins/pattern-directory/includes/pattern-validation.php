@@ -3,6 +3,9 @@
 namespace WordPressdotorg\Pattern_Directory\Pattern_Validation;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
+use WordPressdotorg\Pattern_Translations\Pattern as Translations_Pattern;
+use WordPressdotorg\Pattern_Translations\PatternParser as Translations_PatternParser;
+
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content', 10, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_status', 11, 2 );
@@ -173,14 +176,13 @@ function validate_status( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
-	$target_status = isset( $request['status'] ) ? $request['status'] : '';
+	$target_status  = isset( $request['status'] ) ? $request['status'] : '';
+	$current_status = get_post_status( $prepared_post->ID );
 
 	// Drafts or unlisted patterns are OK.
 	if ( in_array( $target_status, [ 'draft', 'auto-draft', 'unlisted' ] ) ) {
 		return $prepared_post;
 	}
-
-	$current_status = get_post_status( $prepared_post->ID );
 
 	// No validation needed if there's no status change.
 	if ( $target_status === $current_status || '' === $target_status ) {
@@ -236,7 +238,82 @@ function validate_against_spam( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
-	// Extract strings, run against Akismet.
+	// Extract strings and URLs, run against spam checks.
+	$post = get_post( $prepared_post->ID );
+
+	$title       = $prepared_post->post_title   ?? $post->post_title;
+	$content     = $prepared_post->post_content ?? $post->post_content;
+	$description = $request['meta']['wpop_description'] ?? ( $post->wpop_description ?: '' );
+	$keywords    = $request['meta']['wpop_keywords'] ?? ( $post->wpop_keywords ?: '' );
+
+	// Stringify.
+	if ( ! class_exists( '\WordPressdotorg\Pattern_Translations\Pattern' ) ) {
+		// This is just a fall-back for local environments where the Translator isn't active.
+		// not designed to be used in production.
+		$strings = array(
+			$title,
+			$description,
+			wp_strip_all_tags( $content ),
+			$keywords
+		);
+	} else {
+		$pattern              = new Translations_Pattern();
+		$pattern->ID          = $post->ID;
+		$pattern->title       = $title;
+		$pattern->name        = $post->post_name;
+		$pattern->description = $description;
+		$pattern->keywords    = $keywords;
+		$pattern->html        = $content;
+		$pattern->locale      = get_locale();
+
+		$parser  = new Translations_PatternParser( $pattern );
+		$strings = $parser->to_strings();
+	}
+
+	// Combine strings for ease of use.
+	$combined_strings = implode( "\n", $strings );
+
+	// Not yet detected as spam.
+	$is_spam = false;
+
+	// Run it past Akismet.
+	if ( ! $is_spam && is_callable( array( 'Akismet', 'rest_auto_check_comment' ) ) ) {
+		$current_user = wp_get_current_user();
+
+		$akismet_payload = array(
+			'comment_post_ID'      => 0,
+			'comment_type'         => 'pattern_submission',
+			// Disabled as logged in users get bonus points I think, which we don't want.
+			// 'user_ID'           => get_current_user_id(),
+			'comment_author'       => $current_user->display_name ?: $current_user->user_login,
+			'comment_author_email' => $current_user->user_email,
+			'comment_author_url'   => '',
+			'comment_content'      => $combined_strings,
+			'comment_content_raw'  => $content,
+			'permalink'            => get_permalink( $post )
+		);
+
+		$akismet = \Akismet::rest_auto_check_comment( $akismet_payload );
+		if ( is_wp_error( $akismet ) ) {
+			$akismet = array( 'akismet_result' => 'discard' );
+		}
+
+		$is_spam = (
+			isset( $akismet['akismet_result'] ) &&
+			// true: spam, discard: 100% spam no-question.
+			( 'true' === $akismet['akismet_result'] || 'discard' === $akismet['akismet_result'] )
+		);
+	}
+
+	// Testing keyword. Case-sensitive.
+	if ( ! $is_spam && str_contains( $combined_strings, 'PatternDirectorySpamTest' ) ) {
+		$is_spam = true;
+	}
+
+	// If it's been detected as spam, flag it as pending-review.
+	if ( $is_spam ) {
+		$prepared_post->post_status = 'pending';
+	}
 
 	return $prepared_post;
 }
