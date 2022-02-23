@@ -11,6 +11,7 @@ add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 1
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_status', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_against_spam', 20, 2 );
 
+
 /**
  * Strip out basic HTML to get at the manually-entered content in block content.
  *
@@ -241,7 +242,7 @@ function validate_against_spam( $prepared_post, $request ) {
 	// Extract strings and URLs, run against spam checks.
 	$post = get_post( $prepared_post->ID );
 
-	$title       = $prepared_post->post_title   ?? $post->post_title;
+	$title       = $prepared_post->post_title ?? $post->post_title;
 	$content     = $prepared_post->post_content ?? $post->post_content;
 	$description = $request['meta']['wpop_description'] ?? ( $post->wpop_description ?: '' );
 	$keywords    = $request['meta']['wpop_keywords'] ?? ( $post->wpop_keywords ?: '' );
@@ -260,7 +261,7 @@ function validate_against_spam( $prepared_post, $request ) {
 			$title,
 			$description,
 			wp_strip_all_tags( $content ),
-			$keywords
+			$keywords,
 		);
 	} else {
 		$pattern              = new Translations_Pattern();
@@ -315,7 +316,7 @@ function validate_against_spam( $prepared_post, $request ) {
 			'comment_author_url'   => '',
 			'comment_content'      => $combined_strings,
 			'comment_content_raw'  => $content,
-			'permalink'            => get_permalink( $post )
+			'permalink'            => get_permalink( $post ),
 		);
 
 		$akismet = \Akismet::rest_auto_check_comment( $akismet_payload );

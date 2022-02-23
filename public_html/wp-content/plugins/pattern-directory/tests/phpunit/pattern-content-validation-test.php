@@ -267,7 +267,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 		$response = $this->save_block_pattern( array(
 			'title'   => 'Spam Check',
 			'content' => "<!-- wp:heading -->\n<h2 id=\"spam-check\">Spam Check.</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Paragraph: PatternDirectorySpamTest</p>\n<!-- /wp:paragraph -->",
-			'status'  => 'publish'
+			'status'  => 'publish',
 		) );
 
 		$this->assertFalse( $response->is_error() );
@@ -284,7 +284,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 		$response = $this->save_block_pattern( array(
 			'title'   => 'Spam Check',
 			'content' => "<!-- wp:paragraph -->\n<p>Paragraph one.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph two.</p>\n<!-- /wp:paragraph -->",
-			'status'  => 'publish'
+			'status'  => 'publish',
 		) );
 
 		$this->assertFalse( $response->is_error() );
