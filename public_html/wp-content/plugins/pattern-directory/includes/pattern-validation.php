@@ -284,6 +284,23 @@ function validate_against_spam( $prepared_post, $request ) {
 	// Not yet detected as spam.
 	$is_spam = false;
 
+	// Treat Paragraph-only submissions as likely spam.
+	if ( ! $is_spam ) {
+		// Only fetches the top-level of blocks, we're only
+		$block_names_in_use = array_filter(
+			array_unique(
+				wp_list_pluck(
+					parse_blocks( $content ),
+					'blockName'
+				)
+			)
+		);
+
+		if ( array( 'core/paragraph' ) === $block_names_in_use ) {
+			$is_spam = true;
+		}
+	}
+
 	// Run it past Akismet.
 	if ( ! $is_spam && is_callable( array( 'Akismet', 'rest_auto_check_comment' ) ) ) {
 		$current_user = wp_get_current_user();
