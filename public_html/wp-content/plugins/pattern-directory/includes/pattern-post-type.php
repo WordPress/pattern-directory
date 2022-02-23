@@ -19,6 +19,7 @@ add_filter( 'rest_' . POST_TYPE . '_query', __NAMESPACE__ . '\filter_patterns_re
 add_filter( 'user_has_cap', __NAMESPACE__ . '\set_pattern_caps' );
 add_filter( 'posts_orderby', __NAMESPACE__ . '\filter_orderby_locale', 10, 2 );
 
+
 /**
  * Registers post types and associated taxonomies, meta data, etc.
  */
