@@ -6,6 +6,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content', 10, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_status', 11, 2 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_against_spam', 20, 2 );
 
 /**
  * Strip out basic HTML to get at the manually-entered content in block content.
@@ -187,9 +188,10 @@ function validate_status( $prepared_post, $request ) {
 	}
 
 	$default_status = get_option( 'wporg-pattern-default_status', 'publish' );
+	$valid_states   = array_unique( array( 'pending', $default_status ) );
 
 	// Make sure the target status is the expected status (publish or pending).
-	if ( $target_status !== $default_status ) {
+	if ( ! in_array( $target_status, $valid_states, true ) ) {
 		return new \WP_Error(
 			'rest_pattern_invalid_status',
 			sprintf(
@@ -199,6 +201,42 @@ function validate_status( $prepared_post, $request ) {
 			array( 'status' => 400 )
 		);
 	}
+
+	// Do not allow for non-privledged users to move a pending post to another status.
+	if (
+		'pending' === $current_status &&
+		'pending' !== $target_status &&
+		! current_user_can( $post_type->cap->edit_others_patterns )
+	) {
+		return new \WP_Error(
+			'rest_pattern_invalid_status',
+			sprintf(
+				__( 'Invalid post status. Status must be %s.', 'wporg-patterns' ),
+				'pending'
+			),
+			array( 'status' => 400 )
+		);
+	}
+
+	return $prepared_post;
+}
+
+/**
+ * Validate the pattern doesn't appear to be spam.
+ */
+function validate_against_spam( $prepared_post, $request ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	$target_status = isset( $request['status'] ) ? $request['status'] : '';
+
+	// Only run spam checks at publish time.
+	if ( 'publish' !== $target_status ) {
+		return $prepared_post;
+	}
+
+	// Extract strings, run against Akismet.
 
 	return $prepared_post;
 }

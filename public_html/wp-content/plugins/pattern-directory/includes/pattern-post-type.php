@@ -16,7 +16,6 @@ add_filter( 'allowed_block_types_all', __NAMESPACE__ . '\remove_disallowed_block
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
 add_filter( 'rest_' . POST_TYPE . '_collection_params', __NAMESPACE__ . '\filter_patterns_collection_params' );
 add_filter( 'rest_' . POST_TYPE . '_query', __NAMESPACE__ . '\filter_patterns_rest_query', 10, 2 );
-add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\maybe_filter_post_status', 10, 2 );
 add_filter( 'user_has_cap', __NAMESPACE__ . '\set_pattern_caps' );
 add_filter( 'posts_orderby', __NAMESPACE__ . '\filter_orderby_locale', 10, 2 );
 
@@ -669,51 +668,4 @@ function set_pattern_caps( $user_caps ) {
 	}
 
 	return $user_caps;
-}
-
-/**
- * Filter pattern edits through the rest-api to validate that the pattern is what we expect.
- *
- * This prevents publishing patterns that do not meet our automated checks, pushing it to a human
- * review queue. Once the pattern is there, it cannot be published by a non-privledged user.
- *
- * @param stdClass        $prepared_post The Rest API payload, see `rest_pre_insert_{$this->post_type}` filter.
- * @param WP_REST_Request $request       The Rest API request object.
- * @return stdClass The modified $prepared_post.
- */
-function maybe_filter_post_status( $prepared_post, $request ) {
-	// If they're not trying to publish the post, that's okay.
-	if ( 'publish' !== $prepared_post->post_status ) {
-		return $prepared_post;
-	}
-
-	$post_type = get_post_type_object( POST_TYPE );
-	$post      = get_post( $prepared_post->ID  );
-
-	// Do not allow for non-privledged users to move a pending post to another status.
-	if (
-		'pending' === $post->post_status &&
-		! current_user_can( $post_type->cap->edit_others_patterns )
-	) {
-		$prepared_post->post_status = 'pending';
-	}
-
-	// Perform checks over the post to see if we want to accept the pattern as-is, or if it needs to go through human review.
-	$validation = validate_pattern( $prepared_post, $post );
-	if ( ! $validation || is_wp_error( $validation ) ) {
-		$prepared_post->post_status = 'pending';
-	}
-
-	return $prepared_post;
-}
-
-/**
- * Run validations against a given pattern to see if it passes our requirements.
- *
- * @param stdClass        $prepared_post The Rest API payload, see `rest_pre_insert_{$this->post_type}` filter.
- * @param WP_REST_Request $request       The Rest API request object.
- * @return bool Whether the pattern meets the requirements.
- */
-function validate_pattern( $prepared_post, $post ) {
-	return true;
 }
