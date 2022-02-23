@@ -1,14 +1,25 @@
-.pattern-interface {
-	// This should always be 0, because we never have an admin bar to contend with.
-	top: 0 !important;
-	z-index: 1;
+// Unset the top spacing to avoid misaligning the creator UI.
+html {
+	margin-top: 0 !important;
+	scroll-padding-top: 0 !important;
 }
 
 // Push the global header & footer behind the creator UI.
 .wp-block-group.global-footer,
 .wp-block-group.global-header {
-	position: relative;
-	z-index: -1;
+	position: relative !important;
+	z-index: -1 !important;
+}
+
+// Hide the footer to prevent vertical scroll bar.
+.wp-block-group.global-footer {
+	display: none;
+}
+
+.pattern-interface {
+	// This should always be 0, because we never have an admin bar to contend with.
+	top: 0 !important;
+	z-index: 1;
 }
 
 .pattern-visual-editor {
