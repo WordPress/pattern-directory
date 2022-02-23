@@ -10,6 +10,7 @@ class Pattern {
 	public $description = '';
 	public $html = '';
 	public $source_url = '';
+	public $keywords = '';
 
 	public $locale = 'en_US';
 	public $parent = false;
