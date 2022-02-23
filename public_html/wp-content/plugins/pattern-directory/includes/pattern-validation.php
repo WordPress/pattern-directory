@@ -246,6 +246,12 @@ function validate_against_spam( $prepared_post, $request ) {
 	$description = $request['meta']['wpop_description'] ?? ( $post->wpop_description ?: '' );
 	$keywords    = $request['meta']['wpop_keywords'] ?? ( $post->wpop_keywords ?: '' );
 
+	// Extract URLs.
+	$links = array();
+	if ( preg_match_all( '![\b\W"\'](?P<link>((http|https|ftp|mailto):)?//[/.\w]+)[\b\W"\']!', $content, $m ) ) {
+		$links = array_unique( $m['link'] );
+	}
+
 	// Stringify.
 	if ( ! class_exists( '\WordPressdotorg\Pattern_Translations\Pattern' ) ) {
 		// This is just a fall-back for local environments where the Translator isn't active.
@@ -272,6 +278,8 @@ function validate_against_spam( $prepared_post, $request ) {
 
 	// Combine strings for ease of use.
 	$combined_strings = implode( "\n", $strings );
+	$combined_links   = implode( "\n", $links );
+	$combined         = $combined_strings . "\n" . $combined_links;
 
 	// Not yet detected as spam.
 	$is_spam = false;
