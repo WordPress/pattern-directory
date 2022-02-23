@@ -117,7 +117,7 @@ function validate_content( $prepared_post, $request ) {
 	if ( ! count( $real_blocks ) ) {
 		return new \WP_Error(
 			'rest_pattern_empty_blocks',
-			__( 'Pattern content contains only empty blocks.', 'wporg-patterns' ),
+			__( 'Pattern content contains only empty or default blocks.', 'wporg-patterns' ),
 			array( 'status' => 400 )
 		);
 	}
