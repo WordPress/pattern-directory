@@ -1,7 +1,7 @@
 <?php
 
 namespace WordPressdotorg\Pattern_Directory\Pattern_Validation;
-use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{POST_TYPE,UNLISTED_STATUS,SPAM_STATUS};
 
 use WordPressdotorg\Pattern_Translations\Pattern as Translations_Pattern;
 use WordPressdotorg\Pattern_Translations\PatternParser as Translations_PatternParser;
@@ -180,7 +180,7 @@ function validate_status( $prepared_post, $request ) {
 	$current_status = get_post_status( $prepared_post->ID );
 
 	// Drafts or unlisted patterns are OK.
-	if ( in_array( $target_status, [ 'draft', 'auto-draft', 'unlisted' ] ) ) {
+	if ( in_array( $target_status, [ 'draft', 'auto-draft', UNLISTED_STATUS ] ) ) {
 		return $prepared_post;
 	}
 
@@ -190,7 +190,7 @@ function validate_status( $prepared_post, $request ) {
 	}
 
 	$default_status = get_option( 'wporg-pattern-default_status', 'publish' );
-	$valid_states   = array_unique( array( 'pending', $default_status ) );
+	$valid_states   = array_unique( array( 'pending', SPAM_STATUS, $default_status ) );
 
 	// Make sure the target status is the expected status (publish or pending).
 	if ( ! in_array( $target_status, $valid_states, true ) ) {
@@ -204,17 +204,17 @@ function validate_status( $prepared_post, $request ) {
 		);
 	}
 
-	// Do not allow for non-privledged users to move a pending post to another status.
+	// Do not allow for non-privledged users to move a spam post to another status.
 	if (
-		'pending' === $current_status &&
-		'pending' !== $target_status &&
+		SPAM_STATUS === $current_status &&
+		SPAM_STATUS !== $target_status &&
 		! current_user_can( $post_type->cap->edit_others_patterns )
 	) {
 		return new \WP_Error(
 			'rest_pattern_invalid_status',
 			sprintf(
 				__( 'Invalid post status. Status must be %s.', 'wporg-patterns' ),
-				'pending'
+				SPAM_STATUS
 			),
 			array( 'status' => 400 )
 		);
@@ -343,7 +343,7 @@ function validate_against_spam( $prepared_post, $request ) {
 
 	// If it's been detected as spam, flag it as pending-review.
 	if ( $is_spam ) {
-		$prepared_post->post_status = 'pending';
+		$prepared_post->post_status = SPAM_STATUS;
 
 		// Add a note explaining why this post is in pending, if it's due to spam.
 		if ( function_exists( '\WordPressdotorg\InternalNotes\create_note' ) ) {

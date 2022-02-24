@@ -7,6 +7,7 @@ use function WordPressdotorg\Locales\get_locales_with_english_names;
 use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\get_pattern_ids_with_pending_flags;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTERN;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG;
+use const  WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{UNLISTED_STATUS, SPAM_STATUS};
 
 defined( 'WPINC' ) || die();
 
@@ -381,8 +382,11 @@ function display_post_states( $post_states, $post ) {
 		$post_status = '';
 	}
 
-	if ( 'unlisted' === $post->post_status && 'unlisted' !== $post_status ) {
-		$post_states['unlisted'] = _x( 'Unlisted', 'post status', 'wporg-patterns' );
+	if (
+		$post->post_status !== $post_status &&
+		in_array( $post->post_status, [ UNLISTED_STATUS, SPAM_STATUS ] )
+	) {
+		$post_states[ $post->post_status ] = get_post_status_object( $post->post_status )->label;
 	}
 
 	return $post_states;
