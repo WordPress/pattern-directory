@@ -7,7 +7,7 @@ use function WordPressdotorg\Locales\get_locales_with_english_names;
 use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\get_pattern_ids_with_pending_flags;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTERN;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG;
-use const  WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{UNLISTED_STATUS, SPAM_STATUS};
+use const  WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ UNLISTED_STATUS, SPAM_STATUS };
 
 defined( 'WPINC' ) || die();
 

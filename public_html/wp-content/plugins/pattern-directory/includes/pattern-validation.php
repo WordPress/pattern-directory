@@ -1,7 +1,7 @@
 <?php
 
 namespace WordPressdotorg\Pattern_Directory\Pattern_Validation;
-use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{POST_TYPE,UNLISTED_STATUS,SPAM_STATUS};
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 
 use WordPressdotorg\Pattern_Translations\Pattern as Translations_Pattern;
 use WordPressdotorg\Pattern_Translations\PatternParser as Translations_PatternParser;
