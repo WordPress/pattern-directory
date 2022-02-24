@@ -3,7 +3,7 @@
  * Test Block Pattern validation.
  */
 
-use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, SPAM_STATUS };
 
 /**
  * Test pattern validation.
@@ -273,7 +273,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 		$this->assertFalse( $response->is_error() );
 		$data = $response->get_data();
 
-		$this->assertSame( 'pending', $data['status'] );
+		$this->assertSame( SPAM_STATUS, $data['status'] );
 	}
 
 	/**
@@ -290,7 +290,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 		$this->assertFalse( $response->is_error() );
 		$data = $response->get_data();
 
-		$this->assertSame( 'pending', $data['status'] );
+		$this->assertSame( SPAM_STATUS, $data['status'] );
 	}
 }
 
