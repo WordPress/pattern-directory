@@ -282,7 +282,8 @@ function validate_against_spam( $prepared_post, $request ) {
 	$combined         = $combined_strings . "\n" . $combined_links;
 
 	// Not yet detected as spam.
-	$is_spam = false;
+	$is_spam     = false;
+	$spam_reason = '';
 
 	// Treat Paragraph-only submissions as likely spam.
 	if ( ! $is_spam ) {
@@ -297,7 +298,8 @@ function validate_against_spam( $prepared_post, $request ) {
 		);
 
 		if ( array( 'core/paragraph' ) === $block_names_in_use ) {
-			$is_spam = true;
+			$is_spam     = true;
+			$spam_reason = 'Only contains Paragraph blocks.';
 		}
 	}
 
@@ -328,16 +330,31 @@ function validate_against_spam( $prepared_post, $request ) {
 			// true: spam, discard: 100% spam no-question.
 			( 'true' === $akismet['akismet_result'] || 'discard' === $akismet['akismet_result'] )
 		);
+		if ( $is_spam ) {
+			$spam_reason = 'Akismet has detected this Pattern as spam.';
+		}
 	}
 
 	// Testing keyword. Case-sensitive.
 	if ( ! $is_spam && str_contains( $combined_strings, 'PatternDirectorySpamTest' ) ) {
-		$is_spam = true;
+		$is_spam     = true;
+		$spam_reason = 'Includes the spam trigger word: PatternDirectorySpamTest';
 	}
 
 	// If it's been detected as spam, flag it as pending-review.
 	if ( $is_spam ) {
 		$prepared_post->post_status = 'pending';
+
+		// Add a note explaining why this post is in pending, if it's due to spam.
+		if ( function_exists( '\WordPressdotorg\InternalNotes\create_note' ) ) {
+			\WordPressdotorg\InternalNotes\create_note(
+				$prepared_post->ID,
+				array(
+					'post_author'  => get_user_by( 'login', 'wordpressdotorg' )->ID ?? 0,
+					'post_excerpt' => $spam_reason,
+				)
+			);
+		}
 	}
 
 	return $prepared_post;
