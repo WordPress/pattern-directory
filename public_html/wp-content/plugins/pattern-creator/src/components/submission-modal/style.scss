@@ -81,7 +81,7 @@ $modal-height: 375px;
 	flex-direction: column;
 	justify-content: space-between;
 	background: $white;
-	padding: $grid-unit-20 $grid-unit-40 $grid-unit-40;
+	padding: $grid-unit-40;
 }
 
 .submission-modal__link {
@@ -100,7 +100,6 @@ $modal-height: 375px;
 	display: grid;
 	grid-template-columns: 50% 50%;
 	grid-gap: $grid-unit-05;
-	padding-top: $grid-unit-10;
 	margin: 0;
 
 	li {
