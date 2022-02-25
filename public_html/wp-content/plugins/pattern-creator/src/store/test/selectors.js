@@ -119,8 +119,7 @@ describe( 'selectors', () => {
 			} ) ),
 		};
 
-		const state = {};
-		expect( isPatternSaveable( state ) ).toBe( false );
+		expect( isPatternSaveable( {} ) ).toBe( false );
 	} );
 
 	describe( 'isPatternSaveable', () => {
@@ -143,8 +142,7 @@ describe( 'selectors', () => {
 				} ) ),
 			};
 
-			const state = {};
-			expect( isPatternSaveable( state ) ).toBe( true );
+			expect( isPatternSaveable( {} ) ).toBe( true );
 		} );
 	} );
 } );
