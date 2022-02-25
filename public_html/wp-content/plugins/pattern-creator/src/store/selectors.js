@@ -118,8 +118,8 @@ export function isListViewOpened( state ) {
 /**
  * Returns whether the pattern is "saveable".
  *
- * A pattern can be saved if it has a title and content. The other requirements
- * are handled in the publish flow, title and content are the only things
+ * A pattern can be saved if it has content. The other requirements
+ * are handled in the publish flow, content is the only thing
  * required for saving a draft.
  *
  * See https://github.com/WordPress/gutenberg/blob/31330dbb737ce30646a4300410faed633061547a/packages/editor/src/store/selectors.js#L531
@@ -132,10 +132,7 @@ export function isListViewOpened( state ) {
 export const isPatternSaveable = createRegistrySelector( ( select ) => ( state, postId ) => {
 	const post = select( coreStore ).getEditedEntityRecord( 'postType', POST_TYPE, postId ) || EMPTY_OBJECT;
 
-	const hasTitle = !! post.title;
-	const hasContent = ! isEditedPostEmpty( post );
-
-	return hasTitle && hasContent;
+	return ! isEditedPostEmpty( post );
 } );
 
 function isEditedPostEmpty( post ) {

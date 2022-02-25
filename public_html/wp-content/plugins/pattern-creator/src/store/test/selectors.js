@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getSettings, isFeatureActive, isInserterOpened, isListViewOpened } from '../selectors';
+import { getSettings, isFeatureActive, isInserterOpened, isListViewOpened, isPatternSaveable } from '../selectors';
 
 describe( 'selectors', () => {
 	const canUser = jest.fn( () => true );
@@ -105,6 +105,46 @@ describe( 'selectors', () => {
 			expect( isListViewOpened( state ) ).toBe( true );
 			state.listViewPanel = false;
 			expect( isListViewOpened( state ) ).toBe( false );
+		} );
+	} );
+
+	it( 'should return false if post has no blocks', () => {
+		isPatternSaveable.registry = {
+			select: jest.fn( () => ( {
+				getEditedEntityRecord: () => {
+					return {
+						blocks: [],
+					};
+				},
+			} ) ),
+		};
+
+		const state = {};
+		expect( isPatternSaveable( state ) ).toBe( false );
+	} );
+
+	describe( 'isPatternSaveable', () => {
+		it( 'should return true if post has a block', () => {
+			isPatternSaveable.registry = {
+				select: jest.fn( () => ( {
+					getEditedEntityRecord: () => {
+						return {
+							blocks: [
+								{
+									attributes: { content: 'w', dropCap: false },
+									clientId: 'wordpress',
+									innerBlocks: [],
+									isValid: true,
+									name: 'core/paragraph',
+								},
+							],
+						};
+					},
+				} ) ),
+			};
+
+			const state = {};
+			expect( isPatternSaveable( state ) ).toBe( true );
 		} );
 	} );
 } );
