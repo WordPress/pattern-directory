@@ -26,12 +26,6 @@ import { useMergeRefs } from '@wordpress/compose';
 import { POST_TYPE, store as patternStore } from '../../store';
 import { SidebarInspectorFill } from '../sidebar';
 
-const LAYOUT = {
-	type: 'default',
-	// At the root level of the site editor, no alignments should be allowed.
-	alignments: [],
-};
-
 export default function BlockEditor( { setIsInserterOpen } ) {
 	const { settings, deviceType } = useSelect(
 		( select ) => {
@@ -73,10 +67,7 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 					contentRef={ mergedRefs }
 					name="editor-canvas"
 				>
-					<BlockList
-						className="pattern-block-editor__block-list wp-site-blocks"
-						__experimentalLayout={ LAYOUT }
-					/>
+					<BlockList className="pattern-block-editor__block-list wp-site-blocks" />
 				</Iframe>
 			</BlockTools>
 		</BlockEditorProvider>
