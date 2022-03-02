@@ -28,13 +28,8 @@ add_action( 'template_redirect', __NAMESPACE__ . '\rewrite_urls' );
  * as indicating support for post thumbnails.
  */
 function setup() {
-	add_theme_support( 'post-thumbnails' );
-
 	// Add gutenberg styling supports.
 	add_theme_support( 'align-wide' );
-	add_theme_support( 'custom-spacing' );
-	add_theme_support( 'custom-line-height' );
-	add_theme_support( 'experimental-link-color' );
 
 	// The parent wporg theme is designed for use on wordpress.org/* and assumes locale-domains are available.
 	// Remove hreflang support.
