@@ -149,6 +149,9 @@ function generate_block_editor_styles_html() {
 		),
 		'before'
 	);
+
+	wp_dequeue_style( 'global-styles' );
+	wp_deregister_style( 'global-styles' );
 }
 
 /**
