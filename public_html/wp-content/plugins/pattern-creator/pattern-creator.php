@@ -87,7 +87,7 @@ function pattern_creator_init() {
 		$script_asset['version'],
 		true
 	);
-	wp_set_script_translations( 'wporg-pattern-creator-script', 'wporg-pattern-creator' );
+	wp_set_script_translations( 'wp-pattern-creator', 'wporg-patterns' );
 
 	wp_add_inline_script(
 		'wp-pattern-creator',
