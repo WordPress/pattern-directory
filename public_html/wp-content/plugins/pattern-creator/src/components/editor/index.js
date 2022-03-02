@@ -78,6 +78,7 @@ function Editor( { initialSettings, onError, postId } ) {
 		const result = {
 			...settings,
 			fullscreenMode: true,
+			supportsLayout: false,
 			__experimentalLocalAutosaveInterval: 30,
 			__experimentalSetIsInserterOpened: setIsInserterOpened,
 		};
