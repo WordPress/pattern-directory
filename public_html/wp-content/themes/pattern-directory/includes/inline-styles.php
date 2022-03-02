@@ -18,6 +18,7 @@ use WP_Block_Type_Registry;
  * Renders the layout config to the block wrapper.
  *
  * See `wp_render_layout_support_flag`, `gutenberg_render_layout_support_flag`.
+ * Copied from https://github.com/WordPress/gutenberg/blob/0ea49d674a376636db5c0722ae41083394df9e60/lib/block-supports/layout.php#L132.
  *
  * @param  string $block_content Rendered block content.
  * @param  array  $block         Block object.
@@ -69,6 +70,7 @@ add_filter( 'render_block', __NAMESPACE__ . '\render_layout_support_styles', 10,
  * Render the elements stylesheet.
  *
  * See `wp_render_elements_support`, `gutenberg_render_elements_support`.
+ * Copied from https://github.com/WordPress/gutenberg/blob/0ea49d674a376636db5c0722ae41083394df9e60/lib/block-supports/elements.php#L15.
  *
  * @param  string $block_content Rendered block content.
  * @param  array  $block         Block object.
