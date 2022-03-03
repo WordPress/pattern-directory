@@ -112,7 +112,11 @@ function filter_admin_bar_links( $wp_admin_bar ) {
 	if ( is_singular( POST_TYPE ) ) {
 		$edit_pattern = $wp_admin_bar->get_node( 'edit' );
 		if ( $edit_pattern ) {
-			$edit_pattern->href = site_url( 'pattern/' . get_the_ID() . '/edit/' );
+			$pattern_id = wp_get_post_parent_id() ?: get_the_ID();
+			$edit_pattern->href = site_url( "pattern/$pattern_id/edit/" );
+			if ( wp_get_post_parent_id() !== 0 ) {
+				$edit_pattern->title = __( 'Edit Original Pattern', 'wporg-patterns' );
+			}
 			$wp_admin_bar->remove_node( $edit_pattern->id );
 			$wp_admin_bar->add_node( $edit_pattern );
 		}
