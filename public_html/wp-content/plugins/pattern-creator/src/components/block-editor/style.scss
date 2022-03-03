@@ -25,3 +25,11 @@
 .pattern-visual-editor > [name="editor-canvas"] {
 	margin-top: 0 !important;
 }
+
+
+// Restore Gutenberg Styles that are overwritten by twenty twenty one
+html :where(.wp-block) {
+	margin-bottom: 28px;
+	margin-top: 28px;
+	max-width: 840px;
+}
