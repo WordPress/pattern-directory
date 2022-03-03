@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { AsyncModeProvider, useDispatch, useSelect } from '@wordpress/data';
 import { BlockBreadcrumb } from '@wordpress/block-editor';
-import { useCallback, useState } from '@wordpress/element';
+import { createInterpolateElement, useCallback, useEffect, useState } from '@wordpress/element';
 import {
 	ComplementaryArea,
 	FullscreenMode,
@@ -12,6 +12,7 @@ import {
 	store as interfaceStore,
 } from '@wordpress/interface';
 import { store as coreStore } from '@wordpress/core-data';
+import { store as noticesStore } from '@wordpress/notices';
 import {
 	EditorNotices,
 	EditorProvider,
@@ -55,12 +56,21 @@ function Editor( { onError, postId } ) {
 		};
 	}, [] );
 	const { setIsInserterOpened } = useDispatch( patternStore );
+	const { createInfoNotice } = useDispatch( noticesStore );
 	const [ isEntitiesSavedStatesOpen, setIsEntitiesSavedStatesOpen ] = useState( false );
 	const closeEntitiesSavedStates = useCallback( () => {
 		setIsEntitiesSavedStatesOpen( false );
 	}, [] );
 	const openEntitiesSavedStates = useCallback( () => {
 		setIsEntitiesSavedStatesOpen( true );
+	}, [] );
+
+	useEffect( () => {
+		if ( ! wporgLocale.id.startsWith( 'en_' ) ) {
+			createInfoNotice( __( 'Patterns should be submitted in English.', 'wporg-patterns' ), {
+				isDismissible: false,
+			} );
+		}
 	}, [] );
 
 	// Don't render the Editor until the settings are set and loaded
