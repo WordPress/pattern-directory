@@ -10,7 +10,6 @@ namespace WordPressdotorg\Pattern_Translations;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 const GLOTPRESS_PROJECT = 'patterns/core';
-const TRANSLATED_BY_GLOTPRESS_KEY = '_glotpress_translated';
 
 const TRANSLATED_TAXONOMIES = [
 	// Taxonomy => Translation Context, see pattern-directory/bin/i18n.php
