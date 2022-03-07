@@ -60,6 +60,7 @@
 	"require": {
 		"composer/installers": "~1.0",
 		"wpackagist-plugin/gutenberg": "*",
+		"wpackagist-plugin/stream": "*",
 		"wpackagist-plugin/wordpress-importer": "*",
 		"wordpress-meta/wporg": "1",
 		"wordpress-meta/pub": "1",
