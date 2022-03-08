@@ -117,23 +117,17 @@ class Pattern {
 		$defaults = [
 			'post_type'      => POST_TYPE,
 			// Note: This must be set for cli context, in isolated test context this is defaulted to 'publish'
-			// Prevents unexpected patterns in translations. Unlisted to ensure that specifically flagged
-			// dotorg patterns are translated, even if temporarily unlisted.
-			'post_status'    => 'publish,unlisted',
+			// Prevents unexpected patterns in translations
+			'post_status'    => 'publish',
 			'posts_per_page' => -1,
 			'orderby'        => [
 				'post_date' => 'DESC',
 			],
-			// Only select en_US patterns that are marked as glotpress translatable.
+			// Only select en_US patterns.
 			'meta_query' => [
 				[
 					'key'   => 'wpop_locale',
 					'value' => 'en_US',
-				],
-				'relation' => 'AND',
-				[
-					'key'   => TRANSLATED_BY_GLOTPRESS_KEY,
-					'value' => 1,
 				],
 			],
 		];
