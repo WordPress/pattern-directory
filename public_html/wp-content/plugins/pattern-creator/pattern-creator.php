@@ -155,6 +155,8 @@ function pattern_creator_init() {
 	wp_enqueue_script( 'wp-format-library' );
 	wp_enqueue_style( 'wp-edit-site' );
 	wp_enqueue_style( 'wp-format-library' );
+	// Load layout and margin styles.
+	wp_enqueue_style( 'wp-editor-classic-layout-styles' );
 	wp_enqueue_media();
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\pattern_creator_init', 20 );
