@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6d2a20e479fa4683802ba1720e9f44b9",
+    "content-hash": "d71a479ee540b5c6191ee123945b552b",
     "packages": [
         {
             "name": "composer/installers",
@@ -179,15 +179,15 @@
         },
         {
             "name": "wpackagist-plugin/gutenberg",
-            "version": "12.7.0",
+            "version": "12.7.1",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/gutenberg/",
-                "reference": "tags/12.7.0"
+                "reference": "tags/12.7.1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/gutenberg.12.7.0.zip"
+                "url": "https://downloads.wordpress.org/plugin/gutenberg.12.7.1.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -197,15 +197,15 @@
         },
         {
             "name": "wpackagist-plugin/stream",
-            "version": "3.8.2",
+            "version": "3.9.0",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/stream/",
-                "reference": "tags/3.8.2"
+                "reference": "tags/3.9.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/stream.3.8.2.zip"
+                "url": "https://downloads.wordpress.org/plugin/stream.3.9.0.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -232,17 +232,42 @@
             "homepage": "https://wordpress.org/plugins/wordpress-importer/"
         },
         {
+            "name": "wporg/wporg-internal-notes",
+            "version": "dev-build",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/WordPress/wporg-internal-notes.git",
+                "reference": "c6cfcf0f7bcd1200725a311ab8d84004777566cf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/WordPress/wporg-internal-notes/zipball/c6cfcf0f7bcd1200725a311ab8d84004777566cf",
+                "reference": "c6cfcf0f7bcd1200725a311ab8d84004777566cf",
+                "shasum": ""
+            },
+            "type": "wordpress-plugin",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "homepage": "https://wordpress.org",
+            "support": {
+                "issues": "https://github.com/WordPress/wporg-internal-notes/issues",
+                "source": "https://github.com/WordPress/wporg-internal-notes/tree/build"
+            },
+            "time": "2022-03-09T23:07:11+00:00"
+        },
+        {
             "name": "wporg/wporg-mu-plugins",
             "version": "dev-trunk",
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/wporg-mu-plugins.git",
-                "reference": "7674f5dbf3c0d326008ad1d4884946e2b7ee4a60"
+                "reference": "92df8fac50da1e21cec553f3a0c906e96de6143a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/7674f5dbf3c0d326008ad1d4884946e2b7ee4a60",
-                "reference": "7674f5dbf3c0d326008ad1d4884946e2b7ee4a60",
+                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/92df8fac50da1e21cec553f3a0c906e96de6143a",
+                "reference": "92df8fac50da1e21cec553f3a0c906e96de6143a",
                 "shasum": ""
             },
             "require": {
@@ -269,7 +294,7 @@
                 "source": "https://github.com/WordPress/wporg-mu-plugins/tree/trunk",
                 "issues": "https://github.com/WordPress/wporg-mu-plugins/issues"
             },
-            "time": "2022-03-02T05:52:15+00:00"
+            "time": "2022-03-07T21:49:10+00:00"
         }
     ],
     "packages-dev": [
@@ -2499,6 +2524,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "wporg/wporg-internal-notes": 20,
         "wporg/wporg-mu-plugins": 20
     },
     "prefer-stable": false,
@@ -2508,5 +2534,5 @@
     "platform-overrides": {
         "php": "7.2"
     },
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.2.0"
 }
