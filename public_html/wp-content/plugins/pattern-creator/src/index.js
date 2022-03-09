@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
+import { dispatch } from '@wordpress/data';
 /* eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK. */
 import { __experimentalFetchLinkSuggestions as fetchLinkSuggestions } from '@wordpress/core-data';
 import { registerCoreBlocks } from '@wordpress/block-library';
@@ -10,7 +11,7 @@ import { render, unmountComponentAtNode } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import './store';
+import { store as patternStore } from './store';
 import './hooks/media';
 import Editor from './components/editor';
 import { filterEndpoints } from './api-middleware';
@@ -24,13 +25,16 @@ apiFetch.use( filterEndpoints );
  * an unhandled error occurs, replacing previously mounted editor element using
  * an initial state from prior to the crash.
  *
- * @param {Element} target   DOM node in which editor is rendered.
- * @param {?Object} settings Editor settings object.
+ * @param {Element} target          DOM node in which editor is rendered.
+ * @param {Object}  settings        Editor settings.
+ * @param {number}  settings.postId ID of the current post.
  */
-export function reinitializeEditor( target, settings ) {
+export function reinitializeEditor( target, { postId, ...settings } ) {
 	unmountComponentAtNode( target );
 	const reboot = reinitializeEditor.bind( null, target, settings );
-	render( <Editor initialSettings={ settings } onError={ reboot } />, target );
+
+	dispatch( patternStore ).updateSettings( settings );
+	render( <Editor initialSettings={ settings } onError={ reboot } postId={ postId } />, target );
 }
 
 /**
@@ -40,14 +44,12 @@ export function reinitializeEditor( target, settings ) {
  * @param {Object} settings        Editor settings.
  * @param {number} settings.postId ID of the current post.
  */
-export function initialize( id, { postId, ...settings } ) {
+export function initialize( id, settings ) {
 	settings.__experimentalFetchLinkSuggestions = ( search, searchOptions ) =>
 		fetchLinkSuggestions( search, searchOptions, settings );
 
 	const target = document.getElementById( id );
-	const reboot = reinitializeEditor.bind( null, target, settings );
 
 	registerCoreBlocks();
-
-	render( <Editor initialSettings={ settings } onError={ reboot } postId={ postId } />, target );
+	reinitializeEditor( target, settings );
 }

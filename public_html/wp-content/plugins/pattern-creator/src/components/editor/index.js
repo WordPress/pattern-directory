@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { AsyncModeProvider, useDispatch, useSelect } from '@wordpress/data';
 import { BlockBreadcrumb } from '@wordpress/block-editor';
-import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
+import { useCallback, useState } from '@wordpress/element';
 import {
 	ComplementaryArea,
 	FullscreenMode,
@@ -41,27 +41,20 @@ const interfaceLabels = {
 	actions: __( 'Editor publish', 'wporg-patterns' ),
 };
 
-function Editor( { initialSettings, onError, postId } ) {
+function Editor( { onError, postId } ) {
 	const { isInserterOpen, isListViewOpen, post, sidebarIsOpened, settings } = useSelect( ( select ) => {
-		const { isInserterOpened, isListViewOpened, getSettings, isFeatureActive, getPreviewDeviceType } = select(
-			patternStore
-		);
+		const { isInserterOpened, isListViewOpened, getSettings } = select( patternStore );
 		const { getEntityRecord } = select( coreStore );
-
-		const _settings = getSettings();
-		_settings.focusMode = isFeatureActive( 'focusMode' );
-		_settings.hasFixedToolbar = isFeatureActive( 'fixedToolbar' ) || getPreviewDeviceType() !== 'Desktop';
-		_settings.hasReducedUI = isFeatureActive( 'reducedUI' );
 
 		return {
 			isInserterOpen: isInserterOpened(),
 			isListViewOpen: isListViewOpened(),
 			post: getEntityRecord( 'postType', POST_TYPE, postId ),
 			sidebarIsOpened: !! select( interfaceStore ).getActiveComplementaryArea( patternStore.name ),
-			settings: _settings,
+			settings: getSettings(),
 		};
 	}, [] );
-	const { setIsInserterOpened, updateSettings } = useDispatch( patternStore );
+	const { setIsInserterOpened } = useDispatch( patternStore );
 	const [ isEntitiesSavedStatesOpen, setIsEntitiesSavedStatesOpen ] = useState( false );
 	const closeEntitiesSavedStates = useCallback( () => {
 		setIsEntitiesSavedStatesOpen( false );
@@ -69,22 +62,6 @@ function Editor( { initialSettings, onError, postId } ) {
 	const openEntitiesSavedStates = useCallback( () => {
 		setIsEntitiesSavedStatesOpen( true );
 	}, [] );
-
-	useEffect( () => {
-		updateSettings( initialSettings );
-	}, [] );
-
-	const editorSettings = useMemo( () => {
-		const result = {
-			...settings,
-			fullscreenMode: true,
-			supportsLayout: false,
-			__experimentalLocalAutosaveInterval: 30,
-			__experimentalSetIsInserterOpened: setIsInserterOpened,
-		};
-
-		return result;
-	}, [ settings, setIsInserterOpened ] );
 
 	// Don't render the Editor until the settings are set and loaded
 	if ( ! settings?.siteUrl || ! post ) {
@@ -108,7 +85,7 @@ function Editor( { initialSettings, onError, postId } ) {
 	return (
 		<ShortcutProvider>
 			<SlotFillProvider>
-				<EditorProvider settings={ editorSettings } post={ post }>
+				<EditorProvider settings={ settings } post={ post }>
 					<ErrorBoundary onError={ onError }>
 						<FullscreenMode isActive />
 						<UrlController postId={ postId } />

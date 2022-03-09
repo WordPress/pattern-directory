@@ -66,9 +66,13 @@ export const getSettings = createSelector(
 	( state, setIsInserterOpen ) => {
 		const settings = {
 			...state.settings,
+			fullscreenMode: true,
 			outlineMode: true,
 			focusMode: isFeatureActive( state, 'focusMode' ),
-			hasFixedToolbar: isFeatureActive( state, 'fixedToolbar' ),
+			hasFixedToolbar:
+				isFeatureActive( state, 'fixedToolbar' ) || getPreviewDeviceType( state ) !== 'Desktop',
+			hasReducedUI: isFeatureActive( state, 'reducedUI' ),
+			__experimentalLocalAutosaveInterval: 30,
 			__experimentalSetIsInserterOpened: setIsInserterOpen,
 		};
 
@@ -78,6 +82,8 @@ export const getSettings = createSelector(
 		state.settings,
 		isFeatureActive( state, 'focusMode' ),
 		isFeatureActive( state, 'fixedToolbar' ),
+		isFeatureActive( state, 'reducedUI' ),
+		getPreviewDeviceType( state ),
 	]
 );
 
