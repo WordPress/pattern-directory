@@ -14,6 +14,7 @@ import {
 	__unstableIframe as Iframe,
 	__unstableUseMouseMoveTypingReset as useMouseMoveTypingReset,
 	__experimentalUseResizeCanvas as useResizeCanvas,
+	useSetting,
 	__unstableUseTypingObserver as useTypingObserver,
 } from '@wordpress/block-editor';
 /* eslint-enable @wordpress/no-unsafe-wp-apis */
@@ -37,6 +38,7 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 		},
 		[ setIsInserterOpen ]
 	);
+	const layout = useSetting( 'layout' );
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor( 'postType', POST_TYPE );
 	const resizedCanvasStyles = useResizeCanvas( deviceType, true );
 	const ref = useMouseMoveTypingReset();
@@ -73,7 +75,10 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 					contentRef={ mergedRefs }
 					name="editor-canvas"
 				>
-					<BlockList className="pattern-block-editor__block-list wp-site-blocks" />
+					<BlockList
+						className="pattern-block-editor__block-list wp-site-blocks"
+						__experimentalLayout={ layout }
+					/>
 				</Iframe>
 			</BlockTools>
 		</BlockEditorProvider>
