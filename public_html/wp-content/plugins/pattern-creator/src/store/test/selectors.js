@@ -4,8 +4,6 @@
 import { getSettings, isFeatureActive, isInserterOpened, isListViewOpened, isPatternSaveable } from '../selectors';
 
 describe( 'selectors', () => {
-	const canUser = jest.fn( () => true );
-
 	describe( 'isFeatureActive', () => {
 		it( 'is tolerant to an undefined features preference', () => {
 			// See: https://github.com/WordPress/gutenberg/issues/14580
@@ -52,36 +50,41 @@ describe( 'selectors', () => {
 	} );
 
 	describe( 'getSettings', () => {
-		it( "returns the settings when the user can't create media", () => {
-			canUser.mockReturnValueOnce( false );
-			canUser.mockReturnValueOnce( false );
+		it( 'returns the default settings', () => {
 			const state = { settings: {}, preferences: {} };
 			const setInserterOpened = () => {};
 			expect( getSettings( state, setInserterOpened ) ).toEqual( {
 				outlineMode: true,
 				focusMode: false,
-				hasFixedToolbar: false,
+				fullscreenMode: true,
+				hasFixedToolbar: true,
+				hasReducedUI: false,
 				__experimentalSetIsInserterOpened: setInserterOpened,
+				__experimentalLocalAutosaveInterval: 30,
 			} );
 		} );
 
-		it( 'returns the extended settings when the user can create media', () => {
+		it( 'returns the merged settings', () => {
 			const state = {
 				settings: { key: 'value' },
 				preferences: {
 					features: {
 						focusMode: true,
 						fixedToolbar: true,
+						reducedUI: true,
 					},
 				},
 			};
 			const setInserterOpened = () => {};
 			expect( getSettings( state, setInserterOpened ) ).toEqual( {
-				outlineMode: true,
 				key: 'value',
+				outlineMode: true,
 				focusMode: true,
+				fullscreenMode: true,
 				hasFixedToolbar: true,
+				hasReducedUI: true,
 				__experimentalSetIsInserterOpened: setInserterOpened,
+				__experimentalLocalAutosaveInterval: 30,
 			} );
 		} );
 	} );
