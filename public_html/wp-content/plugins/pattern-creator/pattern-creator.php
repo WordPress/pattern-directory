@@ -220,3 +220,27 @@ function rest_api_init() {
 	$controller->register_routes();
 }
 add_action( 'rest_api_init', __NAMESPACE__ . '\rest_api_init' );
+
+/**
+ * Add Twenty Twenty-One styles, set the editor background to white, and add the correct layout settings.
+ *
+ * @param array $settings Default editor settings.
+ * @return array Updated settings.
+ */
+function add_theme_styles_to_editor( $settings ) {
+	if ( ! isset( $settings['__unstableResolvedAssets']['styles'] ) ) {
+		return $settings;
+	}
+
+	$block_gap = wp_get_global_styles( array( 'spacing', 'blockGap' ) );
+	$layout = wp_get_global_settings( array( 'layout' ) );
+	$style = gutenberg_get_layout_style( '.pattern-block-editor__block-list.is-root-container', $layout, true, $block_gap );
+
+	$settings['__unstableResolvedAssets']['styles'] .=
+		'\n<link rel="stylesheet" id="theme-styles" href="https://wp-themes.com/wp-content/themes/twentytwentyone/style.css" media="all" />'; //phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+	$settings['__unstableResolvedAssets']['styles'] .=
+		'\n<style>body.editor-styles-wrapper { background-color: white; }' . $style . '</style>';
+
+	return $settings;
+}
+add_filter( 'block_editor_settings_all', __NAMESPACE__ . '\add_theme_styles_to_editor', 20 );

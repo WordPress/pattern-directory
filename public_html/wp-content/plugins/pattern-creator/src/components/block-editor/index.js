@@ -44,12 +44,6 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 	const ref = useMouseMoveTypingReset();
 	const contentRef = useRef();
 	const mergedRefs = useMergeRefs( [ contentRef, useTypingObserver() ] );
-	if ( -1 === settings.__unstableResolvedAssets.styles.indexOf( 'theme-styles' ) ) {
-		settings.__unstableResolvedAssets.styles +=
-			'\n<link rel="stylesheet" id="theme-styles" href="https://wp-themes.com/wp-content/themes/twentytwentyone/style.css" media="all" />';
-		settings.__unstableResolvedAssets.styles +=
-			'\n<style>body.editor-styles-wrapper { background-color: white; }</style>';
-	}
 
 	return (
 		<BlockEditorProvider
