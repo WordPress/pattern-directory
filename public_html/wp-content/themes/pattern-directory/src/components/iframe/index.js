@@ -114,17 +114,6 @@ function Iframe(
         max-height: 100%;
         pointer-events: none;
     }
-    body > div > :where(:not(.alignleft):not(.alignright)) {
-        max-width: 800px;
-        margin-left: auto !important;
-        margin-right: auto !important;
-    }
-    body > div > .alignwide { max-width: 1000px;}
-    body > div .alignfull { max-width: none; }
-    body > div .alignleft { float: left; margin-right: 2em; margin-left: 0; }
-    body > div .alignright { float: right; margin-left: 2em; margin-right: 0; }
-    body > div > * { margin-top: 0; margin-bottom: 0; }
-    body > div > * + * { margin-top: 24px;  margin-bottom: 0; }
     </style>`;
 
 	const setRef = useCallback( ( node ) => {

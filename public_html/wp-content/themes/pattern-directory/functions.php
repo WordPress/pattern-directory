@@ -136,6 +136,11 @@ function generate_block_editor_styles_html() {
 	wp_styles()->do_items( $handles );
 	wp_styles()->done = $done;
 
+	$block_gap = wp_get_global_styles( array( 'spacing', 'blockGap' ) );
+	$layout = wp_get_global_settings( array( 'layout' ) );
+	$style = gutenberg_get_layout_style( 'body > div', $layout, true, $block_gap );
+	echo '<style>' . $style . '</style>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
 	wp_add_inline_script(
 		'wporg-pattern-script',
 		sprintf(
