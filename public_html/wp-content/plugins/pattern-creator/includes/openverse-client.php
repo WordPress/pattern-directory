@@ -160,6 +160,8 @@ class Openverse_Client {
 			array(
 				'format' => 'json',
 				'license' => 'cc0',
+				// All sources except: flickr, deviantart, thingiverse, svgsilh, stocksnap, sketchfab, rawpixel (403).
+				'source' => 'wordpress,woc_tech,waltersartmuseum,thorvaldsensmuseum,statensmuseum,spacex,smithsonian_zoo_and_conservation,smithsonian_postal_museum,smithsonian_portrait_gallery,smithsonian_national_museum_of_natural_history,smithsonian_libraries,smithsonian_institution_archives,smithsonian_hirshhorn_museum,smithsonian_gardens,smithsonian_freer_gallery_of_art,smithsonian_cooper_hewitt_museum,smithsonian_anacostia_museum,smithsonian_american_indian_museum,smithsonian_american_history_museum,smithsonian_american_art_museum,smithsonian_air_and_space_museum,smithsonian_african_art_museum,smithsonian_african_american_history_museum,sciencemuseum,rijksmuseum,phylopic,nypl,nasa,museumsvictoria,met,mccordmuseum,iha,geographorguk,floraon,eol,digitaltmuseum,clevelandmuseum,brooklynmuseum,bio_diversity,behance,animaldiversity,WoRMS,CAPL,500px',
 				'q' => $this->get_param( 'search' ),
 				'page' => $this->get_param( 'page' ),
 				'page_size' => $this->get_param( 'per_page' ),
