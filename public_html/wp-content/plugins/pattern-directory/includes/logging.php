@@ -18,7 +18,7 @@ add_action( 'transition_post_status', __NAMESPACE__ . '\flag_status_change', 10,
  */
 function logging_enabled() {
 	$support       = post_type_supports( PATTERN_POST_TYPE, 'wporg-internal-notes' )
-	                 && post_type_supports( PATTERN_POST_TYPE, 'wporg-log-notes' );
+					&& post_type_supports( PATTERN_POST_TYPE, 'wporg-log-notes' );
 	$callable_func = is_callable( '\\WordPressdotorg\\InternalNotes\\create_note' );
 
 	return $support && $callable_func;
@@ -65,27 +65,27 @@ function flag_status_change( $new_status, $old_status, $post ) {
 	} elseif ( 'new' === $old_status && PENDING_STATUS === $new_status ) {
 		$msg = sprintf(
 			// translators: User name;
-			__( 'New flag submitted by %s', 'wporg' ),
+			__( 'New flag submitted by %s', 'wporg-patterns' ),
 			esc_html( $user_handle ),
 		);
 	} elseif ( PENDING_STATUS === $new_status ) {
 		$msg = sprintf(
 			// translators: 1. User name; 2. Post status;
-			__( 'Flag submitted by %1$s set to %2$s', 'wporg' ),
+			__( 'Flag submitted by %1$s set to %2$s', 'wporg-patterns' ),
 			esc_html( $user_handle ),
 			esc_html( $new->label )
 		);
 	} elseif ( RESOLVED_STATUS === $new_status ) {
 		$msg = sprintf(
 			// translators: 1. User name; 2. Post status;
-			__( 'Flag submitted by %1$s marked as %2$s', 'wporg' ),
+			__( 'Flag submitted by %1$s marked as %2$s', 'wporg-patterns' ),
 			esc_html( $user_handle ),
 			esc_html( $new->label )
 		);
 	} elseif ( 'trash' === $new_status ) {
 		$msg = sprintf(
 			// translators: User name;
-			__( 'Flag submitted by %s moved to trash.', 'wporg' ),
+			__( 'Flag submitted by %s moved to trash.', 'wporg-patterns' ),
 			esc_html( $user_handle )
 		);
 	}
