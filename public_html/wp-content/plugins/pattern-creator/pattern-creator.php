@@ -155,6 +155,8 @@ function pattern_creator_init() {
 	wp_enqueue_script( 'wp-format-library' );
 	wp_enqueue_style( 'wp-edit-site' );
 	wp_enqueue_style( 'wp-format-library' );
+	// Load layout and margin styles.
+	wp_enqueue_style( 'wp-editor-classic-layout-styles' );
 	wp_enqueue_media();
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\pattern_creator_init', 20 );
@@ -218,3 +220,34 @@ function rest_api_init() {
 	$controller->register_routes();
 }
 add_action( 'rest_api_init', __NAMESPACE__ . '\rest_api_init' );
+
+/**
+ * Filter editor settings to add extra styles to the Pattern Creator editor.
+ *
+ * This adds `link` & `style` tags to be loaded into the editor's iframe.
+ * - Load Twenty Twenty-One styles for a theme preview
+ * - Set the editor background to white for a cleaner preview
+ * - Add layout styles for the pattern container so that alignments work
+ *
+ * @param array $settings Default editor settings.
+ * @return array Updated settings.
+ */
+function add_theme_styles_to_editor( $settings ) {
+	if ( ! isset( $settings['__unstableResolvedAssets']['styles'] ) ) {
+		return $settings;
+	}
+
+	// Build up the alignment styles to match the layout set in theme.json.
+	// See https://github.com/WordPress/gutenberg/blob/9d4b83cbbafcd6c6cbd20c86b572f458fc65ff16/lib/block-supports/layout.php#L38
+	$block_gap = wp_get_global_styles( array( 'spacing', 'blockGap' ) );
+	$layout = wp_get_global_settings( array( 'layout' ) );
+	$style = gutenberg_get_layout_style( '.pattern-block-editor__block-list.is-root-container', $layout, true, $block_gap );
+
+	$settings['__unstableResolvedAssets']['styles'] .=
+		'\n<link rel="stylesheet" id="theme-styles" href="https://wp-themes.com/wp-content/themes/twentytwentyone/style.css" media="all" />'; //phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+	$settings['__unstableResolvedAssets']['styles'] .=
+		'\n<style>body.editor-styles-wrapper { background-color: white; }' . $style . '</style>';
+
+	return $settings;
+}
+add_filter( 'block_editor_settings_all', __NAMESPACE__ . '\add_theme_styles_to_editor', 20 );
