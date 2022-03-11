@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6d2a20e479fa4683802ba1720e9f44b9",
+    "content-hash": "d71a479ee540b5c6191ee123945b552b",
     "packages": [
         {
             "name": "composer/installers",
@@ -230,6 +230,31 @@
             },
             "type": "wordpress-plugin",
             "homepage": "https://wordpress.org/plugins/wordpress-importer/"
+        },
+        {
+            "name": "wporg/wporg-internal-notes",
+            "version": "dev-build",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/WordPress/wporg-internal-notes.git",
+                "reference": "c6cfcf0f7bcd1200725a311ab8d84004777566cf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/WordPress/wporg-internal-notes/zipball/c6cfcf0f7bcd1200725a311ab8d84004777566cf",
+                "reference": "c6cfcf0f7bcd1200725a311ab8d84004777566cf",
+                "shasum": ""
+            },
+            "type": "wordpress-plugin",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "homepage": "https://wordpress.org",
+            "support": {
+                "issues": "https://github.com/WordPress/wporg-internal-notes/issues",
+                "source": "https://github.com/WordPress/wporg-internal-notes/tree/build"
+            },
+            "time": "2022-03-09T23:07:11+00:00"
         },
         {
             "name": "wporg/wporg-mu-plugins",
@@ -2499,6 +2524,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "wporg/wporg-internal-notes": 20,
         "wporg/wporg-mu-plugins": 20
     },
     "prefer-stable": false,
@@ -2508,5 +2534,5 @@
     "platform-overrides": {
         "php": "7.2"
     },
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.2.0"
 }
