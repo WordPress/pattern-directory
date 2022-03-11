@@ -6,7 +6,9 @@ use Error, WP_Block_Type_Registry;
 use function WordPressdotorg\Locales\{ get_locales, get_locales_with_english_names, get_locales_with_native_names };
 use function WordPressdotorg\Pattern_Directory\Favorite\get_favorite_count;
 
-const POST_TYPE = 'wporg-pattern';
+const POST_TYPE       = 'wporg-pattern';
+const UNLISTED_STATUS = 'unlisted';
+const SPAM_STATUS     = 'pending-review';
 
 add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
 add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
@@ -393,17 +395,34 @@ function register_rest_fields() {
  */
 function register_post_statuses() {
 	register_post_status(
-		'unlisted',
+		UNLISTED_STATUS,
 		array(
-			'label'                  => __( 'Unlisted', 'wporg-patterns' ),
-			'label_count'            => _n_noop(
+			'label'                  => _x( 'Unlisted', 'post status', 'wporg-patterns' ),
+			'label_count'            => _nx_noop(
 				'Unlisted <span class="count">(%s)</span>',
 				'Unlisted <span class="count">(%s)</span>',
+				'post status',
 				'wporg-patterns'
 			),
 			'public'                 => false,
 			'protected'              => true,
-			'show_in_admin_all_list' => false,
+			'show_in_admin_all_list' => true,
+		)
+	);
+
+	register_post_status(
+		SPAM_STATUS,
+		array(
+			'label'                  => _x( 'Possible Spam', 'post status', 'wporg-patterns' ),
+			'label_count'            => _nx_noop(
+				'Possible Spam <span class="count">(%s)</span>',
+				'Possible Spam <span class="count">(%s)</span>',
+				'post status',
+				'wporg-patterns'
+			),
+			'public'                 => false,
+			'protected'              => true,
+			'show_in_admin_all_list' => true,
 		)
 	);
 }

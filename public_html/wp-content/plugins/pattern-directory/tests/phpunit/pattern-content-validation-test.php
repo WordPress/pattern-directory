@@ -3,7 +3,7 @@
  * Test Block Pattern validation.
  */
 
-use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, SPAM_STATUS };
 
 /**
  * Test pattern validation.
@@ -39,11 +39,17 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 * Helper function to handle REST requests to save the pattern.
 	 */
 	protected function save_block_content( $content ) {
-		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
+		return $this->save_block_pattern( compact( 'content' ) );
+	}
+
+	/**
+	 * Helper function to handle a REST request to save a full pattern.
+	 */
+	protected function save_block_pattern( $attributes ) {
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern' . ( self::$pattern_id ? '/' . self::$pattern_id : '' ) );
 		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( json_encode( array(
-			'content' => $content,
-		) ) );
+		$request->set_body( json_encode( $attributes ) );
+
 		return rest_do_request( $request );
 	}
 
@@ -251,6 +257,40 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 		$this->assertTrue( $response->is_error() );
 		$data = $response->get_data();
 		$this->assertSame( 'rest_pattern_invalid_blocks', $data['code'] );
+	}
+
+	/**
+	 * Test a block that's detected as spam should be pending.
+	 */
+	public function test_spam_should_be_pending() {
+		wp_set_current_user( self::$user );
+		$response = $this->save_block_pattern( array(
+			'title'   => 'Spam Check',
+			'content' => "<!-- wp:heading -->\n<h2 id=\"spam-check\">Spam Check.</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Paragraph: PatternDirectorySpamTest</p>\n<!-- /wp:paragraph -->",
+			'status'  => 'publish',
+		) );
+
+		$this->assertFalse( $response->is_error() );
+		$data = $response->get_data();
+
+		$this->assertSame( SPAM_STATUS, $data['status'] );
+	}
+
+	/**
+	 * Test that paragraph-only posts should be detected as spam.
+	 */
+	public function test_only_paragraphs_are_spam() {
+		wp_set_current_user( self::$user );
+		$response = $this->save_block_pattern( array(
+			'title'   => 'Spam Check',
+			'content' => "<!-- wp:paragraph -->\n<p>Paragraph one.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph two.</p>\n<!-- /wp:paragraph -->",
+			'status'  => 'publish',
+		) );
+
+		$this->assertFalse( $response->is_error() );
+		$data = $response->get_data();
+
+		$this->assertSame( SPAM_STATUS, $data['status'] );
 	}
 }
 
