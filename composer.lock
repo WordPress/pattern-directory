@@ -179,15 +179,15 @@
         },
         {
             "name": "wpackagist-plugin/gutenberg",
-            "version": "12.7.1",
+            "version": "12.7.2",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/gutenberg/",
-                "reference": "tags/12.7.1"
+                "reference": "tags/12.7.2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/gutenberg.12.7.1.zip"
+                "url": "https://downloads.wordpress.org/plugin/gutenberg.12.7.2.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -237,12 +237,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/wporg-internal-notes.git",
-                "reference": "c6cfcf0f7bcd1200725a311ab8d84004777566cf"
+                "reference": "9d61a7a79bf5068193abd35bcb27ece51a70fd50"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/wporg-internal-notes/zipball/c6cfcf0f7bcd1200725a311ab8d84004777566cf",
-                "reference": "c6cfcf0f7bcd1200725a311ab8d84004777566cf",
+                "url": "https://api.github.com/repos/WordPress/wporg-internal-notes/zipball/9d61a7a79bf5068193abd35bcb27ece51a70fd50",
+                "reference": "9d61a7a79bf5068193abd35bcb27ece51a70fd50",
                 "shasum": ""
             },
             "type": "wordpress-plugin",
@@ -254,7 +254,7 @@
                 "issues": "https://github.com/WordPress/wporg-internal-notes/issues",
                 "source": "https://github.com/WordPress/wporg-internal-notes/tree/build"
             },
-            "time": "2022-03-09T23:07:11+00:00"
+            "time": "2022-03-10T01:28:16+00:00"
         },
         {
             "name": "wporg/wporg-mu-plugins",
