@@ -222,7 +222,12 @@ function rest_api_init() {
 add_action( 'rest_api_init', __NAMESPACE__ . '\rest_api_init' );
 
 /**
- * Add Twenty Twenty-One styles, set the editor background to white, and add the correct layout settings.
+ * Filter editor settings to add extra styles to the Pattern Creator editor.
+ *
+ * This adds `link` & `style` tags to be loaded into the editor's iframe.
+ * - Load Twenty Twenty-One styles for a theme preview
+ * - Set the editor background to white for a cleaner preview
+ * - Add layout styles for the pattern container so that alignments work
  *
  * @param array $settings Default editor settings.
  * @return array Updated settings.
