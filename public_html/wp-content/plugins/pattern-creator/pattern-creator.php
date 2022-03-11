@@ -237,6 +237,8 @@ function add_theme_styles_to_editor( $settings ) {
 		return $settings;
 	}
 
+	// Build up the alignment styles to match the layout set in theme.json.
+	// See https://github.com/WordPress/gutenberg/blob/9d4b83cbbafcd6c6cbd20c86b572f458fc65ff16/lib/block-supports/layout.php#L38
 	$block_gap = wp_get_global_styles( array( 'spacing', 'blockGap' ) );
 	$layout = wp_get_global_settings( array( 'layout' ) );
 	$style = gutenberg_get_layout_style( '.pattern-block-editor__block-list.is-root-container', $layout, true, $block_gap );
