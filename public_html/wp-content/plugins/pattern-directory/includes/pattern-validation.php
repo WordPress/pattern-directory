@@ -278,8 +278,6 @@ function validate_against_spam( $prepared_post, $request ) {
 
 	// Combine strings for ease of use.
 	$combined_strings = implode( "\n", $strings );
-	$combined_links   = implode( "\n", $links );
-	$combined         = $combined_strings . "\n" . $combined_links;
 
 	// Not yet detected as spam.
 	$is_spam     = false;
