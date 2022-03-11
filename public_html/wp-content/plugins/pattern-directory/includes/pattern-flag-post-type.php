@@ -52,7 +52,7 @@ function register_post_type_data() {
 			'show_in_admin_bar'     => false,
 			'show_in_rest'          => true,
 			'rest_controller_class' => '\\WordPressdotorg\\Pattern_Directory\\REST_Flags_Controller',
-			'supports'              => array( 'author', 'excerpt', 'wporg-internal-notes' ),
+			'supports'              => array( 'author', 'excerpt' ),
 			'can_export'            => false,
 			'delete_with_user'      => false,
 		)
