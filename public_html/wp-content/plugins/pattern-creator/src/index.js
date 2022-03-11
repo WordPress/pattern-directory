@@ -33,16 +33,17 @@ export function reinitializeEditor( target, { postId, ...settings } ) {
 	unmountComponentAtNode( target );
 	const reboot = reinitializeEditor.bind( null, target, settings );
 
+	// Update the store synchronously before rendering so that we won't trigger
+	// unnecessary re-renders with useEffect.
 	dispatch( patternStore ).updateSettings( settings );
-	render( <Editor initialSettings={ settings } onError={ reboot } postId={ postId } />, target );
+	render( <Editor onError={ reboot } postId={ postId } />, target );
 }
 
 /**
  * Initializes the pattern editor screen.
  *
- * @param {string} id              ID of the root element to render the screen in.
- * @param {Object} settings        Editor settings.
- * @param {number} settings.postId ID of the current post.
+ * @param {string} id       ID of the root element to render the screen in.
+ * @param {Object} settings Editor settings.
  */
 export function initialize( id, settings ) {
 	settings.__experimentalFetchLinkSuggestions = ( search, searchOptions ) =>
