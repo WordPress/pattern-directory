@@ -139,7 +139,7 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 			<div className="pattern-openverse__collection-notice">
 				<p>
 					{ __(
-						'Patterns are required to use our collection of license-free media provided by Openverse. You won’t be able to upload or link to any other videos in your patterns.',
+						'Patterns are required to use our collection of license-free images provided by Openverse. You won’t be able to upload or link to any other media in your patterns.',
 						'wporg-patterns'
 					) }
 				</p>
