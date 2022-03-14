@@ -59,7 +59,7 @@ function register_post_type_data() {
 			'public'          => true,
 			'show_in_rest'    => true,
 			'rewrite'         => array( 'slug' => 'pattern' ),
-			'supports'        => array( 'title', 'editor', 'author', 'custom-fields', 'revisions', 'wporg-internal-notes' ),
+			'supports'        => array( 'title', 'editor', 'author', 'custom-fields', 'revisions', 'wporg-internal-notes', 'wporg-log-notes' ),
 			'capability_type' => array( 'pattern', 'patterns' ),
 			'map_meta_cap'    => true,
 		)
