@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
+import { Button } from '@wordpress/components';
 import { store as patternStore } from '../../store';
 import { useSelect } from '@wordpress/data';
 
@@ -72,8 +73,16 @@ const MyPatterns = () => {
 			/>
 			{ isEmpty ? (
 				<div className="pattern-grid__empty-header">
-					<h2>{ __( 'Nothing found', 'wporg-patterns' ) }</h2>
-					<p>{ __( 'You haven’t created any patterns yet.', 'wporg-patterns' ) }</p>
+					<h2>{ __( 'Create and share patterns for every WordPress site.', 'wporg-patterns' ) }</h2>
+					<p>
+						{ __(
+							'Anyone can create and share patterns using the familiar block editor. Design helpful starting points for yourself and any WordPress site.',
+							'wporg-patterns'
+						) }
+					</p>
+					<Button variant="primary" href={ `${ wporgPatternsUrl.site }/new-pattern/` }>
+						{ __( 'Create your first pattern', 'wporg-patterns' ) }
+					</Button>
 				</div>
 			) : (
 				<PatternGrid query={ query }>
