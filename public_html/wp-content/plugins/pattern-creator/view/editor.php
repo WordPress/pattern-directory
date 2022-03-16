@@ -67,4 +67,3 @@ if ( is_editing_pattern() ) {
 
 <?php
 get_footer();
-	
