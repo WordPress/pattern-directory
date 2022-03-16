@@ -44,12 +44,12 @@ if ( is_editing_pattern() ) {
 		<?php if ( ( is_editing_pattern() && $can_edit ) || ( ! is_editing_pattern() && $is_logged_in ) ) : ?>
 			<div id="block-pattern-creator"></div>
 		<?php else : ?>
-			<section class="no-results not-found">
-				<header class="page-header">
-					<h1 class="page-title"><?php echo esc_html( $page_title ); ?></h1>
-				</header>
+			<header class="entry-header">
+				<h1 class="entry-title"><?php echo esc_html( $page_title ); ?></h1>
+			</header>
 
-				<div class="page-content">
+			<div class="entry-content">
+				<div class="alignwide" style="max-width:960px;">
 					<p>
 						<?php echo esc_html( $page_content ); ?>
 						<?php if ( ! $is_logged_in ) : ?>
@@ -59,10 +59,12 @@ if ( is_editing_pattern() ) {
 						<?php endif; ?>
 					</p>
 				</div>
-			</section>
+				<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
+			</div>
 		<?php endif; ?>
 
 	</main><!-- #main -->
 
 <?php
 get_footer();
+	
