@@ -233,8 +233,8 @@ function validate_against_spam( $prepared_post, $request ) {
 
 	$target_status = isset( $request['status'] ) ? $request['status'] : '';
 
-	// Only run spam checks at publish time.
-	if ( 'publish' !== $target_status ) {
+	// Run spam checks for publish & pending patterns.
+	if ( 'publish' !== $target_status || 'pending' !== $target_status ) {
 		return $prepared_post;
 	}
 
