@@ -136,7 +136,7 @@ function check_flag_threshold( $post_ID, $post, $update ) {
 		'post_status' => PENDING_STATUS,
 	) );
 
-	$threshold = absint( get_option( 'wporg-pattern-flag_threshold' ) );
+	$threshold = absint( get_option( 'wporg-pattern-flag_threshold', 5 ) );
 
 	if ( $flag_check->found_posts >= $threshold ) {
 		wp_update_post( array(
