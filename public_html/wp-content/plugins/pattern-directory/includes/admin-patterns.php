@@ -426,7 +426,7 @@ function add_row_actions( $actions, $post ) {
 	$edit_url = add_query_arg( 'post_type', PATTERN, 'edit.php' );
 	$title = _draft_or_post_title();
 
-	if ( 'pending' !== $post->post_status ) {
+	if ( 'pending' === $post->post_status || SPAM_STATUS === $post->post_status ) {
 		$spam_url = add_query_arg(
 			array(
 				'action' => 'publish',
