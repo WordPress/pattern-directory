@@ -8,6 +8,7 @@ use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\get_patter
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTERN;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\PENDING_STATUS;
 use const  WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ UNLISTED_STATUS, SPAM_STATUS };
 
 defined( 'WPINC' ) || die();
@@ -427,7 +428,7 @@ function add_row_actions( $actions, $post ) {
 	$edit_url = add_query_arg( 'post_type', PATTERN, 'edit.php' );
 	$title = _draft_or_post_title();
 
-	if ( 'pending' === $post->post_status || SPAM_STATUS === $post->post_status ) {
+	if ( PENDING_STATUS === $post->post_status || SPAM_STATUS === $post->post_status ) {
 		$spam_url = add_query_arg(
 			array(
 				'action' => 'publish',
