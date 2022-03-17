@@ -239,32 +239,67 @@ function validate_against_spam( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
-	// Extract strings and URLs, run against spam checks.
 	$post = get_post( $prepared_post->ID );
 
-	$title       = $prepared_post->post_title ?? $post->post_title;
-	$content     = $prepared_post->post_content ?? $post->post_content;
-	$description = $request['meta']['wpop_description'] ?? ( $post->wpop_description ?: '' );
-	$keywords    = $request['meta']['wpop_keywords'] ?? ( $post->wpop_keywords ?: '' );
+	$pattern = array(
+		'ID'          => $post->ID,
+		'post_name'   => $post->post_name,
+		'post_author' => $post->post_author,
+		'title'       => $prepared_post->post_title ?? $post->post_title,
+		'content'     => $prepared_post->post_content ?? $post->post_content,
+		'description' => $request['meta']['wpop_description'] ?? ( $post->wpop_description ?: '' ),
+		'keywords'    => $request['meta']['wpop_keywords'] ?? ( $post->wpop_keywords ?: '' ),
+	);
 
+	list( $is_spam, $spam_reason ) = check_for_spam( $pattern );
+
+	// If it's been detected as spam, flag it as pending-review.
+	if ( $is_spam ) {
+		$prepared_post->post_status = SPAM_STATUS;
+
+		// Add a note explaining why this post is in pending, if it's due to spam.
+		if ( function_exists( '\WordPressdotorg\InternalNotes\create_note' ) ) {
+			\WordPressdotorg\InternalNotes\create_note(
+				$prepared_post->ID,
+				array(
+					'post_author'  => get_user_by( 'login', 'wordpressdotorg' )->ID ?? 0,
+					'post_excerpt' => $spam_reason,
+				)
+			);
+		}
+	}
+
+	return $prepared_post;
+}
+
+/**
+ * Helper function to check for spam.
+ *
+ * @param array $post
+ * @return array {
+ *    @type boolean $is_spam
+ *    @type string  $spam_reason
+ * }
+ */
+function check_for_spam( $post ) {
 	// Stringify.
 	if ( ! class_exists( '\WordPressdotorg\Pattern_Translations\Pattern' ) ) {
 		// This is just a fall-back for local environments where the Translator isn't active.
 		// not designed to be used in production.
 		$strings = array(
-			$title,
-			$description,
-			wp_strip_all_tags( $content ),
-			$keywords,
+			$post['title'],
+			$post['description'],
+			wp_strip_all_tags( $post['content'] ),
+			$post['keywords'],
 		);
 	} else {
 		$pattern              = new Translations_Pattern();
-		$pattern->ID          = $post->ID;
-		$pattern->title       = $title;
-		$pattern->name        = $post->post_name;
-		$pattern->description = $description;
-		$pattern->keywords    = $keywords;
-		$pattern->html        = $content;
+		$pattern->ID          = $post['ID'];
+		$pattern->title       = $post['title'];
+		$pattern->name        = $post['post_name'];
+		$pattern->description = $post['description'];
+		$pattern->keywords    = $post['keywords'];
+		$pattern->html        = $post['content'];
 		$pattern->locale      = get_locale();
 
 		$parser  = new Translations_PatternParser( $pattern );
@@ -284,7 +319,7 @@ function validate_against_spam( $prepared_post, $request ) {
 		$block_names_in_use = array_filter(
 			array_unique(
 				wp_list_pluck(
-					parse_blocks( $content ),
+					parse_blocks( $post['content'] ),
 					'blockName'
 				)
 			)
@@ -298,18 +333,21 @@ function validate_against_spam( $prepared_post, $request ) {
 
 	// Run it past Akismet.
 	if ( ! $is_spam && is_callable( array( 'Akismet', 'rest_auto_check_comment' ) ) ) {
-		$current_user = wp_get_current_user();
+		$author = get_user_by( 'ID', $post['post_author'] );
+		if ( ! $author ) {
+			$author = wp_get_current_user();
+		}
 
 		$akismet_payload = array(
 			'comment_post_ID'      => 0,
 			'comment_type'         => 'pattern_submission',
 			// Disabled as logged in users get bonus points I think, which we don't want.
 			// 'user_ID'           => get_current_user_id(),
-			'comment_author'       => $current_user->display_name ?: $current_user->user_login,
-			'comment_author_email' => $current_user->user_email,
+			'comment_author'       => $author->display_name ?: $author->user_login,
+			'comment_author_email' => $author->user_email,
 			'comment_author_url'   => '',
 			'comment_content'      => $combined_strings,
-			'comment_content_raw'  => $content,
+			'comment_content_raw'  => $post['content'],
 			'permalink'            => get_permalink( $post ),
 		);
 
@@ -334,21 +372,5 @@ function validate_against_spam( $prepared_post, $request ) {
 		$spam_reason = 'Includes the spam trigger word: PatternDirectorySpamTest';
 	}
 
-	// If it's been detected as spam, flag it as pending-review.
-	if ( $is_spam ) {
-		$prepared_post->post_status = SPAM_STATUS;
-
-		// Add a note explaining why this post is in pending, if it's due to spam.
-		if ( function_exists( '\WordPressdotorg\InternalNotes\create_note' ) ) {
-			\WordPressdotorg\InternalNotes\create_note(
-				$prepared_post->ID,
-				array(
-					'post_author'  => get_user_by( 'login', 'wordpressdotorg' )->ID ?? 0,
-					'post_excerpt' => $spam_reason,
-				)
-			);
-		}
-	}
-
-	return $prepared_post;
+	return array( $is_spam, $spam_reason );
 }
