@@ -421,7 +421,7 @@ function add_row_actions( $actions, $post ) {
 	}
 
 	$saved_actions = array_intersect_key( $actions, array_fill_keys( array( 'trash', 'untrash', 'delete' ), true ) );
-	$actions       = array_intersect_key( $actions, array_fill_keys( array( 'edit' ), true ) );
+	$actions       = array_intersect_key( $actions, array_fill_keys( array( 'edit', 'view' ), true ) );
 
 	$edit_url = add_query_arg( 'post_type', PATTERN, 'edit.php' );
 	$title = _draft_or_post_title();
