@@ -18,7 +18,6 @@ const AUTOSAVE_INTERVAL = 30;
 const IS_EDIT_VAR = 'edit-pattern';
 const PATTERN_ID_VAR = 'pattern-id';
 
-require_once __DIR__ . '/includes/admin.php';
 require_once __DIR__ . '/includes/mock-blocks.php';
 
 /**

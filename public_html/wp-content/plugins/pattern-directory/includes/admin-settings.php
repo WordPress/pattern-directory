@@ -1,19 +1,25 @@
 <?php
 
-namespace WordPressdotorg\Pattern_Creator\Admin;
-use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+namespace WordPressdotorg\Pattern_Directory\Admin\Settings;
 
 defined( 'WPINC' ) || die();
 
+/**
+ * Actions and filters.
+ */
 add_action( 'admin_menu', __NAMESPACE__ . '\admin_menu' );
 add_action( 'admin_init', __NAMESPACE__ . '\admin_init' );
-add_action( 'admin_bar_menu', __NAMESPACE__ . '\filter_admin_bar_links', 500 ); // 500 to run after all items are added to the menu.
 
+/**
+ * Constants.
+ */
 const PAGE_SLUG = 'wporg-pattern-creator';
 const SECTION_NAME = 'wporg-pattern-settings';
 
 /**
  * Registers a new settings page under Settings.
+ *
+ * @return void
  */
 function admin_menu() {
 	add_options_page(
@@ -23,11 +29,12 @@ function admin_menu() {
 		PAGE_SLUG,
 		__NAMESPACE__ . '\render_page'
 	);
-
 }
 
 /**
  * Registers a new settings page under Settings.
+ *
+ * @return void
  */
 function admin_init() {
 	add_settings_section(
@@ -48,6 +55,7 @@ function admin_init() {
 			'default' => 'publish',
 		)
 	);
+
 	add_settings_field(
 		'wporg-pattern-default_status',
 		esc_html__( 'Default status of new patterns', 'wporg-patterns' ),
@@ -62,9 +70,11 @@ function admin_init() {
 
 /**
  * Render a checkbox.
+ *
+ * @return void
  */
 function render_status_field() {
-	$current = get_option( 'wporg-pattern-default_status' );
+	$current = get_option( 'wporg-pattern-default_status', 'publish' );
 	$statii = array(
 		'publish' => esc_html__( 'Published', 'wporg-patterns' ),
 		'pending' => esc_html__( 'Pending', 'wporg-patterns' ),
@@ -81,44 +91,9 @@ function render_status_field() {
 
 /**
  * Display the Block Patterns settings page.
+ *
+ * @return void
  */
 function render_page() {
-	require_once dirname( __DIR__ ) . '/view/settings.php';
-}
-
-/**
- * Filter the admin bar links to direct to the Pattern Creator.
- *
- * @param WP_Admin_Bar $wp_admin_bar The WP_Admin_Bar instance, passed by reference.
- */
-function filter_admin_bar_links( $wp_admin_bar ) {
-	// "New Block Pattern" link.
-	$new_pattern = $wp_admin_bar->get_node( 'new-wporg-pattern' );
-	if ( $new_pattern ) {
-		$new_pattern->href = site_url( 'new-pattern/' );
-		$wp_admin_bar->remove_node( $new_pattern->id );
-		$wp_admin_bar->add_node( $new_pattern );
-	}
-
-	// Top-level "+ New" link, if New Block Pattern is the only item.
-	$new_content = $wp_admin_bar->get_node( 'new-content' );
-	if ( $new_content && str_contains( $new_content->href, POST_TYPE ) ) {
-		$new_content->href = site_url( 'new-pattern/' );
-		$wp_admin_bar->remove_node( $new_content->id );
-		$wp_admin_bar->add_node( $new_content );
-	}
-
-	// "Edit Block Pattern" link.
-	if ( is_singular( POST_TYPE ) ) {
-		$edit_pattern = $wp_admin_bar->get_node( 'edit' );
-		if ( $edit_pattern ) {
-			$pattern_id = wp_get_post_parent_id() ?: get_the_ID();
-			$edit_pattern->href = site_url( "pattern/$pattern_id/edit/" );
-			if ( wp_get_post_parent_id() !== 0 ) {
-				$edit_pattern->title = __( 'Edit Original Pattern', 'wporg-patterns' );
-			}
-			$wp_admin_bar->remove_node( $edit_pattern->id );
-			$wp_admin_bar->add_node( $edit_pattern );
-		}
-	}
+	require_once dirname( __DIR__ ) . '/views/admin-settings.php';
 }
