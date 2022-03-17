@@ -7,6 +7,7 @@ use function WordPressdotorg\Locales\get_locales_with_english_names;
 use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\get_pattern_ids_with_pending_flags;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTERN;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG;
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 use const  WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ UNLISTED_STATUS, SPAM_STATUS };
 
 defined( 'WPINC' ) || die();
@@ -530,6 +531,14 @@ function handle_bulk_actions( $sendback, $doaction, $post_ids ) {
 	}
 
 	$result = bulk_edit_posts( $post_data );
+	if ( 'unlist' === $doaction ) {
+		$reason_term = get_term_by( 'slug', '4-spam', FLAG_REASON );
+		if ( $reason_term ) {
+			foreach ( $result['updated'] as $post_id ) {
+				update_post_meta( $post_id, 'wpop_unlisted_reason', $reason_term->term_id );
+			}
+		}
+	}
 
 	if ( is_array( $result ) ) {
 		$result['updated'] = count( $result['updated'] );
