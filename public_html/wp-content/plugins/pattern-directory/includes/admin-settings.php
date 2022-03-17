@@ -1,19 +1,25 @@
 <?php
 
-namespace WordPressdotorg\Pattern_Creator\Admin;
-use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+namespace WordPressdotorg\Pattern_Directory\Admin\Settings;
 
 defined( 'WPINC' ) || die();
 
+/**
+ * Actions and filters.
+ */
 add_action( 'admin_menu', __NAMESPACE__ . '\admin_menu' );
 add_action( 'admin_init', __NAMESPACE__ . '\admin_init' );
-add_action( 'admin_bar_menu', __NAMESPACE__ . '\filter_admin_bar_links', 500 ); // 500 to run after all items are added to the menu.
 
-const PAGE_SLUG = 'wporg-pattern-creator';
+/**
+ * Constants.
+ */
+const PAGE_SLUG = 'wporg-pattern-directory';
 const SECTION_NAME = 'wporg-pattern-settings';
 
 /**
  * Registers a new settings page under Settings.
+ *
+ * @return void
  */
 function admin_menu() {
 	add_options_page(
@@ -23,20 +29,22 @@ function admin_menu() {
 		PAGE_SLUG,
 		__NAMESPACE__ . '\render_page'
 	);
-
 }
 
 /**
  * Registers a new settings page under Settings.
+ *
+ * @return void
  */
 function admin_init() {
 	add_settings_section(
 		SECTION_NAME,
-		esc_html__( 'Editor Settings', 'wporg-patterns' ),
+		'',
 		'__return_empty_string',
 		PAGE_SLUG
 	);
 
+	// Default status.
 	register_setting(
 		SECTION_NAME,
 		'wporg-pattern-default_status',
@@ -58,10 +66,41 @@ function admin_init() {
 			'label_for' => 'wporg-pattern-default_status',
 		)
 	);
+
+	// Flag threshold.
+	register_setting(
+		SECTION_NAME,
+		'wporg-pattern-flag_threshold',
+		array(
+			'type' => 'integer',
+			'sanitize_callback' => function( $value ) {
+				$value = absint( $value );
+
+				if ( $value < 1 || $value > 100 ) {
+					return 5;
+				}
+
+				return $value;
+			},
+			'default' => 5,
+		)
+	);
+	add_settings_field(
+		'wporg-pattern-flag_threshold',
+		esc_html__( 'Flag threshold', 'wporg-patterns' ),
+		__NAMESPACE__ . '\render_threshold_field',
+		PAGE_SLUG,
+		SECTION_NAME,
+		array(
+			'label_for' => 'wporg-pattern-flag_threshold',
+		)
+	);
 }
 
 /**
- * Render a checkbox.
+ * Render the default status field.
+ *
+ * @return void
  */
 function render_status_field() {
 	$current = get_option( 'wporg-pattern-default_status' );
@@ -80,45 +119,33 @@ function render_status_field() {
 }
 
 /**
- * Display the Block Patterns settings page.
+ * Render the flag threshold field.
+ *
+ * @return void
  */
-function render_page() {
-	require_once dirname( __DIR__ ) . '/view/settings.php';
+function render_threshold_field() {
+	$current = get_option( 'wporg-pattern-flag_threshold' );
+	?>
+		<input
+			class="small-text"
+			type="number"
+			name="wporg-pattern-flag_threshold"
+			id="wporg-pattern-flag_threshold"
+			aria-describedby="wporg-pattern-default_status-help"
+			value="<?php echo esc_attr( $current ); ?>"
+		/>
+	<?php
+	printf(
+		'<p id="wporg-pattern-flag_threshold-help">%s</p>',
+		esc_html__( 'Use this setting to change the number of times a pattern can be reported before it is automatically unpublished (set to pending) while awaiting review.', 'wporg-patterns' )
+	);
 }
 
 /**
- * Filter the admin bar links to direct to the Pattern Creator.
+ * Display the Block Patterns settings page.
  *
- * @param WP_Admin_Bar $wp_admin_bar The WP_Admin_Bar instance, passed by reference.
+ * @return void
  */
-function filter_admin_bar_links( $wp_admin_bar ) {
-	// "New Block Pattern" link.
-	$new_pattern = $wp_admin_bar->get_node( 'new-wporg-pattern' );
-	if ( $new_pattern ) {
-		$new_pattern->href = site_url( 'new-pattern/' );
-		$wp_admin_bar->remove_node( $new_pattern->id );
-		$wp_admin_bar->add_node( $new_pattern );
-	}
-
-	// Top-level "+ New" link, if New Block Pattern is the only item.
-	$new_content = $wp_admin_bar->get_node( 'new-content' );
-	if ( $new_content && str_contains( $new_content->href, POST_TYPE ) ) {
-		$new_content->href = site_url( 'new-pattern/' );
-		$wp_admin_bar->remove_node( $new_content->id );
-		$wp_admin_bar->add_node( $new_content );
-	}
-
-	// "Edit Block Pattern" link.
-	if ( is_singular( POST_TYPE ) ) {
-		$edit_pattern = $wp_admin_bar->get_node( 'edit' );
-		if ( $edit_pattern ) {
-			$pattern_id = wp_get_post_parent_id() ?: get_the_ID();
-			$edit_pattern->href = site_url( "pattern/$pattern_id/edit/" );
-			if ( wp_get_post_parent_id() !== 0 ) {
-				$edit_pattern->title = __( 'Edit Original Pattern', 'wporg-patterns' );
-			}
-			$wp_admin_bar->remove_node( $edit_pattern->id );
-			$wp_admin_bar->add_node( $edit_pattern );
-		}
-	}
+function render_page() {
+	require_once dirname( __DIR__ ) . '/views/admin-settings.php';
 }
