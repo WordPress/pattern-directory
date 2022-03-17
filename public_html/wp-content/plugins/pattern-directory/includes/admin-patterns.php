@@ -462,7 +462,7 @@ function add_row_actions( $actions, $post ) {
 		);
 	}
 
-	if ( SPAM_STATUS !== $post->post_status ) {
+	if ( SPAM_STATUS !== $post->post_status && UNLISTED_STATUS !== $post->post_status ) {
 		$spam_url = add_query_arg(
 			array(
 				'action' => 'spam',
