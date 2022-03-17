@@ -429,7 +429,7 @@ function add_row_actions( $actions, $post ) {
 	$title = _draft_or_post_title();
 
 	if ( PENDING_STATUS === $post->post_status || SPAM_STATUS === $post->post_status ) {
-		$spam_url = add_query_arg(
+		$publish_url = add_query_arg(
 			array(
 				'action' => 'publish',
 				'post'   => array( $post->ID ),
@@ -439,7 +439,7 @@ function add_row_actions( $actions, $post ) {
 
 		$actions['publish'] = sprintf(
 			'<a href="%s" aria-label="%s">%s</a>',
-			$spam_url,
+			$publish_url,
 			/* translators: %s: Post title. */
 			esc_attr( sprintf( __( 'Publish &#8220;%s&#8221;', 'wporg-patterns' ), $title ) ),
 			_x( 'Publish', 'verb', 'wporg-patterns' )
