@@ -179,15 +179,15 @@
         },
         {
             "name": "wpackagist-plugin/gutenberg",
-            "version": "12.8.0",
+            "version": "12.8.1",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/gutenberg/",
-                "reference": "tags/12.8.0"
+                "reference": "tags/12.8.1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/gutenberg.12.8.0.zip"
+                "url": "https://downloads.wordpress.org/plugin/gutenberg.12.8.1.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -262,12 +262,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/wporg-mu-plugins.git",
-                "reference": "d33569b1219f4478596dc71918dd6f7e92d2855f"
+                "reference": "5e3c41854a7f3dfc9bf9b7aefc226c2c8380b746"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/d33569b1219f4478596dc71918dd6f7e92d2855f",
-                "reference": "d33569b1219f4478596dc71918dd6f7e92d2855f",
+                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/5e3c41854a7f3dfc9bf9b7aefc226c2c8380b746",
+                "reference": "5e3c41854a7f3dfc9bf9b7aefc226c2c8380b746",
                 "shasum": ""
             },
             "require": {
@@ -294,7 +294,7 @@
                 "source": "https://github.com/WordPress/wporg-mu-plugins/tree/trunk",
                 "issues": "https://github.com/WordPress/wporg-mu-plugins/issues"
             },
-            "time": "2022-03-16T23:11:28+00:00"
+            "time": "2022-03-18T16:58:01+00:00"
         }
     ],
     "packages-dev": [
@@ -2534,5 +2534,5 @@
     "platform-overrides": {
         "php": "7.2"
     },
-    "plugin-api-version": "2.2.0"
+    "plugin-api-version": "2.0.0"
 }
