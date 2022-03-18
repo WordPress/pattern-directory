@@ -19,6 +19,7 @@ _x( 'Broken or Unusable', 'Flag Reasons term name', 'wporg-patterns' );
 _x( 'Copyrighted or Trademark Issue', 'Flag Reasons term name', 'wporg-patterns' );
 _x( 'Other', 'Flag Reasons term name', 'wporg-patterns' );
 _x( 'Rude, Crude, or Inappropriate', 'Flag Reasons term name', 'wporg-patterns' );
+_x( 'Spam', 'Flag Reasons term name', 'wporg-patterns' );
 _x( 'About Patterns', 'Page title', 'wporg-patterns' );
 _x( 'Favorites', 'Page title', 'wporg-patterns' );
 _x( 'My Patterns', 'Page title', 'wporg-patterns' );
