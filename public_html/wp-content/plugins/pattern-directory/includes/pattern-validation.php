@@ -176,6 +176,7 @@ function validate_status( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
+	$post_type      = get_post_type_object( POST_TYPE );
 	$target_status  = isset( $request['status'] ) ? $request['status'] : '';
 	$current_status = get_post_status( $prepared_post->ID );
 
