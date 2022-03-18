@@ -514,15 +514,25 @@ function remove_disallowed_blocks( $allowed_block_types, $block_editor_context )
 		'core/site-tagline',
 		'core/site-title',
 	);
+
 	if ( isset( $block_editor_context->post ) && POST_TYPE === $block_editor_context->post->post_type ) {
 		// This can be true if all block types are allowed, so to filter them we
 		// need to get the list of all registered blocks first.
 		if ( true === $allowed_block_types ) {
 			$allowed_block_types = array_keys( WP_Block_Type_Registry::get_instance()->get_all_registered() );
 		}
-		return array_values( array_diff( $allowed_block_types, $disallowed_block_types ) );
+		$allowed_block_types = array_diff( $allowed_block_types, $disallowed_block_types );
+
+		// Remove the "WordPress.org" blocks, like Global Header & Global Footer.
+		$allowed_block_types = array_filter(
+			$allowed_block_types,
+			function ( $block_type ) {
+				return 'wporg/' !== substr( $block_type, 0, 6 );
+			}
+		);
 	}
-	return $allowed_block_types;
+
+	return array_values( $allowed_block_types );
 }
 
 /**
