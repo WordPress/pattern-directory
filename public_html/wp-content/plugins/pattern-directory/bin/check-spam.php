@@ -20,7 +20,7 @@ if ( empty( $opts['abspath'] ) && false !== strpos( __DIR__, 'wp-content' ) ) {
 	$opts['abspath'] = substr( __DIR__, 0, strpos( __DIR__, 'wp-content' ) );
 }
 
-$opts['post_status'] = isset( $opts['post_status'] ) ? explode( ',', $opts['post_status'] ) : array( 'publish', 'pending' );
+$opts['post_status'] = isset( $opts['post_status'] ) ? explode( ',', $opts['post_status'] ) : array( 'pending' );
 $opts['apply']       = isset( $opts['apply'] );
 $opts['verbose']     = isset( $opts['verbose'] );
 $opts['all']         = isset( $opts['all'] );
