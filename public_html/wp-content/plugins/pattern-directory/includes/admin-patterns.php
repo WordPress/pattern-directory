@@ -7,6 +7,8 @@ use function WordPressdotorg\Locales\get_locales_with_english_names;
 use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\get_pattern_ids_with_pending_flags;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTERN;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG;
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\PENDING_STATUS;
 use const  WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ UNLISTED_STATUS, SPAM_STATUS };
 
 defined( 'WPINC' ) || die();
@@ -20,6 +22,9 @@ add_action( 'manage_posts_extra_tablenav', __NAMESPACE__ . '\pattern_list_table_
 add_filter( 'views_edit-' . PATTERN, __NAMESPACE__ . '\pattern_list_table_views' );
 add_action( 'pre_get_posts', __NAMESPACE__ . '\handle_pattern_list_table_views' );
 add_filter( 'display_post_states', __NAMESPACE__ . '\display_post_states', 10, 2 );
+add_filter( 'post_row_actions', __NAMESPACE__ . '\add_row_actions', 10, 2 );
+add_filter( 'bulk_actions-edit-' . PATTERN, __NAMESPACE__ . '\add_bulk_actions' );
+add_filter( 'handle_bulk_actions-edit-' . PATTERN, __NAMESPACE__ . '\handle_bulk_actions', 10, 3 );
 
 /**
  * Modify the patterns list table columns.
@@ -212,7 +217,7 @@ function pattern_list_table_styles( $which ) {
 			text-align: center;
 		}
 
-		.column-language {
+		td.column-language {
 			display: flex;
 			flex-direction: column;
 		}
@@ -226,6 +231,16 @@ function pattern_list_table_styles( $which ) {
 		.language-context-link {
 			font-size: 0.85em;
 			line-height: 1.3;
+		}
+
+		.row-actions span.spam a,
+		.row-actions span.unlist a {
+			color: #bd8600;
+		}
+
+		.row-actions span.spam a:hover,
+		.row-actions span.unlist a:hover {
+			color: #996800;
 		}
 	</style>
 	<?php
@@ -390,4 +405,148 @@ function display_post_states( $post_states, $post ) {
 	}
 
 	return $post_states;
+}
+
+/**
+ * Set up row actions for patterns list table.
+ *
+ * Adds action links for "Publish", "Spam", and "Unlist".
+ *
+ * @param string[] $actions An array of row action links.
+ * @param WP_Post  $post    The post object.
+ *
+ * @return array Filtered actions.
+ */
+function add_row_actions( $actions, $post ) {
+	if ( PATTERN !== $post->post_type ) {
+		return $actions;
+	}
+
+	$saved_actions = array_intersect_key( $actions, array_fill_keys( array( 'trash', 'untrash', 'delete' ), true ) );
+	$actions       = array_intersect_key( $actions, array_fill_keys( array( 'edit', 'view' ), true ) );
+
+	$edit_url = add_query_arg( 'post_type', PATTERN, 'edit.php' );
+	$title = _draft_or_post_title();
+
+	if ( PENDING_STATUS === $post->post_status || SPAM_STATUS === $post->post_status ) {
+		$publish_url = add_query_arg(
+			array(
+				'action' => 'publish',
+				'post'   => array( $post->ID ),
+			),
+			wp_nonce_url( $edit_url, 'bulk-posts' )
+		);
+
+		$actions['publish'] = sprintf(
+			'<a href="%s" aria-label="%s">%s</a>',
+			$publish_url,
+			/* translators: %s: Post title. */
+			esc_attr( sprintf( __( 'Publish &#8220;%s&#8221;', 'wporg-patterns' ), $title ) ),
+			_x( 'Publish', 'verb', 'wporg-patterns' )
+		);
+	}
+
+	if ( SPAM_STATUS === $post->post_status ) {
+		$unlist_url = add_query_arg(
+			array(
+				'action' => 'unlist',
+				'post'   => array( $post->ID ),
+			),
+			wp_nonce_url( $edit_url, 'bulk-posts' )
+		);
+
+		$actions['unlist'] = sprintf(
+			'<a href="%s" aria-label="%s">%s</a>',
+			$unlist_url,
+			/* translators: %s: Post title. */
+			esc_attr( sprintf( __( 'Remove &#8220;%s&#8221; from the directory', 'wporg-patterns' ), $title ) ),
+			_x( 'Unlist', 'verb', 'wporg-patterns' )
+		);
+	}
+
+	if ( SPAM_STATUS !== $post->post_status && UNLISTED_STATUS !== $post->post_status ) {
+		$spam_url = add_query_arg(
+			array(
+				'action' => 'spam',
+				'post'   => array( $post->ID ),
+			),
+			wp_nonce_url( $edit_url, 'bulk-posts' )
+		);
+
+		$actions['spam'] = sprintf(
+			'<a href="%s" aria-label="%s">%s</a>',
+			$spam_url,
+			/* translators: %s: Post title. */
+			esc_attr( sprintf( __( 'Mark &#8220;%s&#8221; as spam', 'wporg-patterns' ), $title ) ),
+			_x( 'Spam', 'verb', 'wporg-patterns' )
+		);
+	}
+
+	return $actions + $saved_actions;
+}
+
+/**
+ * Define bulk actions for the pattern list table.
+ *
+ * @param array $actions
+ *
+ * @return array
+ */
+function add_bulk_actions( $actions ) {
+	$saved_actions = array_intersect_key( $actions, array_fill_keys( array( 'trash', 'untrash', 'delete' ), true ) );
+
+	$actions = array(
+		'publish' => __( 'Publish', 'wporg-patterns' ),
+		'spam'    => __( 'Spam', 'wporg-patterns' ),
+		'unlist'  => __( 'Unlist', 'wporg-patterns' ),
+	);
+
+	return $actions + $saved_actions;
+}
+
+/**
+ * Execute bulk actions for the patterns list table.
+ *
+ * @param string $sendback
+ * @param string $doaction
+ * @param array  $post_ids
+ *
+ * @return mixed|string
+ */
+function handle_bulk_actions( $sendback, $doaction, $post_ids ) {
+	$post_data = array(
+		'post_type' => PATTERN,
+		'post'      => $post_ids,
+	);
+
+	switch ( $doaction ) {
+		case 'publish':
+			$post_data['_status'] = 'publish';
+			break;
+		case 'spam':
+			$post_data['_status'] = SPAM_STATUS;
+			break;
+		case 'unlist':
+			$post_data['_status'] = UNLISTED_STATUS;
+			break;
+	}
+
+	$result = bulk_edit_posts( $post_data );
+	if ( 'unlist' === $doaction ) {
+		$reason_term = get_term_by( 'slug', '4-spam', FLAG_REASON );
+		if ( $reason_term ) {
+			foreach ( $result['updated'] as $post_id ) {
+				update_post_meta( $post_id, 'wpop_unlisted_reason', $reason_term->term_id );
+			}
+		}
+	}
+
+	if ( is_array( $result ) ) {
+		$result['updated'] = count( $result['updated'] );
+		$result['skipped'] = count( $result['skipped'] );
+		$result['locked']  = count( $result['locked'] );
+		$sendback          = add_query_arg( $result, $sendback );
+	}
+
+	return $sendback;
 }
