@@ -432,8 +432,8 @@ function register_post_statuses() {
 /**
  * Do things when certain status transitions happen.
  *
- * @param string $new_status
- * @param string $old_status
+ * @param string   $new_status
+ * @param string   $old_status
  * @param \WP_Post $post
  *
  * @return void
