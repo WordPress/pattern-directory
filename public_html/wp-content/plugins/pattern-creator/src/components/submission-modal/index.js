@@ -56,8 +56,10 @@ export default function SubmissionModal( { onClose, onSubmit, status } ) {
 		apiFetch( {
 			path: addQueryArgs( '/wp/v2/pattern-categories' ),
 		} ).then( ( res ) => {
+			// Filter out the "Featured" category.
+			const terms = res.filter( ( { slug } ) => 'featured' !== slug );
 			setCategories(
-				res.map( ( i ) => {
+				terms.map( ( i ) => {
 					return {
 						value: i.id,
 						label: i.name,

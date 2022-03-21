@@ -27,7 +27,7 @@ const DEFAULT_QUERY = {
 	per_page: -1,
 	orderby: 'name',
 	order: 'asc',
-	_fields: 'id,name,parent',
+	_fields: 'id,name,parent,slug',
 	context: 'view',
 };
 
@@ -118,11 +118,14 @@ function PatternCategoriesControl( { selectedTerms = EMPTY_ARRAY, setTerms } ) {
 		const { getTaxonomy, getEntityRecords } = select( coreStore );
 		const _taxonomy = getTaxonomy( CATEGORY_SLUG );
 
+		const terms = getEntityRecords( 'taxonomy', CATEGORY_SLUG, DEFAULT_QUERY ) || EMPTY_ARRAY;
+
 		return {
 			hasAssignAction: _taxonomy
 				? get( getCurrentPost(), [ '_links', 'wp:action-assign-' + _taxonomy.rest_base ], false )
 				: false,
-			availableTerms: getEntityRecords( 'taxonomy', CATEGORY_SLUG, DEFAULT_QUERY ) || EMPTY_ARRAY,
+			// Filter out the "Featured" category.
+			availableTerms: terms.filter( ( { slug } ) => 'featured' !== slug ),
 		};
 	}, [] );
 
