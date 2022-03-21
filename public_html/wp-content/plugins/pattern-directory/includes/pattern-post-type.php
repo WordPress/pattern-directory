@@ -5,7 +5,7 @@ namespace WordPressdotorg\Pattern_Directory\Pattern_Post_Type;
 use Error, WP_Block_Type_Registry;
 use function WordPressdotorg\Locales\{ get_locales, get_locales_with_english_names, get_locales_with_native_names };
 use function WordPressdotorg\Pattern_Directory\Favorite\get_favorite_count;
-use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE;
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 
 const POST_TYPE       = 'wporg-pattern';
 const UNLISTED_STATUS = 'unlisted';
@@ -444,8 +444,8 @@ function status_transitions( $new_status, $old_status, $post ) {
 	}
 
 	// If a pattern gets relisted, remove the reason that it was originally unlisted.
-	if ( UNLISTED_STATUS === $old_status && in_array( $new_status, array( 'publish', 'pending' ), true ) ) {
-		wp_delete_object_term_relationships( $post->ID, array( TAX_TYPE ) );
+	if ( UNLISTED_STATUS === $old_status && UNLISTED_STATUS !== $new_status ) {
+		wp_delete_object_term_relationships( $post->ID, array( FLAG_REASON ) );
 	}
 }
 
