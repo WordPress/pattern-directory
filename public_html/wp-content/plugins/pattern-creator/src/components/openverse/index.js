@@ -73,10 +73,12 @@ export default function OpenverseGallery( { render, ...props } ) {
 							<span className="pattern-openverse__modal-title">
 								{ __( 'Pattern media', 'wporg-patterns' ) }
 							</span>
-							<span
-								className="pattern-openverse__powered-by"
-								aria-label={ __( 'Powered by Openverse', 'wporg-patterns' ) }
-							/>
+							<a href="https://wordpress.org/openverse">
+								<span
+									className="pattern-openverse__powered-by"
+									aria-label={ __( 'Powered by Openverse', 'wporg-patterns' ) }
+								/>
+							</a>
 						</>
 					}
 					closeLabel={ __( 'Close', 'wporg-patterns' ) }
