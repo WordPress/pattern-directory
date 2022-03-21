@@ -5,6 +5,7 @@ namespace WordPressdotorg\Pattern_Directory\Pattern_Post_Type;
 use Error, WP_Block_Type_Registry;
 use function WordPressdotorg\Locales\{ get_locales, get_locales_with_english_names, get_locales_with_native_names };
 use function WordPressdotorg\Pattern_Directory\Favorite\get_favorite_count;
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 
 const POST_TYPE       = 'wporg-pattern';
 const UNLISTED_STATUS = 'unlisted';
@@ -13,6 +14,7 @@ const SPAM_STATUS     = 'pending-review';
 add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
 add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'init', __NAMESPACE__ . '\register_post_statuses' );
+add_action( 'transition_post_status', __NAMESPACE__ . '\status_transitions', 10, 3 );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
 add_filter( 'allowed_block_types_all', __NAMESPACE__ . '\remove_disallowed_blocks', 10, 2 );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
@@ -425,6 +427,26 @@ function register_post_statuses() {
 			'show_in_admin_all_list' => true,
 		)
 	);
+}
+
+/**
+ * Do things when certain status transitions happen.
+ *
+ * @param string   $new_status
+ * @param string   $old_status
+ * @param \WP_Post $post
+ *
+ * @return void
+ */
+function status_transitions( $new_status, $old_status, $post ) {
+	if ( POST_TYPE !== get_post_type( $post ) ) {
+		return;
+	}
+
+	// If a pattern gets relisted, remove the reason that it was originally unlisted.
+	if ( UNLISTED_STATUS === $old_status && UNLISTED_STATUS !== $new_status ) {
+		wp_delete_object_term_relationships( $post->ID, array( FLAG_REASON ) );
+	}
 }
 
 /**

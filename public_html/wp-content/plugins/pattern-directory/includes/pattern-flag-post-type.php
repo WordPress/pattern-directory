@@ -82,7 +82,7 @@ function register_post_type_data() {
 
 	register_taxonomy(
 		TAX_TYPE,
-		POST_TYPE,
+		array( POST_TYPE, PATTERN ), // The taxonomy will also get applied to patterns when they get unlisted.
 		array(
 			'labels'             => $taxonomy_labels,
 			'description'        => 'Flag reason indicates why a flag was added to a pattern.',

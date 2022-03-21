@@ -158,7 +158,7 @@ export default function ( { pattern } ) {
 							</p>
 							<p>
 								{ __(
-									'You can update your pattern to resubmitt it for approval at any time.',
+									'You can update your pattern to resubmit it for approval at any time.',
 									'wporg-patterns'
 								) }
 							</p>

@@ -528,18 +528,17 @@ function handle_bulk_actions( $sendback, $doaction, $post_ids ) {
 			break;
 		case 'unlist':
 			$post_data['_status'] = UNLISTED_STATUS;
+
+			$reason_term = get_term_by( 'slug', '4-spam', FLAG_REASON );
+			if ( $reason_term ) {
+				$post_data['tax_input'] = array(
+					FLAG_REASON => array( $reason_term->term_id ),
+				);
+			}
 			break;
 	}
 
 	$result = bulk_edit_posts( $post_data );
-	if ( 'unlist' === $doaction ) {
-		$reason_term = get_term_by( 'slug', '4-spam', FLAG_REASON );
-		if ( $reason_term ) {
-			foreach ( $result['updated'] as $post_id ) {
-				update_post_meta( $post_id, 'wpop_unlisted_reason', $reason_term->term_id );
-			}
-		}
-	}
 
 	if ( is_array( $result ) ) {
 		$result['updated'] = count( $result['updated'] );

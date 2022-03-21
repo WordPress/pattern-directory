@@ -22,7 +22,7 @@ export const getUnlistedReasons = ( { onSuccess = noop, onFailure = noop } ) => 
 							return 0;
 					}
 				} )
-				.map( ( i ) => ( { label: i.name, value: i.slug } ) );
+				.map( ( i ) => ( { label: i.name, value: i.id + '' } ) ); // `value` must be a string.
 			onSuccess( reasonList );
 		} )
 		.catch( onFailure );

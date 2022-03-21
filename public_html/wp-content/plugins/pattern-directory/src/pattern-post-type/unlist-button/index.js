@@ -26,9 +26,7 @@ export const UnlistButton = () => {
 	const onSubmit = ( reasonId ) => {
 		editPost( {
 			status: UNLISTED_STATUS,
-			meta: {
-				wpop_unlisted_reason: reasonId,
-			},
+			'wporg-pattern-flag-reason': [ reasonId ],
 		} );
 		savePost();
 	};
