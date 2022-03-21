@@ -532,7 +532,7 @@ function handle_bulk_actions( $sendback, $doaction, $post_ids ) {
 			$reason_term = get_term_by( 'slug', '4-spam', FLAG_REASON );
 			if ( $reason_term ) {
 				$post_data['tax_input'] = array(
-					FLAG_REASON => $reason_term->term_id,
+					FLAG_REASON => array( $reason_term->term_id ),
 				);
 			}
 			break;
