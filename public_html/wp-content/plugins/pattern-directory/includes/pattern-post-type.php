@@ -229,23 +229,6 @@ function register_post_type_data() {
 			),
 		)
 	);
-
-	register_post_meta(
-		POST_TYPE,
-		'wpop_unlisted_reason',
-		array(
-			'type'              => 'string',
-			'description'       => 'The ID of a flag reason, used to indicate why a pattern was unlisted.',
-			'single'            => true,
-			'sanitize_callback' => 'sanitize_text_field',
-			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
-			'show_in_rest'      => array(
-				'schema' => array(
-					'type'     => 'string',
-				),
-			),
-		)
-	);
 }
 
 /**
