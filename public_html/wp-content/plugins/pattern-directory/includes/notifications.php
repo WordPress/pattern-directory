@@ -206,7 +206,7 @@ If you would like to resubmit your pattern, please make sure it follows the guid
 %3$s', 'wporg-patterns' ),
 		esc_html( html_entity_decode( $pattern_title ) ),
 		esc_html( html_entity_decode( $reason ) ),
-		'https://wordpress.org/patterns/' // TODO: get the actual URL.
+		'https://wordpress.org/patterns/about/'
 	);
 
 	if ( $locale ) {
