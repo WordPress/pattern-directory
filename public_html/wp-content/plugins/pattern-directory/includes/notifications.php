@@ -15,8 +15,8 @@ add_action( 'transition_post_status', __NAMESPACE__ . '\monitor_post_status_tran
 /**
  * Hook into post status transitions to detect changes that warrant a notification.
  *
- * @param string $new_status
- * @param string $old_status
+ * @param string   $new_status
+ * @param string   $old_status
  * @param \WP_Post $post
  *
  * @return void
@@ -195,7 +195,15 @@ If you would like to resubmit your pattern, please make sure it follows the guid
 	send_email( $email, $subject, $message );
 }
 
-
+/**
+ * Wrapper for wp_mail.
+ *
+ * @param string $to
+ * @param string $subject
+ * @param string $message
+ *
+ * @return void
+ */
 function send_email( $to, $subject, $message ) {
 	$message = html_entity_decode( $message );
 
