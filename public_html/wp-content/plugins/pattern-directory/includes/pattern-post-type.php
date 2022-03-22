@@ -388,6 +388,44 @@ function register_rest_fields() {
 			),
 		)
 	);
+
+	register_rest_field(
+		POST_TYPE,
+		'unlisted_reason',
+		array(
+			'get_callback' => function() {
+				$reasons = wp_get_object_terms( get_the_ID(), FLAG_REASON );
+				if ( count( $reasons ) > 0 ) {
+					$reason = array_shift( $reasons );
+					return array(
+						'term_id' => absint( $reason->term_id ),
+						'name' => esc_attr( $reason->name ),
+						'slug' => esc_attr( $reason->slug ),
+						'description' => wp_kses_post( $reason->description ),
+					);
+				}
+
+				return array();
+			},
+			'schema' => array(
+				'type'  => 'object',
+				'properties' => array(
+					'term_id' => array(
+						'type'  => 'number',
+					),
+					'name' => array(
+						'type'  => 'string',
+					),
+					'slug' => array(
+						'type'  => 'string',
+					),
+					'description' => array(
+						'type'  => 'string',
+					),
+				),
+			),
+		)
+	);
 }
 
 /**
