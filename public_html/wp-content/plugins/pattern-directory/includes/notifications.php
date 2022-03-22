@@ -128,7 +128,7 @@ function notify_pattern_flagged( $post ) {
 		$reason = trim( implode( "\n", $reasons ) );
 	} else {
 		// If it doesn't have flags, it must have gotten here by getting marked as spam.
-		$spam_term = get_term_by( 'slug', '4-spam' );
+		$spam_term = get_term_by( 'slug', '4-spam', REASON );
 		$reason = wp_strip_all_tags( $spam_term->description );
 	}
 
