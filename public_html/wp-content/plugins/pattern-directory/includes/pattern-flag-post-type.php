@@ -112,6 +112,15 @@ function register_post_type_data() {
 }
 
 /**
+ * If a pattern or flag doesn't have a reason term added, but needs to show a reason description.
+ *
+ * @return string
+ */
+function get_default_reason_description() {
+	return __( "This pattern doesn't meet the guidelines for the pattern directory.", 'wporg-patterns' );
+}
+
+/**
  * Automatically unpublish a pattern if it receives a certain number of flags.
  *
  * @param int     $post_ID
