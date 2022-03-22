@@ -47,6 +47,10 @@ function monitor_post_status_transitions( $new_status, $old_status, $post ) {
  */
 function notify_pattern_approved( $post ) {
 	$author = get_user_by( 'id', $post->post_author );
+	if ( ! $author ) {
+		return;
+	}
+
 	$email  = $author->user_email;
 	$locale = get_user_locale( $author );
 
@@ -86,6 +90,10 @@ Thank you for submitting your pattern, %1$s. It is now live in the Block Pattern
  */
 function notify_pattern_flagged( $post ) {
 	$author = get_user_by( 'id', $post->post_author );
+	if ( ! $author ) {
+		return;
+	}
+
 	$email  = $author->user_email;
 	$locale = get_user_locale( $author );
 
@@ -153,6 +161,10 @@ Your pattern has been unpublished from the Block Pattern Directory at this time,
  */
 function notify_pattern_unlisted( $post ) {
 	$author = get_user_by( 'id', $post->post_author );
+	if ( ! $author ) {
+		return;
+	}
+
 	$email  = $author->user_email;
 	$locale = get_user_locale( $author );
 
