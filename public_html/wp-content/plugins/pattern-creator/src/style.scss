@@ -8,13 +8,13 @@
 @import "~@wordpress/base-styles/default-custom-properties";
 
 /* Components */
-@import "./components/block-editor/style.scss";
-@import "./components/editor/style.scss";
-@import "./components/header/style.scss";
-@import "./components/header/more-menu/style.scss";
-@import "./components/openverse/style.scss";
-@import "./components/secondary-sidebar/style.scss";
-@import "./components/sidebar/style.scss";
-@import "./components/sidebar/settings-header/style.scss";
-@import "./components/submission-modal/style.scss";
-@import "./components/welcome-guide/style.scss";
+@import "./components/block-editor/style";
+@import "./components/editor/style";
+@import "./components/header/style";
+@import "./components/header/more-menu/style";
+@import "./components/openverse/style";
+@import "./components/secondary-sidebar/style";
+@import "./components/sidebar/style";
+@import "./components/sidebar/settings-header/style";
+@import "./components/submission-modal/style";
+@import "./components/welcome-guide/style";
