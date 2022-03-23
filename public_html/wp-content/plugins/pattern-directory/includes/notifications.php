@@ -27,7 +27,11 @@ function monitor_post_status_transitions( $new_status, $old_status, $post ) {
 		return;
 	}
 
-	if ( 'publish' === $new_status && in_array( $old_status, array( 'pending', SPAM_STATUS ) ) ) {
+	if ( $new_status === $old_status ) {
+		return;
+	}
+
+	if ( 'publish' === $new_status && in_array( $old_status, array( 'pending', SPAM_STATUS, UNLISTED_STATUS ) ) ) {
 		notify_pattern_approved( $post );
 	} elseif (
 		SPAM_STATUS === $new_status
