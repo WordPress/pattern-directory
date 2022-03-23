@@ -75,7 +75,7 @@ function notify_pattern_approved( $post ) {
 Thank you for submitting your pattern, %1$s. It is now live in the Block Pattern Directory!
 
 %2$s', 'wporg-patterns' ),
-		esc_html( html_entity_decode( $pattern_title ) ),
+		esc_html( $pattern_title ),
 		esc_url_raw( $pattern_url )
 	);
 
@@ -151,8 +151,8 @@ Thanks for submitting your pattern. Unfortunately, your pattern, %1$s, has been 
 %2$s
 
 Your pattern has been unpublished from the Block Pattern Directory at this time, and will receive further review. If the pattern meets the guidelines, we will re-publish it to the Block Pattern Directory. Thanks for your patience with us volunteer reviewers!', 'wporg-patterns' ),
-		esc_html( html_entity_decode( $pattern_title ) ),
-		esc_html( html_entity_decode( $reason ) )
+		esc_html( $pattern_title ),
+		esc_html( $reason )
 	);
 
 	if ( $locale ) {
@@ -208,8 +208,8 @@ Your pattern, %1$s, has been unlisted from the Block Pattern Directory due to th
 If you would like to resubmit your pattern, please make sure it follows the guidelines:
 
 %3$s', 'wporg-patterns' ),
-		esc_html( html_entity_decode( $pattern_title ) ),
-		esc_html( html_entity_decode( $reason ) ),
+		esc_html( $pattern_title ),
+		esc_html( $reason ),
 		'https://wordpress.org/patterns/about/'
 	);
 
