@@ -229,23 +229,6 @@ function register_post_type_data() {
 			),
 		)
 	);
-
-	register_post_meta(
-		POST_TYPE,
-		'wpop_unlisted_reason',
-		array(
-			'type'              => 'string',
-			'description'       => 'The ID of a flag reason, used to indicate why a pattern was unlisted.',
-			'single'            => true,
-			'sanitize_callback' => 'sanitize_text_field',
-			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
-			'show_in_rest'      => array(
-				'schema' => array(
-					'type'     => 'string',
-				),
-			),
-		)
-	);
 }
 
 /**
@@ -385,6 +368,44 @@ function register_rest_fields() {
 				'description' => __( 'The ID for the original English pattern.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
+			),
+		)
+	);
+
+	register_rest_field(
+		POST_TYPE,
+		'unlisted_reason',
+		array(
+			'get_callback' => function() {
+				$reasons = wp_get_object_terms( get_the_ID(), FLAG_REASON );
+				if ( count( $reasons ) > 0 ) {
+					$reason = array_shift( $reasons );
+					return array(
+						'term_id' => absint( $reason->term_id ),
+						'name' => esc_attr( $reason->name ),
+						'slug' => esc_attr( $reason->slug ),
+						'description' => wp_kses_post( $reason->description ),
+					);
+				}
+
+				return array();
+			},
+			'schema' => array(
+				'type'  => 'object',
+				'properties' => array(
+					'term_id' => array(
+						'type'  => 'number',
+					),
+					'name' => array(
+						'type'  => 'string',
+					),
+					'slug' => array(
+						'type'  => 'string',
+					),
+					'description' => array(
+						'type'  => 'string',
+					),
+				),
 			),
 		)
 	);
