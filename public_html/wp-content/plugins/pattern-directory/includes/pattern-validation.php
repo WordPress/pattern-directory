@@ -190,6 +190,11 @@ function validate_status( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
+	// Skip validation if the user is a moderator.
+	if ( current_user_can( $post_type->cap->edit_others_posts ) ) {
+		return $prepared_post;
+	}
+
 	$default_status = get_option( 'wporg-pattern-default_status', 'publish' );
 	$valid_states   = array_unique( array( 'pending', SPAM_STATUS, $default_status ) );
 
@@ -206,11 +211,7 @@ function validate_status( $prepared_post, $request ) {
 	}
 
 	// Do not allow for non-privledged users to move a spam post to another status.
-	if (
-		SPAM_STATUS === $current_status &&
-		SPAM_STATUS !== $target_status &&
-		! current_user_can( $post_type->cap->edit_others_patterns )
-	) {
+	if ( SPAM_STATUS === $current_status && SPAM_STATUS !== $target_status ) {
 		return new \WP_Error(
 			'rest_pattern_invalid_status',
 			sprintf(
