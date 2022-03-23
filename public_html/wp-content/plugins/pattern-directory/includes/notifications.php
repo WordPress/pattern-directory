@@ -226,7 +226,7 @@ If you would like to resubmit your pattern, please make sure it follows the guid
  * @return void
  */
 function send_email( $to, $subject, $message ) {
-	$message = html_entity_decode( $message );
+	$message = html_entity_decode( $message, ENT_QUOTES );
 
 	wp_mail(
 		$to,
