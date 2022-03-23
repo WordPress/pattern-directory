@@ -5,7 +5,9 @@ namespace WordPressdotorg\Pattern_Directory\Stats;
 use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\get_pattern_ids_with_pending_flags;
 use const WordPressdotorg\Pattern_Directory\Favorite\META_KEY as FAVORITE_META_KEY;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTERN_POST_TYPE;
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\UNLISTED_STATUS;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG_POST_TYPE;
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 
 defined( 'WPINC' ) || die();
 
@@ -13,7 +15,7 @@ defined( 'WPINC' ) || die();
  * Constants.
  */
 const STATS_POST_TYPE = 'wporg-pattern-stats'; // Must be <= 20 characters.
-const VERSION         = 1; // Must be an integer.
+const VERSION         = 2; // Must be an integer.
 
 /**
  * Actions and filters.
@@ -75,8 +77,18 @@ function get_meta_field_schema() {
 				'type'        => 'integer',
 				'single'      => true,
 			),
+			'count-patterns_possible-spam'  => array(
+				'description' => __( 'The total number of possibly spam patterns.', 'wporg-patterns' ),
+				'type'        => 'integer',
+				'single'      => true,
+			),
 			'count-patterns_unlisted'        => array(
 				'description' => __( 'The total number of unlisted patterns.', 'wporg-patterns' ),
+				'type'        => 'integer',
+				'single'      => true,
+			),
+			'count-patterns_unlisted-spam'   => array(
+				'description' => __( 'The total number of patterns unlisted due to spam.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'single'      => true,
 			),
@@ -280,6 +292,17 @@ function callback_count_patterns_publish_translations() {
 }
 
 /**
+ * Count the total number of pending-review patterns.
+ *
+ * @return int
+ */
+function callback_count_patterns_possible_spam() {
+	$patterns_by_status = wp_count_posts( PATTERN_POST_TYPE );
+
+	return $patterns_by_status->{'pending-review'};
+}
+
+/**
  * Count the total number of unlisted patterns.
  *
  * @return int
@@ -288,6 +311,30 @@ function callback_count_patterns_unlisted() {
 	$patterns_by_status = wp_count_posts( PATTERN_POST_TYPE );
 
 	return $patterns_by_status->unlisted;
+}
+
+/**
+ * Count the total number of patterns with the unlist reason "spam".
+ *
+ * @return int
+ */
+function callback_count_patterns_unlisted_spam() {
+	$args = array(
+		'post_type'   => PATTERN_POST_TYPE,
+		'post_status' => UNLISTED_STATUS,
+		'tax_query'  => array(
+			array(
+				'taxonomy' => FLAG_REASON,
+				'field'    => 'slug',
+				'terms'    => '4-spam',
+			),
+		),
+		'numberposts' => 1, // We only need the `found_posts` value here.
+	);
+
+	$query = new \WP_Query( $args );
+
+	return $query->found_posts;
 }
 
 /**
