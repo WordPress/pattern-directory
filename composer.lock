@@ -262,12 +262,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/wporg-mu-plugins.git",
-                "reference": "5e3c41854a7f3dfc9bf9b7aefc226c2c8380b746"
+                "reference": "b1ac446e2305dbd70c1d10950f1dc3f8680461af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/5e3c41854a7f3dfc9bf9b7aefc226c2c8380b746",
-                "reference": "5e3c41854a7f3dfc9bf9b7aefc226c2c8380b746",
+                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/b1ac446e2305dbd70c1d10950f1dc3f8680461af",
+                "reference": "b1ac446e2305dbd70c1d10950f1dc3f8680461af",
                 "shasum": ""
             },
             "require": {
@@ -294,7 +294,7 @@
                 "source": "https://github.com/WordPress/wporg-mu-plugins/tree/trunk",
                 "issues": "https://github.com/WordPress/wporg-mu-plugins/issues"
             },
-            "time": "2022-03-18T16:58:01+00:00"
+            "time": "2022-03-23T04:04:53+00:00"
         }
     ],
     "packages-dev": [
@@ -2413,7 +2413,7 @@
         },
         {
             "name": "wp-phpunit/wp-phpunit",
-            "version": "5.9.1",
+            "version": "5.9.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-phpunit/wp-phpunit.git",
