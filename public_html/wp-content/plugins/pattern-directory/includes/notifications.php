@@ -176,6 +176,10 @@ function notify_pattern_unlisted( $post ) {
 
 	$pattern_title = get_the_title( $post );
 
+	if ( $locale ) {
+		switch_to_locale( $locale );
+	}
+
 	$reasons = get_the_terms( $post, REASON );
 	$reason = '';
 	if ( ! empty( $reasons ) ) {
@@ -185,10 +189,6 @@ function notify_pattern_unlisted( $post ) {
 
 	if ( ! $reason ) {
 		$reason = get_default_reason_description();
-	}
-
-	if ( $locale ) {
-		switch_to_locale( $locale );
 	}
 
 	$subject = esc_html__( 'Pattern unlisted', 'wporg-patterns' );
