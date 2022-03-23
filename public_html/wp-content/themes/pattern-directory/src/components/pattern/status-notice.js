@@ -139,7 +139,7 @@ export default function ( { pattern } ) {
 										__html:
 											pattern.unlisted_reason?.description ||
 											__(
-												'Additional review has been requested for this pattern.',
+												"This pattern doesn't meet the guidelines for the pattern directory.",
 												'wporg-patterns'
 											),
 									} }
