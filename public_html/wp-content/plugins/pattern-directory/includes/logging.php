@@ -9,7 +9,38 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\{ PENDING_STA
 /**
  * Actions and filters.
  */
+add_filter( 'wporg_internal_notes_rest_prepare_response', __NAMESPACE__ . '\replace_rest_controller_author_link', 10, 3 );
 add_action( 'transition_post_status', __NAMESPACE__ . '\flag_status_change', 10, 3 );
+
+/**
+ * Replace the Internal Notes default embeddable author link with one from the wporg endpoint.
+ *
+ * Without this, any note author that isn't a member of the Pattern Directory site will appear as "unknown"
+ * on internal notes and logs.
+ *
+ * @param \WP_REST_Response $response
+ *
+ * @return \WP_REST_Response
+ */
+function replace_rest_controller_author_link( $response ) {
+	$resonse_data = $response->get_data();
+	$author = get_user_by( 'id', $resonse_data['author'] ?? 0 );
+
+	if ( ! $author ) {
+		return $response;
+	}
+
+	$response->remove_link( 'author' );
+	$response->add_link(
+		'author',
+		rest_url( sprintf( 'wporg/v1/users/%s', $author->user_nicename ) ),
+		array(
+			'embeddable' => true,
+		)
+	);
+
+	return $response;
+}
 
 /**
  * Check if logging is enabled for patterns.
