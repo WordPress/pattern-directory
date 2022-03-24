@@ -22,21 +22,6 @@ if ( get_query_var( PATTERN_ID_VAR ) ) {
 }
 $current_page_url = add_query_arg( $current_page_query_args, home_url() );
 
-if ( is_editing_pattern() ) {
-	$page_title   = __( 'Update a Block Pattern', 'wporg-patterns' );
-	$page_content = '';
-	if ( ! $is_logged_in ) {
-		$page_content = __( 'You need to be logged in to edit this block pattern.', 'wporg-patterns' );
-	} elseif ( ! $can_edit ) {
-		$page_content = __( "You need to be the pattern's author to edit this pattern.", 'wporg-patterns' );
-	}
-} else {
-	$page_title   = __( 'Submit a Block Pattern', 'wporg-patterns' );
-	$page_content = '';
-	if ( ! $is_logged_in ) {
-		$page_content = __( 'You need to be logged in to create a block pattern.', 'wporg-patterns' );
-	}
-}
 ?>
 
 	<main id="main" class="site-main col-12" role="main">
@@ -44,20 +29,42 @@ if ( is_editing_pattern() ) {
 		<?php if ( ( is_editing_pattern() && $can_edit ) || ( ! is_editing_pattern() && $is_logged_in ) ) : ?>
 			<div id="block-pattern-creator"></div>
 		<?php else : ?>
-			<header class="entry-header">
-				<h1 class="entry-title"><?php echo esc_html( $page_title ); ?></h1>
-			</header>
-
 			<div class="entry-content">
-				<div class="alignwide" style="max-width:960px;">
-					<p>
-						<?php echo esc_html( $page_content ); ?>
+				<div class="wp-block-columns alignwide" style="max-width:960px;justify-content:space-between;">
+					<div class="wp-block-column" style="flex-basis:32%">
+						<figure class="wp-block-image"><img src="<?php echo esc_url( get_theme_file_uri( 'images/masthead-bg.png' ) ); ?>" alt=""></figure>
+					</div>
+					<div class="wp-block-column" style="flex-basis:64%">
+						<h1 style="word-break:normal;hyphens:manual;"><?php esc_html_e( 'Create and share patterns for every WordPress site.', 'wporg-patterns' ); ?></h1>
 						<?php if ( ! $is_logged_in ) : ?>
-							<a href="<?php echo esc_url( wp_login_url( $current_page_url ) ); ?>" rel="nofollow">
-								<?php esc_html_e( 'Log in to WordPress.org.', 'wporg-patterns' ); ?>
-							</a>
+						<p>
+							<?php esc_html_e(
+								'Anyone can create and share patterns using the familiar block editor. Design helpful starting points for yourself and any WordPress site.',
+								'wporg-patterns'
+							); ?>
+						</p>
+						<div style="height:20px" aria-hidden="true" class="wp-block-spacer"></div>
+						<div class="wp-block-buttons">
+							<div class="wp-block-button">
+								<a class="wp-block-button__link has-white-color has-vivid-cyan-blue-background-color has-text-color has-background" href="<?php echo esc_url( wp_login_url( $current_page_url ) ); ?>" rel="nofollow" style="border-radius:0px">
+									<?php esc_html_e( 'Log in to WordPress.org to create your pattern.', 'wporg-patterns' ); ?>
+								</a>
+							</div>
+						</div>
+						<p>
+							<?php
+								printf(
+									wp_kses_post( __( 'Or <a href="%s">review the guidelines</a>.', 'wporg-patterns' ) ),
+									esc_url( home_url( '/about/' ) )
+								);
+							?>
+						</p>
+						<?php elseif ( ! $can_edit ) : ?>
+							<div class="notice notice-error">
+								<p style="font-size:1rem;"><?php esc_html_e( "You need to be the pattern's author to edit this pattern.", 'wporg-patterns' ); ?></p>
+							</div>
 						<?php endif; ?>
-					</p>
+					</div>
 				</div>
 				<div style="height:100px" aria-hidden="true" class="wp-block-spacer"></div>
 			</div>
