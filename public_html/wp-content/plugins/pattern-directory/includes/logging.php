@@ -23,8 +23,8 @@ add_action( 'transition_post_status', __NAMESPACE__ . '\flag_status_change', 10,
  * @return \WP_REST_Response
  */
 function replace_rest_controller_author_link( $response ) {
-	$resonse_data = $response->get_data();
-	$author = get_user_by( 'id', $resonse_data['author'] ?? 0 );
+	$response_data = $response->get_data();
+	$author = get_user_by( 'id', $response_data['author'] ?? 0 );
 
 	if ( ! $author ) {
 		return $response;
