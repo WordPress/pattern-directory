@@ -9,7 +9,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\{ PENDING_STA
 /**
  * Actions and filters.
  */
-add_filter( 'wporg_internal_notes_rest_prepare_response', __NAMESPACE__ . '\replace_rest_controller_author_link', 10, 3 );
+add_filter( 'wporg_internal_notes_rest_prepare_response', __NAMESPACE__ . '\replace_rest_controller_author_link' );
 add_action( 'transition_post_status', __NAMESPACE__ . '\flag_status_change', 10, 3 );
 
 /**
