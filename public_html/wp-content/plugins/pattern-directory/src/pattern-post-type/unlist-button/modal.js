@@ -49,7 +49,7 @@ const UnlistModal = ( { onClose, onSubmit } ) => {
 		const postId = select( editorStore ).getCurrentPostId();
 		const postType = select( editorStore ).getCurrentPostType();
 		const { rest_base: restBase } = select( coreStore ).getPostType( postType );
-		return `/wp/v2/${ restBase }/${ postId }/internal-notes`;
+		return `/wporg/v1/${ restBase }/${ postId }/internal-notes`;
 	} );
 	const [ state, dispatch ] = useReducer( reducer, DEFAULT_STATE );
 	const [ selectedOption, setOption ] = useState( '' );
