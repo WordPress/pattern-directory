@@ -225,7 +225,7 @@ class Openverse_Client {
 				}
 
 				// Log the error
-				trigger_error( $results->get_error_code(), E_USER_WARNING ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				trigger_error( $results->get_error_code() . ' ' . $results->get_error_message(), E_USER_WARNING ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 				// Set a short timeout to avoid hammering the API during outages.
 				set_transient( $cache_key, [], 0.5 * MINUTE_IN_SECONDS );
