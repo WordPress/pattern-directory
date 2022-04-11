@@ -33,6 +33,10 @@ $modal-height: 375px;
 	.components-modal__content {
 		padding: 0;
 		margin-top: 0;
+
+		ul {
+			list-style: disc;
+		}
 	}
 
 	.components-modal__content::before {
