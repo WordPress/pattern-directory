@@ -85,10 +85,10 @@ const UnlistModal = ( { onClose, onSubmit } ) => {
 			return;
 		}
 
-		if ( ! selectedOption || ! details.length ) {
+		if ( ! selectedOption ) {
 			dispatch( {
 				status: 'ERROR',
-				message: __( 'Please select a reason and add an internal note.', 'wporg-patterns' ),
+				message: __( 'Please select a reason.', 'wporg-patterns' ),
 			} );
 			return;
 		}
@@ -98,7 +98,7 @@ const UnlistModal = ( { onClose, onSubmit } ) => {
 
 		sendUnlistedNote( {
 			url: apiUrl,
-			note: `UNLISTED: ${ reason.label } — ${ details }`,
+			note: details ? `UNLISTED: ${ reason.label } — ${ details }` : `UNLISTED: ${ reason.label }`,
 			onSuccess: () => {
 				if ( 'function' === typeof onSubmit ) {
 					onSubmit( selectedOption );
@@ -155,14 +155,13 @@ const UnlistModal = ( { onClose, onSubmit } ) => {
 							<Spinner />
 						) }
 						<TextareaControl
-							label={ __( 'Please provide internal details (required)', 'wporg-patterns' ) }
+							label={ __( 'Please provide internal details', 'wporg-patterns' ) }
 							help={ __(
 								'This note will only be seen by other admins and moderators.',
 								'wporg-patterns'
 							) }
 							value={ details }
 							onChange={ setDetails }
-							required={ true }
 						/>
 
 						{ state.hasError && (
