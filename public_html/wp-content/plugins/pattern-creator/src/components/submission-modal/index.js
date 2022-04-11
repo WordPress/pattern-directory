@@ -103,6 +103,7 @@ export default function SubmissionModal( { onClose, onSubmit, status } ) {
 								'wporg-patterns'
 							),
 							{
+								/* eslint-disable-next-line jsx-a11y/anchor-has-content */
 								a: <a href={ `${ wporgBlockPattern.siteUrl }/about/` } />,
 							}
 						) }
@@ -116,6 +117,7 @@ export default function SubmissionModal( { onClose, onSubmit, status } ) {
 										'wporg-patterns'
 									),
 									{
+										/* eslint-disable-next-line jsx-a11y/anchor-has-content */
 										a: <a href="https://translate.wordpress.org" />,
 									}
 								) }
