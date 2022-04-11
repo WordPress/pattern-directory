@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { AsyncModeProvider, useDispatch, useSelect } from '@wordpress/data';
 import { BlockBreadcrumb } from '@wordpress/block-editor';
-import { createInterpolateElement, useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import {
 	ComplementaryArea,
 	FullscreenMode,
