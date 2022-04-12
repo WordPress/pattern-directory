@@ -35,3 +35,15 @@ yarn wp-env run cli "wp rewrite structure '/%postname%/'"
 # Create editor user
 yarn wp-env run cli "wp user create editor editor@wp.local --role=editor --user_pass=password"
 
+# Create the default pages
+yarn wp-env run cli "wp post create --post_type=page --post_status='publish' --post_name='new-pattern' --post_title='New Pattern'"
+yarn wp-env run cli "wp post create --post_type=page --post_status='publish' --post_name='favorites' --post_title='My Favorites'"
+yarn wp-env run cli "wp post create --post_type=page --post_status='publish' --post_name='my-patterns' --post_title='My Patterns'"
+
+# Create some block categories for the submission window
+yarn wp-env run cli "wp term create wporg-pattern-category Header --description='A header pattern'"
+yarn wp-env run cli "wp term create wporg-pattern-category Footer --description='A footer pattern'"
+yarn wp-env run cli "wp term create wporg-pattern-category Button --description='A button pattern'"
+yarn wp-env run cli "wp term create wporg-pattern-category Columns --description='A column pattern'"
+yarn wp-env run cli "wp term create wporg-pattern-category Gallery --description='A gallery pattern'"
+yarn wp-env run cli "wp term create wporg-pattern-category Image --description='An image pattern'"
