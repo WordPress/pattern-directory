@@ -7,10 +7,14 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 /**
  * Test pattern validation.
+ *
+ * @group title-validation
  */
 class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 	protected static $pattern_id;
 	protected static $user;
+
+	protected static $valid_content = "<!-- wp:paragraph -->\n<p>This is a block.</p>\n<!-- /wp:paragraph -->";
 
 	/**
 	 * Setup fixtures that are shared across all tests.
@@ -27,38 +31,46 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Helper function to handle REST requests to save the pattern.
+	 * Test valid pattern title.
+	 *
+	 * @dataProvider data_valid_title
 	 */
-	protected function save_block( $args = array() ) {
+	public function test_valid_title( $pattern ) {
+		wp_set_current_user( self::$user );
+
 		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
 		$request->set_header( 'content-type', 'application/json' );
-		$request_args = wp_parse_args( $args, array(
+		$request->set_body( json_encode( $pattern ) );
+
+		$response = rest_do_request( $request );
+		$this->assertFalse( $response->is_error() );
+	}
+
+	/**
+	 * Data provider to test valid block titles.
+	 *
+	 * @return array
+	 */
+	public function data_valid_title() {
+		$defaults = array(
 			'status' => 'publish',
-			'content' => "<!-- wp:paragraph -->\n<p>This is a block.</p>\n<!-- /wp:paragraph -->",
-		) );
-		$request->set_body( json_encode( $request_args ) );
-		return rest_do_request( $request );
-	}
-
-	/**
-	 * Test valid pattern title: Add a new title.
-	 */
-	public function test_valid_create_title() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block( array( 'title' => 'Default Paragraph' ) );
-		$this->assertFalse( $response->is_error() );
-	}
-
-	/**
-	 * Test valid pattern title: empty title for a draft pattern.
-	 */
-	public function test_valid_empty_title_draft() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block( array(
-			'title' => '',
-			'status' => 'draft',
-		) );
-		$this->assertFalse( $response->is_error() );
+			'content' => self::$valid_content,
+		);
+		return array(
+			array(
+				array_merge( $defaults, array( 'title' => 'Default Paragraph' ) ),
+			),
+			array(
+				array_merge( $defaults, array( 'title' => 'Testimonial' ) ),
+			),
+			array(
+				array(
+					'title' => '',
+					'status' => 'draft',
+					'content' => self::$valid_content,
+				),
+			),
+		);
 	}
 
 	/**
@@ -68,24 +80,52 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 		wp_set_current_user( self::$user );
 		wp_update_post( array(
 			'ID' => self::$pattern_id,
-			'post_title' => 'Test Title',
+			'post_title' => 'Stylized Quote and Citation',
 		) );
-		$response = $this->save_block();
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( json_encode( array( 'content' => self::$valid_content ) ) );
+
+		$response = rest_do_request( $request );
 		$this->assertFalse( $response->is_error() );
 	}
 
 	/**
-	 * Test invalid pattern title: Published pattern, setting empty title.
+	 * Test invalid pattern titles
+	 *
+	 * @dataProvider data_invalid_title
 	 */
-	public function test_invalid_empty_new_title() {
+	public function test_invalid_title( $expected_error_code, $pattern ) {
 		wp_set_current_user( self::$user );
-		$response = $this->save_block( array(
-			'status' => 'publish',
-			'title' => '',
-		) );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( json_encode( $pattern ) );
+
+		$response = rest_do_request( $request );
 		$this->assertTrue( $response->is_error() );
+
 		$data = $response->get_data();
-		$this->assertSame( 'rest_pattern_empty_title', $data['code'] );
+		$this->assertSame( $expected_error_code, $data['code'] );
+	}
+
+	/**
+	 * Data provider to test invalid block titles.
+	 *
+	 * @return array
+	 */
+	public function data_invalid_title() {
+		$defaults = array(
+			'status' => 'publish',
+			'content' => self::$valid_content,
+		);
+		return array(
+			array(
+				'rest_pattern_empty_title',
+				array_merge( $defaults, array( 'title' => '' ) ),
+			),
+		);
 	}
 
 	/**
@@ -97,8 +137,14 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 			'ID' => self::$pattern_id,
 			'post_title' => '',
 		) );
-		$response = $this->save_block();
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( json_encode( array( 'content' => self::$valid_content ) ) );
+
+		$response = rest_do_request( $request );
 		$this->assertTrue( $response->is_error() );
+
 		$data = $response->get_data();
 		$this->assertSame( 'rest_pattern_empty_title', $data['code'] );
 	}
