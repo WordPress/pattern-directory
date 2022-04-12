@@ -99,7 +99,7 @@ export default function SubmissionModal( { onClose, onSubmit, status } ) {
 					<p>
 						{ createInterpolateElement(
 							__(
-								'<a>Check the guidelines</a> for how to be successful when submitting your pattern.',
+								'<a>Check the guidelines</a> for successfully submitting your pattern.',
 								'wporg-patterns'
 							),
 							{
