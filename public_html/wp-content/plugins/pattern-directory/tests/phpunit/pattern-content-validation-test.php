@@ -19,7 +19,10 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 */
 	public static function wpSetUpBeforeClass( $factory ) {
 		self::$pattern_id = $factory->post->create(
-			array( 'post_type' => POST_TYPE )
+			array(
+				'post_title' => 'Three paragraphs',
+				'post_type' => POST_TYPE,
+			)
 		);
 		self::$user = $factory->user->create(
 			array(

@@ -175,8 +175,10 @@ function validate_title( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
+	$title = isset( $request['title'] ) ? $request['title'] : get_the_title( $prepared_post->ID );
+
 	// A title exists, but is empty -- invalid.
-	if ( isset( $request['title'] ) && empty( trim( $request['title'] ) ) ) {
+	if ( isset( $title ) && empty( trim( $title ) ) ) {
 		return new \WP_Error(
 			'rest_pattern_empty_title',
 			__( 'A pattern title is required.', 'wporg-patterns' ),
@@ -184,12 +186,10 @@ function validate_title( $prepared_post, $request ) {
 		);
 	}
 
-	// The existing pattern doesn't have a title, and none is set -- invalid.
-	$post_title = get_the_title( $prepared_post->ID );
-	if ( empty( $post_title ) && ! isset( $request['title'] ) ) {
+	if ( ! is_title_valid( $title ) ) {
 		return new \WP_Error(
-			'rest_pattern_empty_title',
-			__( 'A pattern title is required.', 'wporg-patterns' ),
+			'rest_pattern_invalid_title',
+			__( 'Pattern title is invalid. The pattern title should describe the pattern.', 'wporg-patterns' ),
 			array( 'status' => 400 )
 		);
 	}
@@ -406,4 +406,28 @@ function check_for_spam( $post ) {
 	}
 
 	return array( $is_spam, $spam_reason );
+}
+
+/**
+ * Helper function to check for a valid pattern title.
+ *
+ * @param string $title
+ * @return boolean
+ */
+function is_title_valid( $title ) {
+	// Check title against a list of disallowed words.
+	// Note the space after `test ` to avoid matching "testimonial".
+	$disallow_list = array( 'test ', 'testing', 'my pattern', 'wordpress', 'example' );
+
+	if ( 'test' === strtolower( $title ) ) {
+		return false;
+	}
+
+	foreach ( $disallow_list as $disallowed ) {
+		if ( false !== stripos( $title, $disallowed ) ) {
+			return false;
+		}
+	}
+
+	return true;
 }

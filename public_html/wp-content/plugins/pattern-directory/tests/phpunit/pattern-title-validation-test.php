@@ -125,6 +125,18 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 				'rest_pattern_empty_title',
 				array_merge( $defaults, array( 'title' => '' ) ),
 			),
+			array(
+				'rest_pattern_invalid_title',
+				array_merge( $defaults, array( 'title' => 'Testing' ) ),
+			),
+			array(
+				'rest_pattern_invalid_title',
+				array_merge( $defaults, array( 'title' => 'My Pattern' ) ),
+			),
+			array(
+				'rest_pattern_invalid_title',
+				array_merge( $defaults, array( 'title' => 'Test' ) ),
+			),
 		);
 	}
 
