@@ -575,7 +575,7 @@ function remove_disallowed_blocks( $allowed_block_types, $block_editor_context )
 		);
 	}
 
-	return array_values( $allowed_block_types );
+	return is_array( $allowed_block_types ) ? array_values( $allowed_block_types ) : $allowed_block_types;
 }
 
 /**
