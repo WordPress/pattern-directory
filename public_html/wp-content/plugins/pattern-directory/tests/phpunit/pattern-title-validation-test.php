@@ -13,8 +13,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 	protected static $pattern_id;
 	protected static $user;
-
-	protected static $valid_content = "<!-- wp:paragraph -->\n<p>This is a block.</p>\n<!-- /wp:paragraph -->";
+	protected static $valid_content;
 
 	/**
 	 * Setup fixtures that are shared across all tests.
@@ -28,6 +27,7 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 				'role' => 'administrator',
 			)
 		);
+		self::$valid_content = str_repeat( "<!-- wp:paragraph -->\n<p>This is a block.</p>\n<!-- /wp:paragraph -->\n\n", 3 );
 	}
 
 	/**

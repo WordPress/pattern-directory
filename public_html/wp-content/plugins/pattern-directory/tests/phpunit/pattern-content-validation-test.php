@@ -60,15 +60,17 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function data_valid_content() {
+		$two_paragraphs = "<!-- wp:paragraph -->\n<p>One.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Two.</p>\n<!-- /wp:paragraph -->";
+		$three_paragraphs = "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.</p>\n<!-- /wp:paragraph -->";
+
 		return array(
-			array( "<!-- wp:paragraph -->\n<p>This is a block.</p>\n<!-- /wp:paragraph -->" ),
-			array( "<!-- wp:paragraph -->\n<p><img class=\"wp-image-63\" style=\"width: 150px;\" src=\"./image.png\" alt=\"\"></p>\n<!-- /wp:paragraph -->" ),
-			array( "<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph --><!-- wp:paragraph -->\n<p>Some block content</p>\n<!-- /wp:paragraph -->" ),
-			array( "<!-- wp:paragraph -->\n<p>Some block content</p>\n<!-- /wp:paragraph --><!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->" ),
-			array( "<!-- wp:group -->\n<div class=\"wp-block-group\"><div class=\"wp-block-group__inner-container\"><!-- wp:image {\"sizeSlug\":\"large\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://s.w.org/style/images/wporg-logo.svg?3\" alt=\"\"/></figure>\n<!-- /wp:image --></div></div>\n<!-- /wp:group -->" ),
-			array( "<!-- wp:group {\"backgroundColor\":\"black\",\"textColor\":\"cyan-bluish-gray\"} -->\n<div class=\"wp-block-group has-cyan-bluish-gray-color has-black-background-color has-text-color has-background\"><div class=\"wp-block-group__inner-container\"><!-- wp:image {\"sizeSlug\":\"large\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://s.w.org/style/images/wporg-logo.svg?3\" alt=\"\"/></figure>\n<!-- /wp:image --></div></div>\n<!-- /wp:group -->" ),
-			array( "<!-- wp:columns -->\n<div class=\"wp-block-columns\"><!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:spacer -->\n<div style=\"height:100px\" aria-hidden=\"true\" class=\"wp-block-spacer\"></div>\n<!-- /wp:spacer -->\n\n<!-- wp:paragraph {\"style\":{\"typography\":{\"fontSize\":\"21px\"},\"color\":{\"text\":\"#000000\"}}} -->\n<p class=\"has-text-color\" style=\"color:#000000;font-size:21px\"><strong>We have worked with:</strong></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph {\"style\":{\"typography\":{\"fontSize\":\"24px\",\"lineHeight\":\"1.2\"}}} -->\n<p style=\"font-size:24px;line-height:1.2\"><a href=\"https://wordpress.org\">EARTHFUND™<br>ARCHWEEKLY<br>FUTURE ROADS<br>BUILDING NY</a></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:spacer -->\n<div style=\"height:100px\" aria-hidden=\"true\" class=\"wp-block-spacer\"></div>\n<!-- /wp:spacer --></div>\n<!-- /wp:column -->\n\n<!-- wp:column -->\n<div class=\"wp-block-column\"></div>\n<!-- /wp:column --></div>\n<!-- /wp:columns -->" ),
-			array( "<!-- wp:audio {\"id\":9} -->\n<figure class=\"wp-block-audio\"><audio controls src=\"./song.mp3\"></audio></figure>\n<!-- /wp:audio -->" ),
+			array( $three_paragraphs ),
+			array( "<!-- wp:paragraph -->\n<p><img class=\"wp-image-63\" style=\"width: 150px;\" src=\"./image.png\" alt=\"\"></p>\n<!-- /wp:paragraph -->\n\n$two_paragraphs" ),
+			array( "<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->\n\n$three_paragraphs" ),
+			array( "$three_paragraphs\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->" ),
+			array( "<!-- wp:group -->\n<div class=\"wp-block-group\">$three_paragraphs</div>\n<!-- /wp:group -->" ),
+			array( "<!-- wp:group {\"layout\":{\"type\":\"flex\",\"justifyContent\":\"space-between\"}} -->\n<div class=\"wp-block-group\"><!-- wp:group -->\n<div class=\"wp-block-group\"><!-- wp:heading -->\n<h2>Heading</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Paragraph</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:group -->\n\n<!-- wp:image {\"id\":null} -->\n<figure class=\"wp-block-image\"><img src=\"./pear.png\" alt=\"\"/></figure>\n<!-- /wp:image --></div>\n<!-- /wp:group -->" ),
+			array( "<!-- wp:columns -->\n<div class=\"wp-block-columns\"><!-- wp:column {\"width\":\"66.66%\"} -->\n<div class=\"wp-block-column\" style=\"flex-basis:66.66%\"><!-- wp:spacer -->\n<div style=\"height:100px\" aria-hidden=\"true\" class=\"wp-block-spacer\"></div>\n<!-- /wp:spacer --></div>\n<!-- /wp:column -->\n\n<!-- wp:column {\"width\":\"33.33%\"} -->\n<div class=\"wp-block-column\" style=\"flex-basis:33.33%\"><!-- wp:spacer {\"height\":\"51px\"} -->\n<div style=\"height:51px\" aria-hidden=\"true\" class=\"wp-block-spacer\"></div>\n<!-- /wp:spacer -->\n\n<!-- wp:paragraph -->\n<p>One</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:column --></div>\n<!-- /wp:columns -->" ),
 		);
 	}
 
@@ -97,17 +99,42 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function data_invalid_content() {
+		$two_paragraphs = "<!-- wp:paragraph -->\n<p>One.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Two.</p>\n<!-- /wp:paragraph -->";
+		$three_paragraphs = "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.</p>\n<!-- /wp:paragraph -->";
+
 		return array(
 			array( 'rest_pattern_empty', '' ),
+
+			// Single empty paragraph.
 			array( 'rest_pattern_empty_blocks', "<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->" ),
+			// Multiple empty paragraphs.
 			array( 'rest_pattern_empty_blocks', "<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph --><!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph --><!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->" ),
+			// Empty paragraph with custom class.
 			array( 'rest_pattern_empty_blocks', "<!-- wp:paragraph {\"className\":\"foo\"} -->\n<p class=\"foo\"></p>\n<!-- /wp:paragraph -->" ),
+			// Empty list.
 			array( 'rest_pattern_empty_blocks', "<!-- wp:list -->\n<ul><li></li></ul>\n<!-- /wp:list -->" ),
+			// Empty image block.
 			array( 'rest_pattern_empty_blocks', "<!-- wp:image -->\n<figure class=\"wp-block-image\"><img alt=\"\"/></figure>\n<!-- /wp:image -->" ),
-			array( 'rest_pattern_empty_blocks', "<!-- wp:group -->\n<div class=\"wp-block-group\"><div class=\"wp-block-group__inner-container\"></div></div>\n<!-- /wp:group -->" ),
+			// Empty group.
+			array( 'rest_pattern_empty_blocks', "<!-- wp:group -->\n<div class=\"wp-block-group\"></div>\n<!-- /wp:group -->" ),
+			// Empty media & text block.
 			array( 'rest_pattern_empty_blocks', "<!-- wp:media-text -->\n<div class=\"wp-block-media-text alignwide is-stacked-on-mobile\"><figure class=\"wp-block-media-text__media\"></figure><div class=\"wp-block-media-text__content\"><!-- wp:paragraph {\"placeholder\":\"Content…\",\"fontSize\":\"large\"} -->\n<p class=\"has-large-font-size\"></p>\n<!-- /wp:paragraph --></div></div>\n<!-- /wp:media-text -->" ),
+
 			array( 'rest_pattern_invalid_blocks', '<p>This is not blocks.</p>' ),
 			array( 'rest_pattern_invalid_blocks', "<!-- wp:plugin/fake -->\n<p>This is some content.</p>\n<!-- /wp:plugin/fake -->" ),
+			array( 'rest_pattern_invalid_blocks', "<!-- wp:group -->\n<div class=\"wp-block-group\"><!-- wp:plugin/fake -->\n<p>Fake nested block.</p>\n<!-- /wp:plugin/fake --></div>\n<!-- /wp:group -->" ),
+
+			// Only 2 paragraphs.
+			array( 'rest_pattern_insufficient_blocks', $two_paragraphs ),
+			// Single group with a heading.
+			array( 'rest_pattern_insufficient_blocks', "<!-- wp:group -->\n<div class=\"wp-block-group\"><!-- wp:heading -->\n<h2>One</h2>\n<!-- /wp:heading --></div>\n<!-- /wp:group -->" ),
+			// Default query loop — not considered totally empty because the query loop's settings make it "not empty".
+			array( 'rest_pattern_insufficient_blocks', "<!-- wp:query {\"queryId\":1,\"query\":{\"perPage\":3,\"pages\":0,\"offset\":0,\"postType\":\"post\",\"order\":\"desc\",\"orderBy\":\"date\",\"author\":\"\",\"search\":\"\",\"exclude\":[],\"sticky\":\"\",\"inherit\":false}} -->\n<div class=\"wp-block-query\"><!-- wp:post-template -->\n<!-- wp:post-title /-->\n\n<!-- wp:post-date /-->\n\n<!-- wp:post-excerpt /-->\n<!-- /wp:post-template -->\n\n<!-- wp:query-pagination -->\n<!-- wp:query-pagination-previous /-->\n\n<!-- wp:query-pagination-numbers /-->\n\n<!-- wp:query-pagination-next /-->\n<!-- /wp:query-pagination -->\n\n<!-- wp:query-no-results -->\n<!-- wp:paragraph {\"placeholder\":\"Add a text or blocks that will display when the query returns no results.\"} -->\n<p></p>\n<!-- /wp:paragraph -->\n<!-- /wp:query-no-results --></div>\n<!-- /wp:query -->" ),
+
+			// 26 * 3 paragraphs = 78 blocks.
+			array( 'rest_pattern_extra_blocks', str_repeat( $three_paragraphs, 26 ) ),
+			// 25 * 3 paragraphs + 1 group = 76 blocks.
+			array( 'rest_pattern_extra_blocks', "<!-- wp:group -->\n<div class=\"wp-block-group\">" . str_repeat( $three_paragraphs, 25 ) . "</div>\n<!-- /wp:group -->" ),
 		);
 	}
 
@@ -121,7 +148,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body( json_encode( array(
 			'title'   => 'Spam Check',
-			'content' => "<!-- wp:heading -->\n<h2 id=\"spam-check\">Spam Check.</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Paragraph: PatternDirectorySpamTest</p>\n<!-- /wp:paragraph -->",
+			'content' => "<!-- wp:heading -->\n<h2 id=\"spam-check\">Spam Check.</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Paragraph: PatternDirectorySpamTest</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Third block.</p>\n<!-- /wp:paragraph -->",
 			'status'  => 'publish',
 		) ) );
 
@@ -142,7 +169,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body( json_encode( array(
 			'title'   => 'Spam Check',
-			'content' => "<!-- wp:paragraph -->\n<p>Paragraph one.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph two.</p>\n<!-- /wp:paragraph -->",
+			'content' => "<!-- wp:paragraph -->\n<p>Paragraph one.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph two.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph three.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph four.</p>\n<!-- /wp:paragraph -->",
 			'status'  => 'publish',
 		) ) );
 
