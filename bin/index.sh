@@ -48,7 +48,7 @@ yarn wp-env run cli "wp term create wporg-pattern-category Columns --description
 yarn wp-env run cli "wp term create wporg-pattern-category Gallery --description='A gallery pattern'"
 yarn wp-env run cli "wp term create wporg-pattern-category Image --description='An image pattern'"
 
-# Create flag reasons for block patttern moderation
+# Create flag reasons for block pattern moderation
 yarn wp-env run cli "wp term create wporg-pattern-flag-reason 'Rude, Crude, or Inappropriate' --slug=1-inappropriate --description='This pattern contains content deemed inappropriate for a general audience.'"
 yarn wp-env run cli "wp term create wporg-pattern-flag-reason 'Copyrighted or Trademark Issue' --slug=2-copyright --description='This pattern contains copyrighted material or uses a trademark without permission.'"
 yarn wp-env run cli "wp term create wporg-pattern-flag-reason 'Broken or Unusable' --slug=3-broken --description='This pattern is broken or does not display correctly.'"
