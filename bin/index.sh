@@ -47,3 +47,13 @@ yarn wp-env run cli "wp term create wporg-pattern-category Button --description=
 yarn wp-env run cli "wp term create wporg-pattern-category Columns --description='A column pattern'"
 yarn wp-env run cli "wp term create wporg-pattern-category Gallery --description='A gallery pattern'"
 yarn wp-env run cli "wp term create wporg-pattern-category Image --description='An image pattern'"
+
+# Create flag reasons for block patttern moderation
+yarn wp-env run cli "wp term create wporg-pattern-flag-reason 'Rude, Crude, or Inappropriate' --slug=1-inappropriate --description='This pattern contains content deemed inappropriate for a general audience.'"
+yarn wp-env run cli "wp term create wporg-pattern-flag-reason 'Copyrighted or Trademark Issue' --slug=2-copyright --description='This pattern contains copyrighted material or uses a trademark without permission.'"
+yarn wp-env run cli "wp term create wporg-pattern-flag-reason 'Broken or Unusable' --slug=3-broken --description='This pattern is broken or does not display correctly.'"
+yarn wp-env run cli "wp term create wporg-pattern-flag-reason 'Spam' --slug=4-spam --description='This pattern was determined to be spam.'"
+yarn wp-env run cli "wp term create wporg-pattern-flag-reason 'Not English' --slug=5-not-english --description='This pattern is not in English. Patterns should be submitted in English, and will be translated through translate.wordpress.org.'"
+yarn wp-env run cli "wp term create wporg-pattern-flag-reason 'Not a Pattern' --slug=6-not-a-pattern --description='This content is not a valid pattern. It may have too much or too little content. Patterns should keep placeholder text to a minimum, while still showcasing what each block can do.'"
+yarn wp-env run cli "wp term create wporg-pattern-flag-reason 'Invalid Name' --slug=7-invalid-name --description='The title for this pattern should be changed to something more descriptive.'"
+yarn wp-env run cli "wp term create wporg-pattern-flag-reason 'Other' --slug=9-other --description='Additional review has been requested for this pattern.'"
