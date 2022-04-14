@@ -5,10 +5,10 @@ import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import { Button, CheckboxControl, Modal, TextControl, TextareaControl } from '@wordpress/components';
+import { createInterpolateElement, useEffect, useRef, useState } from '@wordpress/element';
 import { store as editorStore } from '@wordpress/editor';
 import { store as noticesStore } from '@wordpress/notices';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useEffect, useRef, useState } from '@wordpress/element';
 
 const ForwardButton = ( { children, disabled, onClick } ) => (
 	<Button className="pattern-modal-publish__button" isPrimary disabled={ disabled } onClick={ onClick }>
@@ -96,6 +96,61 @@ export default function SubmissionModal( { onClose, onSubmit, status } ) {
 			header: __( 'Publish your pattern', 'wporg-patterns' ),
 			content: (
 				<div>
+					<p>
+						{ createInterpolateElement(
+							__(
+								'<a>Check the guidelines</a> for successfully submitting your pattern.',
+								'wporg-patterns'
+							),
+							{
+								/* eslint-disable-next-line jsx-a11y/anchor-has-content */
+								a: <a href={ `${ wporgBlockPattern.siteUrl }/about/` } />,
+							}
+						) }
+					</p>
+					<ul>
+						{ ! wporgLocale.id.startsWith( 'en_' ) && (
+							<li>
+								{ createInterpolateElement(
+									__(
+										'Patterns should be submitted in English, any patterns submitted in other languages will be declined. Patterns will be translated through <a>translate.wordpress.org</a>.',
+										'wporg-patterns'
+									),
+									{
+										/* eslint-disable-next-line jsx-a11y/anchor-has-content */
+										a: <a href="https://translate.wordpress.org" />,
+									}
+								) }
+							</li>
+						) }
+						<li>
+							{ __(
+								'Keep placeholder content to a minimum, a few lines will be enough to demonstrate most blocks.',
+								'wporg-patterns'
+							) }
+						</li>
+						<li>
+							{ __(
+								'Use a descriptive name for your pattern. Names like “Test” or “My Pattern” will be declined.',
+								'wporg-patterns'
+							) }
+						</li>
+					</ul>
+				</div>
+			),
+			footer: (
+				<>
+					<span />
+					<ForwardButton disabled={ ! title.length } onClick={ goForward }>
+						{ __( 'Next', 'wporg-patterns' ) }
+					</ForwardButton>
+				</>
+			),
+		},
+		{
+			header: __( 'Publish your pattern', 'wporg-patterns' ),
+			content: (
+				<div>
 					<TextControl
 						className="submission-modal__control"
 						label={ __( 'Title (Required)', 'wporg-patterns' ) }
@@ -119,7 +174,7 @@ export default function SubmissionModal( { onClose, onSubmit, status } ) {
 			),
 			footer: (
 				<>
-					<span />
+					<Button onClick={ goBack }>{ __( 'Previous', 'wporg-patterns' ) }</Button>
 					<ForwardButton disabled={ ! title.length } onClick={ goForward }>
 						{ __( 'Next', 'wporg-patterns' ) }
 					</ForwardButton>

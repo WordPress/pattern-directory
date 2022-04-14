@@ -98,9 +98,18 @@ function pattern_creator_init() {
 	wp_add_inline_script(
 		'wp-pattern-creator',
 		sprintf(
+			'var wporgLocale = JSON.parse( decodeURIComponent( \'%s\' ) );',
+			rawurlencode( wp_json_encode( get_locale() ) )
+		),
+		'before'
+	);
+
+	wp_add_inline_script(
+		'wp-pattern-creator',
+		sprintf(
 			'var wporgBlockPattern = JSON.parse( decodeURIComponent( \'%s\' ) );',
 			rawurlencode( wp_json_encode( array(
-				'siteUrl'       => esc_url( home_url() ),
+				'siteUrl' => esc_url( home_url() ),
 			) ) )
 		),
 		'before'
