@@ -31,7 +31,6 @@ function trigger_notifications( $post_id, $post, $update, $post_before ) {
 	}
 
 	if ( ! $update || is_null( $post_before ) ) {
-		// @todo Maybe notify of submission recieved.
 		return;
 	}
 
