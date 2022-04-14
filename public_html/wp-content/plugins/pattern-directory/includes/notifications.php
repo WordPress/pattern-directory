@@ -11,32 +11,39 @@ defined( 'WPINC' ) || die();
 /**
  * Actions and filters.
  */
-add_action( 'transition_post_status', __NAMESPACE__ . '\monitor_post_status_transitions', 20, 3 );
+add_action( 'wp_after_insert_post', __NAMESPACE__ . '\trigger_notifications', 20, 4 );
+add_action( 'wporg_unlist_pattern', __NAMESPACE__ . '\notify_pattern_flagged' );
 
 /**
- * Hook into post status transitions to detect changes that warrant a notification.
+ * Fire off relevant notification when a post is finished updating.
  *
- * @param string   $new_status
- * @param string   $old_status
- * @param \WP_Post $post
+ * @param int           $post_id     Post ID.
+ * @param \WP_Post      $post        Post object.
+ * @param bool          $update      Whether this is an existing post being updated.
+ * @param null|\WP_Post $post_before Null for new posts, the WP_Post object prior
+ *                                  to the update for updated posts.
  *
  * @return void
  */
-function monitor_post_status_transitions( $new_status, $old_status, $post ) {
+function trigger_notifications( $post_id, $post, $update, $post_before ) {
 	if ( PATTERN !== get_post_type( $post ) ) {
 		return;
 	}
 
+	if ( ! $update || is_null( $post_before ) ) {
+		// @todo Maybe notify of submission recieved.
+		return;
+	}
+
+	$new_status = $post->post_status;
+	$old_status = $post_before->post_status;
 	if ( $new_status === $old_status ) {
 		return;
 	}
 
 	if ( 'publish' === $new_status && in_array( $old_status, array( 'pending', SPAM_STATUS, UNLISTED_STATUS ) ) ) {
 		notify_pattern_approved( $post );
-	} elseif (
-		SPAM_STATUS === $new_status
-		|| ( 'pending' === $new_status && 'publish' === $old_status )
-	) {
+	} elseif ( SPAM_STATUS === $new_status ) {
 		notify_pattern_flagged( $post );
 	} elseif ( UNLISTED_STATUS === $new_status ) {
 		notify_pattern_unlisted( $post );
@@ -89,6 +96,9 @@ Thank you for submitting your pattern, %1$s. It is now live in the Block Pattern
 /**
  * Notify when a pattern has been unpublished for review.
  *
+ * This is called either when the status transitions into "spam", or when a post
+ * crosses the flag threshold.
+ *
  * @param \WP_Post $post
  *
  * @return void
@@ -108,32 +118,34 @@ function notify_pattern_flagged( $post ) {
 		switch_to_locale( $locale );
 	}
 
-	$flags = get_posts( array(
-		'post_type' => FLAG,
-		'post_parent' => $post->ID,
-		'post_status' => PENDING_STATUS,
-	) );
 	$reason = '';
-	if ( ! empty( $flags ) ) {
-		$reasons = array();
-		foreach ( $flags as $flag ) {
-			$terms = get_the_terms( $flag, REASON );
-			if ( is_array( $terms ) ) {
-				$reasons += $terms;
-			}
-		}
-		$reasons = array_map(
-			function( \WP_Term $reason ) {
-				return wp_strip_all_tags( $reason->description );
-			},
-			$reasons
-		);
-		$reasons = array_unique( $reasons );
-		$reason = trim( implode( "\n", $reasons ) );
-	} else {
-		// If it doesn't have flags, it must have gotten here by getting marked as spam.
+
+	if ( SPAM_STATUS === $post->post_status ) {
 		$spam_term = get_term_by( 'slug', '4-spam', REASON );
 		$reason = wp_strip_all_tags( $spam_term->description );
+	} else {
+		$flags = get_posts( array(
+			'post_type' => FLAG,
+			'post_parent' => $post->ID,
+			'post_status' => PENDING_STATUS,
+		) );
+		if ( ! empty( $flags ) ) {
+			$reasons = array();
+			foreach ( $flags as $flag ) {
+				$terms = get_the_terms( $flag, REASON );
+				if ( is_array( $terms ) ) {
+					$reasons = array_merge( $reasons, $terms );
+				}
+			}
+			$reasons = array_map(
+				function( \WP_Term $reason ) {
+					return wp_strip_all_tags( $reason->description );
+				},
+				$reasons
+			);
+			$reasons = array_unique( $reasons );
+			$reason = trim( implode( "\n", $reasons ) );
+		}
 	}
 
 	if ( ! $reason ) {
@@ -242,6 +254,3 @@ function send_email( $to, $subject, $message ) {
 		)
 	);
 }
-
-
-
