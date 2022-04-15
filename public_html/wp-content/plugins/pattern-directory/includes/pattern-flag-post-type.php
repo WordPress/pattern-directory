@@ -16,7 +16,7 @@ const RESOLVED_STATUS = 'resolved';
  * Actions and filters.
  */
 add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
-add_action( 'wp_insert_post', __NAMESPACE__ . '\check_flag_threshold', 10, 3 );
+add_action( 'wp_after_insert_post', __NAMESPACE__ . '\check_flag_threshold', 10, 3 );
 
 /**
  * Register entities for block pattern flags.
@@ -152,6 +152,13 @@ function check_flag_threshold( $post_ID, $post, $update ) {
 			'ID'          => $pattern->ID,
 			'post_status' => PENDING_STATUS,
 		) );
+
+		/**
+		 * Fires after a pattern is automatically unlisted.
+		 *
+		 * @param WP_Post $pattern The just-unlisted pattern.
+		 */
+		do_action( 'wporg_unlist_pattern', $pattern );
 	}
 }
 
