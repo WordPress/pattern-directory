@@ -99,29 +99,61 @@ function validate_content( $prepared_post, $request ) {
 	// The editor adds in linebreaks between blocks, but parse_blocks thinks those are invalid blocks.
 	$content = str_replace( "\n\n", '', $content );
 	$blocks = parse_blocks( $content );
-	$registry = \WP_Block_Type_Registry::get_instance();
+	$blocks_queue = $blocks;
+	$all_blocks = array();
 
-	// $blocks contains a list of the blocks in the content. By default it will always have one item, even if it's
-	// not valid block content. Instead, we should check that each block in the list has a blockName.
-	$invalid_blocks = array_filter( $blocks, function( $block ) use ( $registry ) {
+	// Loop over all the nested blocks to flatten the block list into 1 dimension.
+	while ( count( $blocks_queue ) > 0 ) { // phpcs:ignore -- inline count OK.
+		$block = array_shift( $blocks_queue );
+		array_push( $all_blocks, $block );
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			foreach ( $block['innerBlocks'] as $inner_block ) {
+				array_push( $blocks_queue, $inner_block );
+			}
+		}
+	}
+
+	// Check that each block in the list has a blockName and is registered.
+	$registry = \WP_Block_Type_Registry::get_instance();
+	$invalid_blocks = array_filter( $all_blocks, function( $block ) use ( $registry ) {
 		$block_type = $registry->get_registered( $block['blockName'] );
 		return is_null( $block['blockName'] ) || is_null( $block_type );
 	} );
+
 	if ( count( $invalid_blocks ) ) {
 		return new \WP_Error(
 			'rest_pattern_invalid_blocks',
-			__( 'Pattern content contains invalid blocks.', 'wporg-patterns' ),
+			__( 'Pattern content contains invalid blocks. Patterns shared on the Pattern Directory can only use core blocks.', 'wporg-patterns' ),
 			array( 'status' => 400 )
 		);
 	}
 
-	// Next, we should check that we have at least one non-empty block.
-	$real_blocks = array_filter( $blocks, __NAMESPACE__ . '\is_not_empty_block' );
+	// Next, filter out any empty blocks
+	$real_blocks = array_filter( $all_blocks, __NAMESPACE__ . '\is_not_empty_block' );
 
+	// Check that we have at least one non-empty block.
 	if ( ! count( $real_blocks ) ) {
 		return new \WP_Error(
 			'rest_pattern_empty_blocks',
 			__( 'Pattern content contains only empty or default blocks.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	// Check that we have at least three non-empty blocks (and show a different error message).
+	if ( count( $real_blocks ) < 3 ) {
+		return new \WP_Error(
+			'rest_pattern_insufficient_blocks',
+			__( 'Pattern content contains less than three blocks. Patterns should combine multiple blocks for interesting layouts.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	// Check that there are fewer than 75 blocks.
+	if ( count( $real_blocks ) > 75 ) {
+		return new \WP_Error(
+			'rest_pattern_extra_blocks',
+			__( 'Pattern content contains over 75 blocks. Patterns should not replicate full pages or blog posts, try breaking your pattern into smaller submissions.', 'wporg-patterns' ),
 			array( 'status' => 400 )
 		);
 	}
@@ -143,8 +175,10 @@ function validate_title( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
+	$title = isset( $request['title'] ) ? $request['title'] : get_the_title( $prepared_post->ID );
+
 	// A title exists, but is empty -- invalid.
-	if ( isset( $request['title'] ) && empty( trim( $request['title'] ) ) ) {
+	if ( isset( $title ) && empty( trim( $title ) ) ) {
 		return new \WP_Error(
 			'rest_pattern_empty_title',
 			__( 'A pattern title is required.', 'wporg-patterns' ),
@@ -152,12 +186,10 @@ function validate_title( $prepared_post, $request ) {
 		);
 	}
 
-	// The existing pattern doesn't have a title, and none is set -- invalid.
-	$post_title = get_the_title( $prepared_post->ID );
-	if ( empty( $post_title ) && ! isset( $request['title'] ) ) {
+	if ( ! is_title_valid( $title ) ) {
 		return new \WP_Error(
-			'rest_pattern_empty_title',
-			__( 'A pattern title is required.', 'wporg-patterns' ),
+			'rest_pattern_invalid_title',
+			__( 'Pattern title is invalid. The pattern title should describe the pattern.', 'wporg-patterns' ),
 			array( 'status' => 400 )
 		);
 	}
@@ -374,4 +406,28 @@ function check_for_spam( $post ) {
 	}
 
 	return array( $is_spam, $spam_reason );
+}
+
+/**
+ * Helper function to check for a valid pattern title.
+ *
+ * @param string $title
+ * @return boolean
+ */
+function is_title_valid( $title ) {
+	// Check title against a list of disallowed words.
+	// Note the space after `test ` to avoid matching "testimonial".
+	$disallow_list = array( 'test ', 'testing', 'my pattern', 'wordpress', 'example' );
+
+	if ( 'test' === strtolower( $title ) ) {
+		return false;
+	}
+
+	foreach ( $disallow_list as $disallowed ) {
+		if ( false !== stripos( $title, $disallowed ) ) {
+			return false;
+		}
+	}
+
+	return true;
 }

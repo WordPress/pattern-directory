@@ -7,6 +7,8 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, SPAM_
 
 /**
  * Test pattern validation.
+ *
+ * @group content-validation
  */
 class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	protected static $pattern_id;
@@ -17,7 +19,10 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 */
 	public static function wpSetUpBeforeClass( $factory ) {
 		self::$pattern_id = $factory->post->create(
-			array( 'post_type' => POST_TYPE )
+			array(
+				'post_title' => 'Three paragraphs',
+				'post_type' => POST_TYPE,
+			)
 		);
 		self::$user = $factory->user->create(
 			array(
@@ -36,227 +41,104 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Helper function to handle REST requests to save the pattern.
+	 * Test valid block content.
+	 *
+	 * @dataProvider data_valid_content
 	 */
-	protected function save_block_content( $content ) {
-		return $this->save_block_pattern( compact( 'content' ) );
-	}
+	public function test_valid_content( $content ) {
+		wp_set_current_user( self::$user );
 
-	/**
-	 * Helper function to handle a REST request to save a full pattern.
-	 */
-	protected function save_block_pattern( $attributes ) {
-		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern' . ( self::$pattern_id ? '/' . self::$pattern_id : '' ) );
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
 		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( json_encode( $attributes ) );
+		$request->set_body( json_encode( array( 'content' => $content ) ) );
 
-		return rest_do_request( $request );
-	}
+		$response = rest_do_request( $request );
 
-	/**
-	 * Test valid block content: simple paragraph.
-	 */
-	public function test_valid_simple_block() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content(
-			"<!-- wp:paragraph -->\n<p>This is a block.</p>\n<!-- /wp:paragraph -->"
-		);
 		$this->assertFalse( $response->is_error() );
 	}
 
 	/**
-	 * Test valid block content: paragraph with only an image.
+	 * Data provider to test valid block content.
+	 *
+	 * @return array
 	 */
-	public function test_valid_block_with_image() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content(
-			"<!-- wp:paragraph -->\n<p><img class=\"wp-image-63\" style=\"width: 150px;\" src=\"./image.png\" alt=\"\"></p>\n<!-- /wp:paragraph -->"
+	public function data_valid_content() {
+		$two_paragraphs = "<!-- wp:paragraph -->\n<p>One.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Two.</p>\n<!-- /wp:paragraph -->";
+		$three_paragraphs = "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.</p>\n<!-- /wp:paragraph -->";
+
+		return array(
+			array( $three_paragraphs ),
+			array( "<!-- wp:paragraph -->\n<p><img class=\"wp-image-63\" style=\"width: 150px;\" src=\"./image.png\" alt=\"\"></p>\n<!-- /wp:paragraph -->\n\n$two_paragraphs" ),
+			array( "<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->\n\n$three_paragraphs" ),
+			array( "$three_paragraphs\n\n<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->" ),
+			array( "<!-- wp:group -->\n<div class=\"wp-block-group\">$three_paragraphs</div>\n<!-- /wp:group -->" ),
+			array( "<!-- wp:group {\"layout\":{\"type\":\"flex\",\"justifyContent\":\"space-between\"}} -->\n<div class=\"wp-block-group\"><!-- wp:group -->\n<div class=\"wp-block-group\"><!-- wp:heading -->\n<h2>Heading</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Paragraph</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:group -->\n\n<!-- wp:image {\"id\":null} -->\n<figure class=\"wp-block-image\"><img src=\"./pear.png\" alt=\"\"/></figure>\n<!-- /wp:image --></div>\n<!-- /wp:group -->" ),
+			array( "<!-- wp:columns -->\n<div class=\"wp-block-columns\"><!-- wp:column {\"width\":\"66.66%\"} -->\n<div class=\"wp-block-column\" style=\"flex-basis:66.66%\"><!-- wp:spacer -->\n<div style=\"height:100px\" aria-hidden=\"true\" class=\"wp-block-spacer\"></div>\n<!-- /wp:spacer --></div>\n<!-- /wp:column -->\n\n<!-- wp:column {\"width\":\"33.33%\"} -->\n<div class=\"wp-block-column\" style=\"flex-basis:33.33%\"><!-- wp:spacer {\"height\":\"51px\"} -->\n<div style=\"height:51px\" aria-hidden=\"true\" class=\"wp-block-spacer\"></div>\n<!-- /wp:spacer -->\n\n<!-- wp:paragraph -->\n<p>One</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:column --></div>\n<!-- /wp:columns -->" ),
 		);
-		$this->assertFalse( $response->is_error() );
 	}
 
 	/**
-	 * Test valid block content: real content with an extra empty paragraph (beginning).
+	 * Test invalid block content.
+	 *
+	 * @dataProvider data_invalid_content
 	 */
-	public function test_valid_extra_empty_paragraph_initial() {
+	public function test_invalid_empty_content( $expected_error_code, $content ) {
 		wp_set_current_user( self::$user );
-		$response = $this->save_block_content(
-			"<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph --><!-- wp:paragraph -->\n<p>Some block content</p>\n<!-- /wp:paragraph -->"
-		);
-		$this->assertFalse( $response->is_error() );
-	}
 
-	/**
-	 * Test valid block content: real content with an extra empty paragraph (end).
-	 */
-	public function test_valid_extra_empty_paragraph_end() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content(
-			"<!-- wp:paragraph -->\n<p>Some block content</p>\n<!-- /wp:paragraph --><!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->"
-		);
-		$this->assertFalse( $response->is_error() );
-	}
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( json_encode( array( 'content' => $content ) ) );
 
-	/**
-	 * Test valid block content: a group block with an image.
-	 */
-	public function test_valid_group_block() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content(
-			"<!-- wp:group -->\n<div class=\"wp-block-group\"><div class=\"wp-block-group__inner-container\"><!-- wp:image {\"sizeSlug\":\"large\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://s.w.org/style/images/wporg-logo.svg?3\" alt=\"\"/></figure>\n<!-- /wp:image --></div></div>\n<!-- /wp:group -->"
-		);
-		$this->assertFalse( $response->is_error() );
-	}
+		$response = rest_do_request( $request );
 
-	/**
-	 * Test valid block content: a group block with an image and a background color.
-	 */
-	public function test_valid_group_block_with_color() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content(
-			"<!-- wp:group {\"backgroundColor\":\"black\",\"textColor\":\"cyan-bluish-gray\"} -->\n<div class=\"wp-block-group has-cyan-bluish-gray-color has-black-background-color has-text-color has-background\"><div class=\"wp-block-group__inner-container\"><!-- wp:image {\"sizeSlug\":\"large\"} -->\n<figure class=\"wp-block-image size-large\"><img src=\"https://s.w.org/style/images/wporg-logo.svg?3\" alt=\"\"/></figure>\n<!-- /wp:image --></div></div>\n<!-- /wp:group -->"
-		);
-		$this->assertFalse( $response->is_error() );
-	}
-
-	/**
-	 * Test valid block content: two columns, one empty, should still be valid.
-	 */
-	public function test_valid_columns_block() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content(
-			"<!-- wp:columns -->\n<div class=\"wp-block-columns\"><!-- wp:column -->\n<div class=\"wp-block-column\"><!-- wp:spacer -->\n<div style=\"height:100px\" aria-hidden=\"true\" class=\"wp-block-spacer\"></div>\n<!-- /wp:spacer -->\n\n<!-- wp:paragraph {\"style\":{\"typography\":{\"fontSize\":\"21px\"},\"color\":{\"text\":\"#000000\"}}} -->\n<p class=\"has-text-color\" style=\"color:#000000;font-size:21px\"><strong>We have worked with:</strong></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph {\"style\":{\"typography\":{\"fontSize\":\"24px\",\"lineHeight\":\"1.2\"}}} -->\n<p style=\"font-size:24px;line-height:1.2\"><a href=\"https://wordpress.org\">EARTHFUND™<br>ARCHWEEKLY<br>FUTURE ROADS<br>BUILDING NY</a></p>\n<!-- /wp:paragraph -->\n\n<!-- wp:spacer -->\n<div style=\"height:100px\" aria-hidden=\"true\" class=\"wp-block-spacer\"></div>\n<!-- /wp:spacer --></div>\n<!-- /wp:column -->\n\n<!-- wp:column -->\n<div class=\"wp-block-column\"></div>\n<!-- /wp:column --></div>\n<!-- /wp:columns -->"
-		);
-		$this->assertFalse( $response->is_error() );
-	}
-
-	/**
-	 * Test valid block content: an audio block.
-	 */
-	public function test_valid_audio_block() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content(
-			"<!-- wp:audio {\"id\":9} -->\n<figure class=\"wp-block-audio\"><audio controls src=\"./song.mp3\"></audio></figure>\n<!-- /wp:audio -->"
-		);
-		$this->assertFalse( $response->is_error() );
-	}
-
-	/**
-	 * Test invalid block content: empty content.
-	 */
-	public function test_invalid_empty_content() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content( '' );
 		$this->assertTrue( $response->is_error() );
 		$data = $response->get_data();
-		$this->assertSame( 'rest_pattern_empty', $data['code'] );
+		$this->assertSame( $expected_error_code, $data['code'] );
 	}
 
 	/**
-	 * Test invalid block content: not blocks.
+	 * Data provider to test valid block content.
+	 *
+	 * @return array
 	 */
-	public function test_invalid_not_blocks() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content( '<p>This is not blocks.</p>' );
-		$this->assertTrue( $response->is_error() );
-		$data = $response->get_data();
-		$this->assertSame( 'rest_pattern_invalid_blocks', $data['code'] );
-	}
+	public function data_invalid_content() {
+		$two_paragraphs = "<!-- wp:paragraph -->\n<p>One.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Two.</p>\n<!-- /wp:paragraph -->";
+		$three_paragraphs = "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.</p>\n<!-- /wp:paragraph -->";
 
-	/**
-	 * Test invalid block content: empty paragraph (default block).
-	 */
-	public function test_invalid_empty_paragraph() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content( "<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->" );
-		$this->assertTrue( $response->is_error() );
-		$data = $response->get_data();
-		$this->assertSame( 'rest_pattern_empty_blocks', $data['code'] );
-	}
+		return array(
+			array( 'rest_pattern_empty', '' ),
 
-	/**
-	 * Test invalid block content: empty paragraphs (multiple).
-	 */
-	public function test_invalid_empty_paragraphs() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content( "<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph --><!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph --><!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->" );
-		$this->assertTrue( $response->is_error() );
-		$data = $response->get_data();
-		$this->assertSame( 'rest_pattern_empty_blocks', $data['code'] );
-	}
+			// Single empty paragraph.
+			array( 'rest_pattern_empty_blocks', "<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->" ),
+			// Multiple empty paragraphs.
+			array( 'rest_pattern_empty_blocks', "<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph --><!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph --><!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->" ),
+			// Empty paragraph with custom class.
+			array( 'rest_pattern_empty_blocks', "<!-- wp:paragraph {\"className\":\"foo\"} -->\n<p class=\"foo\"></p>\n<!-- /wp:paragraph -->" ),
+			// Empty list.
+			array( 'rest_pattern_empty_blocks', "<!-- wp:list -->\n<ul><li></li></ul>\n<!-- /wp:list -->" ),
+			// Empty image block.
+			array( 'rest_pattern_empty_blocks', "<!-- wp:image -->\n<figure class=\"wp-block-image\"><img alt=\"\"/></figure>\n<!-- /wp:image -->" ),
+			// Empty group.
+			array( 'rest_pattern_empty_blocks', "<!-- wp:group -->\n<div class=\"wp-block-group\"></div>\n<!-- /wp:group -->" ),
+			// Empty media & text block.
+			array( 'rest_pattern_empty_blocks', "<!-- wp:media-text -->\n<div class=\"wp-block-media-text alignwide is-stacked-on-mobile\"><figure class=\"wp-block-media-text__media\"></figure><div class=\"wp-block-media-text__content\"><!-- wp:paragraph {\"placeholder\":\"Content…\",\"fontSize\":\"large\"} -->\n<p class=\"has-large-font-size\"></p>\n<!-- /wp:paragraph --></div></div>\n<!-- /wp:media-text -->" ),
 
-	/**
-	 * Test invalid block content: empty paragraph, with a class.
-	 */
-	public function test_invalid_block_with_class() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content(
-			"<!-- wp:paragraph {\"className\":\"foo\"} -->\n<p class=\"foo\"></p>\n<!-- /wp:paragraph -->"
+			array( 'rest_pattern_invalid_blocks', '<p>This is not blocks.</p>' ),
+			array( 'rest_pattern_invalid_blocks', "<!-- wp:plugin/fake -->\n<p>This is some content.</p>\n<!-- /wp:plugin/fake -->" ),
+			array( 'rest_pattern_invalid_blocks', "<!-- wp:group -->\n<div class=\"wp-block-group\"><!-- wp:plugin/fake -->\n<p>Fake nested block.</p>\n<!-- /wp:plugin/fake --></div>\n<!-- /wp:group -->" ),
+
+			// Only 2 paragraphs.
+			array( 'rest_pattern_insufficient_blocks', $two_paragraphs ),
+			// Single group with a heading.
+			array( 'rest_pattern_insufficient_blocks', "<!-- wp:group -->\n<div class=\"wp-block-group\"><!-- wp:heading -->\n<h2>One</h2>\n<!-- /wp:heading --></div>\n<!-- /wp:group -->" ),
+			// Default query loop — not considered totally empty because the query loop's settings make it "not empty".
+			array( 'rest_pattern_insufficient_blocks', "<!-- wp:query {\"queryId\":1,\"query\":{\"perPage\":3,\"pages\":0,\"offset\":0,\"postType\":\"post\",\"order\":\"desc\",\"orderBy\":\"date\",\"author\":\"\",\"search\":\"\",\"exclude\":[],\"sticky\":\"\",\"inherit\":false}} -->\n<div class=\"wp-block-query\"><!-- wp:post-template -->\n<!-- wp:post-title /-->\n\n<!-- wp:post-date /-->\n\n<!-- wp:post-excerpt /-->\n<!-- /wp:post-template -->\n\n<!-- wp:query-pagination -->\n<!-- wp:query-pagination-previous /-->\n\n<!-- wp:query-pagination-numbers /-->\n\n<!-- wp:query-pagination-next /-->\n<!-- /wp:query-pagination -->\n\n<!-- wp:query-no-results -->\n<!-- wp:paragraph {\"placeholder\":\"Add a text or blocks that will display when the query returns no results.\"} -->\n<p></p>\n<!-- /wp:paragraph -->\n<!-- /wp:query-no-results --></div>\n<!-- /wp:query -->" ),
+
+			// 26 * 3 paragraphs = 78 blocks.
+			array( 'rest_pattern_extra_blocks', str_repeat( $three_paragraphs, 26 ) ),
+			// 25 * 3 paragraphs + 1 group = 76 blocks.
+			array( 'rest_pattern_extra_blocks', "<!-- wp:group -->\n<div class=\"wp-block-group\">" . str_repeat( $three_paragraphs, 25 ) . "</div>\n<!-- /wp:group -->" ),
 		);
-		$this->assertTrue( $response->is_error() );
-		$data = $response->get_data();
-		$this->assertSame( 'rest_pattern_empty_blocks', $data['code'] );
-	}
-
-	/**
-	 * Test invalid block content: empty list (not default).
-	 */
-	public function test_invalid_empty_list() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content( "<!-- wp:list -->\n<ul><li></li></ul>\n<!-- /wp:list -->" );
-		$this->assertTrue( $response->is_error() );
-		$data = $response->get_data();
-		$this->assertSame( 'rest_pattern_empty_blocks', $data['code'] );
-	}
-
-	/**
-	 * Test invalid block content: empty image.
-	 */
-	public function test_invalid_empty_image() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content( "<!-- wp:image -->\n<figure class=\"wp-block-image\"><img alt=\"\"/></figure>\n<!-- /wp:image -->" );
-		$this->assertTrue( $response->is_error() );
-		$data = $response->get_data();
-		$this->assertSame( 'rest_pattern_empty_blocks', $data['code'] );
-	}
-
-	/**
-	 * Test invalid block content: a group block with an image.
-	 */
-	public function test_invalid_empty_group_block() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content(
-			"<!-- wp:group -->\n<div class=\"wp-block-group\"><div class=\"wp-block-group__inner-container\"></div></div>\n<!-- /wp:group -->"
-		);
-		$this->assertTrue( $response->is_error() );
-		$data = $response->get_data();
-		$this->assertSame( 'rest_pattern_empty_blocks', $data['code'] );
-	}
-
-	/**
-	 * Test invalid block content: an empty media & text block.
-	 */
-	public function test_invalid_empty_media_text_block() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content(
-			"<!-- wp:media-text -->\n<div class=\"wp-block-media-text alignwide is-stacked-on-mobile\"><figure class=\"wp-block-media-text__media\"></figure><div class=\"wp-block-media-text__content\"><!-- wp:paragraph {\"placeholder\":\"Content…\",\"fontSize\":\"large\"} -->\n<p class=\"has-large-font-size\"></p>\n<!-- /wp:paragraph --></div></div>\n<!-- /wp:media-text -->"
-		);
-		$this->assertTrue( $response->is_error() );
-		$data = $response->get_data();
-		$this->assertSame( 'rest_pattern_empty_blocks', $data['code'] );
-	}
-
-	/**
-	 * Test invalid block content: a block that doesn't exist on this site.
-	 */
-	public function test_invalid_fake_block() {
-		wp_set_current_user( self::$user );
-		$response = $this->save_block_content(
-			"<!-- wp:plugin/fake -->\n<p>This is some content.</p>\n<!-- /wp:plugin/fake -->"
-		);
-		$this->assertTrue( $response->is_error() );
-		$data = $response->get_data();
-		$this->assertSame( 'rest_pattern_invalid_blocks', $data['code'] );
 	}
 
 	/**
@@ -264,12 +146,16 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 */
 	public function test_spam_should_be_pending() {
 		wp_set_current_user( self::$user );
-		$response = $this->save_block_pattern( array(
-			'title'   => 'Spam Check',
-			'content' => "<!-- wp:heading -->\n<h2 id=\"spam-check\">Spam Check.</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Paragraph: PatternDirectorySpamTest</p>\n<!-- /wp:paragraph -->",
-			'status'  => 'publish',
-		) );
 
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( json_encode( array(
+			'title'   => 'Spam Check',
+			'content' => "<!-- wp:heading -->\n<h2 id=\"spam-check\">Spam Check.</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Paragraph: PatternDirectorySpamTest</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Third block.</p>\n<!-- /wp:paragraph -->",
+			'status'  => 'publish',
+		) ) );
+
+		$response = rest_do_request( $request );
 		$this->assertFalse( $response->is_error() );
 		$data = $response->get_data();
 
@@ -281,16 +167,19 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 */
 	public function test_only_paragraphs_are_spam() {
 		wp_set_current_user( self::$user );
-		$response = $this->save_block_pattern( array(
-			'title'   => 'Spam Check',
-			'content' => "<!-- wp:paragraph -->\n<p>Paragraph one.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph two.</p>\n<!-- /wp:paragraph -->",
-			'status'  => 'publish',
-		) );
 
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( json_encode( array(
+			'title'   => 'Spam Check',
+			'content' => "<!-- wp:paragraph -->\n<p>Paragraph one.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph two.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph three.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph four.</p>\n<!-- /wp:paragraph -->",
+			'status'  => 'publish',
+		) ) );
+
+		$response = rest_do_request( $request );
 		$this->assertFalse( $response->is_error() );
 		$data = $response->get_data();
 
 		$this->assertSame( SPAM_STATUS, $data['status'] );
 	}
 }
-
