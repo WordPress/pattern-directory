@@ -24,12 +24,12 @@ function status_transitions( $new_status, $old_status, $post ) {
 
 	if ( 'publish' === $new_status ) {
 		assign_badge( 'pattern-author', $post->post_author );
-	} else {
+	} elseif ( 'publish' === $old_status ) {
 		// If the user has no published patterns, remove the badge.
 		$other_posts = get_posts( [
 			'post_type'   => PATTERN_POST_TYPE,
 			'post_status' => 'publish',
-			'post_author' => $post->post_author,
+			'author'      => $post->post_author,
 			'exclude'     => $post->ID,
 			'numberposts' => 1,
 			'fields'      => 'ids',
