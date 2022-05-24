@@ -34,6 +34,7 @@ import KeyboardShortcuts from '../keyboard-shortcuts';
 import ListViewSidebar from '../secondary-sidebar/list-view-sidebar';
 import { POST_TYPE, store as patternStore } from '../../store';
 import { SidebarComplementaryAreaFills } from '../sidebar';
+import { STORE_NAME } from '../../store/constants';
 import UrlController from '../url-controller';
 import WelcomeGuide from '../welcome-guide';
 
@@ -51,7 +52,7 @@ function Editor( { onError, postId } ) {
 			isInserterOpen: isInserterOpened(),
 			isListViewOpen: isListViewOpened(),
 			post: getEntityRecord( 'postType', POST_TYPE, postId ),
-			sidebarIsOpened: !! select( interfaceStore ).getActiveComplementaryArea( patternStore.name ),
+			sidebarIsOpened: !! select( interfaceStore ).getActiveComplementaryArea( STORE_NAME ),
 			settings: getSettings(),
 		};
 	}, [] );
@@ -106,7 +107,7 @@ function Editor( { onError, postId } ) {
 							className="pattern-interface"
 							labels={ interfaceLabels }
 							secondarySidebar={ secondarySidebar() }
-							sidebar={ sidebarIsOpened && <ComplementaryArea.Slot scope="wporg/pattern-creator" /> }
+							sidebar={ sidebarIsOpened && <ComplementaryArea.Slot scope={ STORE_NAME } /> }
 							header={ <Header /> }
 							notices={ <EditorSnackbars /> }
 							content={

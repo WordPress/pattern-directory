@@ -24,13 +24,13 @@ export const SidebarInspectorFill = InspectorFill;
 export function SidebarComplementaryAreaFills() {
 	const { sidebar, isEditorSidebarOpened, hasBlockSelection } = useSelect( ( select ) => {
 		const _sidebar = select( interfaceStore ).getActiveComplementaryArea( STORE_NAME );
-		const _isEditorSidebarOpened = [ SIDEBAR_BLOCK, SIDEBAR_PATTERN ].includes( _sidebar );
 		return {
 			sidebar: _sidebar,
-			isEditorSidebarOpened: _isEditorSidebarOpened,
+			isEditorSidebarOpened: !! _sidebar,
 			hasBlockSelection: !! select( blockEditorStore ).getBlockSelectionStart(),
 		};
-	}, [] );
+	} );
+
 	const { enableComplementaryArea } = useDispatch( interfaceStore );
 	useEffect( () => {
 		if ( ! isEditorSidebarOpened ) return;
@@ -40,22 +40,19 @@ export function SidebarComplementaryAreaFills() {
 			enableComplementaryArea( STORE_NAME, SIDEBAR_PATTERN );
 		}
 	}, [ hasBlockSelection, isEditorSidebarOpened ] );
-	let sidebarName = sidebar;
-	if ( ! isEditorSidebarOpened ) {
-		sidebarName = hasBlockSelection ? SIDEBAR_BLOCK : SIDEBAR_PATTERN;
-	}
+
 	return (
 		<>
 			<DefaultSidebar
-				identifier={ sidebarName }
+				identifier={ sidebar }
 				title={ __( 'Settings', 'wporg-patterns' ) }
 				icon={ cog }
 				closeLabel={ __( 'Close settings sidebar', 'wporg-patterns' ) }
-				header={ <SettingsHeader sidebarName={ sidebarName } /> }
+				header={ <SettingsHeader sidebarName={ sidebar } /> }
 				headerClassName="pattern-sidebar__panel-tabs"
 			>
-				{ sidebarName === SIDEBAR_PATTERN && <PatternSettings /> }
-				{ sidebarName === SIDEBAR_BLOCK && <InspectorSlot bubblesVirtually /> }
+				{ sidebar === SIDEBAR_PATTERN && <PatternSettings /> }
+				{ sidebar === SIDEBAR_BLOCK && <InspectorSlot bubblesVirtually /> }
 			</DefaultSidebar>
 		</>
 	);
