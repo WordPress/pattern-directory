@@ -11,6 +11,8 @@ defined( 'WPINC' ) || die();
 
 add_action( 'render_block_core/archives', __NAMESPACE__ . '\render_archives', 10, 3 );
 add_action( 'render_block_core/latest-comments', __NAMESPACE__ . '\render_latest_comments', 10, 3 );
+add_filter( 'render_block_data', __NAMESPACE__ . '\attach_site_data_filters' );
+add_filter( 'render_block', __NAMESPACE__ . '\remove_site_data_filters' );
 
 /**
  * Mock the Archives block.
@@ -176,4 +178,47 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
 		$wrapper_attributes,
 		$list_items_markup
 	);
+}
+
+/**
+ * Helper function to attach some filters only during the render_callback calls.
+ */
+function attach_site_data_filters( $value ) {
+	add_filter( 'pre_option_blogdescription', __NAMESPACE__ . '\replace_site_info', 10, 3 );
+	add_filter( 'pre_option_blogname', __NAMESPACE__ . '\replace_site_info', 10, 3 );
+
+	return $value;
+}
+
+/**
+ * Helper function to remove filters after the render function runs.
+ *
+ * @see attach_site_data_filters.
+ */
+function remove_site_data_filters( $value ) {
+	remove_filter( 'pre_option_blogdescription', __NAMESPACE__ . '\replace_site_info', 10, 3 );
+	remove_filter( 'pre_option_blogname', __NAMESPACE__ . '\replace_site_info', 10, 3 );
+
+	return $value;
+}
+
+/**
+ * Filter site options to return placeholder content for title & tagline.
+ *
+ * These placeholders should be the same as returned in `src/api-middleware/mock-site-data.js`.
+ *
+ * @param mixed  $value   Value to return.
+ * @param string $option  Option name.
+ * @param mixed  $default The fallback value to return if the option does not exist.
+ *                           Default false.
+ * @return string
+ */
+function replace_site_info( $value, $option, $default ) {
+	switch ( $option ) {
+		case 'blogdescription':
+			return __( 'Site Tagline placeholder', 'wporg-patterns' );
+		case 'blogname':
+			return __( 'Site Title placeholder', 'wporg-patterns' );
+	}
+	return $value;
 }
