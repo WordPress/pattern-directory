@@ -1,7 +1,6 @@
 /**
  * WordPress dependencies
  */
-import apiFetch from '@wordpress/api-fetch';
 import { dispatch } from '@wordpress/data';
 /* eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK. */
 import { __experimentalFetchLinkSuggestions as fetchLinkSuggestions } from '@wordpress/core-data';
@@ -14,11 +13,8 @@ import { render, unmountComponentAtNode } from '@wordpress/element';
 import { store as patternStore } from './store';
 import './hooks/media';
 import Editor from './components/editor';
-import { filterEndpoints } from './api-middleware';
+import './api-middleware';
 import './style.scss';
-
-// Set up API middleware.
-apiFetch.use( filterEndpoints );
 
 /**
  * Reinitializes the editor after the user chooses to reboot the editor after
