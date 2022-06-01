@@ -11,6 +11,7 @@
 	// Over qualified to override other styles
 	select.components-select-control__input.components-select-control__input {
 		width: auto;
+		line-height: 30px;
 	}
 
 	body.rtl & {
