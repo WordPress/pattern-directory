@@ -17,6 +17,17 @@ body.page {
 	.entry-content {
 		max-width: none;
 	}
+	
+	@media only screen and (min-width: 737px) and (max-width: 970px) {
+		.site-header+.site-main {
+			.entry-title {
+				padding: 0 20px;
+			}
+		}
+		.pattern-navigation-layout {
+			margin: 1.5rem;
+		}
+	}
 }
 
 body.page-about {
