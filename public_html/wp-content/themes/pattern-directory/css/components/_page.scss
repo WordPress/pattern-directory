@@ -19,7 +19,7 @@ body.page {
 	}
 
 	@media only screen and (min-width: 737px) and (max-width: 970px) {
-		.site-header+.site-main {
+		.site-header + .site-main {
 			.entry-title {
 				padding: 0 20px;
 			}
@@ -44,6 +44,7 @@ body.page-about {
 				padding: 48px !important; // override the padding from the editor.
 			}
 		}
+
 	}
 
 }
