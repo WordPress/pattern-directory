@@ -8,7 +8,7 @@ body.page {
 			margin: 2rem auto 1rem;
 			max-width: 960px;
 
-			@include breakpoint( $ms-breakpoint ) {
+			@include breakpoint($ms-breakpoint ) {
 				padding: 0 10px;
 			}
 		}
@@ -17,7 +17,7 @@ body.page {
 	.entry-content {
 		max-width: none;
 	}
-	
+
 	@media only screen and (min-width: 737px) and (max-width: 970px) {
 		.site-header+.site-main {
 			.entry-title {
@@ -35,7 +35,7 @@ body.page-about {
 	.entry-content {
 		padding-top: ms(4);
 
-		@media ( max-width: $breakpoint-small ) {
+		@media (max-width: $breakpoint-small ) {
 			h1 {
 				font-size: 36px !important; // override the size from the editor.
 			}
