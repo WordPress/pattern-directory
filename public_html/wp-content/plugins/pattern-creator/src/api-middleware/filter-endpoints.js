@@ -30,7 +30,7 @@ function maybeUpdateContext( path ) {
 
 // Use a middleware provider to intercept and modify API calls.
 // Short-circuit POST requests, bound queries, allow media, etc.
-export default function ( options, next ) {
+export default async function ( options, next ) {
 	if ( options.path ) {
 		// Add limits to all GET queries which attempt unbound queries
 		options.path = options.path.replace( 'per_page=-1', 'per_page=50' );
@@ -38,5 +38,27 @@ export default function ( options, next ) {
 		options.path = maybeUpdateContext( options.path );
 	}
 
-	return next( options );
+	// Wait to get the API response back, so it can be filtered.
+	const response = await next( options );
+
+	if ( options.path ) {
+		if ( options.path.includes( '/wp/v2/types?' ) ) {
+			// Set posts to viewable, but pages and patterns are not viewable.
+			// This controls whether these post-types are options in the Query
+			// Loop block. Pages are disabled because a regular user trying to
+			// access pages results in a `403` error. Patterns are disabled
+			// because they won't exist on other sites.
+			if ( response.post ) {
+				response.post.viewable = true;
+			}
+			if ( response.page ) {
+				response.page.viewable = false;
+			}
+			if ( response[ 'wporg-pattern' ] ) {
+				response[ 'wporg-pattern' ].viewable = false;
+			}
+		}
+	}
+
+	return response;
 }
