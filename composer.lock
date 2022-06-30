@@ -179,15 +179,15 @@
         },
         {
             "name": "wpackagist-plugin/gutenberg",
-            "version": "13.4.0",
+            "version": "13.5.2",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/gutenberg/",
-                "reference": "tags/13.4.0"
+                "reference": "tags/13.5.2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/gutenberg.13.4.0.zip"
+                "url": "https://downloads.wordpress.org/plugin/gutenberg.13.5.2.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -262,12 +262,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/wporg-mu-plugins.git",
-                "reference": "054f2403c556c2a0ae74990d88cc1f879c364b1b"
+                "reference": "51359c33566a20d41b429d1f02d096b67b332450"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/054f2403c556c2a0ae74990d88cc1f879c364b1b",
-                "reference": "054f2403c556c2a0ae74990d88cc1f879c364b1b",
+                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/51359c33566a20d41b429d1f02d096b67b332450",
+                "reference": "51359c33566a20d41b429d1f02d096b67b332450",
                 "shasum": ""
             },
             "require": {
@@ -294,7 +294,7 @@
                 "source": "https://github.com/WordPress/wporg-mu-plugins/tree/trunk",
                 "issues": "https://github.com/WordPress/wporg-mu-plugins/issues"
             },
-            "time": "2022-06-16T16:30:06+00:00"
+            "time": "2022-06-29T15:41:53+00:00"
         }
     ],
     "packages-dev": [
