@@ -547,10 +547,6 @@ function remove_disallowed_blocks( $allowed_block_types, $block_editor_context )
 		'core/nextpage',
 		'core/block', // Reusable blocks
 		'core/shortcode',
-		'core/navigation-area',
-		'core/navigation',
-		'core/navigation-link',
-		'core/navigation-submenu',
 		'core/page-list',
 		'core/template-part',
 	);
