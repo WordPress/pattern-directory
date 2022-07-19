@@ -26,7 +26,7 @@ _x( 'This content is not a valid pattern. It may have too much or too little con
 _x( 'Not English', 'Flag Reasons term name', 'wporg-patterns' );
 _x( 'This pattern is not in English. Patterns should be submitted in English, and will be translated through <a href="https://translate.wordpress.org">translate.wordpress.org</a>.', 'Flag Reasons term description', 'wporg-patterns' );
 _x( 'Other', 'Flag Reasons term name', 'wporg-patterns' );
-_x( 'Additional review has been requested for this pattern.', 'Flag Reasons term description', 'wporg-patterns' );
+_x( 'This pattern did not meet <a href="https://wordpress.org/patterns/about/">the general guidelines</a>.', 'Flag Reasons term description', 'wporg-patterns' );
 _x( 'Rude, Crude, or Inappropriate', 'Flag Reasons term name', 'wporg-patterns' );
 _x( 'This pattern contains content deemed inappropriate for a general audience.', 'Flag Reasons term description', 'wporg-patterns' );
 _x( 'Spam', 'Flag Reasons term name', 'wporg-patterns' );
