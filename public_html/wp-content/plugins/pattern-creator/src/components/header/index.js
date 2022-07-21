@@ -34,9 +34,8 @@ export default function Header() {
 	const inserterButton = useRef();
 	const { deviceType, hasReducedUI, isInserterOpen, isListViewOpen, listViewShortcut } = useSelect(
 		( select ) => {
-			const { getPreviewDeviceType, isFeatureActive, isInserterOpened, isListViewOpened } = select(
-				patternStore
-			);
+			const { getPreviewDeviceType, isFeatureActive, isInserterOpened, isListViewOpened } =
+				select( patternStore );
 			const { getShortcutRepresentation } = select( keyboardShortcutsStore );
 
 			return {
@@ -63,10 +62,10 @@ export default function Header() {
 		}
 	}, [ isInserterOpen, setIsInserterOpened ] );
 
-	const toggleListView = useCallback( () => setIsListViewOpened( ! isListViewOpen ), [
-		setIsListViewOpened,
-		isListViewOpen,
-	] );
+	const toggleListView = useCallback(
+		() => setIsListViewOpened( ! isListViewOpen ),
+		[ setIsListViewOpened, isListViewOpen ]
+	);
 
 	const classes = classnames( 'pattern-header', {
 		'has-reduced-ui': hasReducedUI,
