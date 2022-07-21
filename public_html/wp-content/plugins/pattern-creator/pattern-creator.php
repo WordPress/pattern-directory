@@ -139,7 +139,7 @@ function pattern_creator_init() {
 		'postId'                               => $post_id,
 		'siteUrl'                              => site_url(),
 		'postsPerPage'                         => get_option( 'posts_per_page' ),
-		'styles'                               => gutenberg_get_editor_styles(),
+		'styles'                               => get_block_editor_theme_styles(),
 		'__experimentalBlockPatterns'          => array(),
 		'__experimentalBlockPatternCategories' => array(),
 	);
@@ -266,40 +266,3 @@ function add_theme_styles_to_editor( $settings ) {
 	return $settings;
 }
 add_filter( 'block_editor_settings_all', __NAMESPACE__ . '\add_theme_styles_to_editor', 20 );
-
-/**
- * Load editor styles (this is copied from Gutenberg 13.6).
- *
- * @see https://github.com/WordPress/gutenberg/blob/release/13.6/lib/compat/wordpress-5.9/edit-site-page.php#L43-L77
- *
- * @return array Editor Styles Setting.
- */
-function gutenberg_get_editor_styles() {
-	global $editor_styles;
-
-	// Ideally the code is extracted into a reusable function.
-	$styles = array();
-
-	if ( $editor_styles && current_theme_supports( 'editor-styles' ) ) {
-		foreach ( $editor_styles as $style ) {
-			if ( preg_match( '~^(https?:)?//~', $style ) ) {
-				$response = wp_remote_get( $style );
-				if ( ! is_wp_error( $response ) ) {
-					$styles[] = array(
-						'css' => wp_remote_retrieve_body( $response ),
-					);
-				}
-			} else {
-				$file = get_theme_file_path( $style );
-				if ( is_file( $file ) ) {
-					$styles[] = array(
-						'css'     => file_get_contents( $file ),
-						'baseURL' => get_theme_file_uri( $style ),
-					);
-				}
-			}
-		}
-	}
-
-	return $styles;
-}
