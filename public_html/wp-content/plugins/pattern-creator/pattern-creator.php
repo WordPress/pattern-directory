@@ -259,9 +259,9 @@ function add_theme_styles_to_editor( $settings ) {
 	$style = gutenberg_get_layout_style( '.pattern-block-editor__block-list.is-root-container', $layout, true, $block_gap );
 
 	$settings['__unstableResolvedAssets']['styles'] .=
-		'\n<link rel="stylesheet" id="theme-styles" href="https://wp-themes.com/wp-content/themes/twentytwentyone/style.css" media="all" />'; //phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		'\n<link rel="stylesheet" id="theme-editor-styles" href="https://wp-themes.com/wp-content/themes/twentytwentyone/assets/css/style-editor.css" media="all" />'; //phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 	$settings['__unstableResolvedAssets']['styles'] .=
-		'\n<style>body.editor-styles-wrapper { background-color: white; }' . $style . '</style>';
+		'\n<style>body.editor-styles-wrapper { background-color: white; --global--color-background: #ffffff; --global--color-primary: #000; --global--color-secondary: #000; --button--color-background: #000; --button--color-text-hover: #000; }' . $style . '</style>';
 
 	return $settings;
 }
