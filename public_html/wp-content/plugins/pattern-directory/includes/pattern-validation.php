@@ -37,8 +37,12 @@ function is_not_empty_block( $block ) {
 	$registry = \WP_Block_Type_Registry::get_instance();
 	$block_type = $registry->get_registered( $block['blockName'] );
 
-	// Dynamic blocks don't need custom content.
-	if ( $block_type->is_dynamic() ) {
+	// Most dynamic blocks don't need custom content, but there are some
+	// exceptions that should go through the rest of the checks.
+	if (
+		$block_type->is_dynamic() &&
+		! in_array( $block['blockName'], array( 'core/image' ) )
+	) {
 		return true;
 	}
 
@@ -50,8 +54,8 @@ function is_not_empty_block( $block ) {
 		}
 	}
 
-	// Allow dynamic blocks, which contain no content and maybe no attributes.
-	$allowed_empty = [ 'core/archives', 'core/calendar', 'core/latest-posts', 'core/separator', 'core/spacer', 'core/tag-cloud' ];
+	// Exceptions - these contain no content and maybe no attributes.
+	$allowed_empty = [ 'core/separator', 'core/spacer' ];
 	if ( in_array( $block['blockName'], $allowed_empty ) ) {
 		return true;
 	}
