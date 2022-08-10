@@ -14,6 +14,7 @@ add_action( 'render_block_core/latest-comments', __NAMESPACE__ . '\render_latest
 add_filter( 'render_block_data', __NAMESPACE__ . '\attach_site_data_filters' );
 add_filter( 'render_block', __NAMESPACE__ . '\remove_site_data_filters' );
 add_filter( 'block_core_navigation_render_fallback', __NAMESPACE__ . '\provide_fallback_nav_items' );
+add_filter( 'get_custom_logo', __NAMESPACE__ . '\provide_mock_logo' );
 
 /**
  * Mock the Archives block.
@@ -259,5 +260,19 @@ function provide_fallback_nav_items( $fallback_blocks ) {
 				'isTopLevelLink' => true,
 			),
 		),
+	);
+}
+
+/**
+ * Replace the custom logo output with the WordPress W.
+ * This serves to provide a placeholder for the Site Logo block.
+ *
+ * @param string $html Custom logo HTML output.
+ */
+function provide_mock_logo( $html ) {
+	return sprintf(
+		'<span class="custom-logo-link"><img src="%s" class="custom-logo" alt="%s"></span>',
+		'https://s.w.org/images/wmark.png',
+		__( 'Site logo', 'wporg-patterns' )
 	);
 }
