@@ -37,6 +37,11 @@ function is_not_empty_block( $block ) {
 	$registry = \WP_Block_Type_Registry::get_instance();
 	$block_type = $registry->get_registered( $block['blockName'] );
 
+	// Dynamic blocks don't need custom content.
+	if ( $block_type->is_dynamic() ) {
+		return true;
+	}
+
 	// Paragraphs are a special case, these should never be empty.
 	if ( 'core/paragraph' === $block['blockName'] ) {
 		$block_content = strip_basic_html( $block['innerHTML'] );
