@@ -69,7 +69,7 @@
 		"wordpress-meta/wporg": "1",
 		"wordpress-meta/pub": "1",
 		"wporg/wporg-internal-notes": "dev-build",
-		"wporg/wporg-mu-plugins": "dev-trunk"
+		"wporg/wporg-mu-plugins": "dev-build"
 	},
 	"require-dev": {
 		"dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",

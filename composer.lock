@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d71a479ee540b5c6191ee123945b552b",
+    "content-hash": "9c3a6d8e205ef5b7b9c3ee9055abf808",
     "packages": [
         {
             "name": "composer/installers",
@@ -179,15 +179,15 @@
         },
         {
             "name": "wpackagist-plugin/gutenberg",
-            "version": "13.7.1",
+            "version": "13.8.1",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/gutenberg/",
-                "reference": "tags/13.7.1"
+                "reference": "tags/13.8.1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/gutenberg.13.7.1.zip"
+                "url": "https://downloads.wordpress.org/plugin/gutenberg.13.8.1.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -258,25 +258,27 @@
         },
         {
             "name": "wporg/wporg-mu-plugins",
-            "version": "dev-trunk",
+            "version": "dev-build",
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/wporg-mu-plugins.git",
-                "reference": "eb5d72968fc4a2aa0b7f15df432a54068acb0a3b"
+                "reference": "5b6b2b5ea63693c00c898d11237eaea1db41abb9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/eb5d72968fc4a2aa0b7f15df432a54068acb0a3b",
-                "reference": "eb5d72968fc4a2aa0b7f15df432a54068acb0a3b",
+                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/5b6b2b5ea63693c00c898d11237eaea1db41abb9",
+                "reference": "5b6b2b5ea63693c00c898d11237eaea1db41abb9",
                 "shasum": ""
             },
             "require": {
                 "composer/installers": "~1.0"
             },
             "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
+                "phpcompatibility/phpcompatibility-wp": "*",
+                "wp-coding-standards/wpcs": "2.*",
                 "wporg/wporg-repo-tools": "dev-trunk"
             },
-            "default-branch": true,
             "type": "wordpress-muplugin",
             "extra": {
                 "sync-svn": {
@@ -286,15 +288,23 @@
                     }
                 }
             },
+            "scripts": {
+                "format": [
+                    "phpcbf -p"
+                ],
+                "lint": [
+                    "phpcs"
+                ]
+            },
             "license": [
                 "GPL-2.0-or-later"
             ],
             "description": "`mu-plugins` for the WordPress.org network",
             "support": {
-                "source": "https://github.com/WordPress/wporg-mu-plugins/tree/trunk",
+                "source": "https://github.com/WordPress/wporg-mu-plugins/tree/build",
                 "issues": "https://github.com/WordPress/wporg-mu-plugins/issues"
             },
-            "time": "2022-07-21T13:47:09+00:00"
+            "time": "2022-08-10T05:31:49+00:00"
         }
     ],
     "packages-dev": [
