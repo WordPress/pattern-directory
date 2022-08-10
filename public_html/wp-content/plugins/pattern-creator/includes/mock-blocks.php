@@ -13,6 +13,7 @@ add_action( 'render_block_core/archives', __NAMESPACE__ . '\render_archives', 10
 add_action( 'render_block_core/latest-comments', __NAMESPACE__ . '\render_latest_comments', 10, 3 );
 add_filter( 'render_block_data', __NAMESPACE__ . '\attach_site_data_filters' );
 add_filter( 'render_block', __NAMESPACE__ . '\remove_site_data_filters' );
+add_filter( 'block_core_navigation_render_fallback', __NAMESPACE__ . '\provide_fallback_nav_items' );
 
 /**
  * Mock the Archives block.
@@ -221,4 +222,42 @@ function replace_site_info( $value, $option, $default ) {
 			return __( 'Site Title placeholder', 'wporg-patterns' );
 	}
 	return $value;
+}
+
+/**
+ * Provide custom links as default for empty Navigation blocks.
+ *
+ * @param array[] $fallback_blocks default fallback blocks provided by the default block mechanic.
+ * @return array[]
+ */
+function provide_fallback_nav_items( $fallback_blocks ) {
+	return array(
+		array(
+			'blockName' => 'core/navigation-link',
+			'attrs' => array(
+				'label' => 'Home',
+				'url' => '#',
+				'kind' => 'custom',
+				'isTopLevelLink' => true,
+			),
+		),
+		array(
+			'blockName' => 'core/navigation-link',
+			'attrs' => array(
+				'label' => 'About',
+				'url' => '#',
+				'kind' => 'custom',
+				'isTopLevelLink' => true,
+			),
+		),
+		array(
+			'blockName' => 'core/navigation-link',
+			'attrs' => array(
+				'label' => 'Contact',
+				'url' => '#',
+				'kind' => 'custom',
+				'isTopLevelLink' => true,
+			),
+		),
+	);
 }
