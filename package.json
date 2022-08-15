@@ -7,7 +7,7 @@
 	"private": true,
 	"dependencies": {
 		"@wordpress/env": "5.1.0",
-		"@wordpress/scripts": "23.7.0",
+		"@wordpress/scripts": "23.7.1",
 		"@wordpress/stylelint-config": "20.0.2"
 	},
 	"scripts": {

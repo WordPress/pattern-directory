@@ -2935,10 +2935,10 @@
     "@babel/runtime" "^7.16.0"
     jest-matcher-utils "^27.4.2"
 
-"@wordpress/jest-preset-default@^8.5.0":
-  version "8.5.0"
-  resolved "https://registry.yarnpkg.com/@wordpress/jest-preset-default/-/jest-preset-default-8.5.0.tgz#9f654b0ac15dbb470e534e3c5dcb606753b90188"
-  integrity sha512-b4o82oZfHCuS0XEDrN0A/Nf2U1AIYPaqwYbkud8UEPZomxMOdtaivnZMMlo/CxW6hB9/pr75N03Lu5GZYEEzhw==
+"@wordpress/jest-preset-default@^8.5.1":
+  version "8.5.1"
+  resolved "https://registry.yarnpkg.com/@wordpress/jest-preset-default/-/jest-preset-default-8.5.1.tgz#596c905caca2deac9af2c3e0135dff367b7d92ea"
+  integrity sha512-p84ILJvXxoLr6mAJra3tCtMYNCqcscU+XyuoDy3pro9zVDGFLbWLc6nw0TCQRPvRD5HvK3VGmcLB74ZsiYM0Bg==
   dependencies:
     "@wojtekmaj/enzyme-adapter-react-17" "^0.6.1"
     "@wordpress/jest-console" "^5.4.0"
@@ -3089,10 +3089,10 @@
     memize "^1.1.0"
     rememo "^4.0.0"
 
-"@wordpress/scripts@23.7.0":
-  version "23.7.0"
-  resolved "https://registry.yarnpkg.com/@wordpress/scripts/-/scripts-23.7.0.tgz#b2c862a2d730fe2283509e6d083627394c14900c"
-  integrity sha512-4M05+TI50YEx1iJ+2Y07uHCKit+ciVa/2wLNqdNb69YxWQEvDi/Z9vYF3/+G3ZzV6NarcUoK4bc8+7bYLHKXSw==
+"@wordpress/scripts@23.7.1":
+  version "23.7.1"
+  resolved "https://registry.yarnpkg.com/@wordpress/scripts/-/scripts-23.7.1.tgz#ca4b4a744698f94f14f63312ab0f789826f7e531"
+  integrity sha512-KllePk/QAJo0X6Vp5pkXv2CzCRjo1fIJ60mdd28gP0W7iG+ncw+SGSEWbXOjSInQHzq/FnZf2RkkKWsu//2c8A==
   dependencies:
     "@babel/core" "^7.16.0"
     "@pmmmwh/react-refresh-webpack-plugin" "^0.5.2"
@@ -3101,7 +3101,7 @@
     "@wordpress/browserslist-config" "^4.1.2"
     "@wordpress/dependency-extraction-webpack-plugin" "^3.7.0"
     "@wordpress/eslint-plugin" "^12.9.0"
-    "@wordpress/jest-preset-default" "^8.5.0"
+    "@wordpress/jest-preset-default" "^8.5.1"
     "@wordpress/npm-package-json-lint-config" "^4.1.2"
     "@wordpress/postcss-plugins-preset" "^3.10.0"
     "@wordpress/prettier-config" "^1.4.0"
@@ -4649,10 +4649,10 @@ cssnano-utils@^3.1.0:
   resolved "https://registry.yarnpkg.com/cssnano-utils/-/cssnano-utils-3.1.0.tgz#95684d08c91511edfc70d2636338ca37ef3a6861"
   integrity sha512-JQNR19/YZhz4psLX/rQ9M83e3z2Wf/HdJbryzte4a3NSuafyp9w/I4U+hx5C2S9g41qlstH7DEWnZaaj83OuEA==
 
-cssnano@5.1.12:
-  version "5.1.12"
-  resolved "https://registry.yarnpkg.com/cssnano/-/cssnano-5.1.12.tgz#bcd0b64d6be8692de79332c501daa7ece969816c"
-  integrity sha512-TgvArbEZu0lk/dvg2ja+B7kYoD7BBCmn3+k58xD0qjrGHsFzXY/wKTo9M5egcUCabPol05e/PVoIu79s2JN4WQ==
+cssnano@5.1.13:
+  version "5.1.13"
+  resolved "https://registry.yarnpkg.com/cssnano/-/cssnano-5.1.13.tgz#83d0926e72955332dc4802a7070296e6258efc0a"
+  integrity sha512-S2SL2ekdEz6w6a2epXn4CmMKU4K3KpcyXLKfAYc9UQQqJRkD/2eLUG0vJ3Db/9OvO5GuAdgXw3pFbR6abqghDQ==
   dependencies:
     cssnano-preset-default "^5.2.12"
     lilconfig "^2.0.3"

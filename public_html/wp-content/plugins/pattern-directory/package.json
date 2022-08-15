@@ -26,7 +26,7 @@
 		"@wordpress/i18n": "4.15.0",
 		"@wordpress/notices": "3.15.0",
 		"@wordpress/plugins": "4.13.0",
-		"@wordpress/scripts": "23.7.0"
+		"@wordpress/scripts": "23.7.1"
 	},
 	"eslintConfig": {
 		"extends": "../../../../.eslintrc.js"
