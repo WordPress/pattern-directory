@@ -11,9 +11,11 @@
 _x( 'Buttons', 'Categories term name', 'wporg-patterns' );
 _x( 'Columns', 'Categories term name', 'wporg-patterns' );
 _x( 'Featured', 'Categories term name', 'wporg-patterns' );
+_x( 'Footers', 'Categories term name', 'wporg-patterns' );
 _x( 'Gallery', 'Categories term name', 'wporg-patterns' );
-_x( 'Header', 'Categories term name', 'wporg-patterns' );
+_x( 'Headers', 'Categories term name', 'wporg-patterns' );
 _x( 'Images', 'Categories term name', 'wporg-patterns' );
+_x( 'Query', 'Categories term name', 'wporg-patterns' );
 _x( 'Text', 'Categories term name', 'wporg-patterns' );
 _x( 'Broken or Unusable', 'Flag Reasons term name', 'wporg-patterns' );
 _x( 'This pattern is broken or does not display correctly.', 'Flag Reasons term description', 'wporg-patterns' );
