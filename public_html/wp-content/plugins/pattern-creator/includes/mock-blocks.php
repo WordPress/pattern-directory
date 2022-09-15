@@ -11,6 +11,10 @@ defined( 'WPINC' ) || die();
 
 add_action( 'render_block_core/archives', __NAMESPACE__ . '\render_archives', 10, 3 );
 add_action( 'render_block_core/latest-comments', __NAMESPACE__ . '\render_latest_comments', 10, 3 );
+add_filter( 'render_block_data', __NAMESPACE__ . '\attach_site_data_filters' );
+add_filter( 'render_block', __NAMESPACE__ . '\remove_site_data_filters' );
+add_filter( 'block_core_navigation_render_fallback', __NAMESPACE__ . '\provide_fallback_nav_items' );
+add_filter( 'get_custom_logo', __NAMESPACE__ . '\provide_mock_logo' );
 
 /**
  * Mock the Archives block.
@@ -175,5 +179,100 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
 		'<ol %1$s>%2$s</ol>',
 		$wrapper_attributes,
 		$list_items_markup
+	);
+}
+
+/**
+ * Helper function to attach some filters only during the render_callback calls.
+ */
+function attach_site_data_filters( $value ) {
+	add_filter( 'pre_option_blogdescription', __NAMESPACE__ . '\replace_site_info', 10, 3 );
+	add_filter( 'pre_option_blogname', __NAMESPACE__ . '\replace_site_info', 10, 3 );
+
+	return $value;
+}
+
+/**
+ * Helper function to remove filters after the render function runs.
+ *
+ * @see attach_site_data_filters.
+ */
+function remove_site_data_filters( $value ) {
+	remove_filter( 'pre_option_blogdescription', __NAMESPACE__ . '\replace_site_info', 10, 3 );
+	remove_filter( 'pre_option_blogname', __NAMESPACE__ . '\replace_site_info', 10, 3 );
+
+	return $value;
+}
+
+/**
+ * Filter site options to return placeholder content for title & tagline.
+ *
+ * These placeholders should be the same as returned in `src/api-middleware/mock-site-data.js`.
+ *
+ * @param mixed  $value   Value to return.
+ * @param string $option  Option name.
+ * @param mixed  $default The fallback value to return if the option does not exist.
+ *                           Default false.
+ * @return string
+ */
+function replace_site_info( $value, $option, $default ) {
+	switch ( $option ) {
+		case 'blogdescription':
+			return __( 'Site Tagline placeholder', 'wporg-patterns' );
+		case 'blogname':
+			return __( 'Site Title placeholder', 'wporg-patterns' );
+	}
+	return $value;
+}
+
+/**
+ * Provide custom links as default for empty Navigation blocks.
+ *
+ * @param array[] $fallback_blocks default fallback blocks provided by the default block mechanic.
+ * @return array[]
+ */
+function provide_fallback_nav_items( $fallback_blocks ) {
+	return array(
+		array(
+			'blockName' => 'core/navigation-link',
+			'attrs' => array(
+				'label' => 'Home',
+				'url' => '#',
+				'kind' => 'custom',
+				'isTopLevelLink' => true,
+			),
+		),
+		array(
+			'blockName' => 'core/navigation-link',
+			'attrs' => array(
+				'label' => 'About',
+				'url' => '#',
+				'kind' => 'custom',
+				'isTopLevelLink' => true,
+			),
+		),
+		array(
+			'blockName' => 'core/navigation-link',
+			'attrs' => array(
+				'label' => 'Contact',
+				'url' => '#',
+				'kind' => 'custom',
+				'isTopLevelLink' => true,
+			),
+		),
+	);
+}
+
+/**
+ * Replace the custom logo output with the WordPress W.
+ * This serves to provide a placeholder for the Site Logo block.
+ *
+ * @param string $html Custom logo HTML output.
+ */
+function provide_mock_logo( $html ) {
+	return sprintf(
+		'<span class="custom-logo-link"><img src="%s" class="custom-logo" alt="%s"></span>',
+		'https://s.w.org/images/wmark.png',
+		__( 'Site logo', 'wporg-patterns' )
 	);
 }
