@@ -12,6 +12,7 @@
 
 namespace WordPressdotorg\Pattern_Creator;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+use function WordPressdotorg\MU_Plugins\Global_Header_Footer\{ is_rosetta_site, get_rosetta_name };
 use WP_Block_Editor_Context;
 
 const AUTOSAVE_INTERVAL = 30;
@@ -78,6 +79,9 @@ function pattern_creator_init() {
 	}
 
 	wp_deregister_style( 'wporg-style' );
+	wp_deregister_style( 'wporg-pattern-directory-2022-style' );
+	wp_deregister_style( 'wporg-parent-2021-style' );
+	wp_deregister_style( 'global-styles' );
 
 	$dir = dirname( __FILE__ );
 	$script_asset_path = "$dir/build/index.asset.php";
@@ -98,8 +102,11 @@ function pattern_creator_init() {
 	wp_add_inline_script(
 		'wp-pattern-creator',
 		sprintf(
-			'var wporgLocale = JSON.parse( decodeURIComponent( \'%s\' ) );',
-			rawurlencode( wp_json_encode( get_locale() ) )
+			"var wporgLocale = JSON.parse( decodeURIComponent( '%s' ) )",
+			rawurlencode( wp_json_encode( array(
+				'id' => get_locale(),
+				'displayName' => is_rosetta_site() ? get_rosetta_name() : '',
+			) ) ),
 		),
 		'before'
 	);
