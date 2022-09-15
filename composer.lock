@@ -179,15 +179,15 @@
         },
         {
             "name": "wpackagist-plugin/gutenberg",
-            "version": "13.9.0",
+            "version": "14.0.3",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/gutenberg/",
-                "reference": "tags/13.9.0"
+                "reference": "tags/14.0.3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/gutenberg.13.9.0.zip"
+                "url": "https://downloads.wordpress.org/plugin/gutenberg.14.0.3.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -197,15 +197,15 @@
         },
         {
             "name": "wpackagist-plugin/stream",
-            "version": "3.9.0",
+            "version": "3.9.1",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/stream/",
-                "reference": "tags/3.9.0"
+                "reference": "tags/3.9.1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/stream.3.9.0.zip"
+                "url": "https://downloads.wordpress.org/plugin/stream.3.9.1.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -262,12 +262,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/wporg-mu-plugins.git",
-                "reference": "ca5d5afa2c482b962c78f6e3c152e0090f9ec25c"
+                "reference": "cdb9f799a7747f742b325b2f35da86dae18738ff"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/ca5d5afa2c482b962c78f6e3c152e0090f9ec25c",
-                "reference": "ca5d5afa2c482b962c78f6e3c152e0090f9ec25c",
+                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/cdb9f799a7747f742b325b2f35da86dae18738ff",
+                "reference": "cdb9f799a7747f742b325b2f35da86dae18738ff",
                 "shasum": ""
             },
             "require": {
@@ -304,7 +304,7 @@
                 "source": "https://github.com/WordPress/wporg-mu-plugins/tree/build",
                 "issues": "https://github.com/WordPress/wporg-mu-plugins/issues"
             },
-            "time": "2022-08-15T09:20:57+00:00"
+            "time": "2022-09-15T15:29:38+00:00"
         }
     ],
     "packages-dev": [
@@ -1517,16 +1517,16 @@
         },
         {
             "name": "sebastian/comparator",
-            "version": "3.0.3",
+            "version": "3.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/comparator.git",
-                "reference": "1071dfcef776a57013124ff35e1fc41ccd294758"
+                "reference": "1dc7ceb4a24aede938c7af2a9ed1de09609ca770"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/1071dfcef776a57013124ff35e1fc41ccd294758",
-                "reference": "1071dfcef776a57013124ff35e1fc41ccd294758",
+                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/1dc7ceb4a24aede938c7af2a9ed1de09609ca770",
+                "reference": "1dc7ceb4a24aede938c7af2a9ed1de09609ca770",
                 "shasum": ""
             },
             "require": {
@@ -1579,7 +1579,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/comparator/issues",
-                "source": "https://github.com/sebastianbergmann/comparator/tree/3.0.3"
+                "source": "https://github.com/sebastianbergmann/comparator/tree/3.0.5"
             },
             "funding": [
                 {
@@ -1587,7 +1587,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-11-30T08:04:30+00:00"
+            "time": "2022-09-14T12:31:48+00:00"
         },
         {
             "name": "sebastian/diff",
@@ -1720,16 +1720,16 @@
         },
         {
             "name": "sebastian/exporter",
-            "version": "3.1.4",
+            "version": "3.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/exporter.git",
-                "reference": "0c32ea2e40dbf59de29f3b49bf375176ce7dd8db"
+                "reference": "73a9676f2833b9a7c36968f9d882589cd75511e6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/exporter/zipball/0c32ea2e40dbf59de29f3b49bf375176ce7dd8db",
-                "reference": "0c32ea2e40dbf59de29f3b49bf375176ce7dd8db",
+                "url": "https://api.github.com/repos/sebastianbergmann/exporter/zipball/73a9676f2833b9a7c36968f9d882589cd75511e6",
+                "reference": "73a9676f2833b9a7c36968f9d882589cd75511e6",
                 "shasum": ""
             },
             "require": {
@@ -1785,7 +1785,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/exporter/issues",
-                "source": "https://github.com/sebastianbergmann/exporter/tree/3.1.4"
+                "source": "https://github.com/sebastianbergmann/exporter/tree/3.1.5"
             },
             "funding": [
                 {
@@ -1793,7 +1793,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-11-11T13:51:24+00:00"
+            "time": "2022-09-14T06:00:17+00:00"
         },
         {
             "name": "sebastian/global-state",
@@ -2341,16 +2341,16 @@
         },
         {
             "name": "wp-phpunit/wp-phpunit",
-            "version": "5.9.3",
+            "version": "5.9.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-phpunit/wp-phpunit.git",
-                "reference": "ceece1ed4f2d0732c4a4f2603f4376d85547a50f"
+                "reference": "f9b5b3a44d3677c7d4803074d81ad3cd12b0eeea"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-phpunit/wp-phpunit/zipball/ceece1ed4f2d0732c4a4f2603f4376d85547a50f",
-                "reference": "ceece1ed4f2d0732c4a4f2603f4376d85547a50f",
+                "url": "https://api.github.com/repos/wp-phpunit/wp-phpunit/zipball/f9b5b3a44d3677c7d4803074d81ad3cd12b0eeea",
+                "reference": "f9b5b3a44d3677c7d4803074d81ad3cd12b0eeea",
                 "shasum": ""
             },
             "type": "library",
@@ -2385,7 +2385,7 @@
                 "issues": "https://github.com/wp-phpunit/issues",
                 "source": "https://github.com/wp-phpunit/wp-phpunit"
             },
-            "time": "2022-02-22T20:53:17+00:00"
+            "time": "2022-08-30T21:14:52+00:00"
         },
         {
             "name": "yoast/phpunit-polyfills",
