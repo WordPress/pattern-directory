@@ -1,0 +1,17 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "wporg/pattern-thumbnail",
+	"version": "0.1.0",
+	"title": "Pattern Thumbnail",
+	"category": "design",
+	"icon": "",
+	"description": "Display a thumbnail for the current pattern.",
+	"textdomain": "wporg",
+	"supports": {
+		"html": false
+	},
+	"usesContext": [ "postId", "postType", "queryId" ],
+	"editorScript": "file:./index.js",
+	"style": "file:./style-index.css"
+}
