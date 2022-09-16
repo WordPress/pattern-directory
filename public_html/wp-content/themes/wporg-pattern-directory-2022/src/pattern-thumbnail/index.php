@@ -41,8 +41,9 @@ function render( $attributes, $content, $block ) {
 			'style' => 'height: 202.667px;pointer-events: none;'
 		)
 	);
+	// <iframe title="Pattern Preview" tabindex="-1" style="border: medium none; width: 1200px; max-width: none; height: 800px; transform: scale(0.253333); transform-origin: left top 0px; pointer-events: none;" src="%2$s"></iframe>
 	return sprintf(
-		'<div %1$s><iframe title="Pattern Preview" tabindex="-1" style="border: medium none; width: 1200px; max-width: none; height: 800px; transform: scale(0.253333); transform-origin: left top 0px; pointer-events: none;" src="%2$s"></iframe></div>',
+		'<div %1$s>%2$s</div>',
 		$wrapper_attributes,
 		get_permalink( $block->context['postId'] ) . 'view/'
 	);
