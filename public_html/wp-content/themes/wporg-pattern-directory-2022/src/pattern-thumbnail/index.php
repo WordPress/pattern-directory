@@ -36,15 +36,16 @@ function init() {
  * @return string Returns the block markup.
  */
 function render( $attributes, $content, $block ) {
-	$wrapper_attributes = get_block_wrapper_attributes(
-		array(
-			'style' => 'height: 202.667px;pointer-events: none;'
-		)
-	);
-	// <iframe title="Pattern Preview" tabindex="-1" style="border: medium none; width: 1200px; max-width: none; height: 800px; transform: scale(0.253333); transform-origin: left top 0px; pointer-events: none;" src="%2$s"></iframe>
+	if ( ! empty( $block->block_type->view_script ) ) {
+		wp_enqueue_script( $block->block_type->view_script );
+		// Move to footer.
+		wp_script_add_data( $block->block_type->view_script, 'group', 1 );
+	}
+
+	$wrapper_attributes = get_block_wrapper_attributes();
 	return sprintf(
-		'<div %1$s>%2$s</div>',
+		'<div %1$s data-url="%2$s"></div>',
 		$wrapper_attributes,
-		get_permalink( $block->context['postId'] ) . 'view/'
+		esc_attr( get_permalink( $block->context['postId'] ) . 'view/' )
 	);
 }
