@@ -13,7 +13,7 @@
 
 <!-- wp:post-title {"isLink":true,"fontSize":"small","fontFamily":"inter"} /-->
 
-<!-- wp:post-author {"avatarSize":24} /-->
+<!-- wp:post-author {"avatarSize":24,"fontSize":"small"} /-->
 
 <!-- wp:paragraph -->
 <p>[❤️ 25]</p>
