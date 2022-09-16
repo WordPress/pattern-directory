@@ -61,7 +61,7 @@ function pre_get_posts( $query ) {
 		return;
 	}
 
-	if ( $query->is_tax( 'wporg-pattern-category' ) ) {
+	if ( $query->is_tax( 'wporg-pattern-category' ) || $query->is_search() ) {
 		$query->set( 'posts_per_page', 18 );
 
 		// The `orderby_locale` meta_query will be transformed into a query orderby by Pattern_Post_Type\filter_orderby_locale().
