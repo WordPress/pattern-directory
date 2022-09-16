@@ -210,6 +210,11 @@ function remove_site_data_filters() {
  * @return string
  */
 function replace_site_info( $value, $option, $default ) {
+	global $wp_query;
+	if ( ! isset( $wp_query->query_vars['view'] ) ) {
+		return $value;
+	}
+
 	switch ( $option ) {
 		case 'blogdescription':
 			return __( 'Site Tagline placeholder', 'wporg-patterns' );
