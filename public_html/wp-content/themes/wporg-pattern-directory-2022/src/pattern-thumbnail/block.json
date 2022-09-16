@@ -9,6 +9,7 @@
 	"description": "Display a thumbnail for the current pattern.",
 	"textdomain": "wporg",
 	"supports": {
+		"align": ["wide", "full"],
 		"html": false
 	},
 	"usesContext": [ "postId", "postType", "queryId" ],

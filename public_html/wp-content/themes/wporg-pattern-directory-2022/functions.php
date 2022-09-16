@@ -37,7 +37,9 @@ function enqueue_assets() {
  */
 function update_query_loop_vars( $query, $block, $page ) {
 	if ( isset( $query['post_type']  ) && 'wporg-pattern' === $query['post_type'] ) {
-		$query['posts_per_page'] = 18;
+		if ( ! isset( $query['posts_per_page'] ) ) {
+			$query['posts_per_page'] = 18;
+		}
 
 		// The `orderby_locale` meta_query will be transformed into a query orderby by Pattern_Post_Type\filter_orderby_locale().
 		$query['meta_query'] = array(
@@ -48,6 +50,15 @@ function update_query_loop_vars( $query, $block, $page ) {
 				'value'   => array( get_locale(), 'en_US' ),
 			),
 		);
+
+		// This is used for the "more by this designer" section.
+		// The `[current]` author is a placeholder for the current post's author, and in this case
+		// we also want to exclude the current post from results.
+		$current_post = get_post();
+		if ( $current_post && isset( $query['author'] ) && '[current]' === $query['author'] ) {
+			$query['author'] = $current_post->post_author;
+			$query['post__not_in'] = [ $current_post->ID ];
+		}
 	}
 
 	return $query;
