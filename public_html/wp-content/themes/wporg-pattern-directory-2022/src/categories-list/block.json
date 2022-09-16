@@ -1,0 +1,16 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "wporg/categories-list",
+	"version": "0.1.0",
+	"title": "Pattern Categories List",
+	"category": "design",
+	"icon": "",
+	"description": "Display the pattern categories.",
+	"textdomain": "wporg",
+	"supports": {
+		"html": false
+	},
+	"editorScript": "file:./index.js",
+	"style": "file:./style-index.css"
+}

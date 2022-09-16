@@ -1,0 +1,18 @@
+.wp-block-wporg-categories-list {
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-wrap: nowrap;
+
+	a {
+		display: inline-block;
+		padding: var(--wp--preset--spacing--10) var(--wp--preset--spacing--20);
+		border-radius: 3px;
+	}
+
+	body.home & .cat-item-all a,
+	.current-cat a {
+		background: var(--wp--preset--color--blueberry-1);
+		color: var(--wp--preset--color--white);
+	}
+}
