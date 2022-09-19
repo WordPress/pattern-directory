@@ -60,6 +60,16 @@ function update_query_loop_vars( $query, $block, $page ) {
 			$query['post__not_in'] = [ $current_post->ID ];
 		}
 	}
+	if ( is_page( 'my-patterns' ) ) {
+		$user_id = get_current_user_id();
+		if ( $user_id ) {
+			$query['post_type'] = 'wporg-pattern';
+			$query['post_status'] = 'any';
+			$query['author'] = get_current_user_id();
+		} else {
+			$query['post__in'] = [ -1 ];
+		}
+	}
 
 	return $query;
 }
