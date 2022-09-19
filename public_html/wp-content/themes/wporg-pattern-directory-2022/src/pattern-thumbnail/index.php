@@ -41,11 +41,12 @@ function render( $attributes, $content, $block ) {
 		// Move to footer.
 		wp_script_add_data( $block->block_type->view_script, 'group', 1 );
 	}
+	$url = add_query_arg( 'view', true, get_permalink( $block->context['postId'] ) );
 
 	$wrapper_attributes = get_block_wrapper_attributes();
 	return sprintf(
 		'<div %1$s data-url="%2$s"></div>',
 		$wrapper_attributes,
-		esc_attr( get_permalink( $block->context['postId'] ) . 'view/' )
+		esc_attr( $url )
 	);
 }
