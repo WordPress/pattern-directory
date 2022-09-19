@@ -15,9 +15,7 @@
 
 <!-- wp:post-author {"avatarSize":24,"fontSize":"small"} /-->
 
-<!-- wp:paragraph -->
-<p>[❤️ 25]</p>
-<!-- /wp:paragraph --></div>
+<!-- wp:wporg/favorite-button {"variant":"small"} /--></div>
 <!-- /wp:group -->
 <!-- /wp:post-template -->
 

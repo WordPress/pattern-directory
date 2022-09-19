@@ -4,8 +4,9 @@ namespace WordPressdotorg\Theme\Pattern_Directory_2022;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 // Block files
-require_once( __DIR__ . '/src/pattern-thumbnail/index.php' );
 require_once( __DIR__ . '/src/categories-list/index.php' );
+require_once( __DIR__ . '/src/favorite-button/index.php' );
+require_once( __DIR__ . '/src/pattern-thumbnail/index.php' );
 
 /**
  * Actions and filters.
