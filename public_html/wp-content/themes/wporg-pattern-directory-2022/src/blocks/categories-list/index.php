@@ -19,7 +19,7 @@ add_action( 'init', __NAMESPACE__ . '\init' );
  */
 function init() {
 	register_block_type(
-		dirname( dirname( __DIR__ ) ) . '/build/categories-list',
+		__DIR__ . '/../../../build/blocks/categories-list',
 		array(
 			'render_callback' => __NAMESPACE__ . '\render',
 		)

@@ -6,7 +6,7 @@ import { render } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import Iframe from '../components/iframe';
+import Iframe from '../../components/iframe';
 
 const init = () => {
 	const containers = document.querySelectorAll( '.wp-block-wporg-pattern-thumbnail' );
