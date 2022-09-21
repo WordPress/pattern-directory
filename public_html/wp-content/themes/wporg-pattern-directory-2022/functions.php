@@ -2,10 +2,12 @@
 
 namespace WordPressdotorg\Theme\Pattern_Directory_2022;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+use function WordPressdotorg\Theme\Pattern_Directory_2022\Order_Dropdown_Block\get_orderby_args;
 
 // Block files
 require_once( __DIR__ . '/src/blocks/categories-list/index.php' );
 require_once( __DIR__ . '/src/blocks/favorite-button/index.php' );
+require_once( __DIR__ . '/src/blocks/order-dropdown/index.php' );
 require_once( __DIR__ . '/src/blocks/pattern-thumbnail/index.php' );
 
 /**
@@ -42,6 +44,11 @@ function update_query_loop_vars( $query, $block, $page ) {
 			$query['posts_per_page'] = 18;
 		}
 
+		if ( isset( $_GET['_orderby'] ) ) {
+			$args = get_orderby_args( $_GET['_orderby'] );
+			$query = array_merge( $query, $args );
+		}
+
 		// The `orderby_locale` meta_query will be transformed into a query orderby by Pattern_Post_Type\filter_orderby_locale().
 		$query['meta_query'] = array(
 			'orderby_locale' => array(
@@ -61,6 +68,7 @@ function update_query_loop_vars( $query, $block, $page ) {
 			$query['post__not_in'] = [ $current_post->ID ];
 		}
 	}
+
 	if ( is_page( 'my-patterns' ) ) {
 		$user_id = get_current_user_id();
 		if ( $user_id ) {
@@ -86,6 +94,13 @@ function pre_get_posts( $query ) {
 
 	if ( $query->is_tax( 'wporg-pattern-category' ) || $query->is_search() ) {
 		$query->set( 'posts_per_page', 18 );
+
+		if ( isset( $_GET['_orderby'] ) ) {
+			$args = get_orderby_args( $_GET['_orderby'] );
+			foreach( $args as $key => $value ) {
+				$query->set( $key, $value );
+			}
+		}
 
 		// The `orderby_locale` meta_query will be transformed into a query orderby by Pattern_Post_Type\filter_orderby_locale().
 		$query->set( 'meta_query', array(
