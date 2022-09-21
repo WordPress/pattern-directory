@@ -50,18 +50,17 @@ function render( $attributes, $content, $block ) {
 	}
 
 	$user_id = get_current_user_id();
-	if ( ! $user_id ) {
-		return '';
-	}
-
-	$is_favorite = is_favorite( $post_id, $user_id );
-
+	
 	if ( 'small' === $variant ) {
 		$button = get_small_button( $post_id, $user_id );
 	} else {
+		if ( ! $user_id ) {
+			return '';
+		}
 		$button = get_button( $post_id, $user_id );
 	}
 
+	$is_favorite = is_favorite( $post_id, $user_id );
 	$wrapper_attributes = get_block_wrapper_attributes(
 		array(
 			'class' => 'is-style-outline',
@@ -98,7 +97,11 @@ function get_small_button( $post_id, $user_id ) {
 	$favorite_count = get_favorite_count( $post_id );
 
 	// Render a disabled button until the JS kicks in.
-	$button = '<button class="wp-block-button__link wp-element-button" disabled="disabled">❤️ ';
+	$button = '<button class="wp-block-wporg-favorite-button__button" disabled="disabled">❤️ ';
+
+	if ( ! $user_id ) {
+		$button = '<span class="wp-block-wporg-favorite-button__button" class="">❤️ ';
+	}
 
 	$button .= '<span class="wp-block-wporg-favorite-button__count">';
 	$button .= '<span class="screen-reader-text">';
@@ -119,7 +122,11 @@ function get_small_button( $post_id, $user_id ) {
 	$button .= $is_favorite ? $remove_label : $add_label;
 	$button .= '</span>';
 
-	$button .= '</button>';
+	if ( $user_id ) {
+		$button .= '</button>';
+	} else {
+		$button .= '</span>';
+	}
 
 	return $button;
 }
