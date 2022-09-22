@@ -10,7 +10,7 @@
 		border-radius: 3px;
 	}
 
-	body.home & .cat-item-all a,
+	&.has-all-cats .cat-item-all a,
 	.current-cat a {
 		background: var(--wp--preset--color--blueberry-1);
 		color: var(--wp--preset--color--white);

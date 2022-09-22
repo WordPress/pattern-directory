@@ -64,6 +64,12 @@ function update_query_loop_vars( $query, $block, $page ) {
 			$query = array_merge( $query, $args );
 		}
 
+		if ( isset( $_GET['wporg-pattern-category'] ) 
+			&& term_exists( $_GET['wporg-pattern-category'], 'wporg-pattern-category' )
+		) {
+			$query['wporg-pattern-category'] = $_GET['wporg-pattern-category'];
+		}
+
 		$user_id = get_current_user_id();
 		if ( $user_id ) {
 			$query['post_type'] = 'wporg-pattern';
@@ -86,7 +92,7 @@ function pre_get_posts( $query ) {
 		return;
 	}
 
-	if ( $query->is_home() || $query->is_tax( 'wporg-pattern-category' ) || $query->is_search() ) {
+	if ( ! $query->is_page() ) {
 		$query->set( 'posts_per_page', 18 );
 		$query->set( 'post_type', array( POST_TYPE ) );
 

@@ -46,10 +46,61 @@ function render( $attributes, $content, $block ) {
 	);
 	$list = wp_list_categories( $args );
 
-	$wrapper_attributes = get_block_wrapper_attributes();
+	$block_args = array();
+	if ( ! is_tax( 'wporg-pattern-category' ) && ! isset( $_GET['wporg-pattern-category'] ) ) {
+		$block_args['class'] = 'has-all-cats';
+	}
+
+	$wrapper_attributes = get_block_wrapper_attributes( $block_args );
 	return sprintf(
 		'<ul %1$s>%2$s</ul>',
 		$wrapper_attributes,
 		$list
 	);
 }
+
+/**
+ * Adjust the URL for category filtering on other pages, ex author archives, favorites.
+ *
+ * @param array   $atts              The HTML attributes applied to the list item's
+ *                                   `<a>` element, empty strings are ignored.
+ * @param WP_Term $category          Term data object.
+ *
+ * @return array Filtered attributes.
+ */
+add_filter(
+	'category_list_link_attributes',
+	function( $atts, $category ) {
+		global $wp;
+		if ( ! is_home() ) {
+			$path = $wp->request ?? '/';
+			$path = trailingslashit( preg_replace( '/\/page\/[\d]+/', '', $path ) );
+			$atts['href'] = add_query_arg( 'wporg-pattern-category', $category->slug, home_url( $path ) );
+		}
+		return $atts;
+	},
+	10,
+	2
+);
+
+/**
+ * Add the "current" class to categories when used in query-loop blocks.
+ *
+ * @param string[] $css_classes An array of CSS classes to be applied to each list item.
+ * @param WP_Term  $category    Category data object.
+ *
+ * @return string[] Filtered classes.
+ */
+add_filter(
+	'category_css_class',
+	function( $css_classes, $category ) {
+		if ( isset( $_GET['wporg-pattern-category'] ) ) {
+			if ( $category->slug === $_GET['wporg-pattern-category'] ) {
+				$css_classes[] = 'current-cat';
+			}
+		}
+		return $css_classes;
+	},
+	10,
+	2
+);
