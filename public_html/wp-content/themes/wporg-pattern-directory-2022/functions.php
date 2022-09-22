@@ -48,6 +48,8 @@ function enqueue_assets() {
  * @param int      $page  Current query's page.
  */
 function update_query_loop_vars( $query, $block, $page ) {
+	$query['posts_per_page'] = 18;
+
 	if ( isset( $query['post_type'] ) && 'wporg-pattern' === $query['post_type'] ) {
 		// This is used for the "more by this designer" section.
 		// The `[current]` author is a placeholder for the current post's author, and in this case
@@ -57,6 +59,10 @@ function update_query_loop_vars( $query, $block, $page ) {
 			$query['author'] = $current_post->post_author;
 			$query['post__not_in'] = [ $current_post->ID ];
 		}
+	}
+
+	if ( isset( $page ) && ! isset( $query['offset'] ) ) {
+		$query['paged'] = $page;
 	}
 
 	if ( is_page( [ 'my-patterns', 'favorites' ] ) ) {
