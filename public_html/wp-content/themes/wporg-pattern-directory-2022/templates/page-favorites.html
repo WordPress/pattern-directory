@@ -1,0 +1,46 @@
+<!-- wp:wporg/global-header /-->
+
+<!-- wp:group {"tagName":"main","layout":{"type":"constrained"},"className":"entry-content","style":{"spacing":{"blockGap":"0px"}}} -->
+<main class="wp-block-group entry-content">
+	<!-- wp:pattern {"slug":"wporg-pattern-directory-2022/single-header"} /-->
+
+	<!-- wp:group {"layout":{"type":"default"},"align":"wide"} -->
+	<div class="wp-block-group alignwide">
+		<!-- wp:post-title {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|40"}}},"fontSize":"heading-3"} /-->
+
+		<!-- wp:pattern {"slug":"wporg-pattern-directory-2022/pattern-filters"} /-->
+
+		<!-- wp:query {"queryId":1,"query":{"inherit":false,"postType":"wporg-pattern","override":"my-patterns"},"displayLayout":{"type":"flex","columns":3}} -->
+		<div class="wp-block-query"><!-- wp:post-template -->
+		<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|10","right":"var:preset|spacing|10","bottom":"var:preset|spacing|10","left":"var:preset|spacing|10"}}}} -->
+		<div class="wp-block-group" style="padding-top:var(--wp--preset--spacing--10);padding-right:var(--wp--preset--spacing--10);padding-bottom:var(--wp--preset--spacing--10);padding-left:var(--wp--preset--spacing--10)"><!-- wp:wporg/pattern-thumbnail /-->
+
+		<!-- wp:post-title {"isLink":true,"fontSize":"small","fontFamily":"inter"} /-->
+
+		<!-- wp:post-author {"avatarSize":24,"fontSize":"small"} /-->
+
+		<!-- wp:wporg/favorite-button {"variant":"small"} /--></div>
+		<!-- /wp:group -->
+		<!-- /wp:post-template -->
+
+		<!-- wp:query-no-results -->
+		<!-- wp:paragraph -->
+		<p>Please log in to view your favorites.</p>
+		<!-- /wp:paragraph -->
+		<!-- wp:buttons -->
+		<div class="wp-block-buttons"><!-- wp:button -->
+		<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="https://login.wordpress.org/">Log in</a></div>
+		<!-- /wp:button --></div>
+		<!-- /wp:buttons -->
+		<!-- /wp:query-no-results --></div>
+		<!-- /wp:query -->
+	</div>
+	<!-- /wp:group -->
+
+	<!-- wp:spacer {"height":"80px"} -->
+	<div style="height:80px" aria-hidden="true" class="wp-block-spacer"></div>
+	<!-- /wp:spacer -->
+</main>
+<!-- /wp:group -->
+
+<!-- wp:wporg/global-footer {"style":"white-on-blue"} /-->

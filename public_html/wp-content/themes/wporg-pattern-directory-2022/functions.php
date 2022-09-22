@@ -3,6 +3,7 @@
 namespace WordPressdotorg\Theme\Pattern_Directory_2022;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 use function WordPressdotorg\Theme\Pattern_Directory_2022\Order_Dropdown_Block\get_orderby_args;
+use function WordPressdotorg\Pattern_Directory\Favorite\{get_favorites};
 
 // Block files
 require_once( __DIR__ . '/src/blocks/categories-list/index.php' );
@@ -58,7 +59,7 @@ function update_query_loop_vars( $query, $block, $page ) {
 		}
 	}
 
-	if ( is_page( 'my-patterns' ) ) {
+	if ( is_page( [ 'my-patterns', 'favorites' ] ) ) {
 		if ( isset( $_GET['_orderby'] ) ) {
 			$args = get_orderby_args( $_GET['_orderby'] );
 			$query = array_merge( $query, $args );
@@ -69,7 +70,9 @@ function update_query_loop_vars( $query, $block, $page ) {
 		) {
 			$query['wporg-pattern-category'] = $_GET['wporg-pattern-category'];
 		}
+	}
 
+	if ( is_page( 'my-patterns' ) ) {
 		$user_id = get_current_user_id();
 		if ( $user_id ) {
 			$query['post_type'] = 'wporg-pattern';
@@ -78,6 +81,10 @@ function update_query_loop_vars( $query, $block, $page ) {
 		} else {
 			$query['post__in'] = [ -1 ];
 		}
+	}
+
+	if ( is_page( 'favorites' ) ) {
+		$query['post__in'] = get_favorites();
 	}
 
 	return $query;
