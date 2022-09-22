@@ -39,26 +39,7 @@ function enqueue_assets() {
  * @param int      $page  Current query's page.
  */
 function update_query_loop_vars( $query, $block, $page ) {
-	if ( isset( $query['post_type']  ) && 'wporg-pattern' === $query['post_type'] ) {
-		if ( ! isset( $query['posts_per_page'] ) ) {
-			$query['posts_per_page'] = 18;
-		}
-
-		if ( isset( $_GET['_orderby'] ) ) {
-			$args = get_orderby_args( $_GET['_orderby'] );
-			$query = array_merge( $query, $args );
-		}
-
-		// The `orderby_locale` meta_query will be transformed into a query orderby by Pattern_Post_Type\filter_orderby_locale().
-		$query['meta_query'] = array(
-			'orderby_locale' => array(
-				'key'     => 'wpop_locale',
-				'compare' => 'IN',
-				// Order in value determines result order
-				'value'   => array( get_locale(), 'en_US' ),
-			),
-		);
-
+	if ( isset( $query['post_type'] ) && 'wporg-pattern' === $query['post_type'] ) {
 		// This is used for the "more by this designer" section.
 		// The `[current]` author is a placeholder for the current post's author, and in this case
 		// we also want to exclude the current post from results.
@@ -70,6 +51,11 @@ function update_query_loop_vars( $query, $block, $page ) {
 	}
 
 	if ( is_page( 'my-patterns' ) ) {
+		if ( isset( $_GET['_orderby'] ) ) {
+			$args = get_orderby_args( $_GET['_orderby'] );
+			$query = array_merge( $query, $args );
+		}
+
 		$user_id = get_current_user_id();
 		if ( $user_id ) {
 			$query['post_type'] = 'wporg-pattern';
@@ -92,8 +78,9 @@ function pre_get_posts( $query ) {
 		return;
 	}
 
-	if ( $query->is_tax( 'wporg-pattern-category' ) || $query->is_search() ) {
+	if ( $query->is_home() || $query->is_tax( 'wporg-pattern-category' ) || $query->is_search() ) {
 		$query->set( 'posts_per_page', 18 );
+		$query->set( 'post_type', array( POST_TYPE ) );
 
 		if ( isset( $_GET['_orderby'] ) ) {
 			$args = get_orderby_args( $_GET['_orderby'] );

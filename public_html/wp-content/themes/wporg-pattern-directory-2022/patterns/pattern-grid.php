@@ -19,6 +19,14 @@
 <!-- /wp:group -->
 <!-- /wp:post-template -->
 
+<!-- wp:query-pagination -->
+<!-- wp:query-pagination-previous /-->
+
+<!-- wp:query-pagination-numbers /-->
+
+<!-- wp:query-pagination-next /-->
+<!-- /wp:query-pagination -->
+
 <!-- wp:query-no-results -->
 <!-- wp:paragraph -->
 <p>No patterns found</p>
