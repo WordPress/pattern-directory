@@ -17,6 +17,14 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
 add_filter( 'query_loop_block_query_vars', __NAMESPACE__ . '\update_query_loop_vars', 10, 3 );
 add_action( 'pre_get_posts', __NAMESPACE__ . '\pre_get_posts' );
 
+add_action(
+	'init',
+	function() {
+		// Don't swap author link with w.org profile link.
+		remove_all_filters( 'author_link' );
+	}
+);
+
 /**
  * Enqueue scripts and styles.
  */

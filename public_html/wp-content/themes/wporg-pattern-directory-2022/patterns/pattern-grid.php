@@ -13,7 +13,7 @@
 
 <!-- wp:post-title {"isLink":true,"fontSize":"small","fontFamily":"inter"} /-->
 
-<!-- wp:post-author {"avatarSize":24,"fontSize":"small"} /-->
+<!-- wp:post-author-name {"fontSize":"small","isLink":true} /-->
 
 <!-- wp:wporg/favorite-button {"variant":"small"} /--></div>
 <!-- /wp:group -->
