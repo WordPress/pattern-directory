@@ -19,8 +19,8 @@ namespace WordPressdotorg\Pattern_Directory;
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 
-<div class="wp-site-blocks">
-	<div class="entry-content">
+<div class="wp-site-blocks" style="display:flex;align-items:center;min-height:100vh;">
+	<div class="entry-content" style="width:100%">
 		<?php the_content(); ?>
 	</div>
 </div>
