@@ -734,3 +734,53 @@ function set_pattern_caps( $user_caps ) {
 
 	return $user_caps;
 }
+
+add_action(
+	'init',
+	function() {
+		add_rewrite_endpoint( 'view', EP_PERMALINK );
+	}
+);
+
+add_action(
+	'setup_theme',
+	function() {
+		// query_vars are not set yet, so just check the URL.
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
+
+		// Match pretty & non-pretty permalinks for unpublished patterns.
+		if ( preg_match( '#/view/$#', $request_uri ) || preg_match( '#[?&]view=[1|true]#', $request_uri ) ) {
+			add_filter( 'show_admin_bar', '__return_false' );
+
+			add_filter( 'template', function() {
+				return 'twentytwentyone';
+			} );
+
+			add_filter( 'stylesheet', function() {
+				return 'twentytwentyone';
+			} );
+
+			add_filter( 'theme_mod_background_color', function( $value ) {
+				return 'ffffff';
+			} );
+
+			add_filter( 'wp_enqueue_scripts', function() {
+				wp_deregister_style( 'wporg-global-header-footer' );
+			}, 201 );
+		}
+	}
+);
+
+add_action(
+	'template_redirect',
+	function() {
+		global $wp_query;
+
+		if ( ! isset( $wp_query->query_vars['view'] ) || ! is_singular() ) {
+			return;
+		}
+
+		include dirname( __DIR__ ) . '/views/view.php';
+		exit;
+	}
+);
