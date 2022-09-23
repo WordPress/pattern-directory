@@ -19,6 +19,7 @@ namespace WordPressdotorg\Pattern_Directory;
 		}
 		.entry-content {
 			width:100%;
+			pointer-events: none;
 		}
 	</style>
 </head>
