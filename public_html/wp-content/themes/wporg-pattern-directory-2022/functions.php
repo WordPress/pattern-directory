@@ -49,7 +49,9 @@ function enqueue_assets() {
  * @param int      $page  Current query's page.
  */
 function update_query_loop_vars( $query, $block, $page ) {
-	$query['posts_per_page'] = 18;
+	if ( ! isset( $query['posts_per_page'] ) ) {
+		$query['posts_per_page'] = 18;
+	}
 
 	if ( isset( $query['post_type'] ) && 'wporg-pattern' === $query['post_type'] ) {
 		// This is used for the "more by this designer" section.
