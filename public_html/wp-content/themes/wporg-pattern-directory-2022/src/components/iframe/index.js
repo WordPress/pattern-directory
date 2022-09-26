@@ -47,7 +47,7 @@ export default function ( { url } ) {
 		window.addEventListener( 'resize', handleOnResize );
 
 		return () => {
-			window.addEventListener( 'resize', handleOnResize );
+			window.removeEventListener( 'resize', handleOnResize );
 		};
 	}, [] );
 

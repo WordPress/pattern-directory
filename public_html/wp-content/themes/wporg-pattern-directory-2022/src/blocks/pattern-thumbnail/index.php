@@ -1,7 +1,7 @@
 <?php
 /**
  * Block Name: Pattern Thumbnail
- * Description: Display a random heading from a set.
+ * Description: Display a thumbnail for the current pattern.
  *
  * @package wporg
  */
