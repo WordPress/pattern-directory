@@ -7,6 +7,7 @@ use function WordPressdotorg\Pattern_Directory\Favorite\{get_favorites};
 
 // Block files
 require_once( __DIR__ . '/src/blocks/categories-list/index.php' );
+require_once( __DIR__ . '/src/blocks/copy-button/index.php' );
 require_once( __DIR__ . '/src/blocks/favorite-button/index.php' );
 require_once( __DIR__ . '/src/blocks/order-dropdown/index.php' );
 require_once( __DIR__ . '/src/blocks/pattern-thumbnail/index.php' );
