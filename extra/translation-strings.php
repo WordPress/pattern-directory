@@ -17,6 +17,7 @@ _x( 'Headers', 'Categories term name', 'wporg-patterns' );
 _x( 'Images', 'Categories term name', 'wporg-patterns' );
 _x( 'Query', 'Categories term name', 'wporg-patterns' );
 _x( 'Text', 'Categories term name', 'wporg-patterns' );
+_x( 'Wireframe', 'Categories term name', 'wporg-patterns' );
 _x( 'Broken or Unusable', 'Flag Reasons term name', 'wporg-patterns' );
 _x( 'This pattern is broken or does not display correctly.', 'Flag Reasons term description', 'wporg-patterns' );
 _x( 'Copyrighted or Trademark Issue', 'Flag Reasons term name', 'wporg-patterns' );
