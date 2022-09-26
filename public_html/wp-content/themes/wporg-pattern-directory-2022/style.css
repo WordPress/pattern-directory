@@ -27,3 +27,8 @@
 	background: var(--wp--preset--color--white);
 	color: var(--wp--preset--color--charcoal-1);
 }
+
+/* Fix image alignment */
+.wp-block-avatar__image {
+	vertical-align: middle;
+}
