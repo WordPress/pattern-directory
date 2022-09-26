@@ -108,7 +108,7 @@ function pre_get_posts( $query ) {
 		return;
 	}
 
-	if ( ! $query->is_page() ) {
+	if ( ! $query->is_singular() ) {
 		$query->set( 'posts_per_page', 18 );
 		$query->set( 'post_type', array( POST_TYPE ) );
 
