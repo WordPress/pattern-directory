@@ -61,9 +61,13 @@ function render( $attributes, $content, $block ) {
 	}
 
 	$is_favorite = is_favorite( $post_id, $user_id );
+	$classes = [ 'is-style-outline' ];
+	if ( $is_favorite ) {
+		$classes[] = 'is-favorite';
+	}
 	$wrapper_attributes = get_block_wrapper_attributes(
 		array(
-			'class' => 'is-style-outline',
+			'class' => implode( ' ', $classes ),
 		)
 	);
 	return sprintf(

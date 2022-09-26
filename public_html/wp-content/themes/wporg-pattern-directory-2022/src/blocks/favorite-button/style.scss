@@ -7,3 +7,7 @@
 	box-shadow: none;
 	font-size: 14px;
 }
+
+.wp-block-wporg-favorite-button:not(.is-favorite) .emoji {
+	filter: grayscale(1);
+}
