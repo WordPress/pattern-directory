@@ -750,14 +750,22 @@ add_action(
 
 		// Match pretty & non-pretty permalinks for unpublished patterns.
 		if ( preg_match( '#/view/$#', $request_uri ) || preg_match( '#[?&]view=[1|true]#', $request_uri ) ) {
-			add_filter( 'show_admin_bar', '__return_false' );
+			add_filter( 'show_admin_bar', '__return_false', 2000 );
 
 			add_filter( 'template', function() {
-				return 'twentytwentyone';
+				if ( 'local' === wp_get_environment_type() ) {
+					return 'twentytwentyone';
+				} else {
+					return 'core/twentytwentyone';
+				}
 			} );
 
 			add_filter( 'stylesheet', function() {
-				return 'twentytwentyone';
+				if ( 'local' === wp_get_environment_type() ) {
+					return 'twentytwentyone';
+				} else {
+					return 'core/twentytwentyone';
+				}
 			} );
 
 			add_filter( 'theme_mod_background_color', function( $value ) {
@@ -765,6 +773,7 @@ add_action(
 			} );
 
 			add_filter( 'wp_enqueue_scripts', function() {
+				wp_deregister_style( 'wp4-styles' );
 				wp_deregister_style( 'wporg-global-header-footer' );
 			}, 201 );
 		}
