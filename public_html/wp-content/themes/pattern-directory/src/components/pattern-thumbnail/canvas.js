@@ -39,7 +39,7 @@ function PatternThumbnail( { className, html } ) {
 		window.addEventListener( 'resize', handleOnResize );
 
 		return () => {
-			window.addEventListener( 'resize', handleOnResize );
+			window.removeEventListener( 'resize', handleOnResize );
 		};
 	}, [] );
 
