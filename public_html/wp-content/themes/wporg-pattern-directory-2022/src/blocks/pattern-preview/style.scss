@@ -1,7 +1,12 @@
 .wp-block-wporg-pattern-preview {
-	margin: 0;
 	position: relative;
 	width: 100%;
+}
+
+// Specificity hack to ensure the margin is not overridden by the responsive styles in `style.css`.
+// The specificity includes the ID in `:not`, which is higher than the nested `alignfull` classes.
+.wp-block-wporg-pattern-preview:not(#spec-hack) {
+	margin: 0 !important;
 }
 
 .wp-block-wporg-pattern-preview__controls {

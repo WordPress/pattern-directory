@@ -32,3 +32,19 @@
 .wp-block-avatar__image {
 	vertical-align: middle;
 }
+
+@media (max-width: 1199px) {
+
+	/* Once we start touching content, add in some side padding. */
+	.entry-content.entry-content > .alignwide,
+	.entry-content.entry-content > .alignfull {
+		padding-left: var(--wp--preset--spacing--60) !important;
+		padding-right: var(--wp--preset--spacing--60) !important;
+	}
+
+	/* Ensure nested full-alignment items are still full-width */
+	.entry-content.entry-content > .alignfull .alignfull {
+		margin-left: calc(var(--wp--preset--spacing--60) * -1) !important;
+		margin-right: calc(var(--wp--preset--spacing--60) * -1) !important;
+	}
+}

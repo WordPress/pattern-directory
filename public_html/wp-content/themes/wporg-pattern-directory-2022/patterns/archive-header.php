@@ -21,7 +21,7 @@
 
 <!-- wp:search {"label":"Search","showLabel":false,"placeholder":"Search patterns","buttonText":"Search","buttonPosition":"button-inside","buttonUseIcon":true} /-->
 
-<!-- wp:navigation {"ref":8884} /--></div>
+<!-- wp:navigation {"ref":8884,"overlayMenu":"never"} /--></div>
 <!-- /wp:group --></div>
 <!-- /wp:column -->
 
