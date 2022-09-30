@@ -9,8 +9,13 @@
 	"description": "Display a resizable preview for the current pattern.",
 	"textdomain": "wporg",
 	"supports": {
-		"align": ["wide", "full"],
-		"html": false
+		"align": [ "wide", "full" ],
+		"html": false,
+		"spacing": {
+			"margin": true,
+			"padding": false,
+			"blockGap": false
+		}
 	},
 	"usesContext": [ "postId", "postType" ],
 	"editorScript": "file:./index.js",
