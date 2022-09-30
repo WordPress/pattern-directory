@@ -72,10 +72,17 @@ add_filter(
 	'category_list_link_attributes',
 	function( $atts, $category ) {
 		global $wp;
-		if ( ! is_home() ) {
+		if ( is_search() ) {
 			$path = $wp->request ?? '/';
 			$path = trailingslashit( preg_replace( '/\/page\/[\d]+/', '', $path ) );
-			$atts['href'] = add_query_arg( 'wporg-pattern-category', $category->slug, home_url( $path ) );
+			$query_string = $wp->query_string ?? '';
+			$url = home_url( $path . '?' . $query_string );
+			$atts['href'] = add_query_arg( 'wporg-pattern-category', $category->slug, $url );
+		} else if ( ! is_home() ) {
+			$path = $wp->request ?? '/';
+			$path = trailingslashit( preg_replace( '/\/page\/[\d]+/', '', $path ) );
+			$url = home_url( $path );
+			$atts['href'] = add_query_arg( 'wporg-pattern-category', $category->slug, $url );
 		}
 		return $atts;
 	},
