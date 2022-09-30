@@ -52,11 +52,20 @@ function render( $attributes, $content, $block ) {
 
 	// Render a disabled button until the JS kicks in.
 	$button = '<button class="wp-block-button__link wp-element-button" disabled="disabled">';
-	$button .= __( 'Copy pattern', 'wporg-patterns' );
+	$button .= 'small' === $variant ? __( 'Copy', 'wporg-patterns' ) : __( 'Copy pattern', 'wporg-patterns' );
 	$button .= '</button>';
 	$button .= '<input class="wp-block-wporg-copy-button__content" type="hidden" value="' . rawurlencode( wp_json_encode( $post->post_content ) ) . '" />';
 
-	$wrapper_attributes = get_block_wrapper_attributes();
+	$classes = [];
+	if ( 'small' === $variant ) {
+		$classes[] = 'is-variant-small';
+		$classes[] = 'is-style-outline';
+	}
+	$wrapper_attributes = get_block_wrapper_attributes(
+		array(
+			'class' => implode( ' ', $classes ),
+		)
+	);
 
 	return sprintf(
 		'<div %1$s>%2$s</div>',
