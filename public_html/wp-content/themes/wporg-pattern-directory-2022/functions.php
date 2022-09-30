@@ -44,6 +44,9 @@ function enqueue_assets() {
 }
 
 /**
+ * Filter the query loop arguments.
+ *
+ * Used when listing patterns on pages, ex Favorites (query.inherit = false).
  *
  * @param array    $query Array containing parameters for `WP_Query` as parsed by the block context.
  * @param WP_Block $block Block instance.
@@ -101,6 +104,9 @@ function update_query_loop_vars( $query, $block, $page ) {
 }
 
 /**
+ * Filter the default query.
+ *
+ * Used to render Patterns on archive pages (query.inherit = true).
  *
  * @param \WP_Query $query The WordPress Query object.
  */
