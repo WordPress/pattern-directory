@@ -20,6 +20,8 @@ namespace WordPressdotorg\Pattern_Directory;
 		.entry-content {
 			width:100%;
 			pointer-events: none;
+			margin-top: 0;
+			margin-bottom: 0;
 		}
 	</style>
 </head>
