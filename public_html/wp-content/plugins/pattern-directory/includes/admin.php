@@ -14,7 +14,8 @@ require_once __DIR__ . '/admin-stats.php';
 /**
  * Actions and filters.
  */
-add_action( 'admin_bar_menu', __NAMESPACE__ . '\filter_admin_bar_links', 500 ); // 500 to run after all items are added to the menu.
+// 200 is last core-added item. Keep this lower than 500 to run before the `wporg-mu-plugin`'s alterations.
+add_action( 'admin_bar_menu', __NAMESPACE__ . '\filter_admin_bar_links', 250 );
 
 /**
  * Filter the admin bar links to direct to the Pattern Creator.
@@ -26,7 +27,6 @@ function filter_admin_bar_links( $wp_admin_bar ) {
 	$new_pattern = $wp_admin_bar->get_node( 'new-wporg-pattern' );
 	if ( $new_pattern ) {
 		$new_pattern->href = site_url( 'new-pattern/' );
-		$wp_admin_bar->remove_node( $new_pattern->id );
 		$wp_admin_bar->add_node( $new_pattern );
 	}
 
@@ -34,7 +34,6 @@ function filter_admin_bar_links( $wp_admin_bar ) {
 	$new_content = $wp_admin_bar->get_node( 'new-content' );
 	if ( $new_content && str_contains( $new_content->href, POST_TYPE ) ) {
 		$new_content->href = site_url( 'new-pattern/' );
-		$wp_admin_bar->remove_node( $new_content->id );
 		$wp_admin_bar->add_node( $new_content );
 	}
 
@@ -47,7 +46,6 @@ function filter_admin_bar_links( $wp_admin_bar ) {
 			if ( wp_get_post_parent_id() !== 0 ) {
 				$edit_pattern->title = __( 'Edit Original Pattern', 'wporg-patterns' );
 			}
-			$wp_admin_bar->remove_node( $edit_pattern->id );
 			$wp_admin_bar->add_node( $edit_pattern );
 		}
 	}
