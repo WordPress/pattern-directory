@@ -11,8 +11,6 @@ defined( 'WPINC' ) || die();
 
 add_action( 'render_block_core/archives', __NAMESPACE__ . '\render_archives', 10, 3 );
 add_action( 'render_block_core/latest-comments', __NAMESPACE__ . '\render_latest_comments', 10, 3 );
-add_filter( 'render_block_data', __NAMESPACE__ . '\attach_site_data_filters' );
-add_filter( 'render_block', __NAMESPACE__ . '\remove_site_data_filters' );
 add_filter( 'block_core_navigation_render_fallback', __NAMESPACE__ . '\provide_fallback_nav_items' );
 add_filter( 'get_custom_logo', __NAMESPACE__ . '\provide_mock_logo' );
 
@@ -183,25 +181,21 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
 }
 
 /**
- * Helper function to attach some filters only during the render_callback calls.
+ * Helper function to attach some filters only when necessary.
  */
-function attach_site_data_filters( $value ) {
+function attach_site_data_filters() {
 	add_filter( 'pre_option_blogdescription', __NAMESPACE__ . '\replace_site_info', 10, 3 );
 	add_filter( 'pre_option_blogname', __NAMESPACE__ . '\replace_site_info', 10, 3 );
-
-	return $value;
 }
 
 /**
- * Helper function to remove filters after the render function runs.
+ * Helper function to remove filters so they don't affect aything else.
  *
  * @see attach_site_data_filters.
  */
-function remove_site_data_filters( $value ) {
+function remove_site_data_filters() {
 	remove_filter( 'pre_option_blogdescription', __NAMESPACE__ . '\replace_site_info', 10, 3 );
 	remove_filter( 'pre_option_blogname', __NAMESPACE__ . '\replace_site_info', 10, 3 );
-
-	return $value;
 }
 
 /**

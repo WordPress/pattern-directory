@@ -4,6 +4,7 @@
  */
 
 namespace WordPressdotorg\Pattern_Directory;
+use function WordPressdotorg\Pattern_Creator\MockBlocks\{attach_site_data_filters, remove_site_data_filters};
 
 ?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -31,7 +32,12 @@ namespace WordPressdotorg\Pattern_Directory;
 
 <div class="wp-site-blocks">
 	<div class="entry-content">
-		<?php the_content(); ?>
+	<?php
+		// Attach the filters to override real site data with placeholder content.
+		attach_site_data_filters();
+		the_content();
+		remove_site_data_filters();
+	?>
 	</div>
 </div>
 
