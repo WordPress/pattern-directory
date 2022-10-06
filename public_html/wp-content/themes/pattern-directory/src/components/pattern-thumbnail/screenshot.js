@@ -95,7 +95,7 @@ export default function ( { alt, className, isReady = false, size, src, style } 
 	if ( isLoading ) {
 		return (
 			<div className={ `${ className } is-loading` } style={ style }>
-				<Spinner style={ { width: '33%', height: '33%' } } />
+				<Spinner style={ { width: '32px', height: '32px' } } />
 				<span className="screen-reader-text">{ __( 'Loading', 'wporg-patterns' ) }</span>
 			</div>
 		);
