@@ -34,7 +34,7 @@ function PatternThumbnail( { pattern, showAvatar, showOptions } ) {
 			<div className="pattern-grid__pattern-frame">
 				<a href={ pattern.link } rel="bookmark">
 					<span className="screen-reader-text">{ decodeEntities( pattern.title.rendered ) }</span>
-					<Canvas url={ addQueryArgs( pattern.link, { view: true } ) } />
+					<Canvas url={ addQueryArgs( pattern.link, { view: true, modified: pattern.modified_gmt } ) } />
 				</a>
 				{ statusLabel ? (
 					<div className={ `pattern-grid__status is-${ pattern.status }` }>
