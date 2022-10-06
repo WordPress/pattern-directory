@@ -10,6 +10,7 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import getCardFrameHeight from '../../utils/get-card-frame-height';
 import useInterval from '../../hooks/use-interval';
 
 /**
@@ -17,6 +18,8 @@ import useInterval from '../../hooks/use-interval';
  */
 const MAX_ATTEMPTS = 10;
 const RETRY_DELAY = 1000;
+const VIEWPORT_WIDTH = 1200;
+const IMAGE_WIDTH = 600;
 
 /**
  *
@@ -28,15 +31,15 @@ const RETRY_DELAY = 1000;
  * @param {string}  props.alt       The alt text for the screenshot image.
  * @param {string}  props.className Any extra class names for the wrapper div.
  * @param {boolean} props.isReady   Whether we should start try to show the image.
- * @param {Object}  props.size      The viewport size to take the screenshot at.
  * @param {Object}  props.style     Styles for the wrapper div.
  * @param {string}  props.src       The url of the page to screenshot.
  * @return {Object} React component
  */
-export default function ( { alt, className, isReady = false, size, src, style } ) {
+export default function ( { alt, className, isReady = false, src, style } ) {
 	const fullUrl = addQueryArgs( `https://s0.wp.com/mshots/v1/${ encodeURIComponent( src ) }`, {
-		vpw: size.width,
-		vph: size.height,
+		w: IMAGE_WIDTH, // eslint-disable-line id-length
+		vpw: VIEWPORT_WIDTH,
+		vph: getCardFrameHeight( VIEWPORT_WIDTH ),
 	} );
 
 	const [ attempts, setAttempts ] = useState( 0 );

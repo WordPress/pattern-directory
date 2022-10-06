@@ -11,8 +11,6 @@ import getCardFrameHeight from '../../utils/get-card-frame-height';
 import useInView from '../../hooks/in-view';
 import Screenshot from './screenshot';
 
-const VIEWPORT_WIDTH = 1200;
-
 export default function ( { alt, url } ) {
 	const wrapperRef = useRef();
 	const isVisible = useInView( { element: wrapperRef } );
@@ -57,7 +55,6 @@ export default function ( { alt, url } ) {
 				className="pattern-grid__preview"
 				alt={ alt || __( 'Pattern Preview', 'wporg-patterns' ) }
 				style={ style }
-				size={ { width: VIEWPORT_WIDTH, height: getCardFrameHeight( VIEWPORT_WIDTH ) } }
 				isReady={ shouldLoad }
 				src={ url }
 			/>
