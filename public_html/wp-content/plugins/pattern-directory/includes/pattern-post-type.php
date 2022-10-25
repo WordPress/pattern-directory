@@ -334,8 +334,8 @@ function register_rest_fields() {
 		array(
 			'get_callback' => function( $post ) {
 				return array(
-					'name'   => esc_html( get_the_author_meta( 'display_name' ) ),
-					'url'    => esc_url( home_url( '/author/' . get_the_author_meta( 'user_nicename' ) ) ),
+					'name'   => esc_html( get_the_author_meta( 'display_name', $post['author'] ) ),
+					'url'    => esc_url( home_url( '/author/' . get_the_author_meta( 'user_nicename', $post['author'] ) ) ),
 					'avatar' => get_avatar_url( $post['author'], array( 'size' => 64 ) ),
 				);
 			},
