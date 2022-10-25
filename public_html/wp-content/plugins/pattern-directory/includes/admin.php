@@ -48,5 +48,16 @@ function filter_admin_bar_links( $wp_admin_bar ) {
 			}
 			$wp_admin_bar->add_node( $edit_pattern );
 		}
+
+		// Add a link to the post in wp-admin if the user is a moderator.
+		$post_type = get_post_type_object( POST_TYPE );
+		if ( current_user_can( $post_type->cap->edit_others_posts ) ) {
+			$wp_admin_bar->add_node( array(
+				'id' => 'edit-admin',
+				'title' => 'Moderate Pattern',
+				'parent' => 'edit-actions', // this node is added by wporg-mu-plugins.
+				'href' => get_edit_post_link(),
+			) );
+		}
 	}
 }
