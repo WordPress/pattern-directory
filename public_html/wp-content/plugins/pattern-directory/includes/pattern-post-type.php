@@ -298,7 +298,7 @@ function register_rest_fields() {
 		'pattern_content',
 		array(
 			'get_callback' => function() {
-				return wp_kses_post( get_the_content() );
+				return decode_pattern_content( get_the_content() );
 			},
 
 			'schema' => array(
@@ -793,3 +793,28 @@ add_action(
 		exit;
 	}
 );
+
+/**
+ * Intercept the post object and decode the content.
+ */
+add_action(
+	'the_post',
+	function( $post ) {
+		$post->post_content = decode_pattern_content( $post->post_content );
+	}
+);
+
+/**
+ * Process post content, replacing broken encoding.
+ *
+ * Some image URLs have &s, which are double-encoded and sanitized to become malformed,
+ * for example, `https://img.rawpixel.com/s3fs-private/rawpixel_images/website_content/a010-markuss-0964.jpg?w=1200\u0026amp;h=1200\u0026amp;fit=clip\u0026amp;crop=default\u0026amp;dpr=1\u0026amp;q=75\u0026amp;vib=3\u0026amp;con=3\u0026amp;usm=15\u0026amp;cs=srgb\u0026amp;bg=F4F4F3\u0026amp;ixlib=js-2.2.1\u0026amp;s=7d494bd5db8acc2a34321c15ed18ace5`.
+ *
+ * @param string $content The raw post content.
+ *
+ * @return string
+ */
+function decode_pattern_content( $content ) {
+	// Sometimes the initial `\` is missing, so look for both versions.
+	return str_replace( [ '\u0026amp;', 'u0026amp;' ], '&', $content );
+}
