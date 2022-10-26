@@ -6,6 +6,8 @@
 namespace WordPressdotorg\Pattern_Directory;
 use function WordPressdotorg\Pattern_Creator\MockBlocks\{attach_site_data_filters, remove_site_data_filters};
 
+remove_action( 'wp_footer', 'stats_footer', 101 );
+
 ?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
