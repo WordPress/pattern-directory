@@ -24,7 +24,6 @@ add_filter( 'handle_bulk_actions-edit-wporg-pattern-flag', __NAMESPACE__ . '\fla
 add_filter( 'views_edit-wporg-pattern-flag', __NAMESPACE__ . '\flag_list_table_views' );
 add_filter( 'wp_count_posts', __NAMESPACE__ . '\flag_list_table_count_flags_for_pattern', 10, 2 );
 add_filter( 'wp_untrash_post_status', __NAMESPACE__ . '\flag_untrash_status', 5, 2 ); // Low priority so it won't override "Undo".
-add_action( 'admin_menu', __NAMESPACE__ . '\flag_reason_submenu_page' );
 add_filter( 'submenu_file', __NAMESPACE__ . '\flag_reason_submenu_highlight', 10, 2 );
 
 /**
@@ -411,27 +410,6 @@ function flag_untrash_status( $new_status, $post_id ) {
 	}
 
 	return $new_status;
-}
-
-/**
- * Add the Flag Reason taxonomy page as a subpage of Block Pattern.
- *
- * WP won't do this on its own because Flag Reason is associated with the Pattern Flag post type rather than
- * the post type that we want to put it under.
- *
- * @return void
- */
-function flag_reason_submenu_page() {
-	$taxonomy = get_taxonomy( FLAG_REASON );
-
-	add_submenu_page(
-		'edit.php?post_type=wporg-pattern',
-		__( 'Flag Reasons', 'wporg-patterns' ),
-		__( 'Reasons', 'wporg-patterns' ),
-		$taxonomy->cap->manage_terms,
-		'edit-tags.php?taxonomy=' . FLAG_REASON . '&post_type=' . PATTERN,
-		null
-	);
 }
 
 /**
