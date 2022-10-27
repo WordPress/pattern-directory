@@ -2,97 +2,92 @@ name: Unit Tests
 
 # Run on any changes in public_html
 on:
-  pull_request:
-    paths:
-    - public_html/**
-  push:
-    branches: [trunk]
-    paths:
-    - public_html/**
-
+    pull_request:
+        paths:
+            - public_html/**
+    push:
+        branches: [trunk]
+        paths:
+            - public_html/**
 
 jobs:
-  unit-php:
-    name: PHP
+    unit-php:
+        name: PHP
 
-    runs-on: ubuntu-latest
+        runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v2
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
 
-    - name: Get yarn cache directory path
-      id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+            - name: Set PHP version
+              uses: shivammathur/setup-php@e04e1d97f0c0481c6e1ba40f8a538454fe5d7709 # v2.21.2
+              with:
+                  php-version: 7.4
+                  coverage: none
+                  tools: composer:v2
 
-    - name: Cache node modules
-      uses: actions/cache@v2
-      id: yarn-cache
-      with:
-        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-yarn-
+            - name: Install PHP dependencies
+              run: |
+                  composer install
 
-    - name: Use Node.js 14.x
-      uses: actions/setup-node@v1
-      with:
-        node-version: 14.x
+            - name: Install NodeJS
+              uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # v3.5.1
+              with:
+                  node-version-file: '.nvmrc'
+                  cache: yarn
 
-    - name: composer install
-      run: |
-        composer install
+            - name: Install JS dependencies
+              run: |
+                  yarn
 
-    - name: yarn install and build
-      run: |
-        yarn
-        yarn workspaces run build
+            - name: Build
+              run: yarn workspaces run build
 
-    - name: Install WordPress
-      run: |
-        chmod -R 767 ./ # TODO: Possibly integrate in wp-env
-        yarn wp-env start
+            - name: Install WordPress
+              run: |
+                  chmod -R 767 ./ # TODO: Possibly integrate in wp-env
+                  yarn wp-env start
 
-    - name: Running multisite unit tests
-      run: yarn test:php
-      if: ${{ success() || failure() }}
+            - name: Running multisite unit tests
+              run: yarn test:php
+              if: ${{ success() || failure() }}
 
-  unit-js:
-    name: JS
+    unit-js:
+        name: JS
 
-    runs-on: ubuntu-latest
+        runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v2
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
 
-    - name: Get yarn cache directory path
-      id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+            - name: Install NodeJS
+              uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # v3.5.1
+              with:
+                  node-version-file: '.nvmrc'
+                  cache: yarn
 
-    - name: Cache node modules
-      uses: actions/cache@v2
-      id: yarn-cache
-      with:
-        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-yarn-
+            - name: Set PHP version
+              uses: shivammathur/setup-php@e04e1d97f0c0481c6e1ba40f8a538454fe5d7709 # v2.21.2
+              with:
+                  php-version: 7.4
+                  coverage: none
+                  tools: composer:v2
 
-    - name: Use Node.js 14.x
-      uses: actions/setup-node@v1
-      with:
-        node-version: 14.x
+            - name: Install PHP dependencies
+              run: |
+                  composer install
 
-    - name: composer install
-      run: |
-        composer install
+            - name: Install JS dependencies
+              run: |
+                  yarn
 
-    - name: yarn install and build
-      run: |
-        yarn
-        yarn workspaces run build
+            - name: Build
+              run: yarn workspaces run build
 
-    - name: Run unit tests on theme data store
-      run:  yarn workspace wporg-pattern-directory-theme test:unit
+            - name: Run unit tests on theme data store
+              run: yarn workspace wporg-pattern-directory-theme test:unit
 
-    - name: Run unit tests on the pattern creator
-      run:  yarn workspace wporg-pattern-creator test:unit
+            - name: Run unit tests on the pattern creator
+              run: yarn workspace wporg-pattern-creator test:unit

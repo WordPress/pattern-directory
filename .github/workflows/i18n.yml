@@ -1,34 +1,35 @@
 name: I18n
 
 on:
-  schedule:
-    - cron: '0 6,18 * * *'
+    schedule:
+        - cron: '0 6,18 * * *'
 
 jobs:
-  translation-strings:
-    name: Translation strings
+    translation-strings:
+        name: Translation strings
 
-    runs-on: ubuntu-latest
+        runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v2
+        steps:
+            - uses: actions/checkout@v2
 
-      - name: Set PHP version
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 7.4
-          tools: composer:v2
+            - name: Set PHP version
+              uses: shivammathur/setup-php@e04e1d97f0c0481c6e1ba40f8a538454fe5d7709 # v2.21.2
+              with:
+                  php-version: 7.4
+                  coverage: none
+                  tools: composer:v2
 
-      - name: Install dependencies
-        run: composer install
+            - name: Install dependencies
+              run: composer install
 
-      - name: Run translation script
-        run: php ./bin/i18n.php
+            - name: Run translation script
+              run: php ./bin/i18n.php
 
-      - name: Commit and push
-        # Using a specific hash here instead of a tagged version, for risk mitigation, since this action modifies our repo.
-        uses: actions-js/push@a52398fac807b0c1e5f1492c969b477c8560a0ba
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: trunk
-          message: Update translation strings
+            - name: Commit and push
+              # Using a specific hash here instead of a tagged version, for risk mitigation, since this action modifies our repo.
+              uses: actions-js/push@a52398fac807b0c1e5f1492c969b477c8560a0ba
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  branch: trunk
+                  message: Update translation strings
