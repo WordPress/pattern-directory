@@ -229,6 +229,23 @@ function register_post_type_data() {
 			),
 		)
 	);
+
+	register_post_meta(
+		POST_TYPE,
+		'wpop_wp_version',
+		array(
+			'type'              => 'string',
+			'description'       => 'The earliest WordPress version compatible with this pattern.',
+			'single'            => true,
+			'sanitize_callback' => 'sanitize_text_field',
+			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type'     => 'string',
+				),
+			),
+		)
+	);
 }
 
 /**
@@ -610,6 +627,11 @@ function filter_patterns_collection_params( $query_params ) {
 		$query_params['orderby']['enum'][] = 'favorite_count';
 	}
 
+	$query_params['wp-version'] = array(
+		'description' => __( 'The version of the requesting site, used to filter out newer patterns.', 'wporg-patterns' ),
+		'type'        => 'string',
+	);
+
 	return $query_params;
 }
 
@@ -648,6 +670,31 @@ function filter_patterns_rest_query( $args, $request ) {
 	if ( 'favorite_count' === $orderby ) {
 		$args['orderby'] = 'meta_value_num';
 		$args['meta_key'] = 'wporg-pattern-favorites';
+	}
+
+	// Use the passed-in version information to skip over any patterns that
+	// require newer block features.
+	// See https://github.com/WordPress/gutenberg/issues/45179.
+	$version = $request->get_param( 'wp-version' );
+	if ( $version && preg_match( '/^\d+\.\d+/', $version, $matches ) ) {
+		// $version is the full WP version, for example `6.0.2` or `6.2-alpha-54642-src`.
+		// Parse out just the major version section, `6.0` or `6.2`, respectively,
+		// so that the math comparison works.
+		$major_version = $matches[0];
+		$args['meta_query']['version'] = array(
+			// Fetch patterns with no version info, or only those with a lower
+			// or equal version.
+			'relation' => 'OR',
+			array(
+				'key'     => 'wpop_wp_version',
+				'compare' => '<=',
+				'value'   => $major_version,
+			),
+			array(
+				'key'     => 'wpop_wp_version',
+				'compare' => 'NOT EXISTS',
+			),
+		);
 	}
 
 	return $args;
