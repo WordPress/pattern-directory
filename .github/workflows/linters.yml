@@ -2,51 +2,46 @@ name: Static Analysis (Linting)
 
 # This workflow is triggered on pushes to trunk, and any PRs.
 on:
-  push:
-    branches: [trunk]
-  pull_request:
+    push:
+        branches: [trunk]
+    pull_request:
 
 jobs:
-  check:
-    name: All
+    check:
+        name: All
 
-    runs-on: ubuntu-latest
+        runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v2
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
 
-    - name: Get yarn cache directory path
-      id: yarn-cache-dir-path
-      run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+            - name: Install NodeJS
+              uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # v3.5.1
+              with:
+                  node-version-file: '.nvmrc'
+                  cache: yarn
 
-    - name: Cache node modules
-      uses: actions/cache@v2
-      id: yarn-cache
-      with:
-        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-yarn-
+            - name: Install JS dependencies
+              run: |
+                  yarn
 
-    - name: Use Node.js 14.x
-      uses: actions/setup-node@v1
-      with:
-        node-version: 14.x
+            - name: Set PHP version
+              uses: shivammathur/setup-php@e04e1d97f0c0481c6e1ba40f8a538454fe5d7709 # v2.21.2
+              with:
+                  php-version: 7.4
+                  coverage: none
+                  tools: composer:v2
 
-    - name: composer install
-      run: |
-        composer install
+            - name: Install PHP dependencies
+              run: |
+                  composer install
 
-    - name: yarn install
-      run: |
-        yarn
+            - name: Lint JavaScript and Styles
+              run: |
+                  yarn workspaces run lint:js
+                  yarn workspaces run lint:css
 
-    - name: Lint JavaScript and Styles
-      run: |
-        yarn workspaces run lint:js
-        yarn workspaces run lint:css
-
-    - name: Lint PHP
-      run: |
-        composer run lint
-
+            - name: Lint PHP
+              run: |
+                  composer run lint
