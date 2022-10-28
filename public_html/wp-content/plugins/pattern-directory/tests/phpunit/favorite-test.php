@@ -53,7 +53,6 @@ class Pattern_Favorite_Test extends WP_UnitTestCase {
 
 		$favorites = get_favorites( self::$user_admin );
 		$this->assertSame( $favorites, array( self::$faved_pattern_id, self::$pattern_id ) );
-		$this->assertTrue( true );
 	}
 
 	/**
