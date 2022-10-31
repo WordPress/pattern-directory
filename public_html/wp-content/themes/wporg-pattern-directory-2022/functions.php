@@ -6,7 +6,6 @@ use function WordPressdotorg\Theme\Pattern_Directory_2022\Order_Dropdown_Block\g
 use function WordPressdotorg\Pattern_Directory\Favorite\{get_favorites};
 
 // Block files
-require_once( __DIR__ . '/src/blocks/categories-list/index.php' );
 require_once( __DIR__ . '/src/blocks/copy-button/index.php' );
 require_once( __DIR__ . '/src/blocks/favorite-button/index.php' );
 require_once( __DIR__ . '/src/blocks/order-dropdown/index.php' );
@@ -16,9 +15,11 @@ require_once( __DIR__ . '/src/blocks/pattern-thumbnail/index.php' );
 /**
  * Actions and filters.
  */
+add_action( 'after_setup_theme', __NAMESPACE__ . '\theme_support', 9 );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
 add_filter( 'query_loop_block_query_vars', __NAMESPACE__ . '\update_query_loop_vars', 10, 3 );
 add_action( 'pre_get_posts', __NAMESPACE__ . '\pre_get_posts' );
+add_filter( 'wp_get_nav_menu_items', __NAMESPACE__ . '\contextualize_category_menu_links', 10, 3 );
 
 add_action(
 	'init',
@@ -27,6 +28,19 @@ add_action(
 		remove_all_filters( 'author_link' );
 	}
 );
+
+/**
+ * Register theme support.
+ */
+function theme_support() {
+	// Add the category menu.
+	register_nav_menus(
+		array(
+			'category-filters' => __( 'Category Filters', 'wporg' ),
+			'status-filters' => __( 'Status Filters', 'wporg' ),
+		)
+	);
+}
 
 /**
  * Enqueue scripts and styles.
@@ -136,4 +150,49 @@ function pre_get_posts( $query ) {
 			),
 		) );
 	}
+}
+
+/**
+ * Adjust the URLs for category filtering on other pages, ex author archives, favorites.
+ *
+ * @param array  $items An array of menu item post objects.
+ * @param object $menu  The menu object.
+ * @param array  $args  An array of arguments used to retrieve menu item objects.
+ *
+ * @return array Updated menu items.
+ */
+function contextualize_category_menu_links( $items, $menu, $args ) {
+	global $wp;
+	$locations = get_nav_menu_locations();
+	$category_menu_id = $locations['category-filters'];
+	if ( $menu->term_id === $category_menu_id ) {
+		foreach ( $items as $item ) {
+			$path = $wp->request ?? '/';
+			$path = trailingslashit( preg_replace( '/\/page\/[\d]+/', '', $path ) );
+			$url = home_url( $path );
+			$term = get_term( $item->object_id, $item->object );
+			if ( ! is_wp_error( $term ) ) {
+				if ( is_search() ) {
+					$search_term = get_search_query();
+					$item->url = add_query_arg(
+						array(
+							'wporg-pattern-category' => $term->slug,
+							's' => $search_term,
+						),
+						$url
+					);
+				} else if ( ! is_home() && ! is_tax( 'wporg-pattern-category' ) ) {
+					$item->url = add_query_arg( 'wporg-pattern-category', $term->slug, $url );
+				}
+			} else {
+				if ( is_search() ) {
+					$search_term = get_search_query();
+					$item->url = add_query_arg( 's', $search_term, $url );
+				} else if ( ! is_home() && ! is_tax( 'wporg-pattern-category' ) ) {
+					$item->url = $url;
+				}
+			}
+		}
+	}
+	return $items;
 }

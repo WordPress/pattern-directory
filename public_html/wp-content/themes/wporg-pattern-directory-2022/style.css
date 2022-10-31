@@ -33,6 +33,29 @@
 	vertical-align: middle;
 }
 
+.wp-block-navigation.is-style-filter-bar {
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.wp-block-navigation.is-style-filter-bar .wp-block-navigation__container {
+	gap: 0;
+}
+
+.wp-block-navigation.is-style-filter-bar a {
+	display: inline-block;
+	padding: var(--wp--preset--spacing--10) var(--wp--preset--spacing--20);
+	border-radius: 3px;
+}
+
+.wp-block-navigation.is-style-filter-bar .current-menu-item a {
+	background: var(--wp--preset--color--blueberry-1);
+	color: var(--wp--preset--color--white);
+}
+
+
 @media (max-width: 1199px) {
 
 	/* Once we start touching content, add in some side padding. */
