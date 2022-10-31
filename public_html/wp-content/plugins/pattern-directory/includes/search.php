@@ -2,7 +2,8 @@
 
 namespace WordPressdotorg\Pattern_Directory\Search;
 
-use WP_Query, Jetpack_WPES_Search_Query_Parser;
+use WP_Query;
+use Automattic\Jetpack\Search\WPES\Query_Parser as Jetpack_WPES_Search_Query_Parser;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 // Note: This depends on the Search module and custom index being enabled in `mu-plugins/main-network/site-patterns.php`.
@@ -71,8 +72,6 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 	if ( ! empty( $meta_query['orderby_locale']['value'] ) ) {
 		$locales = array_unique( $meta_query['orderby_locale']['value'] );
 	}
-
-	jetpack_require_lib( 'jetpack-wpes-query-builder/jetpack-wpes-query-parser' );
 
 	$parser = new Jetpack_WPES_Search_Query_Parser( $wp_query, array() );
 
