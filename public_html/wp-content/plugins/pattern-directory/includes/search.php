@@ -45,13 +45,7 @@ function sync_pattern_meta( $post_meta_safelist ) {
  * @return bool
  */
 function should_handle_query( $handle_query, $query ) {
-	/*
-	 * This isn't really what `wp_is_json_request()` is meant for, but it's the best option until something like
-	 * `wp_doing_rest()` is available.
-	 *
-	 * @link https://core.trac.wordpress.org/ticket/42061
-	 */
-	return wp_is_json_request() && $query->is_search() && POST_TYPE === $query->get( 'post_type' );
+	return defined( 'REST_REQUEST' ) && REST_REQUEST && $query->is_search() && POST_TYPE === $query->get( 'post_type' );
 }
 
 /**
