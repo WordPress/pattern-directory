@@ -94,6 +94,7 @@ function enqueue_assets() {
 				"var wporgPatternsData = JSON.parse( decodeURIComponent( '%s' ) );",
 				rawurlencode( wp_json_encode( array(
 					'currentAuthorName' => esc_html( get_the_author_meta( 'display_name' ) ),
+					'env' => esc_js( wp_get_environment_type() ),
 					'thumbnailVersion' => 1, // cachebuster for the generated thumbnail image.
 					'userId' => get_current_user_id(),
 				) ) ),

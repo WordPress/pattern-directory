@@ -56,7 +56,11 @@ export default function ( { alt, url } ) {
 				alt={ alt || __( 'Pattern Preview', 'wporg-patterns' ) }
 				style={ style }
 				isReady={ shouldLoad }
-				src={ url }
+				src={
+					wporgPatternsData.env === 'local'
+						? url.replace( wporgPatternsUrl.site, 'https://wordpress.org/patterns' )
+						: url
+				}
 			/>
 		</div>
 	);
