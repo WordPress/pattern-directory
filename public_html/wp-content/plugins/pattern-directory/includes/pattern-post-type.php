@@ -832,7 +832,53 @@ function setup_preview_theme() {
 			wp_deregister_style( 'wp4-styles' );
 			wp_deregister_style( 'wporg-global-header-footer' );
 		}, 201 );
+
+		add_filter( 'render_block_core/gallery', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
+		add_filter( 'render_block_core/image', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
+		add_filter( 'render_block_core/media-text', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
+		add_filter( 'render_block_core/video', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
 	}
+}
+
+/**
+ * Inject the placehodler SVG if we find an empty media block.
+ *
+ * @param string $block_content The block content.
+ * @param array  $block         The full block, including name and attributes.
+ * @return string The updated block content.
+ */
+function inject_placeholder_svg( $block_content, $block ) {
+	$svg = '<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" preserveAspectRatio="none">';
+	$svg .= '<rect width="60" height="60" fill="currentColor" fill-opacity="0.1" />';
+	$svg .= '<path vector-effect="non-scaling-stroke" d="M60 60 0 0" stroke="currentColor" stroke-width="1" stroke-opacity="0.25" />';
+	$svg .= '</svg>';
+
+	// Image block, find img without `src`, replace with svg.
+	if ( preg_match( '/<img([^>]*)\/?>/', $block_content, $match ) ) {
+		if ( false === strpos( $match[1], 'src=' ) ) {
+			$new_content = str_replace( '<svg ', '<svg ' . $match[1], $svg );
+			$block_content = str_replace( $match[0], $new_content, $block_content );
+			return $block_content;
+		}
+	}
+
+	// Media & Text block, video block.
+	if ( 'core/media-text' === $block['blockName'] || 'core/video' === $block['blockName'] ) {
+		// Find empty `<figure …></figure>`, inject svg into figure.
+		if ( preg_match( '/(<figure[^>]*>)(<\/figure>)/', $block_content, $match ) ) {
+			$new_content = $match[1] . $svg . $match[2];
+			$block_content = str_replace( $match[0], $new_content, $block_content );
+		}
+	}
+
+	// Gallery, find empty `<figure …></figure>`, inject 3 fake image blocks into figure.
+	if ( 'core/gallery' === $block['blockName'] && preg_match( '/(<figure[^>]*>)(<\/figure>)/', $block_content, $match ) ) {
+		$image = '<figure class="wp-block-image">' . $svg . '</figure>';
+		$new_content = $match[1] . str_repeat( $image, 3 ) . $match[2];
+		$block_content = str_replace( $match[0], $new_content, $block_content );
+	}
+
+	return $block_content;
 }
 
 /**

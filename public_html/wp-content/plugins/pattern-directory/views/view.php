@@ -26,6 +26,13 @@ remove_action( 'wp_footer', 'stats_footer', 101 );
 			margin-top: 0;
 			margin-bottom: 0;
 		}
+		.wp-block-image svg,
+		.wp-block-video svg,
+		.wp-block-media-text__media svg {
+			vertical-align: middle;
+			width: 100%;
+			max-height: 200px;
+		}
 	</style>
 </head>
 
