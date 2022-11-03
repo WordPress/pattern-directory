@@ -22,6 +22,9 @@ add_filter( 'rest_' . POST_TYPE . '_collection_params', __NAMESPACE__ . '\filter
 add_filter( 'rest_' . POST_TYPE . '_query', __NAMESPACE__ . '\filter_patterns_rest_query', 10, 2 );
 add_filter( 'user_has_cap', __NAMESPACE__ . '\set_pattern_caps' );
 add_filter( 'posts_orderby', __NAMESPACE__ . '\filter_orderby_locale', 10, 2 );
+add_action( 'init', __NAMESPACE__ . '\add_preview_endpoint' );
+add_action( 'setup_theme', __NAMESPACE__ . '\setup_preview_theme' );
+add_action( 'template_redirect', __NAMESPACE__ . '\load_pattern_preview' );
 
 
 /**
@@ -782,64 +785,69 @@ function set_pattern_caps( $user_caps ) {
 	return $user_caps;
 }
 
-add_action(
-	'init',
-	function() {
-		add_rewrite_endpoint( 'view', EP_PERMALINK );
+/**
+ * Set up the `view` endpoint.
+ *
+ * Technically this applies to posts too, but this is easier than a custom EP mask.
+ */
+function add_preview_endpoint() {
+	add_rewrite_endpoint( 'view', EP_PERMALINK );
+}
+
+/**
+ * When viewing a `view` page, set up the preview theme.
+ *
+ * This should switch the theme to twentytwentyone, with a white background,
+ * and inject the image placeholder workaround.
+ */
+function setup_preview_theme() {
+	// query_vars are not set yet, so just check the URL.
+	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
+
+	// Match pretty & non-pretty permalinks for unpublished patterns.
+	if ( preg_match( '#/view/$#', $request_uri ) || preg_match( '#[?&]view=[1|true]#', $request_uri ) ) {
+		add_filter( 'show_admin_bar', '__return_false', 2000 );
+
+		add_filter( 'template', function() {
+			if ( 'local' === wp_get_environment_type() ) {
+				return 'twentytwentyone';
+			} else {
+				return 'core/twentytwentyone';
+			}
+		} );
+
+		add_filter( 'stylesheet', function() {
+			if ( 'local' === wp_get_environment_type() ) {
+				return 'twentytwentyone';
+			} else {
+				return 'core/twentytwentyone';
+			}
+		} );
+
+		add_filter( 'theme_mod_background_color', function( $value ) {
+			return 'ffffff';
+		} );
+
+		add_filter( 'wp_enqueue_scripts', function() {
+			wp_deregister_style( 'wp4-styles' );
+			wp_deregister_style( 'wporg-global-header-footer' );
+		}, 201 );
 	}
-);
+}
 
-add_action(
-	'setup_theme',
-	function() {
-		// query_vars are not set yet, so just check the URL.
-		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
+/**
+ * If this is the `view` query, load the view template file.
+ */
+function load_pattern_preview() {
+	global $wp_query;
 
-		// Match pretty & non-pretty permalinks for unpublished patterns.
-		if ( preg_match( '#/view/$#', $request_uri ) || preg_match( '#[?&]view=[1|true]#', $request_uri ) ) {
-			add_filter( 'show_admin_bar', '__return_false', 2000 );
-
-			add_filter( 'template', function() {
-				if ( 'local' === wp_get_environment_type() ) {
-					return 'twentytwentyone';
-				} else {
-					return 'core/twentytwentyone';
-				}
-			} );
-
-			add_filter( 'stylesheet', function() {
-				if ( 'local' === wp_get_environment_type() ) {
-					return 'twentytwentyone';
-				} else {
-					return 'core/twentytwentyone';
-				}
-			} );
-
-			add_filter( 'theme_mod_background_color', function( $value ) {
-				return 'ffffff';
-			} );
-
-			add_filter( 'wp_enqueue_scripts', function() {
-				wp_deregister_style( 'wp4-styles' );
-				wp_deregister_style( 'wporg-global-header-footer' );
-			}, 201 );
-		}
+	if ( ! isset( $wp_query->query_vars['view'] ) || ! is_singular() ) {
+		return;
 	}
-);
 
-add_action(
-	'template_redirect',
-	function() {
-		global $wp_query;
-
-		if ( ! isset( $wp_query->query_vars['view'] ) || ! is_singular() ) {
-			return;
-		}
-
-		include dirname( __DIR__ ) . '/views/view.php';
-		exit;
-	}
-);
+	include dirname( __DIR__ ) . '/views/view.php';
+	exit;
+}
 
 /**
  * Intercept the post object and decode the content.
