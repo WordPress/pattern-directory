@@ -47,10 +47,14 @@ function create_or_update_translated_pattern( Pattern $pattern ) {
 		'post_author'  => $parent->post_author ?? 0,
 		'post_status'  => $parent->post_status ?? 'pending',
 		'meta_input'   => [
-			'wpop_description'    => $pattern->description,
-			'wpop_locale'         => $pattern->locale,
-			'wpop_viewport_width' => $parent->wpop_viewport_width,
-			'wpop_is_translation' => true,
+			'wpop_description'          => $pattern->description,
+			'wpop_locale'               => $pattern->locale,
+			'wpop_keywords'             => $pattern->keywords,
+			'wpop_viewport_width'       => $parent->wpop_viewport_width,
+			'wpop_block_types'          => $parent->wpop_block_types,
+			'wpop_contains_block_types' => $parent->wpop_contains_block_types,
+			'wpop_wp_version'           => $parent->wpop_wp_version,
+			'wpop_is_translation'       => true,
 		],
 	];
 
