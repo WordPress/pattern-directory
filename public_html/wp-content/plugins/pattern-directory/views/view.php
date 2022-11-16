@@ -26,6 +26,20 @@ remove_action( 'wp_footer', 'stats_footer', 101 );
 			margin-top: 0;
 			margin-bottom: 0;
 		}
+		.wp-block-image svg,
+		.wp-block-video svg,
+		.wp-block-media-text__media svg {
+			vertical-align: middle;
+			width: 100%;
+			max-height: 200px;
+		}
+		/*
+		 * Workaround for placeholder color when used in a white-background cover block.
+		 * TT1 sets the color in covers to white, which makes the placeholder invisible.
+		 */
+		.wp-block-cover__background.has-white-background-color + .wp-block-cover__inner-container {
+			color: var(--global--color-primary);
+		}
 	</style>
 </head>
 
