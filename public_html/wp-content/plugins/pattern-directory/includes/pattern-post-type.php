@@ -15,6 +15,7 @@ add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
 add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'init', __NAMESPACE__ . '\register_post_statuses' );
 add_action( 'transition_post_status', __NAMESPACE__ . '\status_transitions', 10, 3 );
+add_action( 'post_updated', __NAMESPACE__ . '\update_contains_block_types_meta' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
 add_filter( 'allowed_block_types_all', __NAMESPACE__ . '\remove_disallowed_blocks', 10, 2 );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
@@ -506,6 +507,26 @@ function status_transitions( $new_status, $old_status, $post ) {
 	if ( UNLISTED_STATUS === $old_status && UNLISTED_STATUS !== $new_status ) {
 		wp_delete_object_term_relationships( $post->ID, array( FLAG_REASON ) );
 	}
+}
+
+/**
+ * Given a post ID, parse out the block types and update the `wpop_contains_block_types` meta field.
+ *
+ * @param int $pattern_id Pattern ID.
+ */
+function update_contains_block_types_meta( $pattern_id ) {
+	$pattern    = get_post( $pattern_id );
+	$blocks     = parse_blocks( $pattern->post_content );
+	$all_blocks = _flatten_blocks( $blocks );
+
+	// Get the list of block names and convert it to a single string.
+	$block_names = wp_list_pluck( $all_blocks, 'blockName' );
+	$block_names = array_filter( $block_names ); // Filter out null values (extra line breaks).
+	$block_names = array_unique( $block_names );
+	sort( $block_names );
+	$used_blocks = implode( ',', $block_names );
+
+	update_post_meta( $pattern_id, 'wpop_contains_block_types', $used_blocks );
 }
 
 /**
