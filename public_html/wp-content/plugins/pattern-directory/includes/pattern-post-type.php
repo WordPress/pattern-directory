@@ -653,6 +653,14 @@ function filter_patterns_collection_params( $query_params ) {
 		'type'        => 'string',
 	);
 
+	$query_params['allowed_blocks'] = array(
+		'description' => __( 'Filter the request to only return patterns with blocks on this list.', 'wporg-patterns' ),
+		'type'        => 'array',
+		'items'       => array(
+			'type' => 'string',
+		),
+	);
+
 	return $query_params;
 }
 
@@ -715,6 +723,16 @@ function filter_patterns_rest_query( $args, $request ) {
 				'key'     => 'wpop_wp_version',
 				'compare' => 'NOT EXISTS',
 			),
+		);
+	}
+
+	$allowed_blocks = $request->get_param( 'allowed_blocks' );
+	if ( $allowed_blocks ) {
+		// Only return a pattern if all contained blocks are in the allowed blocks list.
+		$args['meta_query']['allowed_blocks'] = array(
+			'key'     => 'wpop_contains_block_types',
+			'compare' => 'REGEXP',
+			'value'   => '^((' . implode( '|', $allowed_blocks ) . '),?)+$',
 		);
 	}
 
