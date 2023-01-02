@@ -15,6 +15,7 @@ add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
 add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'init', __NAMESPACE__ . '\register_post_statuses' );
 add_action( 'transition_post_status', __NAMESPACE__ . '\status_transitions', 10, 3 );
+add_action( 'post_updated', __NAMESPACE__ . '\update_contains_block_types_meta' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
 add_filter( 'allowed_block_types_all', __NAMESPACE__ . '\remove_disallowed_blocks', 10, 2 );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
@@ -240,6 +241,24 @@ function register_post_type_data() {
 			'type'              => 'string',
 			'description'       => 'The earliest WordPress version compatible with this pattern.',
 			'single'            => true,
+			'sanitize_callback' => 'sanitize_text_field',
+			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type'     => 'string',
+				),
+			),
+		)
+	);
+
+	register_post_meta(
+		POST_TYPE,
+		'wpop_contains_block_types',
+		array(
+			'type'              => 'string',
+			'description'       => 'A list of block types used in this pattern',
+			'single'            => true,
+			'default'           => '',
 			'sanitize_callback' => 'sanitize_text_field',
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
 			'show_in_rest'      => array(
@@ -491,6 +510,26 @@ function status_transitions( $new_status, $old_status, $post ) {
 }
 
 /**
+ * Given a post ID, parse out the block types and update the `wpop_contains_block_types` meta field.
+ *
+ * @param int $pattern_id Pattern ID.
+ */
+function update_contains_block_types_meta( $pattern_id ) {
+	$pattern    = get_post( $pattern_id );
+	$blocks     = parse_blocks( $pattern->post_content );
+	$all_blocks = _flatten_blocks( $blocks );
+
+	// Get the list of block names and convert it to a single string.
+	$block_names = wp_list_pluck( $all_blocks, 'blockName' );
+	$block_names = array_filter( $block_names ); // Filter out null values (extra line breaks).
+	$block_names = array_unique( $block_names );
+	sort( $block_names );
+	$used_blocks = implode( ',', $block_names );
+
+	update_post_meta( $pattern_id, 'wpop_contains_block_types', $used_blocks );
+}
+
+/**
  * Determines if the current user can edit the given pattern post.
  *
  * This is a callback for the `auth_{$object_type}_meta_{$meta_key}` filter, and it's used to authorize access to
@@ -635,6 +674,14 @@ function filter_patterns_collection_params( $query_params ) {
 		'type'        => 'string',
 	);
 
+	$query_params['allowed_blocks'] = array(
+		'description' => __( 'Filter the request to only return patterns with blocks on this list.', 'wporg-patterns' ),
+		'type'        => 'array',
+		'items'       => array(
+			'type' => 'string',
+		),
+	);
+
 	return $query_params;
 }
 
@@ -697,6 +744,16 @@ function filter_patterns_rest_query( $args, $request ) {
 				'key'     => 'wpop_wp_version',
 				'compare' => 'NOT EXISTS',
 			),
+		);
+	}
+
+	$allowed_blocks = $request->get_param( 'allowed_blocks' );
+	if ( $allowed_blocks ) {
+		// Only return a pattern if all contained blocks are in the allowed blocks list.
+		$args['meta_query']['allowed_blocks'] = array(
+			'key'     => 'wpop_contains_block_types',
+			'compare' => 'REGEXP',
+			'value'   => '^((' . implode( '|', $allowed_blocks ) . '),?)+$',
 		);
 	}
 
