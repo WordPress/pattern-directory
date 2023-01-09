@@ -28,6 +28,7 @@ function sync_pattern_meta( $post_meta_safelist ) {
 	$post_meta_safelist[] = 'wpop_keywords';
 	$post_meta_safelist[] = 'wpop_viewport_width';
 	$post_meta_safelist[] = 'wpop_locale';
+	$post_meta_safelist[] = 'wpop_contains_block_types';
 
 	return $post_meta_safelist;
 }
