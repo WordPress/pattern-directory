@@ -160,6 +160,18 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 		}
 	}
 
+	// If there is an allowed_blocks meta_query, use it to filter the ES query.
+	if ( isset( $meta_query['allowed_blocks'] ) && ! empty( $meta_query['allowed_blocks']['value'] ) ) {
+		// Parse it out of the regex format.
+		$regex       = $meta_query['allowed_blocks']['value'];
+		$list        = substr( $regex, 3, -6 );
+		$block_types = explode( '|', $list );
+
+		$filter['bool']['must'][] = [
+			'terms' => [ 'meta.wpop_contains_block_types.value.raw' => $block_types ],
+		];
+	}
+
 	$parser->add_query( $must_query, 'must' );
 	$parser->add_query( $should_query, 'should' );
 	$parser->add_filter( $filter );
