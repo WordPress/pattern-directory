@@ -12,6 +12,7 @@ defined( 'WPINC' ) || die();
 add_action( 'render_block_core/archives', __NAMESPACE__ . '\render_archives', 10, 3 );
 add_action( 'render_block_core/latest-comments', __NAMESPACE__ . '\render_latest_comments', 10, 3 );
 add_filter( 'block_core_navigation_render_fallback', __NAMESPACE__ . '\provide_fallback_nav_items' );
+add_filter( 'render_block_data', __NAMESPACE__ . '\update_block_data' );
 add_filter( 'get_custom_logo', __NAMESPACE__ . '\provide_mock_logo' );
 
 /**
@@ -255,6 +256,20 @@ function provide_fallback_nav_items( $fallback_blocks ) {
 			),
 		),
 	);
+}
+
+/**
+ * Remove the `ref` from the navigation block to ensure it renders the fallback.
+ *
+ * @param array $parsed_block The block being rendered.
+ * @return array Updated block data.
+ */
+function update_block_data( $parsed_block ) {
+	if ( 'core/navigation' === $parsed_block['blockName'] ) {
+		unset( $parsed_block['attrs']['ref'] );
+	}
+
+	return $parsed_block;
 }
 
 /**
