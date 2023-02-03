@@ -894,6 +894,7 @@ function setup_preview_theme() {
 		add_filter( 'render_block_core/image', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
 		add_filter( 'render_block_core/media-text', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
 		add_filter( 'render_block_core/video', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
+		add_filter( 'render_block_core/site-logo', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
 	}
 }
 
@@ -910,9 +911,9 @@ function inject_placeholder_svg( $block_content, $block ) {
 	$svg .= '<path vector-effect="non-scaling-stroke" d="M60 60 0 0" stroke="currentColor" stroke-width="1" stroke-opacity="0.25" />';
 	$svg .= '</svg>';
 
-	// Image block, find img without `src`, replace with svg.
+	// Image block, find img without `src` or with wmark.png (logo), replace with svg.
 	if ( preg_match( '/<img([^>]*)\/?>/', $block_content, $match ) ) {
-		if ( false === strpos( $match[1], 'src=' ) ) {
+		if ( ! str_contains( $match[1], 'src=' ) || str_contains( $match[1], 'wmark.png' ) ) {
 			$new_content = str_replace( '<svg ', '<svg ' . $match[1], $svg );
 			$block_content = str_replace( $match[0], $new_content, $block_content );
 			return $block_content;

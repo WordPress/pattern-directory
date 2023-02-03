@@ -28,10 +28,14 @@ remove_action( 'wp_footer', 'stats_footer', 101 );
 		}
 		.wp-block-image svg,
 		.wp-block-video svg,
-		.wp-block-media-text__media svg {
+		.wp-block-media-text__media svg,
+		.wp-block-site-logo svg {
 			vertical-align: middle;
 			width: 100%;
 			max-height: 200px;
+		}
+		.wp-block-site-logo svg {
+			max-height: 120px;
 		}
 		/*
 		 * Workaround for placeholder color when used in a white-background cover block.
