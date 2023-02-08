@@ -336,8 +336,9 @@ function register_rest_fields() {
 		POST_TYPE,
 		'pattern_content',
 		array(
-			'get_callback' => function() {
-				return decode_pattern_content( get_the_content() );
+			'get_callback' => function( $response_data ) {
+				$pattern = get_post( $response_data['id'] );
+				return decode_pattern_content( $pattern->post_content );
 			},
 
 			'schema' => array(
