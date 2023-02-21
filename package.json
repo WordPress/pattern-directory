@@ -11,6 +11,9 @@
 		"@wordpress/stylelint-config": "21.10.0"
 	},
 	"scripts": {
+		"build:creator": "yarn workspace wporg-pattern-creator build",
+		"build:directory": "yarn workspace wporg-pattern-directory build",
+		"build:theme": "yarn workspace wporg-pattern-directory-theme build",
 		"create": "./bin/index.sh",
 		"wp-env": "wp-env",
 		"lint:php": "composer run lint",
