@@ -41,6 +41,11 @@ export function SidebarComplementaryAreaFills() {
 		}
 	}, [ hasBlockSelection, isEditorSidebarOpened ] );
 
+	let sidebarName = sidebar;
+	if ( ! isEditorSidebarOpened ) {
+		sidebarName = hasBlockSelection ? SIDEBAR_BLOCK : SIDEBAR_TEMPLATE;
+	}
+
 	return (
 		<>
 			<DefaultSidebar
