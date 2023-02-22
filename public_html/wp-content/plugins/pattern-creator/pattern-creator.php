@@ -150,6 +150,8 @@ function pattern_creator_init() {
 
 	$settings['defaultStatus'] = get_option( 'wporg-pattern-default_status', 'publish' );
 
+	$settings = add_theme_styles_to_editor( $settings );
+
 	gutenberg_initialize_editor(
 		'block-pattern-creator',
 		'pattern-creator',
@@ -268,16 +270,28 @@ function add_theme_styles_to_editor( $settings ) {
 		return $settings;
 	}
 
+	$stylesheet = wp_remote_get( 'https://wp-themes.com/wp-content/themes/twentytwentyone/assets/css/style-editor.css' );
+	if ( ! is_wp_error( $stylesheet ) ) {
+		$css = wp_remote_retrieve_body( $stylesheet );
+
+		$settings['styles'][] = array(
+			'css'            => $css,
+			'__unstableType' => 'theme',
+			'isGlobalStyles' => true,
+		);
+	}
+
 	// Build up the alignment styles to match the layout set in theme.json.
 	// See https://github.com/WordPress/gutenberg/blob/9d4b83cbbafcd6c6cbd20c86b572f458fc65ff16/lib/block-supports/layout.php#L38
 	$block_gap = wp_get_global_styles( array( 'spacing', 'blockGap' ) );
-	$layout = wp_get_global_settings( array( 'layout' ) );
-	$style = gutenberg_get_layout_style( '.pattern-block-editor__block-list.is-root-container', $layout, true, $block_gap );
+	$layout    = wp_get_global_settings( array( 'layout' ) );
+	$style     = wp_get_layout_style( '.pattern-block-editor__block-list.is-root-container', $layout, true, $block_gap );
 
-	$settings['__unstableResolvedAssets']['styles'] .=
-		'\n<link rel="stylesheet" id="theme-editor-styles" href="https://wp-themes.com/wp-content/themes/twentytwentyone/assets/css/style-editor.css" media="all" />'; //phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-	$settings['__unstableResolvedAssets']['styles'] .=
-		'\n<style>body.editor-styles-wrapper { background-color: white; --global--color-background: #ffffff; --global--color-primary: #000; --global--color-secondary: #000; --button--color-background: #000; --button--color-text-hover: #000; }' . $style . '</style>';
+	$settings['styles'][] = array(
+		'css'            => 'body.editor-styles-wrapper { background-color: white; --global--color-background: #ffffff; --global--color-primary: #000; --global--color-secondary: #000; --button--color-background: #000; --button--color-text-hover: #000; }' . $style,
+		'__unstableType' => 'theme',
+		'isGlobalStyles' => true,
+	);
 
 	return $settings;
 }
