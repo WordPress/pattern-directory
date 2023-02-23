@@ -172,8 +172,6 @@ function pattern_creator_init() {
 	wp_enqueue_script( 'wp-format-library' );
 	wp_enqueue_style( 'wp-edit-site' );
 	wp_enqueue_style( 'wp-format-library' );
-	// Load layout and margin styles.
-	wp_enqueue_style( 'wp-editor-classic-layout-styles' );
 	wp_enqueue_media();
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\pattern_creator_init', 20 );
@@ -266,11 +264,11 @@ add_action( 'rest_api_init', __NAMESPACE__ . '\rest_api_init' );
  * @return array Updated settings.
  */
 function add_theme_styles_to_editor( $settings ) {
-	if ( ! isset( $settings['__unstableResolvedAssets']['styles'] ) ) {
+	if ( ! isset( $settings['styles'] ) ) {
 		return $settings;
 	}
 
-	$stylesheet = wp_remote_get( 'https://wp-themes.com/wp-content/themes/twentytwentyone/assets/css/style-editor.css' );
+	$stylesheet = wp_remote_get( 'https://wp-themes.com/wp-content/themes/twentytwentythree/style.css' );
 	if ( ! is_wp_error( $stylesheet ) ) {
 		$css = wp_remote_retrieve_body( $stylesheet );
 

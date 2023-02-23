@@ -24,7 +24,7 @@ add_filter( 'rest_' . POST_TYPE . '_query', __NAMESPACE__ . '\filter_patterns_re
 add_filter( 'user_has_cap', __NAMESPACE__ . '\set_pattern_caps' );
 add_filter( 'posts_orderby', __NAMESPACE__ . '\filter_orderby_locale', 10, 2 );
 add_action( 'init', __NAMESPACE__ . '\add_preview_endpoint' );
-add_action( 'setup_theme', __NAMESPACE__ . '\setup_preview_theme' );
+add_action( 'setup_theme', __NAMESPACE__ . '\setup_preview_theme', 1 );
 add_action( 'template_redirect', __NAMESPACE__ . '\load_pattern_preview' );
 
 
@@ -563,7 +563,7 @@ function enqueue_editor_assets() {
 		throw new Error( 'You need to run `yarn start` or `yarn build` for the Pattern Directory.' );
 	}
 
-	$script_asset = require( $script_asset_path );
+	$script_asset = require $script_asset_path;
 	wp_enqueue_script(
 		'wporg-pattern-post-type',
 		plugins_url( 'build/pattern-post-type.js', dirname( __FILE__ ) ),
@@ -868,22 +868,18 @@ function setup_preview_theme() {
 
 		add_filter( 'template', function() {
 			if ( 'local' === wp_get_environment_type() ) {
-				return 'twentytwentyone';
+				return 'twentytwentythree';
 			} else {
-				return 'core/twentytwentyone';
+				return 'core/twentytwentythree';
 			}
 		} );
 
 		add_filter( 'stylesheet', function() {
 			if ( 'local' === wp_get_environment_type() ) {
-				return 'twentytwentyone';
+				return 'twentytwentythree';
 			} else {
-				return 'core/twentytwentyone';
+				return 'core/twentytwentythree';
 			}
-		} );
-
-		add_filter( 'theme_mod_background_color', function( $value ) {
-			return 'ffffff';
 		} );
 
 		add_filter( 'wp_enqueue_scripts', function() {

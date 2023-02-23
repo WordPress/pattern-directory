@@ -51,14 +51,13 @@ remove_action( 'wp_footer', 'stats_footer', 101 );
 <?php wp_body_open(); ?>
 
 <div class="wp-site-blocks">
-	<div class="entry-content">
-	<?php
-		// Attach the filters to override real site data with placeholder content.
-		attach_site_data_filters();
-		the_content();
-		remove_site_data_filters();
-	?>
-	</div>
+<?php
+	// Attach the filters to override real site data with placeholder content.
+	attach_site_data_filters();
+	// phpcs:ignore -- Allow output from do_blocks.
+	echo do_blocks( '<!-- wp:post-content {"layout":{"inherit":true}} /-->' );
+	remove_site_data_filters();
+?>
 </div>
 
 <?php wp_footer(); ?>
