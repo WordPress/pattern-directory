@@ -1,12 +1,31 @@
 <?php
 /**
  * Pattern preview template.
+ *
+ * Forked from core's template-canvas.php.
+ *
+ * @see https://github.com/WordPress/wordpress-develop/blob/6.1/src/wp-includes/template-canvas.php
  */
 
 namespace WordPressdotorg\Pattern_Directory;
 use function WordPressdotorg\Pattern_Creator\MockBlocks\{attach_site_data_filters, remove_site_data_filters};
 
 remove_action( 'wp_footer', 'stats_footer', 101 );
+
+// Attach the filters to override real site data with placeholder content.
+attach_site_data_filters();
+global $_wp_current_template_content;
+// Override the theme template to only output the pattern content.
+$_wp_current_template_content = <<<HTML
+<!-- wp:group {"tagName":"main"} -->
+<main class="wp-block-group">
+<!-- wp:post-content {"layout":{"type":"constrained"}} /-->
+</main>
+<!-- /wp:group -->
+HTML;
+
+$template_html = get_the_block_template_html();
+remove_site_data_filters();
 
 ?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -19,12 +38,10 @@ remove_action( 'wp_footer', 'stats_footer', 101 );
 			display:flex;
 			align-items:center;
 			min-height:100vh;
+			box-sizing: border-box;
 		}
-		.entry-content {
-			width:100%;
-			pointer-events: none;
-			margin-top: 0;
-			margin-bottom: 0;
+		.wp-site-blocks > * {
+			width: 100%;
 		}
 		.wp-block-image svg,
 		.wp-block-video svg,
@@ -50,15 +67,7 @@ remove_action( 'wp_footer', 'stats_footer', 101 );
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 
-<div class="wp-site-blocks">
-<?php
-	// Attach the filters to override real site data with placeholder content.
-	attach_site_data_filters();
-	// phpcs:ignore -- Allow output from do_blocks.
-	echo do_blocks( '<!-- wp:post-content {"layout":{"inherit":true}} /-->' );
-	remove_site_data_filters();
-?>
-</div>
+<?php echo $template_html; // phpcs:ignore WordPress.Security.EscapeOutput ?>
 
 <?php wp_footer(); ?>
 </body>
