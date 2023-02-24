@@ -48,7 +48,7 @@
 		"autoprefixer": "10.4.13",
 		"classnames": "2.3.2",
 		"cssnano": "5.1.15",
-		"grunt": "1.6.1",
+		"grunt": "1.5.3",
 		"grunt-contrib-clean": "2.0.1",
 		"grunt-contrib-watch": "1.1.0",
 		"grunt-sass": "3.1.0",
