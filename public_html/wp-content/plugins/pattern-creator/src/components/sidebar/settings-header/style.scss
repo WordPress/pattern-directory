@@ -35,7 +35,8 @@
 	border: none;
 	box-shadow: none;
 	cursor: pointer;
-	padding: 3px $grid-unit-20; // Use padding to offset the is-active border, this benefits Windows High Contrast mode
+	// Use padding to offset the is-active border, this benefits Windows High Contrast mode.
+	padding: 3px $grid-unit-20;
 	margin-left: 0;
 	font-weight: 500;
 
@@ -62,6 +63,7 @@
 
 		// Animation
 		transition: all 0.1s linear;
+
 		@include reduce-motion("transition");
 	}
 
@@ -86,6 +88,7 @@
 
 		// Animation
 		transition: all 0.1s linear;
+
 		@include reduce-motion("transition");
 	}
 
