@@ -24,9 +24,8 @@ add_filter( 'rest_' . POST_TYPE . '_query', __NAMESPACE__ . '\filter_patterns_re
 add_filter( 'user_has_cap', __NAMESPACE__ . '\set_pattern_caps' );
 add_filter( 'posts_orderby', __NAMESPACE__ . '\filter_orderby_locale', 10, 2 );
 add_action( 'init', __NAMESPACE__ . '\add_preview_endpoint' );
-add_action( 'setup_theme', __NAMESPACE__ . '\setup_preview_theme' );
-add_action( 'template_redirect', __NAMESPACE__ . '\load_pattern_preview' );
-
+add_action( 'setup_theme', __NAMESPACE__ . '\setup_preview_theme', 1 );
+add_action( 'template_include', __NAMESPACE__ . '\load_pattern_preview', 100 );
 
 /**
  * Registers post types and associated taxonomies, meta data, etc.
@@ -563,7 +562,7 @@ function enqueue_editor_assets() {
 		throw new Error( 'You need to run `yarn start` or `yarn build` for the Pattern Directory.' );
 	}
 
-	$script_asset = require( $script_asset_path );
+	$script_asset = require $script_asset_path;
 	wp_enqueue_script(
 		'wporg-pattern-post-type',
 		plugins_url( 'build/pattern-post-type.js', dirname( __FILE__ ) ),
@@ -868,22 +867,18 @@ function setup_preview_theme() {
 
 		add_filter( 'template', function() {
 			if ( 'local' === wp_get_environment_type() ) {
-				return 'twentytwentyone';
+				return 'twentytwentythree';
 			} else {
-				return 'core/twentytwentyone';
+				return 'core/twentytwentythree';
 			}
 		} );
 
 		add_filter( 'stylesheet', function() {
 			if ( 'local' === wp_get_environment_type() ) {
-				return 'twentytwentyone';
+				return 'twentytwentythree';
 			} else {
-				return 'core/twentytwentyone';
+				return 'core/twentytwentythree';
 			}
-		} );
-
-		add_filter( 'theme_mod_background_color', function( $value ) {
-			return 'ffffff';
 		} );
 
 		add_filter( 'wp_enqueue_scripts', function() {
@@ -941,17 +936,16 @@ function inject_placeholder_svg( $block_content, $block ) {
 }
 
 /**
- * If this is the `view` query, load the view template file.
+ * If this is the `view` query, use our version of the `template-canvas.php`.
  */
-function load_pattern_preview() {
+function load_pattern_preview( $template ) {
 	global $wp_query;
 
-	if ( ! isset( $wp_query->query_vars['view'] ) || ! is_singular() ) {
-		return;
+	if ( ! isset( $wp_query->query_vars['view'] ) ) {
+		return $template;
 	}
 
-	include dirname( __DIR__ ) . '/views/view.php';
-	exit;
+	return dirname( __DIR__ ) . '/views/view.php';
 }
 
 /**

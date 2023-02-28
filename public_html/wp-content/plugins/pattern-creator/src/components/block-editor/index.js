@@ -12,6 +12,7 @@ import {
 	BlockTools,
 	__unstableEditorStyles as EditorStyles,
 	__unstableIframe as Iframe,
+	__experimentalLayoutStyle as LayoutStyle,
 	__unstableUseMouseMoveTypingReset as useMouseMoveTypingReset,
 	__experimentalUseResizeCanvas as useResizeCanvas,
 	useSetting,
@@ -63,12 +64,16 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 				</div>
 				<Iframe
 					style={ resizedCanvasStyles }
-					assets={ settings.__unstableResolvedAssets }
 					head={ <EditorStyles styles={ settings.styles } /> }
 					ref={ ref }
 					contentRef={ mergedRefs }
 					name="editor-canvas"
 				>
+					<LayoutStyle
+						selector=".pattern-block-editor__block-list.is-root-container"
+						layout={ { ...layout, type: 'constrained' } }
+						layoutDefinitions={ layout?.definitions }
+					/>
 					<BlockList
 						className="pattern-block-editor__block-list wp-site-blocks"
 						__experimentalLayout={ layout }
