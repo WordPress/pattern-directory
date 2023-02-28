@@ -13,7 +13,7 @@ _x( ' Introduce yourself.', 'Categories term description', 'wporg-patterns' );
 _x( 'Banners', 'Categories term name', 'wporg-patterns' );
 _x( 'Buttons', 'Categories term name', 'wporg-patterns' );
 _x( 'Patterns that contain buttons and call to actions.', 'Categories term description', 'wporg-patterns' );
-_x( 'Call to Action ', 'Categories term name', 'wporg-patterns' );
+_x( 'Call to Action', 'Categories term name', 'wporg-patterns' );
 _x( 'Sections whose purpose is to trigger a specific action.', 'Categories term description', 'wporg-patterns' );
 _x( 'Columns', 'Categories term name', 'wporg-patterns' );
 _x( 'Multi-column patterns with more complex layouts.', 'Categories term description', 'wporg-patterns' );
