@@ -22,6 +22,7 @@ export { POST_TYPE, CATEGORY_SLUG, KEYWORD_SLUG } from './constants';
 
 export const store = createReduxStore( STORE_NAME, storeConfig );
 
-// Once we build a more generic persistence plugin that works across types of stores
-// we'd be able to replace this with a register call.
+// Technically `registerStore` has been deprecated in favor of `register`, but
+// `register` does not support the persistance layer. To switch, we'll need to
+// update the `preferences` state to use the `@wordpress/preferences` package.
 registerStore( STORE_NAME, storeConfig );
