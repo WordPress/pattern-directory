@@ -268,10 +268,14 @@ function add_theme_styles_to_editor( $settings ) {
 		return $settings;
 	}
 
-	$stylesheet = wp_remote_get( 'https://wp-themes.com/wp-content/themes/twentytwentythree/style.css' );
-	if ( ! is_wp_error( $stylesheet ) ) {
-		$css = wp_remote_retrieve_body( $stylesheet );
+	$stylesheet_url = WP_CONTENT_DIR . '/themes/core/twentytwentythree/style.css';
+	if ( 'local' === wp_get_environment_type() ) {
+		$stylesheet_url = WP_CONTENT_DIR . '/themes/twentytwentythree/style.css';
+	}
 
+	// phpcs:ignore -- Allow file_get_contents.
+	$css = file_get_contents( $stylesheet_url );
+	if ( ! $css ) {
 		$settings['styles'][] = array(
 			'css'            => $css,
 			'__unstableType' => 'theme',
