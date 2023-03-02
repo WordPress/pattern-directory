@@ -12,6 +12,7 @@
 
 namespace WordPressdotorg\Pattern_Creator;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+use function WordPressdotorg\MU_Plugins\Global_Header_Footer\{ is_rosetta_site, get_rosetta_name };
 use WP_Block_Editor_Context;
 
 const AUTOSAVE_INTERVAL = 30;
@@ -98,8 +99,11 @@ function pattern_creator_init() {
 	wp_add_inline_script(
 		'wp-pattern-creator',
 		sprintf(
-			'var wporgLocale = JSON.parse( decodeURIComponent( \'%s\' ) );',
-			rawurlencode( wp_json_encode( get_locale() ) )
+			"var wporgLocale = JSON.parse( decodeURIComponent( '%s' ) );",
+			rawurlencode( wp_json_encode( array(
+				'id' => get_locale(),
+				'displayName' => is_rosetta_site() ? get_rosetta_name() : '',
+			) ) ),
 		),
 		'before'
 	);
@@ -135,6 +139,9 @@ function pattern_creator_init() {
 		update_post_meta( $post_id, 'wpop_locale', 'en_US' );
 	}
 
+	add_filter( 'template', __NAMESPACE__ . '\set_theme_twentytwentythree' );
+	add_filter( 'stylesheet', __NAMESPACE__ . '\set_theme_twentytwentythree' );
+
 	$custom_settings = array(
 		'postId'                               => $post_id,
 		'siteUrl'                              => site_url(),
@@ -145,12 +152,14 @@ function pattern_creator_init() {
 	);
 
 	wp_deregister_script( 'wporg-global-header-script' );
+
 	$editor_context = new WP_Block_Editor_Context( array( 'post' => $post ) );
 	$settings       = get_block_editor_settings( $custom_settings, $editor_context );
 
 	$settings['defaultStatus'] = get_option( 'wporg-pattern-default_status', 'publish' );
 
-	$settings = add_theme_styles_to_editor( $settings );
+	remove_filter( 'template', __NAMESPACE__ . '\set_theme_twentytwentythree' );
+	remove_filter( 'stylesheet', __NAMESPACE__ . '\set_theme_twentytwentythree' );
 
 	gutenberg_initialize_editor(
 		'block-pattern-creator',
@@ -253,48 +262,14 @@ function rest_api_init() {
 add_action( 'rest_api_init', __NAMESPACE__ . '\rest_api_init' );
 
 /**
- * Filter editor settings to add extra styles to the Pattern Creator editor.
+ * Return the appropriate theme slug for the current environment.
  *
- * This adds `link` & `style` tags to be loaded into the editor's iframe.
- * - Load Twenty Twenty-One styles for a theme preview
- * - Set the editor background to white for a cleaner preview
- * - Add layout styles for the pattern container so that alignments work
- *
- * @param array $settings Default editor settings.
- * @return array Updated settings.
+ * @return string Theme slug.
  */
-function add_theme_styles_to_editor( $settings ) {
-	if ( ! isset( $settings['styles'] ) ) {
-		return $settings;
-	}
-
-	$stylesheet_url = WP_CONTENT_DIR . '/themes/core/twentytwentythree/style.css';
+function set_theme_twentytwentythree() {
 	if ( 'local' === wp_get_environment_type() ) {
-		$stylesheet_url = WP_CONTENT_DIR . '/themes/twentytwentythree/style.css';
+		return 'twentytwentythree';
+	} else {
+		return 'core/twentytwentythree';
 	}
-
-	// phpcs:ignore -- Allow file_get_contents.
-	$css = file_get_contents( $stylesheet_url );
-	if ( ! $css ) {
-		$settings['styles'][] = array(
-			'css'            => $css,
-			'__unstableType' => 'theme',
-			'isGlobalStyles' => true,
-		);
-	}
-
-	// Build up the alignment styles to match the layout set in theme.json.
-	// See https://github.com/WordPress/gutenberg/blob/9d4b83cbbafcd6c6cbd20c86b572f458fc65ff16/lib/block-supports/layout.php#L38
-	$block_gap = wp_get_global_styles( array( 'spacing', 'blockGap' ) );
-	$layout    = wp_get_global_settings( array( 'layout' ) );
-	$style     = wp_get_layout_style( '.pattern-block-editor__block-list.is-root-container', $layout, true, $block_gap );
-
-	$settings['styles'][] = array(
-		'css'            => 'body.editor-styles-wrapper { background-color: white; --global--color-background: #ffffff; --global--color-primary: #000; --global--color-secondary: #000; --button--color-background: #000; --button--color-text-hover: #000; }' . $style,
-		'__unstableType' => 'theme',
-		'isGlobalStyles' => true,
-	);
-
-	return $settings;
 }
-add_filter( 'block_editor_settings_all', __NAMESPACE__ . '\add_theme_styles_to_editor', 20 );
