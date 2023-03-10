@@ -126,8 +126,8 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 					],
 				],
 				'negative_boost' => 0.001,
- 			],
- 		];
+			],
+		];
 	}
 
 	$filter = [
