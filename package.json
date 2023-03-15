@@ -6,9 +6,9 @@
 	"license": "GPL-2.0-or-later",
 	"private": true,
 	"dependencies": {
-		"@wordpress/env": "5.12.0",
-		"@wordpress/scripts": "25.4.0",
-		"@wordpress/stylelint-config": "21.10.0"
+		"@wordpress/env": "5.14.0",
+		"@wordpress/scripts": "26.0.0",
+		"@wordpress/stylelint-config": "21.12.0"
 	},
 	"scripts": {
 		"build:creator": "yarn workspace wporg-pattern-creator build",
