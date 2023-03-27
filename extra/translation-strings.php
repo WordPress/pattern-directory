@@ -10,6 +10,7 @@
 
 _x( 'About', 'Categories term name', 'wporg-patterns' );
 _x( ' Introduce yourself.', 'Categories term description', 'wporg-patterns' );
+_x( 'Audio', 'Categories term name', 'wporg-patterns' );
 _x( 'Banners', 'Categories term name', 'wporg-patterns' );
 _x( 'Buttons', 'Categories term name', 'wporg-patterns' );
 _x( 'Patterns that contain buttons and call to actions.', 'Categories term description', 'wporg-patterns' );
