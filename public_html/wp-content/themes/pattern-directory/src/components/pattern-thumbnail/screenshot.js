@@ -5,7 +5,7 @@
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import { Spinner } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -88,8 +88,8 @@ export default function ( { alt, className, isReady = false, src, style } ) {
 		}
 	};
 
-	useEffect( async () => {
-		await fetchImage();
+	useEffect( () => {
+		( async () => await fetchImage() )();
 	}, [] );
 
 	/**
