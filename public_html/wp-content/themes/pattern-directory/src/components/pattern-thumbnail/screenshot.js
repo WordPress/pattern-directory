@@ -31,6 +31,7 @@ const IMAGE_WIDTH = 600;
  * @param {string}  props.alt       The alt text for the screenshot image.
  * @param {string}  props.className Any extra class names for the wrapper div.
  * @param {boolean} props.isReady   Whether we should start try to show the image.
+ * @param {Object}  props.style     Styles for the wrapper div.
  * @param {string}  props.src       The url of the page to screenshot.
  * @return {Object} React component
  */
