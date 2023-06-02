@@ -59,6 +59,7 @@ const MyFavorites = () => {
 						query={ query }
 						onNavigation={ onNavigation }
 						isEmpty={ isEmpty }
+						hideCuration
 					/>
 				) }
 			</div>

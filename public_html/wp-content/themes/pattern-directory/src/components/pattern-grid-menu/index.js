@@ -27,7 +27,7 @@ const ALLOWED_CATS = [
 	'wireframe',
 ];
 
-const PatternGridMenu = ( { basePath = '', onNavigation, ...props } ) => {
+const PatternGridMenu = ( { basePath = '', onNavigation, hideCuration = false, ...props } ) => {
 	const { path, update: updatePath } = useRoute();
 	const { categorySlug, isLoading, options } = useSelect( ( select ) => {
 		const { getCategoryById, getCategories, getQueryFromUrl, getUrlFromQuery, isLoadingCategories } =
@@ -77,15 +77,17 @@ const PatternGridMenu = ( { basePath = '', onNavigation, ...props } ) => {
 				}
 				secondary={
 					<>
-						<PatternSelectControl
-							label={ __( 'Filter by', 'wporg-patterns' ) }
-							param="curation"
-							defaultValue="core"
-							options={ [
-								{ label: __( 'Curated', 'wporg-patterns' ), value: 'core' },
-								{ label: __( 'Community', 'wporg-patterns' ), value: 'community' },
-							] }
-						/>
+						{ hideCuration ? null : (
+							<PatternSelectControl
+								label={ __( 'Filter by', 'wporg-patterns' ) }
+								param="curation"
+								defaultValue="core"
+								options={ [
+									{ label: __( 'Curated', 'wporg-patterns' ), value: 'core' },
+									{ label: __( 'Community', 'wporg-patterns' ), value: 'community' },
+								] }
+							/>
+						) }
 						<PatternSelectControl
 							label={ __( 'Order by', 'wporg-patterns' ) }
 							param="orderby"
