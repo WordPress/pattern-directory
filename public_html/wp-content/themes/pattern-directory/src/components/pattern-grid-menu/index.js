@@ -8,7 +8,7 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import ContextBar from '../context-bar';
-import PatternOrderSelect from '../pattern-order-select';
+import PatternSelectControl from '../pattern-select-control';
 import Menu from '../menu';
 import NavigationLayout from '../navigation-layout';
 import { store as patternStore } from '../../store';
@@ -76,7 +76,10 @@ const PatternGridMenu = ( { basePath = '', onNavigation, ...props } ) => {
 					/>
 				}
 				secondary={
-					<PatternOrderSelect
+					<PatternSelectControl
+						label={ __( 'Order by', 'wporg-patterns' ) }
+						param="orderby"
+						defaultValue="date"
 						options={ [
 							{ label: __( 'Newest', 'wporg-patterns' ), value: 'date' },
 							{ label: __( 'Popular', 'wporg-patterns' ), value: 'favorite_count' },
