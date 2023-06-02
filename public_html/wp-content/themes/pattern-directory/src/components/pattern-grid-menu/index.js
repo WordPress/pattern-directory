@@ -76,15 +76,26 @@ const PatternGridMenu = ( { basePath = '', onNavigation, ...props } ) => {
 					/>
 				}
 				secondary={
-					<PatternSelectControl
-						label={ __( 'Order by', 'wporg-patterns' ) }
-						param="orderby"
-						defaultValue="date"
-						options={ [
-							{ label: __( 'Newest', 'wporg-patterns' ), value: 'date' },
-							{ label: __( 'Popular', 'wporg-patterns' ), value: 'favorite_count' },
-						] }
-					/>
+					<>
+						<PatternSelectControl
+							label={ __( 'Filter by', 'wporg-patterns' ) }
+							param="curation"
+							defaultValue="core"
+							options={ [
+								{ label: __( 'Curated', 'wporg-patterns' ), value: 'core' },
+								{ label: __( 'Community', 'wporg-patterns' ), value: 'community' },
+							] }
+						/>
+						<PatternSelectControl
+							label={ __( 'Order by', 'wporg-patterns' ) }
+							param="orderby"
+							defaultValue="date"
+							options={ [
+								{ label: __( 'Newest', 'wporg-patterns' ), value: 'date' },
+								{ label: __( 'Popular', 'wporg-patterns' ), value: 'favorite_count' },
+							] }
+						/>
+					</>
 				}
 			/>
 			<ContextBar { ...props } />
