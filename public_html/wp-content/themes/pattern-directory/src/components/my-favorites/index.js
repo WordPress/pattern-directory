@@ -42,7 +42,7 @@ const MyFavorites = () => {
 	} );
 	const [ ref, onNavigation ] = useFocusOnNavigation();
 
-	const mostFavoritedQuery = { orderby: 'favorite_count', per_page: 6 };
+	const mostFavoritedQuery = { orderby: 'favorite_count', per_page: 6, curation: 'core' };
 	if ( query[ 'pattern-categories' ] ) {
 		mostFavoritedQuery[ 'pattern-categories' ] = query[ 'pattern-categories' ];
 	}
