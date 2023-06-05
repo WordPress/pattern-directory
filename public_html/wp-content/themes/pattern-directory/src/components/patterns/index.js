@@ -51,7 +51,7 @@ const Patterns = () => {
 				{ isSearch ? (
 					<ContextBar query={ query } />
 				) : (
-					<PatternGridMenu onNavigation={ onNavigation } hideCuration={ isAuthor } />
+					<PatternGridMenu onNavigation={ onNavigation } query={ query } hideCuration={ isAuthor } />
 				) }
 			</div>
 			{ isEmpty ? (
