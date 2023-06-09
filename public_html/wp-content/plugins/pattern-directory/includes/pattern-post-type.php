@@ -646,6 +646,7 @@ function disable_block_directory() {
  * Filter the collection parameters:
  * - set a new default for per_page.
  * - add a new parameter, `author_name`, for a user's nicename slug.
+ * - add a new parameter, `curation`, to filter between curated, community, and all patterns.
  *
  * @param array $query_params JSON Schema-formatted collection parameters.
  * @return array Filtered parameters.
@@ -663,6 +664,17 @@ function filter_patterns_collection_params( $query_params ) {
 			$user = get_user_by( 'slug', $value );
 			return (bool) $user;
 		},
+	);
+
+	$query_params['curation'] = array(
+		'description' => __( 'Limit result to either curated core, community, or all patterns.', 'wporg-patterns' ),
+		'type'        => 'string',
+		'default'     => 'core',
+		'enum'        => array(
+			'all',
+			'core',
+			'community',
+		),
 	);
 
 	if ( isset( $query_params['orderby'] ) ) {
@@ -713,6 +725,28 @@ function filter_patterns_rest_query( $args, $request ) {
 			$args['author'] = $user->ID;
 		} else {
 			$args['post__in'] = array( -1 );
+		}
+	}
+
+	// If `curation` is passed and either `core` or `community`, we should
+	// filter the result. If `curation=all`, no filtering is needed.
+	if ( isset( $request['curation'] ) ) {
+		if ( 'core' === $request['curation'] ) {
+			// Patterns with the core keyword.
+			$args['tax_query']['core_keyword'] = array(
+				'taxonomy' => 'wporg-pattern-keyword',
+				'field'    => 'slug',
+				'terms'    => 'core',
+				'operator' => 'IN',
+			);
+		} else if ( 'community' === $request['curation'] ) {
+			// Patterns without the core keyword.
+			$args['tax_query']['core_keyword'] = array(
+				'taxonomy' => 'wporg-pattern-keyword',
+				'field'    => 'slug',
+				'terms'    => 'core',
+				'operator' => 'NOT IN',
+			);
 		}
 	}
 
