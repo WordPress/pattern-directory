@@ -669,7 +669,7 @@ function filter_patterns_collection_params( $query_params ) {
 	$query_params['curation'] = array(
 		'description' => __( 'Limit result to either curated core, community, or all patterns.', 'wporg-patterns' ),
 		'type'        => 'string',
-		'default'     => 'core',
+		'default'     => 'all',
 		'enum'        => array(
 			'all',
 			'core',
