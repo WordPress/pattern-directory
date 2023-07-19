@@ -12,7 +12,7 @@ import {
 	BlockTools,
 	__unstableEditorStyles as EditorStyles,
 	__unstableIframe as Iframe,
-	__experimentalLayoutStyle as LayoutStyle,
+	privateApis as blockEditorPrivateApis,
 	__unstableUseMouseMoveTypingReset as useMouseMoveTypingReset,
 	__experimentalUseResizeCanvas as useResizeCanvas,
 	useSetting,
@@ -21,12 +21,20 @@ import {
 /* eslint-enable @wordpress/no-unsafe-wp-apis */
 import { PostTitle, VisualEditorGlobalKeyboardShortcuts } from '@wordpress/editor';
 import { useMergeRefs } from '@wordpress/compose';
+import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/private-apis';
 
 /**
  * Internal dependencies
  */
 import { POST_TYPE, store as patternStore } from '../../store';
 import { SidebarInspectorFill } from '../sidebar';
+
+const { unlock } = __dangerousOptInToUnstableAPIsOnlyForCoreModules(
+	'I know using unstable features means my plugin or theme will inevitably break on the next WordPress release.',
+	'@wordpress/edit-post'
+);
+
+const { LayoutStyle } = unlock( blockEditorPrivateApis );
 
 export default function BlockEditor( { setIsInserterOpen } ) {
 	const { settings, deviceType } = useSelect(
