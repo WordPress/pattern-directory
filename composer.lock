@@ -236,15 +236,15 @@
         },
         {
             "name": "wpackagist-plugin/gutenberg",
-            "version": "16.2.1",
+            "version": "16.4.0",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/gutenberg/",
-                "reference": "tags/16.2.1"
+                "reference": "tags/16.4.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/gutenberg.16.2.1.zip"
+                "url": "https://downloads.wordpress.org/plugin/gutenberg.16.4.0.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -319,12 +319,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/wporg-mu-plugins.git",
-                "reference": "366b6396901caaa1db69dbb97daa89ea0fa02274"
+                "reference": "22bd36cc52d800b61a6e9f103c735e3cd8b96af3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/366b6396901caaa1db69dbb97daa89ea0fa02274",
-                "reference": "366b6396901caaa1db69dbb97daa89ea0fa02274",
+                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/22bd36cc52d800b61a6e9f103c735e3cd8b96af3",
+                "reference": "22bd36cc52d800b61a6e9f103c735e3cd8b96af3",
                 "shasum": ""
             },
             "require": {
@@ -365,7 +365,7 @@
                 "source": "https://github.com/WordPress/wporg-mu-plugins/tree/build",
                 "issues": "https://github.com/WordPress/wporg-mu-plugins/issues"
             },
-            "time": "2023-07-19T17:50:57+00:00"
+            "time": "2023-08-09T00:17:46+00:00"
         }
     ],
     "packages-dev": [
@@ -2406,7 +2406,7 @@
         },
         {
             "name": "wp-phpunit/wp-phpunit",
-            "version": "5.9.5",
+            "version": "5.9.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-phpunit/wp-phpunit.git",
