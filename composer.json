@@ -78,7 +78,7 @@
 		"wp-phpunit/wp-phpunit": "^5.4",
 		"phpunit/phpunit": "^7.5.20",
 		"rmccue/requests": "^1.8.1",
-		"yoast/phpunit-polyfills": "^1.0"
+		"yoast/phpunit-polyfills": "^1.1"
 	},
 	"scripts": {
 		"format": "phpcbf -p",
