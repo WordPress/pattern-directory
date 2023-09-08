@@ -115,7 +115,9 @@ export default function Header() {
 			<div className="pattern-header_end">
 				<div className="pattern-header__actions">
 					<SaveDraftButton />
-					<PreviewOptions deviceType={ deviceType } setDeviceType={ setPreviewDeviceType } />
+					<PreviewOptions deviceType={ deviceType } setDeviceType={ setPreviewDeviceType }>
+						{ () => null /* Empty function required by `PreviewOptions`. */ }
+					</PreviewOptions>
 					<SaveButton />
 					<PinnedItems.Slot scope="wporg/pattern-creator" />
 					<MoreMenu />
