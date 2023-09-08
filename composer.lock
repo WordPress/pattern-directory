@@ -236,15 +236,15 @@
         },
         {
             "name": "wpackagist-plugin/gutenberg",
-            "version": "16.4.0",
+            "version": "16.6.0",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/gutenberg/",
-                "reference": "tags/16.4.0"
+                "reference": "tags/16.6.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/gutenberg.16.4.0.zip"
+                "url": "https://downloads.wordpress.org/plugin/gutenberg.16.6.0.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -319,12 +319,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/wporg-mu-plugins.git",
-                "reference": "22bd36cc52d800b61a6e9f103c735e3cd8b96af3"
+                "reference": "a4e5d51d2b9d23102f23df2ae3b37771dfe30c69"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/22bd36cc52d800b61a6e9f103c735e3cd8b96af3",
-                "reference": "22bd36cc52d800b61a6e9f103c735e3cd8b96af3",
+                "url": "https://api.github.com/repos/WordPress/wporg-mu-plugins/zipball/a4e5d51d2b9d23102f23df2ae3b37771dfe30c69",
+                "reference": "a4e5d51d2b9d23102f23df2ae3b37771dfe30c69",
                 "shasum": ""
             },
             "require": {
@@ -338,7 +338,7 @@
                 "wp-coding-standards/wpcs": "2.*",
                 "wp-phpunit/wp-phpunit": "~6.0",
                 "wporg/wporg-repo-tools": "dev-trunk",
-                "yoast/phpunit-polyfills": "^1.0"
+                "yoast/phpunit-polyfills": "^1.1"
             },
             "type": "wordpress-muplugin",
             "extra": {
@@ -365,7 +365,7 @@
                 "source": "https://github.com/WordPress/wporg-mu-plugins/tree/build",
                 "issues": "https://github.com/WordPress/wporg-mu-plugins/issues"
             },
-            "time": "2023-08-09T00:17:46+00:00"
+            "time": "2023-09-07T22:43:43+00:00"
         }
     ],
     "packages-dev": [
@@ -2526,5 +2526,5 @@
     "platform-overrides": {
         "php": "7.2"
     },
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.3.0"
 }
