@@ -1,14 +1,14 @@
 {
-	"name": "wporg-pattern-directory",
+	"name": "wporg-pattern-directory-project",
 	"version": "0.0.0",
 	"description": "wordpress.org/pattern-directory website",
 	"author": "WordPress.org",
 	"license": "GPL-2.0-or-later",
 	"private": true,
 	"dependencies": {
-		"@wordpress/env": "5.14.0",
-		"@wordpress/scripts": "26.0.0",
-		"@wordpress/stylelint-config": "21.12.0"
+		"@wordpress/env": "9.3.0",
+		"@wordpress/scripts": "27.2.0",
+		"@wordpress/stylelint-config": "21.34.0"
 	},
 	"scripts": {
 		"build:creator": "yarn workspace wporg-pattern-creator build",
