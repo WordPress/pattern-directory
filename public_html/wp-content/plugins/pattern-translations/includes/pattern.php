@@ -135,12 +135,14 @@ class Pattern {
 
 		$options = wp_parse_args( $args, $defaults );
 
-		$query = new \WP_Query();
-		$posts = $query->query( $options );
+		$query    = new \WP_Query();
+		$patterns = $query->query( $options );
 
 		wp_reset_postdata();
 
-		$patterns = array_map( [ self::class, 'from_post' ], $posts );
+		if ( 'ids' !== $query->get( 'fields' ) ) {
+			$patterns = array_map( [ self::class, 'from_post' ], $patterns );
+		}
 
 		return $patterns;
 	}
