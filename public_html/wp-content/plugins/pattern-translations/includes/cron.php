@@ -60,7 +60,7 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 				$timestamp += $delay;
 			}
 
-			printf( "Queued %d cron jobs of %d Patterns each.\n", count( $pattern_ids ) / CHUNK_SIZE, CHUNK_SIZE );
+			printf( "Queued %d cron jobs of %d Patterns each.\n", count( $pattern_ids ) / CHUNK_SIZE, CHUNK_SIZE ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			return;
 		}
 	}
