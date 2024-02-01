@@ -24,7 +24,7 @@ add_action( 'admin_init', __NAMESPACE__ . '\register_cron_tasks' );
 /**
  * Periodically import all Patterns into GlotPress for translation.
  *
- * This is the equivilient of the following WP-CLI command:
+ * This is the equivalent of the following WP-CLI command:
  * `wp --url=https://wordpress.org/patterns/ patterns glotpress-import --all-posts --save`
  */
 function pattern_import_to_glotpress() {
