@@ -4,6 +4,8 @@ use WordPressdotorg\Pattern_Translations\{ Pattern, PatternMakepot };
 use function WordPressdotorg\Pattern_Translations\create_or_update_translated_pattern;
 use function WordPressdotorg\Locales\get_locales;
 
+const CHUNK_SIZE = 200;
+
 /**
  * Register the cron jobs needed.
  */
@@ -36,15 +38,41 @@ add_action( 'pattern_import_to_glotpress', __NAMESPACE__ . '\pattern_import_to_g
  * Sync/Create translated patterns of GlotPress translated patterns.
  *
  * This creates the "forked" patterns of a parent pattern when translations are available.
+ * This queues sub-tasks which each process a CHUNK_SIZE group of patterns, to avoid memory exhaustion.
+ * These subtasks are spread between now and the next time this cron is expected to run.
+ *
+ * @param int[] $pattern_ids Optional. An array of Pattern IDs to process.
+ *                           If not provided, queues sub-tasks if in cron context, else processes all patterns.
  */
-function pattern_import_translations_to_directory() {
-	$patterns = Pattern::get_patterns();
-	$locales  = get_locales();
+function pattern_import_translations_to_directory( $pattern_ids = array() ) {
+	if ( ! $pattern_ids ) {
+		$pattern_ids = Pattern::get_patterns( [ 'fields' => 'ids' ] );
 
-	printf( "Processing %d Patterns in %d locales.\n", count( $patterns ), count( $locales ) );
+		if ( wp_doing_cron() ) {
+			// Chunk the patterns to avoid memory exhaustion.
+			$timestamp = time();
+			$chunks    = array_chunk( $pattern_ids, CHUNK_SIZE );
+			// Spread out the sub-tasks over the entire twicedaily period.
+			$delay     = floor( ( 12 * HOUR_IN_SECONDS ) / count( $chunks ) );
+			foreach ( $chunks as $chunk ) {
+				wp_schedule_single_event( $timestamp, current_action(), array( $chunk ) );
 
-	foreach ( $patterns as $pattern ) {
-		echo "Processing {$pattern->name} / '{$pattern->title}'..\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				$timestamp += $delay;
+			}
+
+			printf( "Queued %d cron jobs of %d Patterns each.\n", count( $pattern_ids ) / CHUNK_SIZE, CHUNK_SIZE );
+			return;
+		}
+	}
+
+	$locales = get_locales();
+
+	printf( "Processing %d Patterns in %d locales.\n", count( $pattern_ids ), count( $locales ) );
+
+	foreach ( $pattern_ids as $i => $pattern_id ) {
+		$pattern = Pattern::from_post( get_post( $pattern_id ) );
+
+		echo "{$i}. Processing {$pattern->name} / '{$pattern->title}'..\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		foreach ( $locales as $gp_locale ) {
 			$locale     = $gp_locale->wp_locale;
 			if ( ! $locale || 'en_US' === $locale ) {
