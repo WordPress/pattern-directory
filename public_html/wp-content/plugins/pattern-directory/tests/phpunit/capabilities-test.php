@@ -108,7 +108,7 @@ class Capabilities_Test extends WP_UnitTestCase {
 	/**
 	 * Clean up shared fixtures.
 	 */
-	public static function wpTearDownAfterClass() {
+	public static function tear_down_after_class() {
 		wp_delete_post( self::$pattern_id_1, true );
 		wp_delete_post( self::$pattern_id_2, true );
 		wp_delete_post( self::$post_id, true );
@@ -124,7 +124,7 @@ class Capabilities_Test extends WP_UnitTestCase {
 	/**
 	 * Reset state between tests.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		unset( $GLOBALS['current_screen'] );
 		wp_set_current_user( 0 );
 	}
