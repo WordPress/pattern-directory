@@ -4,7 +4,7 @@ use WordPressdotorg\Pattern_Translations\{ Pattern, PatternMakepot };
 use function WordPressdotorg\Pattern_Translations\create_or_update_translated_pattern;
 use function WordPressdotorg\Locales\get_locales;
 
-const CHUNK_SIZE = 200;
+const CHUNK_SIZE = 50;
 
 /**
  * Register the cron jobs needed.
