@@ -1,0 +1,27 @@
+.wp-block-wporg-pattern-preview {
+	position: relative;
+	width: 100%;
+}
+
+// Specificity hack to ensure the margin is not overridden by the responsive styles in `style.css`.
+// The specificity includes the ID in `:not`, which is higher than the nested `alignfull` classes.
+.wp-block-wporg-pattern-preview:not(#spec-hack) {
+	margin: 0 !important;
+}
+
+.wp-block-wporg-pattern-preview__controls {
+	text-align: center;
+}
+
+.wp-block-wporg-pattern-preview__frame {
+	// The height is calculated based on the child iframe, `content-box` means
+	// this does not need to include the padding.
+	box-sizing: content-box;
+	padding-top: var(--wp--preset--spacing--20);
+	padding-bottom: var(--wp--preset--spacing--20);
+
+	> iframe {
+		margin: 0 auto;
+		display: block;
+	}
+}

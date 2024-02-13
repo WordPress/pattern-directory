@@ -1,0 +1,13 @@
+.wp-block-wporg-favorite-button__button {
+	margin: 0;
+	padding: 0;
+	background: none;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
+	font-size: 14px;
+}
+
+.wp-block-wporg-favorite-button:not(.is-favorite) .emoji {
+	filter: grayscale(1);
+}

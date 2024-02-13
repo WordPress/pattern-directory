@@ -1,0 +1,17 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 2,
+	"name": "wporg/order-dropdown",
+	"version": "0.1.0",
+	"title": "Sort Order Dropdown",
+	"category": "design",
+	"icon": "",
+	"description": "Display the pattern categories.",
+	"textdomain": "wporg",
+	"supports": {
+		"html": false
+	},
+	"editorScript": "file:./index.js",
+	"style": "file:./style-index.css",
+	"viewScript": "file:./view.js"
+}

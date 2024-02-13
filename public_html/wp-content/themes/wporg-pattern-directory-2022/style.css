@@ -1,0 +1,73 @@
+/*
+ * Theme Name: WordPress.org Pattern Directory 2022
+ * Theme URI: https://github.com/WordPress/pattern-directory
+ * Author: WordPress.org
+ * Author URI: https://wordpress.org/
+ * Description:
+ * Version: 1.0.0
+ * License: GNU General Public License v2 or later
+ * Text Domain: wporg
+ * Template: wporg-parent-2021
+ */
+
+/*
+ * Note: only add styles here in cases where you can't achieve the style with
+ * templates or theme.json settings.
+ */
+
+/* Fix the search box… check if there's a GBy way to do this. */
+.wp-block-search.wp-block-search__button-inside .wp-block-search__inside-wrapper {
+	border: none;
+	background: var(--wp--preset--color--white);
+	color: var(--wp--preset--color--charcoal-1);
+}
+
+.wp-block-search.wp-block-search__button-inside .wp-block-search__inside-wrapper .wp-block-search__input {
+	border: none;
+	background: var(--wp--preset--color--white);
+	color: var(--wp--preset--color--charcoal-1);
+}
+
+/* Fix image alignment */
+.wp-block-avatar__image {
+	vertical-align: middle;
+}
+
+.wp-block-navigation.is-style-filter-bar {
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.wp-block-navigation.is-style-filter-bar .wp-block-navigation__container {
+	gap: 0;
+}
+
+.wp-block-navigation.is-style-filter-bar a {
+	display: inline-block;
+	padding: var(--wp--preset--spacing--10) var(--wp--preset--spacing--20);
+	border-radius: 3px;
+}
+
+.wp-block-navigation.is-style-filter-bar .current-menu-item a {
+	background: var(--wp--preset--color--blueberry-1);
+	color: var(--wp--preset--color--white);
+}
+
+
+@media (max-width: 1199px) {
+
+	/* Once we start touching content, add in some side padding. */
+	.entry-content.entry-content > .alignwide,
+	.entry-content.entry-content > .alignfull {
+		padding-left: var(--wp--preset--spacing--60) !important;
+		padding-right: var(--wp--preset--spacing--60) !important;
+	}
+
+	/* Ensure nested full-alignment items are still full-width */
+	.entry-content.entry-content > .alignfull .alignfull {
+		margin-left: calc(var(--wp--preset--spacing--60) * -1) !important;
+		margin-right: calc(var(--wp--preset--spacing--60) * -1) !important;
+	}
+}

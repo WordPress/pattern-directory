@@ -1,0 +1,9 @@
+.wp-block-wporg-copy-button {
+	min-width: fit-content;
+}
+
+.wp-block-wporg-copy-button.is-variant-small .wp-element-button {
+	padding: var(--wp--preset--spacing--10) !important;
+	font-size: var(--wp--preset--font-size--small);
+	font-weight: 400;
+}
