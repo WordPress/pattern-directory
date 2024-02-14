@@ -26,6 +26,10 @@ const init = () => {
 
 				if ( success ) {
 					speak( __( 'Copied pattern to clipboard.', 'wporg-patterns' ) );
+					button.innerText = button.dataset.labelSuccess;
+					setTimeout( () => {
+						button.innerText = button.dataset.label;
+					}, 20000 );
 				}
 			};
 		} );

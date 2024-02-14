@@ -3,7 +3,10 @@
 }
 
 .wp-block-wporg-copy-button.is-variant-small .wp-element-button {
-	padding: var(--wp--preset--spacing--10) !important;
+	--wp--custom--button--spacing--padding--top: calc(var(--wp--preset--spacing--10) / 2);
+	--wp--custom--button--spacing--padding--right: var(--wp--preset--spacing--10);
+	--wp--custom--button--spacing--padding--bottom: calc(var(--wp--preset--spacing--10) / 2);
+	--wp--custom--button--spacing--padding--left: var(--wp--preset--spacing--10);
 	font-size: var(--wp--preset--font-size--small);
 	font-weight: 400;
 }
