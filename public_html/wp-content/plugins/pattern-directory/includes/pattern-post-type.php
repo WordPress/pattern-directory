@@ -21,6 +21,9 @@ add_filter( 'allowed_block_types_all', __NAMESPACE__ . '\remove_disallowed_block
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
 add_filter( 'rest_' . POST_TYPE . '_collection_params', __NAMESPACE__ . '\filter_patterns_collection_params' );
 add_filter( 'rest_' . POST_TYPE . '_query', __NAMESPACE__ . '\filter_patterns_rest_query', 10, 2 );
+add_action( 'query_vars', __NAMESPACE__ . '\add_patterns_query_vars' );
+add_action( 'pre_get_posts', __NAMESPACE__ . '\modify_patterns_query' );
+add_filter( 'query_loop_block_query_vars', __NAMESPACE__ . '\modify_query_loop_block_query_vars', 10, 2 );
 add_filter( 'user_has_cap', __NAMESPACE__ . '\set_pattern_caps' );
 add_filter( 'posts_orderby', __NAMESPACE__ . '\filter_orderby_locale', 10, 2 );
 add_action( 'init', __NAMESPACE__ . '\add_preview_endpoint' );
@@ -793,6 +796,103 @@ function filter_patterns_rest_query( $args, $request ) {
 	}
 
 	return $args;
+}
+
+/**
+ * Add the `curation` query parameter.
+ *
+ * @param array $query_vars
+ *
+ * @return array
+ */
+function add_patterns_query_vars( $query_vars ) {
+	$query_vars[] = 'curation';
+	return $query_vars;
+}
+
+/**
+ * Update the query to show patters according to the "curation" filter.
+ *
+ * @param WP_Query $query The WP_Query instance (passed by reference).
+ */
+function modify_patterns_query( $query ) {
+	if ( ! $query->is_main_query() ) {
+		return;
+	}
+
+	// If `curation` is passed and either `core` or `community`, we should
+	// filter the result. If `curation=all`, no filtering is needed.
+	$curation = $query->get( 'curation' );
+	if ( $curation ) {
+		$tax_query = isset( $query->tax_query->queries ) ? $query->tax_query->queries : [];
+		if ( 'core' === $curation ) {
+			// Patterns with the core keyword.
+			$tax_query['core_keyword'] = array(
+				'taxonomy' => 'wporg-pattern-keyword',
+				'field'    => 'slug',
+				'terms'    => [ 'core' ],
+				'operator' => 'IN',
+			);
+		} else if ( 'community' === $curation ) {
+			// Patterns without the core keyword.
+			$tax_query['core_keyword'] = array(
+				'taxonomy' => 'wporg-pattern-keyword',
+				'field'    => 'slug',
+				'terms'    => [ 'core' ],
+				'operator' => 'NOT IN',
+			);
+		}
+		$query->set( 'tax_query', $tax_query );
+	}
+
+	if ( str_ends_with( $query->get( 'orderby' ), '_desc' ) ) {
+		$orderby = str_replace( '_desc', '', $query->get( 'orderby' ) );
+		$query->set( 'orderby', $orderby );
+		$query->set( 'order', 'desc' );
+	} else if ( str_ends_with( $query->get( 'orderby' ), '_asc' ) ) {
+		$orderby = str_replace( '_asc', '', $query->get( 'orderby' ) );
+		$query->set( 'orderby', $orderby );
+		$query->set( 'order', 'asc' );
+	}
+
+	if ( $query->get( 'orderby' ) === 'favorite_count' ) {
+		$query->set( 'orderby', 'meta_value_num' );
+		$query->set( 'meta_key', 'wporg-pattern-favorites' );
+	}
+}
+
+/**
+ * Modify query vars to support `curation`.
+ *
+ * @return string
+ */
+function modify_query_loop_block_query_vars( $query, $block ) {
+	if ( isset( $block->context['query']['curation'] ) ) {
+		if ( 'core' === $block->context['query']['curation'] ) {
+			// Patterns with the core keyword.
+			$query['tax_query']['core_keyword'] = array(
+				'taxonomy' => 'wporg-pattern-keyword',
+				'field'    => 'slug',
+				'terms'    => 'core',
+				'operator' => 'IN',
+			);
+		} else if ( 'community' === $block->context['query']['curation'] ) {
+			// Patterns without the core keyword.
+			$query['tax_query']['core_keyword'] = array(
+				'taxonomy' => 'wporg-pattern-keyword',
+				'field'    => 'slug',
+				'terms'    => [ 'core' ],
+				'operator' => 'NOT IN',
+			);
+		}
+	}
+
+	if ( isset( $block->context['query']['orderBy'] ) && 'favorite_count' === $block->context['query']['orderBy'] ) {
+		$query['orderby'] = 'meta_value_num';
+		$query['meta_key'] = 'wporg-pattern-favorites';
+	}
+
+	return $query;
 }
 
 /**
