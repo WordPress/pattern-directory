@@ -1,7 +1,7 @@
 <?php
 /**
- * Title: Pattern Grid (Favorites)
- * Slug: wporg-pattern-directory-2022/grid-favorites
+ * Title: Pattern Grid (Mine)
+ * Slug: wporg-pattern-directory-2022/grid-mine
  * Inserter: no
  */
 
@@ -37,10 +37,6 @@
 			<!-- wp:wporg/pattern-thumbnail /-->
 
 			<!-- wp:post-title {"isLink":true,"fontSize":"small","fontFamily":"inter"} /-->
-
-			<!-- wp:post-author {"avatarSize":24,"fontSize":"small"} /-->
-
-			<!-- wp:wporg/favorite-button {"variant":"small"} /-->
 		</div>
 		<!-- /wp:group -->
 	<!-- /wp:post-template -->
