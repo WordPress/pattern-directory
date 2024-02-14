@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __, isRTL } from '@wordpress/i18n';
-import { render, useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import { createRoot, useCallback, useEffect, useRef, useState } from '@wordpress/element';
 
 const VIEWPORT_WIDTH = 1200;
 
@@ -98,7 +98,8 @@ const init = () => {
 	const containers = document.querySelectorAll( '.wp-block-wporg-pattern-preview' );
 	if ( containers ) {
 		containers.forEach( ( element ) => {
-			render( <ResizableCanvas url={ element.dataset.url } />, element );
+			const root = createRoot( element );
+			root.render( <ResizableCanvas url={ element.dataset.url } /> );
 		} );
 	}
 };

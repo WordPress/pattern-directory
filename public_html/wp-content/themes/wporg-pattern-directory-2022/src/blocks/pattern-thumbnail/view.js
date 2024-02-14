@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { render } from '@wordpress/element';
+import { createRoot } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -12,7 +12,8 @@ const init = () => {
 	const containers = document.querySelectorAll( '.wp-block-wporg-pattern-thumbnail' );
 	if ( containers ) {
 		containers.forEach( ( element ) => {
-			render( <Iframe url={ element.dataset.url } />, element );
+			const root = createRoot( element );
+			root.render( <Iframe url={ element.dataset.url } /> );
 		} );
 	}
 };
