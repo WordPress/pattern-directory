@@ -27,6 +27,9 @@ add_action(
 	function() {
 		// Don't swap author link with w.org profile link.
 		remove_all_filters( 'author_link' );
+
+		// Remove the "By…" from the author name block.
+		remove_filter( 'render_block_core/post-author-name', 'WordPressdotorg\Theme\Parent_2021\Gutenberg_Tweaks\render_author_prefix', 10, 2 );
 	}
 );
 
@@ -78,10 +81,10 @@ function update_query_loop_vars( $query, $block, $page ) {
 		// we also want to exclude the current post from results.
 		$current_post = get_post();
 		if ( $current_post && isset( $query['author'] ) && '[current]' === $query['author'] ) {
-			$query['author'] = $current_post->post_author;
-			$query['post__not_in'] = [ $current_post->ID ];
+				$query['author'] = $current_post->post_author;
+				$query['post__not_in'] = [ $current_post->ID ];
+			}
 		}
-	}
 
 	if ( isset( $page ) && ! isset( $query['offset'] ) ) {
 		$query['paged'] = $page;
