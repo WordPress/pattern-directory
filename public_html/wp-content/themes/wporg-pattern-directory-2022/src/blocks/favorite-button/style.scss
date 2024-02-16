@@ -1,13 +1,77 @@
-.wp-block-wporg-favorite-button__button {
-	margin: 0;
-	padding: 0;
-	background: none;
-	border: 0;
-	border-radius: 0;
-	box-shadow: none;
-	font-size: 14px;
+:where(.wp-block-wporg-favorite-button) {
+	.wporg-favorite-button__button {
+		margin: 0;
+		padding: 0;
+		background: none;
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+		font-size: 14px;
+	}
+
+	&.is-favorite svg path {
+		fill: #d24c49;
+	}
+
+	> * {
+
+		/* Align children. */
+		display: flex;
+		align-items: center;
+		gap: calc(var(--wp--preset--spacing--10) / 2);
+	}
+
+	svg {
+		height: 1rem;
+		width: 1rem;
+		transition: all 0.15s ease-out;
+
+		path {
+			fill: var(--wp--preset--color--charcoal-4);
+		}
+	}
+
+	&:not(.is-variant-small) {
+		svg path {
+			fill: transparent;
+			stroke: var(--wp--preset--color--blueberry-1);
+			stroke-width: 2px;
+		}
+
+		&.is-favorite svg path {
+			fill: #d24c49;
+			stroke-width: 0;
+		}
+
+		&:hover svg path {
+			transform-origin: center;
+			animation: 0.9s infinite HeartBeat;
+
+			@media (prefers-reduced-motion) {
+				animation: none;
+			}
+		}
+	}
 }
 
-.wp-block-wporg-favorite-button:not(.is-favorite) .emoji {
-	filter: grayscale(1);
+@keyframes HeartBeat {
+	0% {
+		transform: scale(1);
+	}
+
+	25% {
+		transform: scale(1.2);
+	}
+
+	40% {
+		transform: scale(1);
+	}
+
+	60% {
+		transform: scale(1.2);
+	}
+
+	100% {
+		transform: scale(1);
+	}
 }
