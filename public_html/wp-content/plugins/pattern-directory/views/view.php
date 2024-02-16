@@ -39,6 +39,8 @@ remove_site_data_filters();
 			align-items:center;
 			min-height:100vh;
 			box-sizing: border-box;
+			padding-top: 0;
+			padding-bottom: 0;
 		}
 		.wp-site-blocks > * {
 			width: 100%;
