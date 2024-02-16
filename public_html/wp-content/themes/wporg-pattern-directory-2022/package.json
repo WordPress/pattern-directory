@@ -20,8 +20,8 @@
 		]
 	},
 	"scripts": {
-		"build": "wp-scripts build",
-		"start": "wp-scripts start",
+		"build": "wp-scripts build --experimental-modules",
+		"start": "wp-scripts start --experimental-modules",
 		"lint:js": "wp-scripts lint-js src",
 		"lint:css": "wp-scripts lint-style src/**/*.scss",
 		"format": "wp-scripts format src -- --config=../../../../.prettierrc.js"

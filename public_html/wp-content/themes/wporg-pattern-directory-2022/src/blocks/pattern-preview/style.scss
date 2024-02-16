@@ -23,5 +23,8 @@
 	> iframe {
 		margin: 0 auto;
 		display: block;
+		pointer-events: none;
+		border: none;
+		max-width: none;
 	}
 }

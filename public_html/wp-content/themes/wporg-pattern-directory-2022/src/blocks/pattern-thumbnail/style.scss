@@ -1,7 +1,16 @@
 .wp-block-wporg-pattern-thumbnail {
-	border-radius: 2px;
-	box-shadow: 0 0 0 1px var(--wp--preset--color--light-grey-2);
+	border-color: var(--wp--custom--wporg-pattern-thumbnail--border--color);
+	border-radius: var(--wp--custom--wporg-pattern-thumbnail--border--radius);
+	border-style: solid;
+	border-width: var(--wp--custom--wporg-pattern-thumbnail--border--width);
 	margin: 0;
 	position: relative;
 	width: 100%;
+	overflow: hidden;
+
+	iframe {
+		border: none;
+		max-width: none;
+		pointer-events: none;
+	}
 }

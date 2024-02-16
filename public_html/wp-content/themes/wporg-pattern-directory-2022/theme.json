@@ -1,5 +1,15 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/theme.json",
 	"version": 2,
-	"settings": {}
+	"settings": {
+		"custom": {
+			"wporg-pattern-thumbnail": {
+				"border": {
+					"color": "rgba(30, 30, 30, 0.1)",
+					"width": "2px",
+					"radius": "2px"
+				}
+			}
+		}
+	}
 }
