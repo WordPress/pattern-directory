@@ -7,8 +7,7 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 import { __, _x } from '@wordpress/i18n';
-/* eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK. */
-import { __experimentalPreviewOptions as PreviewOptions, ToolSelector } from '@wordpress/block-editor';
+import { ToolSelector } from '@wordpress/block-editor';
 import { Button, VisuallyHidden } from '@wordpress/components';
 import { Icon, arrowLeft, listView, plus } from '@wordpress/icons';
 import { PinnedItems } from '@wordpress/interface';
@@ -32,24 +31,19 @@ const preventDefault = ( event ) => {
 
 export default function Header() {
 	const inserterButton = useRef();
-	const { deviceType, hasReducedUI, isInserterOpen, isListViewOpen, listViewShortcut } = useSelect(
-		( select ) => {
-			const { getPreviewDeviceType, isFeatureActive, isInserterOpened, isListViewOpened } =
-				select( patternStore );
-			const { getShortcutRepresentation } = select( keyboardShortcutsStore );
+	const { hasReducedUI, isInserterOpen, isListViewOpen, listViewShortcut } = useSelect( ( select ) => {
+		const { isFeatureActive, isInserterOpened, isListViewOpened } = select( patternStore );
+		const { getShortcutRepresentation } = select( keyboardShortcutsStore );
 
-			return {
-				deviceType: getPreviewDeviceType(),
-				hasReducedUI: isFeatureActive( 'reducedUI' ),
-				isInserterOpen: isInserterOpened(),
-				isListViewOpen: isListViewOpened(),
-				listViewShortcut: getShortcutRepresentation( 'core/edit-site/toggle-list-view' ),
-			};
-		},
-		[]
-	);
+		return {
+			hasReducedUI: isFeatureActive( 'reducedUI' ),
+			isInserterOpen: isInserterOpened(),
+			isListViewOpen: isListViewOpened(),
+			listViewShortcut: getShortcutRepresentation( 'core/edit-site/toggle-list-view' ),
+		};
+	}, [] );
 
-	const { setPreviewDeviceType, setIsInserterOpened, setIsListViewOpened } = useDispatch( patternStore );
+	const { setIsInserterOpened, setIsListViewOpened } = useDispatch( patternStore );
 
 	const isLargeViewport = useViewportMatch( 'medium' );
 
@@ -115,9 +109,6 @@ export default function Header() {
 			<div className="pattern-header_end">
 				<div className="pattern-header__actions">
 					<SaveDraftButton />
-					<PreviewOptions deviceType={ deviceType } setDeviceType={ setPreviewDeviceType }>
-						{ () => null /* Empty function required by `PreviewOptions`. */ }
-					</PreviewOptions>
 					<SaveButton />
 					<PinnedItems.Slot scope="wporg/pattern-creator" />
 					<MoreMenu />
