@@ -49,6 +49,18 @@ function get_applied_filter_list( $include_search = true ) {
 }
 
 /**
+ * Get the destination for query-filter submission based on the current page.
+ *
+ * When on an Author archive, it should stay on the author archive.
+ *
+ * @return string
+ */
+function get_filter_action_url() {
+	global $wp;
+	return is_author() ? home_url( $wp->request ) : home_url( '/archives/' );
+}
+
+/**
  * Update the query total label to reflect "patterns" found.
  *
  * @param string $label       The maybe-pluralized label to use, a result of `_n()`.
@@ -97,7 +109,7 @@ function get_category_options( $options ) {
 		'label' => $label,
 		'title' => __( 'Categories', 'wporg' ),
 		'key' => 'pattern-categories',
-		'action' => home_url( '/archives/' ),
+		'action' => get_filter_action_url(),
 		'options' => array_combine( wp_list_pluck( $categories, 'slug' ), wp_list_pluck( $categories, 'name' ) ),
 		'selected' => $selected,
 	);
@@ -133,7 +145,7 @@ function get_curation_options( $options ) {
 		'label' => $label,
 		'title' => __( 'Filter', 'wporg' ),
 		'key' => 'curation',
-		'action' => home_url( '/archives/' ),
+		'action' => get_filter_action_url(),
 		'options' => array(
 			'community' => __( 'Community', 'wporg' ),
 			'core' => __( 'Curated', 'wporg' ),
@@ -179,7 +191,7 @@ function get_sort_options( $options ) {
 		'label' => $label,
 		'title' => __( 'Sort', 'wporg' ),
 		'key' => 'orderby',
-		'action' => home_url( '/archives/' ),
+		'action' => get_filter_action_url(),
 		'options' => array(
 			'favorite_count_desc' => __( 'Popular', 'wporg' ),
 			'date_desc' => __( 'Newest', 'wporg' ),
