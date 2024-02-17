@@ -80,11 +80,13 @@ function update_query_loop_vars( $query, $block, $page ) {
 		// The `[current]` author is a placeholder for the current post's author, and in this case
 		// we also want to exclude the current post from results.
 		$current_post = get_post();
-		if ( $current_post && isset( $query['author'] ) && '[current]' === $query['author'] ) {
+		if ( isset( $block->context['query']['override'] ) ) {
+			if ( 'more-by-author' === $block->context['query']['override'] && $current_post && $current_post->post_author ) {
 				$query['author'] = $current_post->post_author;
 				$query['post__not_in'] = [ $current_post->ID ];
 			}
 		}
+	}
 
 	if ( isset( $page ) && ! isset( $query['offset'] ) ) {
 		$query['paged'] = $page;
