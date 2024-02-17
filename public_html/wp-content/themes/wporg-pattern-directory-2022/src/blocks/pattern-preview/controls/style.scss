@@ -1,0 +1,21 @@
+.wp-block-wporg-pattern-view-control {
+	position: relative;
+	width: 100%;
+}
+
+.wp-block-wporg-pattern-view-control__controls {
+	margin-bottom: var(--wp--preset--spacing--20);
+	text-align: center;
+}
+
+.wp-block-wporg-pattern-view-control .wp-block-wporg-pattern-preview {
+	// The height is calculated based on the child iframe, `content-box` means
+	// this does not need to include the padding.
+	box-sizing: content-box;
+	border: none;
+
+	> iframe {
+		margin: 0 auto;
+		display: block;
+	}
+}

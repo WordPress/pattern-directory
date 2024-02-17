@@ -4,11 +4,18 @@ $url = add_query_arg( 'view', true, get_permalink( $block->context['postId'] ) )
 
 // Initial state to pass to Interactivity API.
 $init_state = [
+	'url' => $url,
 	'previewWidth' => 1200,
 	'previewHeight' => 200,
-	'iframeWidth' => 1200,
 ];
 $encoded_state = wp_json_encode( $init_state );
+
+// Remove the nested context for child blocks, so that it uses this context.
+$p = new WP_HTML_Tag_Processor( $content );
+$p->next_tag( 'div' );
+$p->remove_attribute( 'data-wp-interactive' );
+$p->remove_attribute( 'data-wp-context' );
+$content = $p->get_updated_html();
 
 ?>
 <div
@@ -18,7 +25,7 @@ $encoded_state = wp_json_encode( $init_state );
 	data-wp-init="actions.handleOnResize"
 	data-wp-on-window--resize="actions.handleOnResize"
 >
-	<div class="wp-block-wporg-pattern-preview__controls">
+	<div class="wp-block-wporg-pattern-view-control__controls">
 		<select
 			data-wp-on--change="actions.onWidthChange"
 			data-wp-bind--value="context.previewWidth"
@@ -29,22 +36,5 @@ $encoded_state = wp_json_encode( $init_state );
 			<option value="480"><?php _e( 'Narrow (480px)', 'wporg-patterns' ); ?></option>
 		</select>
 	</div>
-	<div
-		class="wp-block-wporg-pattern-preview__frame"
-		style="overflow:hidden;"
-		data-wp-style--height="state.previewHeightCSS"
-		tabIndex="-1"
-	>
-		<iframe
-			title=<?php _e( 'Pattern Preview', 'wporg-patterns' ); ?>
-			tabIndex="-1"
-			src="<?php echo esc_url( $url ); ?>"
-			data-wp-style--width="state.iframeWidthCSS"
-			data-wp-style--height="state.iframeHeightCSS"
-			data-wp-style--transform="state.transformCSS"
-			data-wp-on--load="actions.updatePreviewHeight"
-			data-wp-watch="actions.updatePreviewHeight"
-			style="transform-origin: <?php echo is_rtl() ? 'top right' : 'top left'; ?>;"
-		></iframe>
-	</div>
+	<?php echo $content; ?>
 </div>

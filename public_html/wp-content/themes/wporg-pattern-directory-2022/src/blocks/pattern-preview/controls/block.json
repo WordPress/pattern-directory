@@ -1,12 +1,12 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
-	"name": "wporg/pattern-preview",
+	"name": "wporg/pattern-view-control",
 	"version": "0.1.0",
-	"title": "Pattern Preview",
+	"title": "Pattern View Control",
 	"category": "design",
 	"icon": "",
-	"description": "Display a resizable preview for the current pattern.",
+	"description": "A wrapper for the pattern preview to control the viewport size.",
 	"textdomain": "wporg",
 	"supports": {
 		"align": [ "wide", "full" ],

@@ -9,6 +9,10 @@ const init = () => {
 	if ( containers ) {
 		containers.forEach( ( element ) => {
 			const button = element.querySelector( 'button' );
+			if ( ! button ) {
+				return;
+			}
+
 			const label = element.querySelector( '.wp-block-wporg-favorite-button__label' );
 			const countEl = element.querySelector( '.wp-block-wporg-favorite-button__count' );
 			button.disabled = false;

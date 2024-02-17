@@ -24,7 +24,9 @@
 
 	<!-- wp:group {"layout":{"type":"constrained"},"style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"}}},"backgroundColor":"light-grey-2","align":"full"} -->
 	<div class="wp-block-group has-light-grey-2-background-color has-background alignfull" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50);">
-		<!-- wp:wporg/pattern-preview {"align":"full"} /-->
+		<!-- wp:wporg/pattern-view-control {"align":"full"} -->
+			<!-- wp:wporg/pattern-preview /-->
+		<!-- /wp:wporg/pattern-view-control -->
 
 		<!-- wp:group {"layout":{"type":"default"},"align":"wide"} -->
 		<div class="wp-block-group alignwide">
