@@ -22,3 +22,4 @@
 # Ignore built files inside our plugins & themes.
 /public_html/wp-content/themes/pattern-directory/css/*.css
 /public_html/wp-content/themes/pattern-directory/css/*.map
+public_html/wp-content/tests/phpunit/.phpunit.result.cache

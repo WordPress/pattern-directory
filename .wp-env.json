@@ -7,6 +7,7 @@
 		"WP_ENVIRONMENT_TYPE": "local"
 	},
 	"core": "WordPress/WordPress#master",
+	"phpVersion": "7.4",
 	"plugins": [],
 	"mappings": {
 		".htaccess": "./.wp-env/.htaccess",
@@ -16,6 +17,9 @@
 	},
 	"env": {
 		"tests": {
+			"config": {
+				"WP_ENVIRONMENT_TYPE": false
+			},
 			"mappings": {
 				".htaccess": "./.wp-env/.htaccess",
 				"wp-content": "./public_html/wp-content",
