@@ -6,6 +6,9 @@
 		convertNoticesToExceptions="true"
 		convertWarningsToExceptions="true"
 >
+	<php>
+		<const name="WP_TESTS_MULTISITE" value="1" />
+	</php>
 	<testsuites>
 		<testsuite name="pattern-directory">
 			<directory suffix="-test.php">../../plugins/pattern-directory/tests/phpunit/</directory>

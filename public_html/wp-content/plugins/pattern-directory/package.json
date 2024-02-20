@@ -14,19 +14,19 @@
 		"test:unit": "echo \"No JS tests.\""
 	},
 	"dependencies": {
-		"@wordpress/a11y": "3.29.0",
-		"@wordpress/api-fetch": "6.26.0",
-		"@wordpress/components": "23.6.0",
-		"@wordpress/compose": "6.6.0",
-		"@wordpress/core-data": "6.6.0",
-		"@wordpress/data": "8.6.0",
-		"@wordpress/edit-post": "7.6.0",
-		"@wordpress/editor": "13.6.0",
-		"@wordpress/element": "5.6.0",
-		"@wordpress/i18n": "4.29.0",
-		"@wordpress/notices": "3.29.0",
-		"@wordpress/plugins": "5.6.0",
-		"@wordpress/scripts": "26.0.0"
+		"@wordpress/a11y": "3.51.0",
+		"@wordpress/api-fetch": "6.48.0",
+		"@wordpress/components": "26.0.1",
+		"@wordpress/compose": "6.28.0",
+		"@wordpress/core-data": "6.28.1",
+		"@wordpress/data": "9.21.0",
+		"@wordpress/edit-post": "7.28.1",
+		"@wordpress/editor": "13.28.1",
+		"@wordpress/element": "5.28.0",
+		"@wordpress/i18n": "4.51.0",
+		"@wordpress/notices": "4.19.0",
+		"@wordpress/plugins": "6.19.0",
+		"@wordpress/scripts": "27.2.0"
 	},
 	"eslintConfig": {
 		"extends": "../../../../.eslintrc.js"

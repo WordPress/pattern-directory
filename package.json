@@ -1,27 +1,29 @@
 {
-	"name": "wporg-pattern-directory",
+	"name": "wporg-pattern-directory-project",
 	"version": "0.0.0",
 	"description": "wordpress.org/pattern-directory website",
 	"author": "WordPress.org",
 	"license": "GPL-2.0-or-later",
 	"private": true,
 	"dependencies": {
-		"@wordpress/env": "5.14.0",
-		"@wordpress/scripts": "26.0.0",
-		"@wordpress/stylelint-config": "21.12.0"
+		"@wordpress/env": "9.3.0",
+		"@wordpress/scripts": "27.2.0",
+		"@wordpress/stylelint-config": "21.34.0"
 	},
 	"scripts": {
 		"build:creator": "yarn workspace wporg-pattern-creator build",
 		"build:directory": "yarn workspace wporg-pattern-directory build",
-		"build:theme": "yarn workspace wporg-pattern-directory-theme build",
+		"build:theme:old": "yarn workspace wporg-pattern-directory-theme build",
+		"build:theme": "yarn workspace wporg-pattern-directory-2022-theme build",
 		"start:creator": "yarn workspace wporg-pattern-creator start",
 		"start:directory": "yarn workspace wporg-pattern-directory start",
-		"start:theme": "yarn workspace wporg-pattern-directory-theme start",
+		"start:theme:old": "yarn workspace wporg-pattern-directory-theme start",
+		"start:theme": "yarn workspace wporg-pattern-directory-2022-theme start",
 		"create": "./bin/index.sh",
 		"wp-env": "wp-env",
 		"lint:php": "composer run lint",
 		"format:php": "composer run format",
-		"test:php": "wp-env run phpunit 'WP_MULTISITE=1 phpunit -c /var/www/html/wp-content/tests/phpunit/phpunit.xml --verbose'"
+		"test:php": "wp-env run tests-cli --env-cwd=/var/www/html/ ./vendor/bin/phpunit -c wp-content/tests/phpunit/phpunit.xml"
 	},
 	"workspaces": [
 		"public_html/wp-content/plugins/pattern-creator",
