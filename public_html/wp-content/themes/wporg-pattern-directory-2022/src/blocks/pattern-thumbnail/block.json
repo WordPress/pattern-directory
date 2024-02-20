@@ -8,6 +8,16 @@
 	"icon": "",
 	"description": "Display a thumbnail for the current pattern.",
 	"textdomain": "wporg",
+	"attributes": {
+		"isLink": {
+			"type": "boolean",
+			"default": false
+		},
+		"lazyLoad": {
+			"type": "boolean",
+			"default": false
+		}
+	},
 	"supports": {
 		"align": ["wide", "full"],
 		"html": false,
