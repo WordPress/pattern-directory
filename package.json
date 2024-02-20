@@ -23,7 +23,7 @@
 		"wp-env": "wp-env",
 		"lint:php": "composer run lint",
 		"format:php": "composer run format",
-		"test:php": "wp-env run tests-cli --env-cwd=/var/www/html/ phpunit"
+		"test:php": "wp-env run tests-cli --env-cwd=/var/www/html/ phpunit -c wp-content/tests/phpunit/phpunit.xml"
 	},
 	"workspaces": [
 		"public_html/wp-content/plugins/pattern-creator",
