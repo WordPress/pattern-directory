@@ -2,8 +2,6 @@
  * WordPress dependencies
  */
 import { dispatch } from '@wordpress/data';
-/* eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK. */
-import { __experimentalFetchLinkSuggestions as fetchLinkSuggestions } from '@wordpress/core-data';
 import { registerCoreBlocks } from '@wordpress/block-library';
 import { render, unmountComponentAtNode } from '@wordpress/element';
 
@@ -42,9 +40,6 @@ export function reinitializeEditor( target, { postId, ...settings } ) {
  * @param {Object} settings Editor settings.
  */
 export function initialize( id, settings ) {
-	settings.__experimentalFetchLinkSuggestions = ( search, searchOptions ) =>
-		fetchLinkSuggestions( search, searchOptions, settings );
-
 	const target = document.getElementById( id );
 
 	registerCoreBlocks();

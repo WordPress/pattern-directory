@@ -15,24 +15,19 @@ import {
 	privateApis as blockEditorPrivateApis,
 	__unstableUseMouseMoveTypingReset as useMouseMoveTypingReset,
 	__experimentalUseResizeCanvas as useResizeCanvas,
-	useSetting,
+	useSettings,
 	__unstableUseTypingObserver as useTypingObserver,
 } from '@wordpress/block-editor';
 /* eslint-enable @wordpress/no-unsafe-wp-apis */
 import { PostTitle, VisualEditorGlobalKeyboardShortcuts } from '@wordpress/editor';
 import { useMergeRefs } from '@wordpress/compose';
-import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/private-apis';
 
 /**
  * Internal dependencies
  */
 import { POST_TYPE, store as patternStore } from '../../store';
 import { SidebarInspectorFill } from '../sidebar';
-
-const { unlock } = __dangerousOptInToUnstableAPIsOnlyForCoreModules(
-	'I know using unstable features means my plugin or theme will inevitably break on the next WordPress release.',
-	'@wordpress/edit-post'
-);
+import { unlock } from '../../lock-unlock';
 
 const { LayoutStyle } = unlock( blockEditorPrivateApis );
 
@@ -47,7 +42,7 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 		},
 		[ setIsInserterOpen ]
 	);
-	const layout = useSetting( 'layout' );
+	const [ layout ] = useSettings( 'layout' );
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor( 'postType', POST_TYPE );
 	const resizedCanvasStyles = useResizeCanvas( deviceType, true );
 	const ref = useMouseMoveTypingReset();
