@@ -4403,7 +4403,7 @@
     "@babel/runtime" "^7.16.0"
     jest-matcher-utils "^29.6.2"
 
-"@wordpress/jest-preset-default@^11.22.0":
+"@wordpress/jest-preset-default@11.22.0", "@wordpress/jest-preset-default@^11.22.0":
   version "11.22.0"
   resolved "https://registry.yarnpkg.com/@wordpress/jest-preset-default/-/jest-preset-default-11.22.0.tgz#778c07d545ed741b14284d83ca6e804cc9825a8b"
   integrity sha512-OSKGvYOQDWynaA78AUzwMpj8kkUrBSJF/Z8InH84RHV1w30DUMQ0b7pSJzOiPPo72uXDcTiit4hYHvSK20BqbA==
