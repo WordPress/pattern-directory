@@ -1,7 +1,7 @@
 <?php
 /**
  * Title: Single pattern
- * Slug: wporg-pattern-directory-2022/single-pattern
+ * Slug: wporg-pattern-directory-2024/single-pattern
  * Inserter: no
  */
 

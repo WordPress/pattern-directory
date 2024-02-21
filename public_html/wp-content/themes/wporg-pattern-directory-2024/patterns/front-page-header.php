@@ -1,7 +1,7 @@
 <?php
 /**
  * Title: Front Page Header
- * Slug: wporg-pattern-directory-2022/front-page-header
+ * Slug: wporg-pattern-directory-2024/front-page-header
  * Inserter: no
  */
 

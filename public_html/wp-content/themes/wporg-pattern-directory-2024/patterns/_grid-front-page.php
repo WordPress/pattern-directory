@@ -1,7 +1,7 @@
 <?php
 /**
  * Title: Pattern Grid (Front Page)
- * Slug: wporg-pattern-directory-2022/grid-front-page
+ * Slug: wporg-pattern-directory-2024/grid-front-page
  * Inserter: no
  */
 

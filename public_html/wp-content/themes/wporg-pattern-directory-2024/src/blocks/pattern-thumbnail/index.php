@@ -6,7 +6,7 @@
  * @package wporg
  */
 
-namespace WordPressdotorg\Theme\Pattern_Directory_2022\Pattern_Thumbnail_Block;
+namespace WordPressdotorg\Theme\Pattern_Directory_2024\Pattern_Thumbnail_Block;
 
 add_action( 'init', __NAMESPACE__ . '\init' );
 

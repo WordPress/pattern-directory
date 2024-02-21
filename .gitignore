@@ -18,7 +18,7 @@
 !/public_html/wp-content/plugins/pattern-directory
 !/public_html/wp-content/plugins/pattern-translations
 !/public_html/wp-content/themes/pattern-directory
-!/public_html/wp-content/themes/wporg-pattern-directory-2022
+!/public_html/wp-content/themes/wporg-pattern-directory-2024
 
 # Ignore built files inside our plugins & themes.
 /public_html/wp-content/themes/pattern-directory/css/*.css

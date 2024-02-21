@@ -6,7 +6,7 @@
  * @package wporg
  */
 
-namespace WordPressdotorg\Theme\Pattern_Directory_2022\Pattern_Preview_Blocks;
+namespace WordPressdotorg\Theme\Pattern_Directory_2024\Pattern_Preview_Blocks;
 
 add_action( 'init', __NAMESPACE__ . '\init' );
 

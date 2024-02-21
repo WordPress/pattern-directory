@@ -1,7 +1,7 @@
 <?php
 /**
  * Title: Footer
- * Slug: wporg-pattern-directory-2022/footer
+ * Slug: wporg-pattern-directory-2024/footer
  * Inserter: no
  */
 

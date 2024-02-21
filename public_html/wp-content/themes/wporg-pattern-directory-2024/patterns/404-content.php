@@ -1,7 +1,7 @@
 <?php
 /**
  * Title: 404 Content
- * Slug: wporg-pattern-directory-2022/404-content
+ * Slug: wporg-pattern-directory-2024/404-content
  * Inserter: no
  */
 

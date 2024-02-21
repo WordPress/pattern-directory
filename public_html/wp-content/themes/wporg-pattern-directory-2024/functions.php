@@ -1,8 +1,8 @@
 <?php
 
-namespace WordPressdotorg\Theme\Pattern_Directory_2022;
+namespace WordPressdotorg\Theme\Pattern_Directory_2024;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
-use function WordPressdotorg\Theme\Pattern_Directory_2022\Order_Dropdown_Block\get_orderby_args;
+use function WordPressdotorg\Theme\Pattern_Directory_2024\Order_Dropdown_Block\get_orderby_args;
 use function WordPressdotorg\Pattern_Directory\Favorite\{get_favorites};
 
 // Block files
@@ -54,7 +54,7 @@ function enqueue_assets() {
 	// explicitly unregistered. We can load any child-theme overrides by declaring the parent
 	// stylesheet as a dependency.
 	wp_enqueue_style(
-		'wporg-pattern-directory-2022-style',
+		'wporg-pattern-directory-2024-style',
 		get_stylesheet_uri(),
 		array( 'wporg-parent-2021-style', 'wporg-global-fonts' ),
 		filemtime( __DIR__ . '/style.css' )
