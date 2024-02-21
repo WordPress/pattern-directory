@@ -27,7 +27,7 @@ yarn wp-env run cli wp plugin activate pattern-directory/bootstrap.php
 yarn wp-env run cli wp plugin activate pattern-creator
 
 # Activate theme
-yarn wp-env run cli wp theme activate wporg-pattern-directory-2022
+yarn wp-env run cli wp theme activate pattern-directory
 
 # Change permalinks
 yarn wp-env run cli wp rewrite structure '/%postname%/'
