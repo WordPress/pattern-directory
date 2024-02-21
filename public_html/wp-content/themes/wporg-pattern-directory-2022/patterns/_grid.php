@@ -32,10 +32,10 @@
 	<div style="margin-top:0;margin-bottom:0;height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>
 	<!-- /wp:spacer -->
 
-	<!-- wp:post-template {"layout":{"type":"grid","columnCount":3}} -->
+	<!-- wp:post-template {"style":{"spacing":{"blockGap":"var:preset|spacing|40"}},"layout":{"type":"grid","columnCount":3}} -->
 		<!-- wp:group {"style":{"spacing":{"blockGap":"5px"}}} -->
 		<div class="wp-block-group">
-			<!-- wp:wporg/pattern-thumbnail {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|20"}}}} /-->
+			<!-- wp:wporg/pattern-thumbnail {"isLink":true} /-->
 
 			<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
 			<div class="wp-block-group">
