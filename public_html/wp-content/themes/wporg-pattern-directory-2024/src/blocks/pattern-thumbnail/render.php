@@ -1,15 +1,17 @@
 <?php
 
+use function WordPressdotorg\Theme\Pattern_Directory_2024\get_pattern_preview_url;
+
 if ( ! isset( $block->context['postId'] ) ) {
 	return '';
 }
 $post_id = $block->context['postId'];
 
-$view_url = add_query_arg( 'view', true, get_permalink( $post_id ) );
+$view_url = get_pattern_preview_url( $post_id );
 $has_link = isset( $attributes['isLink'] ) && true == $attributes['isLink'];
 $is_lazyload = isset( $attributes['lazyLoad'] ) && true === $attributes['lazyLoad'];
 
-$viewport_width = get_post_meta( $block->context['postId'], 'wpop_viewport_width', true );
+$viewport_width = get_post_meta( $post_id, 'wpop_viewport_width', true );
 
 if ( ! $viewport_width ) {
 	$viewport_width = 1200;
@@ -17,7 +19,6 @@ if ( ! $viewport_width ) {
 
 $cache_key = '20240220'; // To break out of cached image.
 
-$view_url = str_replace( 'http://localhost:8888/', 'https://wordpress.org/patterns/', $view_url );
 $view_url = add_query_arg( 'v', $cache_key, $view_url );
 $url = add_query_arg(
 	array(

@@ -1,10 +1,16 @@
 <?php
 
-$url = add_query_arg( 'view', true, get_permalink( $block->context['postId'] ) );
+use function WordPressdotorg\Theme\Pattern_Directory_2024\get_pattern_preview_url;
+
+if ( ! isset( $block->context['postId'] ) ) {
+	return '';
+}
+
+$view_url = get_pattern_preview_url( $block->context['postId'] );
 
 // Initial state to pass to Interactivity API.
 $init_state = [
-	'url' => $url,
+	'url' => $view_url,
 	'previewWidth' => 1200,
 	'previewHeight' => 200,
 ];

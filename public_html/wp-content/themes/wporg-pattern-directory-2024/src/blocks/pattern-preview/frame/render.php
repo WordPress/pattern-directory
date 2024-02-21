@@ -1,6 +1,12 @@
 <?php
 
-$url = add_query_arg( 'view', true, get_permalink( $block->context['postId'] ) );
+use function WordPressdotorg\Theme\Pattern_Directory_2024\get_pattern_preview_url;
+
+if ( ! isset( $block->context['postId'] ) ) {
+	return '';
+}
+
+$view_url = get_pattern_preview_url( $block->context['postId'] );
 $viewport_width = get_post_meta( $block->context['postId'], 'wpop_viewport_width', true );
 
 if ( ! $viewport_width ) {
@@ -9,7 +15,7 @@ if ( ! $viewport_width ) {
 
 // Initial state to pass to Interactivity API.
 $init_state = [
-	'url' => $url,
+	'url' => $view_url,
 	'previewWidth' => $viewport_width,
 	'previewHeight' => 200,
 ];
@@ -28,7 +34,7 @@ $encoded_state = wp_json_encode( $init_state );
 	<iframe
 		title="<?php _e( 'Pattern Preview', 'wporg-patterns' ); ?>"
 		tabIndex="-1"
-		src="<?php echo esc_url( $url ); ?>"
+		src="<?php echo esc_url( $view_url ); ?>"
 		data-wp-style--width="state.iframeWidthCSS"
 		data-wp-style--height="state.iframeHeightCSS"
 		data-wp-style--transform="state.transformCSS"

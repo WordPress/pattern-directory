@@ -142,3 +142,15 @@ function pre_get_posts( $query ) {
 		) );
 	}
 }
+
+/**
+ * Get the preview URL for the current pattern.
+ *
+ * @param int|WP_Post $post Post ID or post object.
+ *
+ * @return string The pattern `view` URL.
+ */
+function get_pattern_preview_url( $post = 0 ) {
+	$view_url = add_query_arg( 'view', true, get_permalink( $post ) );
+	return apply_filters( 'wporg_pattern_preview_url', $view_url, $post );
+}
