@@ -22,11 +22,24 @@ const { state } = store( 'wporg/patterns/preview', {
 		get transformCSS() {
 			return `scale(${ state.scale })`;
 		},
+		get isWidth1200() {
+			return 1200 === getContext().previewWidth;
+		},
+		get isWidth960() {
+			return 960 === getContext().previewWidth;
+		},
+		get isWidth600() {
+			return 600 === getContext().previewWidth;
+		},
+		get isWidth480() {
+			return 480 === getContext().previewWidth;
+		},
 	},
 	actions: {
-		onWidthChange: ( { target } ) => {
+		onWidthChange: () => {
+			const { ref } = getElement();
 			const context = getContext();
-			context.previewWidth = parseInt( target.value, 10 );
+			context.previewWidth = parseInt( ref.dataset.width, 10 );
 		},
 		updatePreviewHeight: () => {
 			const context = getContext();

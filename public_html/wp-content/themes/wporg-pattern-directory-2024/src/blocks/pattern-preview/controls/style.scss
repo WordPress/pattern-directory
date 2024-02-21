@@ -3,9 +3,21 @@
 	width: 100%;
 }
 
-.wp-block-wporg-pattern-view-control__controls {
+.wporg-pattern-view-control__controls {
 	margin-bottom: var(--wp--preset--spacing--20);
-	text-align: center;
+	display: flex;
+	justify-content: center;
+	gap: var(--wp--preset--spacing--10);
+
+	.wp-element-button {
+		display: flex !important;
+		flex-direction: column;
+		align-items: center;
+
+		svg {
+			fill: currentColor !important;
+		}
+	}
 }
 
 .wp-block-wporg-pattern-view-control .wp-block-wporg-pattern-preview {
