@@ -3,7 +3,7 @@
  */
 import { getContext, getElement, store } from '@wordpress/interactivity';
 
-const { state } = store( 'wporg/patterns/preview', {
+const { actions, state } = store( 'wporg/patterns/preview', {
 	state: {
 		get scale() {
 			const { pageWidth, previewWidth } = getContext();
@@ -36,12 +36,27 @@ const { state } = store( 'wporg/patterns/preview', {
 		},
 	},
 	actions: {
-		onWidthChange: () => {
+		onWidthChange() {
 			const { ref } = getElement();
 			const context = getContext();
 			context.previewWidth = parseInt( ref.dataset.width, 10 );
 		},
-		updatePreviewHeight: () => {
+		*onLoad() {
+			const { ref } = getElement();
+			const iframeDoc = ref.contentWindow.document;
+
+			// The iframe might be loaded already, so we attach a listener but also check readyState.
+			yield new Promise( ( resolve ) => {
+				ref.addEventListener( 'load', () => resolve() );
+				if ( 'complete' === iframeDoc.readyState ) {
+					resolve();
+				}
+			} );
+
+			// iframe is loaded now, so we should adjust the height.
+			actions.updatePreviewHeight();
+		},
+		updatePreviewHeight() {
 			const context = getContext();
 			const { ref } = getElement();
 
@@ -54,7 +69,7 @@ const { state } = store( 'wporg/patterns/preview', {
 				context.previewHeight = height * state.scale;
 			}
 		},
-		handleOnResize: () => {
+		handleOnResize() {
 			const context = getContext();
 			const { ref } = getElement();
 			context.pageWidth = ref.clientWidth;
