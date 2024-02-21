@@ -52,9 +52,9 @@
 		</div>
 		<!-- /wp:group -->
 
-		<!-- wp:query {"queryId":1,"query":{"inherit":false,"perPage":3,"postType":"wporg-pattern","override":"more-by-author"}} -->
+		<!-- wp:query {"queryId":1,"query":{"inherit":false,"perPage":4,"postType":"wporg-pattern","override":"more-by-author"}} -->
 		<div class="wp-block-query">
-			<!-- wp:post-template {"layout":{"type":"grid","columnCount":3}} -->
+			<!-- wp:post-template {"style":{"spacing":{"blockGap":"var:preset|spacing|40"}},"layout":{"type":"grid","columnCount":4}} -->
 				<!-- wp:group {"style":{"spacing":{"blockGap":"0"}}} -->
 				<div class="wp-block-group">
 					<!-- wp:wporg/pattern-thumbnail {"style":{"spacing":{"margin":{"bottom":"var:preset|spacing|20"}}}} /-->

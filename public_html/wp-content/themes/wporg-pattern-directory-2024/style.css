@@ -26,3 +26,20 @@
 	border-radius: 2px;
 	box-shadow: 0 0 0 1.5px var(--wp--custom--link--color--text);
 }
+
+body.single-wporg-pattern .wp-block-post-template.is-layout-grid.columns-4 {
+	column-gap: clamp(20px, 3vw, 40px);
+}
+
+@media (max-width: 1600px) {
+	:where(body:not(.single-wporg-pattern)) .wp-block-post-template.is-layout-grid.columns-4 {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		column-gap: clamp(20px, calc(3.75vw + -10px), 50px);
+	}
+}
+
+@media (max-width: 1200px) {
+	.wp-block-post-template.is-layout-grid.columns-4 {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
