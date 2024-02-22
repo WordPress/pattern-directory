@@ -102,7 +102,12 @@ function update_query_loop_vars( $query, $block, $page ) {
 	}
 
 	if ( is_page( 'favorites' ) ) {
-		$query['post__in'] = get_favorites();
+		$user_id = get_current_user_id();
+		if ( $user_id ) {
+			$query['post__in'] = get_favorites();
+		} else {
+			$query['post__in'] = [ -1 ];
+		}
 	}
 
 	return $query;
