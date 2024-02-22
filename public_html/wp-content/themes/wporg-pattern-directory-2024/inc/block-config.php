@@ -51,13 +51,14 @@ function get_applied_filter_list( $include_search = true ) {
 /**
  * Get the destination for query-filter submission based on the current page.
  *
- * When on an Author archive, it should stay on the author archive.
- *
  * @return string
  */
 function get_filter_action_url() {
 	global $wp;
-	return is_author() ? home_url( $wp->request ) : home_url( '/archives/' );
+	if ( is_page( 'favorites' ) || is_page( 'my-patterns' ) || is_author() ) {
+		return home_url( $wp->request );
+	}
+	return home_url( '/archives/' );
 }
 
 /**
