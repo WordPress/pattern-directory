@@ -65,6 +65,10 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 		}
 	}
 
+	// See https://github.com/WordPress/gutenberg/issues/59300
+	remove_action( 'registered_post_type', 'gutenberg_block_core_navigation_link_register_post_type_variation' );
+	remove_action( 'registered_taxonomy', 'gutenberg_block_core_navigation_link_register_taxonomy_variation' );
+
 	$locales = get_locales();
 
 	printf( "Processing %d Patterns in %d locales.\n", count( $pattern_ids ), count( $locales ) );
