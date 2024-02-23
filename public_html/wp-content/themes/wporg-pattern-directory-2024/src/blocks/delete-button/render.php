@@ -2,7 +2,7 @@
 
 $post_id = $block->context['postId'];
 if ( ! $post_id ) {
-	return '';
+	return;
 }
 
 // Check if the user has permissions.

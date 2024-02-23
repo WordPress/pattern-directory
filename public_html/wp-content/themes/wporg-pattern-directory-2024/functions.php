@@ -11,8 +11,10 @@ require_once( __DIR__ . '/src/blocks/delete-button/index.php' );
 require_once( __DIR__ . '/src/blocks/favorite-button/index.php' );
 require_once( __DIR__ . '/src/blocks/pattern-preview/index.php' );
 require_once( __DIR__ . '/src/blocks/pattern-thumbnail/index.php' );
+require_once( __DIR__ . '/src/blocks/status-notice/index.php' );
 
 require_once( __DIR__ . '/inc/block-config.php' );
+require_once( __DIR__ . '/inc/shortcodes.php' );
 
 /**
  * Actions and filters.
@@ -20,6 +22,7 @@ require_once( __DIR__ . '/inc/block-config.php' );
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
 add_filter( 'query_loop_block_query_vars', __NAMESPACE__ . '\update_query_loop_vars', 10, 3 );
 add_action( 'pre_get_posts', __NAMESPACE__ . '\pre_get_posts' );
+add_action( 'template_redirect', __NAMESPACE__ . '\do_pattern_actions' );
 
 add_action(
 	'init',
@@ -146,6 +149,47 @@ function pre_get_posts( $query ) {
 				'value'   => array( get_locale(), 'en_US' ),
 			),
 		) );
+	}
+}
+
+/**
+ * Check if the current request needs an action, and run that action.
+ *
+ * Available actions:
+ * - draft: Update the current post to a draft.
+ */
+function do_pattern_actions() {
+	if ( ! is_singular( POST_TYPE ) ) {
+		return;
+	}
+
+	$action = isset( $_GET['action'] ) ? $_GET['action'] : false;
+	$nonce = isset( $_GET['_wpnonce'] ) ? $_GET['_wpnonce'] : false;
+	$post_id = get_the_ID();
+
+	if ( 'draft' === $action ) {
+		if ( wp_verify_nonce( $nonce, 'draft-' . $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
+			// Draft the post.
+			$success = wp_update_post(
+				array(
+					'ID' => $post_id,
+					'post_status' => 'draft',
+				)
+			);
+			if ( $success ) {
+				// Reload the page without the action.
+				wp_safe_redirect( get_the_permalink() );
+			} else {
+				// Reload the page with an error flag.
+				$url = add_query_arg(
+					array(
+						'error' => 'draft-failed'
+					),
+					get_the_permalink()
+				);
+				wp_safe_redirect( $url );
+			}
+		}
 	}
 }
 

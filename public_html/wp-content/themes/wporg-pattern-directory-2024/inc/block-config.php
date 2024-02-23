@@ -15,6 +15,7 @@ add_action( 'wporg_query_filter_in_form', __NAMESPACE__ . '\inject_other_filters
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
 add_filter( 'render_block_core/query-title', __NAMESPACE__ . '\update_archive_title', 10, 3 );
 add_filter( 'wporg_block_site_breadcrumbs', __NAMESPACE__ . '\update_site_breadcrumbs' );
+add_filter( 'render_block_data', __NAMESPACE__ . '\modify_pattern_include' );
 
 /**
  * Get a list of the currently-applied filters.
@@ -385,4 +386,26 @@ function update_site_breadcrumbs( $breadcrumbs ) {
 	}
 
 	return $breadcrumbs;
+}
+
+/**
+ * Update header template based on current query.
+ *
+ * @param array $parsed_block The block being rendered.
+ *
+ * @return array The updated block.
+ */
+function modify_pattern_include( $parsed_block ) {
+	if ( 'core/pattern' !== $parsed_block['blockName'] || empty( $parsed_block['attrs']['slug'] ) ) {
+		return $parsed_block;
+	}
+
+	if (
+		'wporg-pattern-directory-2024/single-pattern' === $parsed_block['attrs']['slug'] &&
+		get_current_user_id() === get_the_author_meta( 'ID' )
+	) {
+			$parsed_block['attrs']['slug'] = 'wporg-pattern-directory-2024/single-my-pattern';
+	}
+
+	return $parsed_block;
 }
