@@ -17,13 +17,13 @@ if ( ! $viewport_width ) {
 	$viewport_width = 1200;
 }
 
-$cache_key = '20240220'; // To break out of cached image.
+$cache_key = '20240223'; // To break out of cached image.
 
 $view_url = add_query_arg( 'v', $cache_key, $view_url );
 $url = add_query_arg(
 	array(
 		'scale' => 2,
-		'w' => 700,
+		'w' => 1100,
 		'vpw' => $viewport_width,
 		'vph' => 300, // Smaller than the vast majority of patterns to avoid whitespace.
 		'screen_height' => 3600, // Max height of a screenshot.

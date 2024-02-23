@@ -57,7 +57,7 @@ $tag_name = ! $user_id ? 'span' : 'button';
 					);
 				?>
 				</span>
-				<span aria-hidden="true"><?php echo $favorite_count; ?></span>
+				<span aria-hidden="true">(<?php echo $favorite_count; ?>)</span>
 			</span>
 			<span class="wporg-favorite-button__label screen-reader-text">
 				<?php echo $is_favorite ? $remove_label : $add_label; ?>

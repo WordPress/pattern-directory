@@ -5,9 +5,28 @@
 		"custom": {
 			"wporg-pattern-thumbnail": {
 				"border": {
-					"color": "rgba(30, 30, 30, 0.1)",
-					"width": "2px",
+					"color": "rgba(0, 0, 0, 0.10)",
+					"width": "1px",
 					"radius": "2px"
+				}
+			},
+			"wporg-pattern-preview": {
+				"border": {
+					"color": "var(--wp--preset--color--light-grey-2)",
+					"width": "20px"
+				}
+			}
+		}
+	},
+	"styles": {
+		"blocks": {
+			"core/post-title": {
+				"elements": {
+					"link": {
+						"color": {
+							"text": "var(--wp--preset--color--blueberry-1)"
+						}
+					}
 				}
 			}
 		}

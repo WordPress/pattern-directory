@@ -31,6 +31,8 @@ $content = $p->get_updated_html();
 	data-wp-init="actions.handleOnResize"
 	data-wp-on-window--resize="actions.handleOnResize"
 >
+	<?php echo $content; ?>
+
 	<section class="wporg-pattern-view-control__controls wp-block-buttons" aria-label="<?php esc_attr_e( 'Preview width', 'wporg-patterns' ); ?>">
 		<div class="wp-block-button is-style-toggle is-small">
 			<button
@@ -77,6 +79,4 @@ $content = $p->get_updated_html();
 			</button>
 		</div>
 	</section>
-
-	<?php echo $content; ?>
 </div>
