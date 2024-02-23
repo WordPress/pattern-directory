@@ -62,7 +62,7 @@ function update_query_loop_vars( $query, $block, $page ) {
 	global $wp_query;
 
 	if ( ! isset( $query['posts_per_page'] ) ) {
-		$query['posts_per_page'] = 18;
+		$query['posts_per_page'] = 24;
 	}
 
 	if ( isset( $query['post_type'] ) && 'wporg-pattern' === $query['post_type'] ) {
@@ -144,7 +144,7 @@ function pre_get_posts( $query ) {
 	}
 
 	if ( ! $query->is_singular() ) {
-		$query->set( 'posts_per_page', 18 );
+		$query->set( 'posts_per_page', 24 );
 		$query->set( 'post_type', array( POST_TYPE ) );
 
 		// The `orderby_locale` meta_query will be transformed into a query orderby by Pattern_Post_Type\filter_orderby_locale().

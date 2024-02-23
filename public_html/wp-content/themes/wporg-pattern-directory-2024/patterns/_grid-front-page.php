@@ -6,7 +6,7 @@
  */
 
 ?>
-<!-- wp:query {"queryId":0,"query":{"perPage":18,"curation":"core","pages":0,"offset":0,"postType":"wporg-pattern","order":"desc","orderBy":"favorite_count","author":"","search":"","exclude":[],"sticky":"","inherit":false},"align":"wide","layout":{"type":"constrained","wideSize":"1760px"}} -->
+<!-- wp:query {"queryId":0,"query":{"perPage":24,"curation":"core","pages":0,"offset":0,"postType":"wporg-pattern","order":"desc","orderBy":"favorite_count","author":"","search":"","exclude":[],"sticky":"","inherit":false},"align":"wide","layout":{"type":"constrained","wideSize":"1760px"}} -->
 <div class="wp-block-query alignwide">
 	<!-- wp:group {"align":"wide","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
 	<div class="wp-block-group alignwide">
