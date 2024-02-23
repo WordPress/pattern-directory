@@ -2,7 +2,6 @@
 
 namespace WordPressdotorg\Theme\Pattern_Directory_2024;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
-use function WordPressdotorg\Theme\Pattern_Directory_2024\Order_Dropdown_Block\get_orderby_args;
 use function WordPressdotorg\Pattern_Directory\Favorite\{get_favorites};
 
 // Block files
@@ -60,6 +59,8 @@ function enqueue_assets() {
  * @param int      $page  Current query's page.
  */
 function update_query_loop_vars( $query, $block, $page ) {
+	global $wp_query;
+
 	if ( ! isset( $query['posts_per_page'] ) ) {
 		$query['posts_per_page'] = 18;
 	}
@@ -82,15 +83,28 @@ function update_query_loop_vars( $query, $block, $page ) {
 	}
 
 	if ( is_page( [ 'my-patterns', 'favorites' ] ) ) {
-		if ( isset( $_GET['_orderby'] ) ) {
-			$args = get_orderby_args( $_GET['_orderby'] );
-			$query = array_merge( $query, $args );
+		if ( isset( $wp_query->query['pattern-categories'] ) ) {
+			if ( ! isset( $query['tax_query'] ) || ! is_array( $query['tax_query'] ) ) {
+				$query['tax_query'] = array();
+			}
+			$query['tax_query'][] = array(
+				'taxonomy'         => 'wporg-pattern-category',
+				'field'            => 'slug',
+				'terms'            => $wp_query->query['pattern-categories'],
+				'include_children' => false,
+			);
 		}
 
-		if ( isset( $_GET['wporg-pattern-category'] ) 
-			&& term_exists( $_GET['wporg-pattern-category'], 'wporg-pattern-category' )
-		) {
-			$query['wporg-pattern-category'] = $_GET['wporg-pattern-category'];
+		if ( isset( $wp_query->query['orderby'] ) ) {
+			if ( str_ends_with( $wp_query->query['orderby'], '_desc' ) ) {
+				$orderby = str_replace( '_desc', '', $wp_query->query['orderby'] );
+				$query['orderby'] = $orderby;
+				$query['order'] = 'desc';
+			} else if ( str_ends_with( $wp_query->query['orderby'], '_asc' ) ) {
+				$orderby = str_replace( '_asc', '',$wp_query->query['orderby'] );
+				$query['orderby'] = $orderby;
+				$query['order'] = 'asc';
+			}
 		}
 	}
 
@@ -132,13 +146,6 @@ function pre_get_posts( $query ) {
 	if ( ! $query->is_singular() ) {
 		$query->set( 'posts_per_page', 18 );
 		$query->set( 'post_type', array( POST_TYPE ) );
-
-		if ( isset( $_GET['_orderby'] ) ) {
-			$args = get_orderby_args( $_GET['_orderby'] );
-			foreach( $args as $key => $value ) {
-				$query->set( $key, $value );
-			}
-		}
 
 		// The `orderby_locale` meta_query will be transformed into a query orderby by Pattern_Post_Type\filter_orderby_locale().
 		$query->set( 'meta_query', array(

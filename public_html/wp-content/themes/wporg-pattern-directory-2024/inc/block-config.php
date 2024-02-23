@@ -189,16 +189,22 @@ function get_sort_options( $options ) {
 		$label = __( 'Sort: Popular', 'wporg' );
 	}
 
+	$options = array(
+		'date_desc' => __( 'Newest', 'wporg' ),
+		'date_asc' => __( 'Oldest', 'wporg' ),
+	);
+
+	// These pages don't support sorting by favorite count.
+	if ( ! is_page( [ 'my-patterns', 'favorites' ] ) ) {
+		$options = array_merge( [ 'favorite_count_desc' => __( 'Popular', 'wporg' ) ], $options );
+	}
+
 	return array(
 		'label' => $label,
 		'title' => __( 'Sort', 'wporg' ),
 		'key' => 'orderby',
 		'action' => get_filter_action_url(),
-		'options' => array(
-			'favorite_count_desc' => __( 'Popular', 'wporg' ),
-			'date_desc' => __( 'Newest', 'wporg' ),
-			'date_asc' => __( 'Oldest', 'wporg' ),
-		),
+		'options' => $options,
 		'selected' => [ $sort ],
 	);
 }
