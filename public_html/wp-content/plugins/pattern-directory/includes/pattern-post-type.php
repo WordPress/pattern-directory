@@ -816,7 +816,7 @@ function add_patterns_query_vars( $query_vars ) {
  * @param WP_Query $query The WP_Query instance (passed by reference).
  */
 function modify_patterns_query( $query ) {
-	if ( ! $query->is_main_query() ) {
+	if ( is_admin() || ! $query->is_main_query() ) {
 		return;
 	}
 
