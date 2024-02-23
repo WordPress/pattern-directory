@@ -65,7 +65,7 @@
 	<!-- wp:group {"align":"wide","style":{"spacing":{"padding":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"},"margin":{"bottom":"var:preset|spacing|50"}}},"layout":{"type":"default"}} -->
 	<div class="wp-block-group alignwide" style="margin-bottom:var(--wp--preset--spacing--50);padding-top:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--40)">
 		<!-- wp:paragraph -->
-		<p class="is-style-default"><a href="/archives/">View all patterns</a></p>
+		<p class="is-style-default"><a href="<?php echo esc_url( home_url( '/archives/' ) ); ?>"><?php esc_html_e( 'View all patterns', 'wporg-patterns' ); ?></a></p>
 		<!-- /wp:paragraph -->
 	</div>
 	<!-- /wp:group -->
