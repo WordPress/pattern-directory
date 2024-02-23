@@ -4,7 +4,7 @@ namespace WordPressdotorg\Pattern_Directory\Pattern_Post_Type;
 
 use Error, WP_Block_Type_Registry;
 use function WordPressdotorg\Locales\{ get_locales, get_locales_with_english_names, get_locales_with_native_names };
-use function WordPressdotorg\Pattern_Directory\Favorite\get_favorite_count;
+use function WordPressdotorg\Pattern_Directory\Favorite\{get_favorites, get_favorite_count};
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 
 const POST_TYPE       = 'wporg-pattern';
@@ -859,6 +859,20 @@ function modify_patterns_query( $query ) {
 		$query->set( 'orderby', 'meta_value_num' );
 		$query->set( 'meta_key', 'wporg-pattern-favorites' );
 	}
+
+	if ( ! $query->is_singular() ) {
+		$query->set( 'post_type', array( POST_TYPE ) );
+
+		// The `orderby_locale` meta_query will be transformed into a query orderby by Pattern_Post_Type\filter_orderby_locale().
+		$query->set( 'meta_query', array(
+			'orderby_locale' => array(
+				'key'     => 'wpop_locale',
+				'compare' => 'IN',
+				// Order in value determines result order
+				'value'   => array( get_locale(), 'en_US' ),
+			),
+		) );
+	}
 }
 
 /**
@@ -867,6 +881,16 @@ function modify_patterns_query( $query ) {
  * @return string
  */
 function modify_query_loop_block_query_vars( $query, $block ) {
+	global $wp_query;
+
+	if ( ! isset( $query['posts_per_page'] ) ) {
+		$query['posts_per_page'] = 24;
+	}
+
+	if ( isset( $page ) && ! isset( $query['offset'] ) ) {
+		$query['paged'] = $page;
+	}
+
 	if ( isset( $block->context['query']['curation'] ) ) {
 		if ( 'core' === $block->context['query']['curation'] ) {
 			// Patterns with the core keyword.
@@ -891,6 +915,64 @@ function modify_query_loop_block_query_vars( $query, $block ) {
 		$query['orderby'] = 'meta_value_num';
 		$query['meta_key'] = 'wporg-pattern-favorites';
 	}
+
+	// Query Loops on My Patterns & Favorites pages
+	if ( is_page( [ 'my-patterns', 'favorites' ] ) ) {
+		// Get these values from the global wp_query, they're passed via the URL.
+		if ( isset( $wp_query->query['pattern-categories'] ) ) {
+			if ( ! isset( $query['tax_query'] ) || ! is_array( $query['tax_query'] ) ) {
+				$query['tax_query'] = array();
+			}
+			$query['tax_query'][] = array(
+				'taxonomy'         => 'wporg-pattern-category',
+				'field'            => 'slug',
+				'terms'            => $wp_query->query['pattern-categories'],
+				'include_children' => false,
+			);
+		}
+
+		if ( isset( $wp_query->query['orderby'] ) ) {
+			if ( str_ends_with( $wp_query->query['orderby'], '_desc' ) ) {
+				$orderby = str_replace( '_desc', '', $wp_query->query['orderby'] );
+				$query['orderby'] = $orderby;
+				$query['order'] = 'desc';
+			} else if ( str_ends_with( $wp_query->query['orderby'], '_asc' ) ) {
+				$orderby = str_replace( '_asc', '', $wp_query->query['orderby'] );
+				$query['orderby'] = $orderby;
+				$query['order'] = 'asc';
+			}
+		}
+
+		if ( is_page( 'my-patterns' ) ) {
+			$user_id = get_current_user_id();
+			if ( $user_id ) {
+				$query['post_type'] = 'wporg-pattern';
+				$query['post_status'] = 'any';
+				$query['author'] = get_current_user_id();
+			} else {
+				$query['post__in'] = [ -1 ];
+			}
+		}
+
+		if ( is_page( 'favorites' ) ) {
+			$user_id = get_current_user_id();
+			if ( $user_id ) {
+				$query['post__in'] = get_favorites();
+			} else {
+				$query['post__in'] = [ -1 ];
+			}
+		}
+	}
+
+	// The `orderby_locale` meta_query will be transformed into a query orderby by Pattern_Post_Type\filter_orderby_locale().
+	$query['meta_query'] = array(
+		'orderby_locale' => array(
+			'key'     => 'wpop_locale',
+			'compare' => 'IN',
+			// Order in value determines result order
+			'value'   => array( get_locale(), 'en_US' ),
+		),
+	);
 
 	return $query;
 }

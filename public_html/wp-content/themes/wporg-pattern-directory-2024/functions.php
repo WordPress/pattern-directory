@@ -2,7 +2,6 @@
 
 namespace WordPressdotorg\Theme\Pattern_Directory_2024;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
-use function WordPressdotorg\Pattern_Directory\Favorite\{get_favorites};
 
 // Block files
 require_once( __DIR__ . '/src/blocks/copy-button/index.php' );
@@ -20,7 +19,6 @@ require_once( __DIR__ . '/inc/shortcodes.php' );
  */
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
 add_filter( 'query_loop_block_query_vars', __NAMESPACE__ . '\update_query_loop_vars', 10, 3 );
-add_action( 'pre_get_posts', __NAMESPACE__ . '\pre_get_posts' );
 add_action( 'template_redirect', __NAMESPACE__ . '\do_pattern_actions' );
 
 add_action(
@@ -52,19 +50,11 @@ function enqueue_assets() {
 /**
  * Filter the query loop arguments.
  *
- * Used when listing patterns on pages, ex Favorites (query.inherit = false).
- *
  * @param array    $query Array containing parameters for `WP_Query` as parsed by the block context.
  * @param WP_Block $block Block instance.
  * @param int      $page  Current query's page.
  */
 function update_query_loop_vars( $query, $block, $page ) {
-	global $wp_query;
-
-	if ( ! isset( $query['posts_per_page'] ) ) {
-		$query['posts_per_page'] = 24;
-	}
-
 	if ( isset( $query['post_type'] ) && 'wporg-pattern' === $query['post_type'] ) {
 		// This is used for the "more by this designer" section.
 		// The `[current]` author is a placeholder for the current post's author, and in this case
@@ -78,85 +68,7 @@ function update_query_loop_vars( $query, $block, $page ) {
 		}
 	}
 
-	if ( isset( $page ) && ! isset( $query['offset'] ) ) {
-		$query['paged'] = $page;
-	}
-
-	if ( is_page( [ 'my-patterns', 'favorites' ] ) ) {
-		if ( isset( $wp_query->query['pattern-categories'] ) ) {
-			if ( ! isset( $query['tax_query'] ) || ! is_array( $query['tax_query'] ) ) {
-				$query['tax_query'] = array();
-			}
-			$query['tax_query'][] = array(
-				'taxonomy'         => 'wporg-pattern-category',
-				'field'            => 'slug',
-				'terms'            => $wp_query->query['pattern-categories'],
-				'include_children' => false,
-			);
-		}
-
-		if ( isset( $wp_query->query['orderby'] ) ) {
-			if ( str_ends_with( $wp_query->query['orderby'], '_desc' ) ) {
-				$orderby = str_replace( '_desc', '', $wp_query->query['orderby'] );
-				$query['orderby'] = $orderby;
-				$query['order'] = 'desc';
-			} else if ( str_ends_with( $wp_query->query['orderby'], '_asc' ) ) {
-				$orderby = str_replace( '_asc', '',$wp_query->query['orderby'] );
-				$query['orderby'] = $orderby;
-				$query['order'] = 'asc';
-			}
-		}
-	}
-
-	if ( is_page( 'my-patterns' ) ) {
-		$user_id = get_current_user_id();
-		if ( $user_id ) {
-			$query['post_type'] = 'wporg-pattern';
-			$query['post_status'] = 'any';
-			$query['author'] = get_current_user_id();
-		} else {
-			$query['post__in'] = [ -1 ];
-		}
-	}
-
-	if ( is_page( 'favorites' ) ) {
-		$user_id = get_current_user_id();
-		if ( $user_id ) {
-			$query['post__in'] = get_favorites();
-		} else {
-			$query['post__in'] = [ -1 ];
-		}
-	}
-
 	return $query;
-}
-
-/**
- * Filter the default query.
- *
- * Used to render Patterns on archive pages (query.inherit = true).
- *
- * @param \WP_Query $query The WordPress Query object.
- */
-function pre_get_posts( $query ) {
-	if ( is_admin() || ! $query->is_main_query() ) {
-		return;
-	}
-
-	if ( ! $query->is_singular() ) {
-		$query->set( 'posts_per_page', 24 );
-		$query->set( 'post_type', array( POST_TYPE ) );
-
-		// The `orderby_locale` meta_query will be transformed into a query orderby by Pattern_Post_Type\filter_orderby_locale().
-		$query->set( 'meta_query', array(
-			'orderby_locale' => array(
-				'key'     => 'wpop_locale',
-				'compare' => 'IN',
-				// Order in value determines result order
-				'value'   => array( get_locale(), 'en_US' ),
-			),
-		) );
-	}
 }
 
 /**
