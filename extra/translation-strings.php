@@ -60,6 +60,8 @@ _x( 'Rude, Crude, or Inappropriate', 'Flag Reasons term name', 'wporg-patterns' 
 _x( 'This pattern contains content deemed inappropriate for a general audience.', 'Flag Reasons term description', 'wporg-patterns' );
 _x( 'Spam', 'Flag Reasons term name', 'wporg-patterns' );
 _x( 'This pattern was determined to be spam.', 'Flag Reasons term description', 'wporg-patterns' );
+_x( 'Archives', 'Page title', 'wporg-patterns' );
+_x( 'Pattern Directory', 'Page title', 'wporg-patterns' );
 _x( 'About Patterns', 'Page title', 'wporg-patterns' );
 _x( 'Favorites', 'Page title', 'wporg-patterns' );
 _x( 'My Patterns', 'Page title', 'wporg-patterns' );
