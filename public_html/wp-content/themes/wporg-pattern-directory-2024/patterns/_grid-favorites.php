@@ -31,7 +31,7 @@
 	<div style="margin-top:0;margin-bottom:0;height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>
 	<!-- /wp:spacer -->
 
-	<!-- wp:post-template {"style":{"spacing":{"blockGap":"var:preset|spacing|40"}},"layout":{"type":"grid","columnCount":4}} -->
+	<!-- wp:post-template {"style":{"spacing":{"blockGap":"var:preset|spacing|40"}},"layout":{"type":"grid","columnCount":3}} -->
 		<!-- wp:group {"style":{"spacing":{"blockGap":"5px"}}} -->
 		<div class="wp-block-group">
 			<!-- wp:wporg/pattern-thumbnail {"isLink":true} /-->
@@ -54,17 +54,13 @@
 	<!-- /wp:query-pagination -->
 
 	<!-- wp:query-no-results -->
-		<!-- wp:paragraph -->
-		<p><?php esc_html_e( 'Please log in to view your favorites.', 'wporg-patterns' ); ?></p>
-		<!-- /wp:paragraph -->
-
-		<!-- wp:buttons -->
-		<div class="wp-block-buttons">
-			<!-- wp:button -->
-			<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="https://login.wordpress.org/"><?php esc_html_e( 'Log in', 'wporg-patterns' ); ?></a></div>
-			<!-- /wp:button -->
+		<!-- wp:group {"layout":{"type":"constrained","justifyContent":"left"}} -->
+		<div class="wp-block-group">
+			<!-- wp:paragraph -->
+			<p><?php esc_html_e( 'Looks like you don&#8217;t have any favorites yet. Tap the heart on any pattern to mark it as a favorite. All your favorite patterns will appear here.', 'wporg-patterns' ); ?></p>
+			<!-- /wp:paragraph -->
 		</div>
-		<!-- /wp:buttons -->
+		<!-- wp:group /-->
 	<!-- /wp:query-no-results -->
 </div>
 <!-- /wp:query -->

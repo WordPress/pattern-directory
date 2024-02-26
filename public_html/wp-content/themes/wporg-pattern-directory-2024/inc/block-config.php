@@ -270,21 +270,24 @@ function inject_other_filters( $key ) {
  * Provide a list of local navigation menus.
  */
 function add_site_navigation_menus( $menus ) {
+	$menu = array();
+
+	$menu[] = array(
+		'label' => __( 'Favorites', 'wporg-patterns' ),
+		'url' => home_url( '/favorites/' ),
+	);
+	if ( is_user_logged_in() ) {
+		$menu[] = array(
+			'label' => __( 'My Patterns', 'wporg-patterns' ),
+			'url' => home_url( '/my-patterns/' ),
+		);
+	}
+	$menu[] = array(
+		'label' => __( 'New Pattern', 'wporg-patterns' ),
+		'url' => home_url( '/new-pattern/' ),
+	);
 	return array(
-		'main' => array(
-			array(
-				'label' => __( 'Favorites', 'wporg-patterns' ),
-				'url' => home_url( '/favorites/' ),
-			),
-			array(
-				'label' => __( 'My Patterns', 'wporg-patterns' ),
-				'url' => home_url( '/my-patterns/' ),
-			),
-			array(
-				'label' => __( 'New Pattern', 'wporg-patterns' ),
-				'url' => home_url( '/new-pattern/' ),
-			),
-		),
+		'main' => $menu,
 	);
 }
 
@@ -411,6 +414,20 @@ function modify_pattern_include( $parsed_block ) {
 		get_current_user_id() === get_the_author_meta( 'ID' )
 	) {
 			$parsed_block['attrs']['slug'] = 'wporg-pattern-directory-2024/single-my-pattern';
+	}
+
+	if (
+		'wporg-pattern-directory-2024/grid-mine' === $parsed_block['attrs']['slug'] &&
+		! get_current_user_id()
+	) {
+			$parsed_block['attrs']['slug'] = 'wporg-pattern-directory-2024/logged-out-patterns';
+	}
+
+	if (
+		'wporg-pattern-directory-2024/grid-favorites' === $parsed_block['attrs']['slug'] &&
+		! get_current_user_id()
+	) {
+			$parsed_block['attrs']['slug'] = 'wporg-pattern-directory-2024/logged-out-favorites';
 	}
 
 	return $parsed_block;
