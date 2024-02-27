@@ -25,6 +25,7 @@
 		height: 1rem;
 		width: 1rem;
 		transition: all 0.15s ease-out;
+		overflow: visible;
 
 		path {
 			fill: var(--wp--preset--color--charcoal-4);

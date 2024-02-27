@@ -20,6 +20,6 @@
 	"usesContext": [ "postId", "postType" ],
 	"editorScript": "file:./index.js",
 	"style": "file:./style-index.css",
-	"viewScript": "file:./view.js",
+	"viewScriptModule": "file:./view.js",
 	"render": "file:./render.php"
 }
