@@ -13,10 +13,6 @@ $register_url = wp_registration_url();
 ?>
 <!-- wp:group {"layout":{"type":"constrained","contentSize":"30rem","justifyContent":"left"}} -->
 <div class="wp-block-group">
-	<!-- wp:heading {"level":1,fontSize":"heading-3"} -->
-	<h1 class="has-heading-3-font-size"><?php esc_html_e( 'Your patterns', 'wporg-patterns' ); ?></h1>
-	<!-- /wp:heading -->
-
 	<!-- wp:paragraph -->
 	<p><?php esc_html_e( 'Anyone can create and share patterns using the familiar block editor. Design helpful starting points for yourself and any WordPress site.', 'wporg-patterns' ); ?></p>
 	<!-- /wp:paragraph -->
