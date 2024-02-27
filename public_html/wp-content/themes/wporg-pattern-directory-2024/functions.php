@@ -18,7 +18,7 @@ require_once( __DIR__ . '/inc/shortcodes.php' );
  * Actions and filters.
  */
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
-add_filter( 'query_loop_block_query_vars', __NAMESPACE__ . '\update_query_loop_vars', 10, 3 );
+add_filter( 'query_loop_block_query_vars', __NAMESPACE__ . '\update_query_loop_vars', 20, 3 );
 add_action( 'template_redirect', __NAMESPACE__ . '\do_pattern_actions' );
 
 add_action(
@@ -55,17 +55,18 @@ function enqueue_assets() {
  * @param int      $page  Current query's page.
  */
 function update_query_loop_vars( $query, $block, $page ) {
-	if ( isset( $query['post_type'] ) && 'wporg-pattern' === $query['post_type'] ) {
-		// This is used for the "more by this designer" section.
-		// The `[current]` author is a placeholder for the current post's author, and in this case
-		// we also want to exclude the current post from results.
-		$current_post = get_post();
-		if ( isset( $block->context['query']['override'] ) ) {
-			if ( 'more-by-author' === $block->context['query']['override'] && $current_post && $current_post->post_author ) {
-				$query['author'] = $current_post->post_author;
-				$query['post__not_in'] = [ $current_post->ID ];
-			}
-		}
+	if ( ! isset( $block->context['query']['_id'] ) ) {
+		return $query;
+	}
+
+	// This is used for the "more by this designer" section.
+	// The `[current]` author is a placeholder for the current post's author, and in this case
+	// we also want to exclude the current post from results.
+	$current_post = get_post();
+	if ( 'more-by-author' === $block->context['query']['_id'] && $current_post && $current_post->post_author ) {
+		$query['author'] = $current_post->post_author;
+		$query['post__not_in'] = [ $current_post->ID ];
+		$query['post_type'] = 'wporg-pattern';
 	}
 
 	return $query;

@@ -58,7 +58,7 @@
 		</div>
 		<!-- /wp:group -->
 
-		<!-- wp:query {"queryId":1,"query":{"inherit":false,"perPage":3,"postType":"wporg-pattern","override":"more-by-author"}} -->
+		<!-- wp:query {"queryId":1,"query":{"inherit":false,"perPage":3,"postType":"wporg-pattern","_id":"more-by-author"}} -->
 		<div class="wp-block-query">
 			<!-- wp:post-template {"style":{"spacing":{"blockGap":"var:preset|spacing|40"}},"layout":{"type":"grid","columnCount":3}} -->
 				<!-- wp:group {"style":{"spacing":{"blockGap":"5px"}}} -->
