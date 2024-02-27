@@ -346,7 +346,12 @@ function update_archive_title( $block_content, $block, $instance ) {
 			// translators: %s list of terms used for filtering.
 			$title = sprintf( __( 'Patterns: %s', 'wporg' ), implode( ', ', $term_names ) );
 		} else {
-			$title = __( 'All patterns', 'wporg' );
+			$author = isset( $wp_query->query['author_name'] ) ? get_user_by( 'slug', $wp_query->query['author_name'] ) : false;
+			if ( $author ) {
+				$title = sprintf( __( 'Author: %s', 'wporg' ), $author->display_name );
+			} else {
+				$title = __( 'All patterns', 'wporg' );
+			}
 		}
 
 		$tag_name           = isset( $attributes['level'] ) ? 'h' . (int) $attributes['level'] : 'h1';
@@ -372,6 +377,8 @@ function update_archive_title( $block_content, $block, $instance ) {
  * Update the breadcrumbs to the current page.
  */
 function update_site_breadcrumbs( $breadcrumbs ) {
+	global $wp_query;
+
 	// Build up the breadcrumbs from scratch.
 	$breadcrumbs = array(
 		array(
@@ -405,26 +412,32 @@ function update_site_breadcrumbs( $breadcrumbs ) {
 	if ( is_home() || is_archive() ) {
 		// Get the current applied filters (except search, handled above).
 		$term_names = get_applied_filter_list( false );
-		if ( empty( $term_names ) ) {
-			$breadcrumbs[] = array(
-				'url' => false,
-				'title' => __( 'All patterns', 'wporg' ),
-			);
-			return $breadcrumbs;
-		}
+		$author = isset( $wp_query->query['author_name'] ) ? get_user_by( 'slug', $wp_query->query['author_name'] ) : false;
 
 		$breadcrumbs[] = array(
 			'url' => home_url( '/archives/' ),
 			'title' => __( 'All patterns', 'wporg' ),
 		);
 
-		$term_names = wp_list_pluck( $term_names, 'name' );
-		$breadcrumbs[] = array(
-			'url' => false,
-			// translators: %s list of terms used for filtering.
-			'title' => implode( ', ', $term_names ),
-		);
+		if ( $author ) {
+			$breadcrumbs[] = array(
+				'url' => get_author_posts_url( $author->ID ),
+				'title' => sprintf( __( 'Author: %s', 'wporg' ), $author->display_name ),
+			);
+		}
+
+		if ( $term_names ) {
+			$term_names = wp_list_pluck( $term_names, 'name' );
+			$breadcrumbs[] = array(
+				'url' => false,
+				// translators: %s list of terms used for filtering.
+				'title' => implode( ', ', $term_names ),
+			);
+		}
 	}
+
+	// Last item should be "current", no URL.
+	$breadcrumbs[count($breadcrumbs) - 1]['url'] = false;
 
 	return $breadcrumbs;
 }
