@@ -960,8 +960,8 @@ function modify_query_loop_block_query_vars( $query, $block ) {
 		}
 
 		if ( is_page( 'favorites' ) ) {
-			$user_id = get_current_user_id();
-			if ( $user_id ) {
+			$favorites = get_favorites();
+			if ( ! empty( $favorites ) ) {
 				$query['post__in'] = get_favorites();
 			} else {
 				$query['post__in'] = [ -1 ];

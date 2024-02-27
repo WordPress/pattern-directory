@@ -69,6 +69,13 @@ function update_query_loop_vars( $query, $block, $page ) {
 		$query['post_type'] = 'wporg-pattern';
 	}
 
+	if ( 'empty-favorites' === $block->context['query']['_id'] ) {
+		unset( $query['post__in'] );
+		$query['post_type'] = 'wporg-pattern';
+		$query['orderby'] = 'meta_value_num';
+		$query['meta_key'] = 'wporg-pattern-favorites';
+	}
+
 	return $query;
 }
 

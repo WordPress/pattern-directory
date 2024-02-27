@@ -20,6 +20,10 @@
 	vertical-align: middle;
 }
 
+.wp-block-query-no-results {
+	margin-top: 0;
+}
+
 .wp-block-post-title a:where(:not(.wp-element-button)) {
 	color: var(--wp--preset--color--blueberry-1);
 }
@@ -34,5 +38,18 @@
 @media (max-width: 1280px) {
 	:where(body:not(.single-wporg-pattern)) .wp-block-post-template.is-layout-grid.columns-3 {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+/* Pages using this the 1760 wide width. */
+.wporg-patterns-nested-alignfull {
+	width: 100vw;
+	margin-inline-start: calc(1760px / 2 - 50vw);
+}
+
+/* 1920 = 1760 + 2 * edge-space. */
+@media (max-width: 1920px) {
+	.wporg-patterns-nested-alignfull {
+		margin-inline-start: calc(var(--wp--preset--spacing--edge-space) * -1);
 	}
 }

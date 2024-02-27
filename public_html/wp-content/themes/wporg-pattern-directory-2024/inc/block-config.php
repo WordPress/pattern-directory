@@ -344,7 +344,7 @@ function update_archive_title( $block_content, $block, $instance ) {
 		if ( ! empty( $term_names ) ) {
 			$term_names = wp_list_pluck( $term_names, 'name' );
 			// translators: %s list of terms used for filtering.
-			$title = sprintf( __( 'Filter by: %s', 'wporg' ), implode( ', ', $term_names ) );
+			$title = sprintf( __( 'Patterns: %s', 'wporg' ), implode( ', ', $term_names ) );
 		} else {
 			$title = __( 'All patterns', 'wporg' );
 		}
