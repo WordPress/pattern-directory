@@ -799,7 +799,7 @@ function filter_patterns_rest_query( $args, $request ) {
 }
 
 /**
- * Add the `curation` query parameter.
+ * Add custom query parameters.
  *
  * @param array $query_vars
  *
@@ -812,7 +812,8 @@ function add_patterns_query_vars( $query_vars ) {
 }
 
 /**
- * Update the query to show patters according to the "curation" filter.
+ * Update the query to show patters according to the "curation" &
+ * sort order filters.
  *
  * @param WP_Query $query The WP_Query instance (passed by reference).
  */
@@ -877,12 +878,17 @@ function modify_patterns_query( $query ) {
 }
 
 /**
- * Modify query vars to support `curation`.
+ * Set up query customizations for the Query Loop block.
  *
  * @return string
  */
 function modify_query_loop_block_query_vars( $query, $block ) {
 	global $wp_query;
+
+	// Return early if this is a pattern.
+	if ( is_singular( POST_TYPE ) ) {
+		return $query;
+	}
 
 	if ( ! isset( $query['posts_per_page'] ) ) {
 		$query['posts_per_page'] = 24;
