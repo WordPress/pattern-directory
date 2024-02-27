@@ -65,8 +65,8 @@
 		<p class="has-text-align-center">
 			<?php printf(
 				/* translators: %s is url of the pattern archives. */
-				wp_kses_post( __( 'View <a href="%s">all sites</a> or try a different search. ', 'wporg' ) ),
-				esc_url( home_url( '/' ) )
+				wp_kses_post( __( 'View <a href="%s">all patterns</a> or try a different search. ', 'wporg' ) ),
+				esc_url( home_url( '/archives/' ) )
 			); ?>
 		</p>
 		<!-- /wp:paragraph -->
