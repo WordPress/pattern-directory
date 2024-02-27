@@ -807,6 +807,7 @@ function filter_patterns_rest_query( $args, $request ) {
  */
 function add_patterns_query_vars( $query_vars ) {
 	$query_vars[] = 'curation';
+	$query_vars[] = 'status';
 	return $query_vars;
 }
 
@@ -951,6 +952,10 @@ function modify_query_loop_block_query_vars( $query, $block ) {
 				$query['author'] = get_current_user_id();
 			} else {
 				$query['post__in'] = [ -1 ];
+			}
+
+			if ( isset( $wp_query->query['status'] ) ) {
+				$query['post_status'] = $wp_query->query['status'];
 			}
 		}
 

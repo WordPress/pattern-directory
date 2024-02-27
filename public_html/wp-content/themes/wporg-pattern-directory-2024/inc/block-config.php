@@ -11,6 +11,7 @@ add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\update_query_total_labe
 add_filter( 'wporg_query_filter_options_category', __NAMESPACE__ . '\get_category_options' );
 add_filter( 'wporg_query_filter_options_curation', __NAMESPACE__ . '\get_curation_options' );
 add_filter( 'wporg_query_filter_options_sort', __NAMESPACE__ . '\get_sort_options' );
+add_filter( 'wporg_query_filter_options_status', __NAMESPACE__ . '\get_status_options' );
 add_action( 'wporg_query_filter_in_form', __NAMESPACE__ . '\inject_other_filters' );
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
 add_filter( 'render_block_core/query-title', __NAMESPACE__ . '\update_archive_title', 10, 3 );
@@ -206,6 +207,37 @@ function get_sort_options( $options ) {
 		'action' => get_filter_action_url(),
 		'options' => $options,
 		'selected' => [ $sort ],
+	);
+}
+
+/**
+ * Provide a list of post status options.
+ *
+ * @param array $options The options for this filter.
+ * @return array New list of status options.
+ */
+function get_status_options( $options ) {
+	global $wp_query;
+	$selected = isset( $wp_query->query['status'] ) ? (array) $wp_query->query['status'] : array();
+
+	$count = count( $selected );
+	$label = sprintf(
+		/* translators: The dropdown label for filtering, %s is the selected term count. */
+		_n( 'Status <span>%s</span>', 'Status <span>%s</span>', $count, 'wporg' ),
+		$count
+	);
+
+	return array(
+		'label' => $label,
+		'title' => __( 'Status', 'wporg' ),
+		'key' => 'status',
+		'action' => get_filter_action_url(),
+		'options' => array(
+			'draft' => __( 'Draft', 'wporg' ),
+			'pending' => __( 'Pending Review', 'wporg' ),
+			'publish' => __( 'Published', 'wporg' ),
+		),
+		'selected' => $selected,
 	);
 }
 
