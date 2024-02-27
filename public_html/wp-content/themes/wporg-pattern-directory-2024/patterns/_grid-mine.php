@@ -35,7 +35,13 @@
 		<div class="wp-block-group">
 			<!-- wp:wporg/pattern-preview {"isLink":true} /-->
 
-			<!-- wp:post-title {"isLink":true,"fontSize":"small","fontFamily":"inter"} /-->
+			<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
+			<div class="wp-block-group">
+				<!-- wp:post-title {"isLink":true,"fontSize":"small","fontFamily":"inter"} /-->
+
+				<!-- wp:wporg/post-status /-->
+			</div>
+			<!-- /wp:group -->
 		</div>
 		<!-- /wp:group -->
 	<!-- /wp:post-template -->

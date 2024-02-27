@@ -9,6 +9,7 @@ require_once( __DIR__ . '/src/blocks/delete-button/index.php' );
 require_once( __DIR__ . '/src/blocks/favorite-button/index.php' );
 require_once( __DIR__ . '/src/blocks/pattern-preview/index.php' );
 require_once( __DIR__ . '/src/blocks/pattern-thumbnail/index.php' );
+require_once( __DIR__ . '/src/blocks/post-status/index.php' );
 require_once( __DIR__ . '/src/blocks/status-notice/index.php' );
 
 require_once( __DIR__ . '/inc/block-config.php' );

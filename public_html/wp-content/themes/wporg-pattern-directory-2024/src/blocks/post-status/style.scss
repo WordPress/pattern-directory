@@ -1,0 +1,28 @@
+.wp-block-wporg-post-status {
+	display: inline-block;
+	padding: 0.1rem 0.75rem;
+	border-radius: 2px;
+	background: var(--wp--preset--color--blueberry-4);
+	border: 1px solid var(--wp--preset--color--blueberry-1);
+	color: var(--wp--preset--color--charcoal-1);
+	font-weight: 600;
+	font-size: var(--wp--preset--font-size--extra-small);
+	line-height: var(--wp--custom--body--extra-small--typography--line-height);
+	text-transform: uppercase;
+
+	&.is-pending,
+	&.is-pending-review {
+		background: var(--wp--preset--color--lemon-3);
+		border-color: var(--wp--preset--color--lemon-1);
+	}
+
+	&.is-unlisted {
+		background: var(--wp--preset--color--pomegrade-3);
+		border-color: var(--wp--preset--color--pomegrade-1);
+	}
+
+	&.is-published {
+		background: var(--wp--preset--color--acid-green-3);
+		border-color: var(--wp--preset--color--acid-green-1);
+	}
+}
