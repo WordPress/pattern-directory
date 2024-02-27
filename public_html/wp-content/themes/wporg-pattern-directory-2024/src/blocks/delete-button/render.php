@@ -10,6 +10,9 @@ if ( ! current_user_can( 'edit_post', $post_id ) ) {
 	return;
 }
 
+// Manually enqueue this script, so that it's available for the interactivity view script.
+wp_enqueue_script( 'wp-api-fetch' );
+
 // Initial state to pass to Interactivity API.
 $init_state = [
 	'postId' => $post_id,
