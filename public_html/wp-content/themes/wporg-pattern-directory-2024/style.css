@@ -20,6 +20,18 @@
 	vertical-align: middle;
 }
 
+.wp-block-query-pagination.wp-block-query-pagination {
+	margin-bottom: 0;
+}
+
+/*
+ * If two spacers are immediate siblings, something isn't rendering
+ * (like pagination, etc). So hide the subsequent spacers.
+ */
+.wp-block-query .wp-block-spacer + .wp-block-spacer {
+	display: none;
+}
+
 .wp-block-query-no-results {
 	margin-top: 0;
 }
