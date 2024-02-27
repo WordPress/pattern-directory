@@ -4,7 +4,7 @@ namespace WordPressdotorg\Pattern_Directory\Pattern_Post_Type;
 
 use Error, WP_Block_Type_Registry;
 use function WordPressdotorg\Locales\{ get_locales, get_locales_with_english_names, get_locales_with_native_names };
-use function WordPressdotorg\Pattern_Directory\Favorite\{get_favorites, get_favorite_count};
+use function WordPressdotorg\Pattern_Directory\Favorite\get_favorite_count;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 
 const POST_TYPE       = 'wporg-pattern';
@@ -21,9 +21,6 @@ add_filter( 'allowed_block_types_all', __NAMESPACE__ . '\remove_disallowed_block
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
 add_filter( 'rest_' . POST_TYPE . '_collection_params', __NAMESPACE__ . '\filter_patterns_collection_params' );
 add_filter( 'rest_' . POST_TYPE . '_query', __NAMESPACE__ . '\filter_patterns_rest_query', 10, 2 );
-add_action( 'query_vars', __NAMESPACE__ . '\add_patterns_query_vars' );
-add_action( 'pre_get_posts', __NAMESPACE__ . '\modify_patterns_query' );
-add_filter( 'query_loop_block_query_vars', __NAMESPACE__ . '\modify_query_loop_block_query_vars', 10, 2 );
 add_filter( 'user_has_cap', __NAMESPACE__ . '\set_pattern_caps' );
 add_filter( 'posts_orderby', __NAMESPACE__ . '\filter_orderby_locale', 10, 2 );
 add_action( 'init', __NAMESPACE__ . '\add_preview_endpoint' );
@@ -796,196 +793,6 @@ function filter_patterns_rest_query( $args, $request ) {
 	}
 
 	return $args;
-}
-
-/**
- * Add custom query parameters.
- *
- * @param array $query_vars
- *
- * @return array
- */
-function add_patterns_query_vars( $query_vars ) {
-	$query_vars[] = 'curation';
-	$query_vars[] = 'status';
-	return $query_vars;
-}
-
-/**
- * Update the query to show patters according to the "curation" &
- * sort order filters.
- *
- * @param WP_Query $query The WP_Query instance (passed by reference).
- */
-function modify_patterns_query( $query ) {
-	if ( is_admin() || ! $query->is_main_query() ) {
-		return;
-	}
-
-	// If `curation` is passed and either `core` or `community`, we should
-	// filter the result. If `curation=all`, no filtering is needed.
-	$curation = $query->get( 'curation' );
-	if ( $curation ) {
-		$tax_query = isset( $query->tax_query->queries ) ? $query->tax_query->queries : [];
-		if ( 'core' === $curation ) {
-			// Patterns with the core keyword.
-			$tax_query['core_keyword'] = array(
-				'taxonomy' => 'wporg-pattern-keyword',
-				'field'    => 'slug',
-				'terms'    => [ 'core' ],
-				'operator' => 'IN',
-			);
-		} else if ( 'community' === $curation ) {
-			// Patterns without the core keyword.
-			$tax_query['core_keyword'] = array(
-				'taxonomy' => 'wporg-pattern-keyword',
-				'field'    => 'slug',
-				'terms'    => [ 'core' ],
-				'operator' => 'NOT IN',
-			);
-		}
-		$query->set( 'tax_query', $tax_query );
-	}
-
-	if ( str_ends_with( $query->get( 'orderby' ), '_desc' ) ) {
-		$orderby = str_replace( '_desc', '', $query->get( 'orderby' ) );
-		$query->set( 'orderby', $orderby );
-		$query->set( 'order', 'desc' );
-	} else if ( str_ends_with( $query->get( 'orderby' ), '_asc' ) ) {
-		$orderby = str_replace( '_asc', '', $query->get( 'orderby' ) );
-		$query->set( 'orderby', $orderby );
-		$query->set( 'order', 'asc' );
-	}
-
-	if ( $query->get( 'orderby' ) === 'favorite_count' ) {
-		$query->set( 'orderby', 'meta_value_num' );
-		$query->set( 'meta_key', 'wporg-pattern-favorites' );
-	}
-
-	if ( ! $query->is_singular() ) {
-		$query->set( 'post_type', array( POST_TYPE ) );
-
-		// The `orderby_locale` meta_query will be transformed into a query orderby by Pattern_Post_Type\filter_orderby_locale().
-		$query->set( 'meta_query', array(
-			'orderby_locale' => array(
-				'key'     => 'wpop_locale',
-				'compare' => 'IN',
-				// Order in value determines result order
-				'value'   => array( get_locale(), 'en_US' ),
-			),
-		) );
-	}
-}
-
-/**
- * Set up query customizations for the Query Loop block.
- *
- * @return string
- */
-function modify_query_loop_block_query_vars( $query, $block ) {
-	global $wp_query;
-
-	// Return early if this is a pattern.
-	if ( is_singular( POST_TYPE ) ) {
-		return $query;
-	}
-
-	if ( ! isset( $query['posts_per_page'] ) ) {
-		$query['posts_per_page'] = 24;
-	}
-
-	if ( isset( $page ) && ! isset( $query['offset'] ) ) {
-		$query['paged'] = $page;
-	}
-
-	if ( isset( $block->context['query']['curation'] ) ) {
-		if ( 'core' === $block->context['query']['curation'] ) {
-			// Patterns with the core keyword.
-			$query['tax_query']['core_keyword'] = array(
-				'taxonomy' => 'wporg-pattern-keyword',
-				'field'    => 'slug',
-				'terms'    => 'core',
-				'operator' => 'IN',
-			);
-		} else if ( 'community' === $block->context['query']['curation'] ) {
-			// Patterns without the core keyword.
-			$query['tax_query']['core_keyword'] = array(
-				'taxonomy' => 'wporg-pattern-keyword',
-				'field'    => 'slug',
-				'terms'    => [ 'core' ],
-				'operator' => 'NOT IN',
-			);
-		}
-	}
-
-	if ( isset( $block->context['query']['orderBy'] ) && 'favorite_count' === $block->context['query']['orderBy'] ) {
-		$query['orderby'] = 'meta_value_num';
-		$query['meta_key'] = 'wporg-pattern-favorites';
-	}
-
-	// Query Loops on My Patterns & Favorites pages
-	if ( is_page( [ 'my-patterns', 'favorites' ] ) ) {
-		// Get these values from the global wp_query, they're passed via the URL.
-		if ( isset( $wp_query->query['pattern-categories'] ) ) {
-			if ( ! isset( $query['tax_query'] ) || ! is_array( $query['tax_query'] ) ) {
-				$query['tax_query'] = array();
-			}
-			$query['tax_query'][] = array(
-				'taxonomy'         => 'wporg-pattern-category',
-				'field'            => 'slug',
-				'terms'            => $wp_query->query['pattern-categories'],
-				'include_children' => false,
-			);
-		}
-
-		if ( isset( $wp_query->query['orderby'] ) ) {
-			if ( str_ends_with( $wp_query->query['orderby'], '_desc' ) ) {
-				$orderby = str_replace( '_desc', '', $wp_query->query['orderby'] );
-				$query['orderby'] = $orderby;
-				$query['order'] = 'desc';
-			} else if ( str_ends_with( $wp_query->query['orderby'], '_asc' ) ) {
-				$orderby = str_replace( '_asc', '', $wp_query->query['orderby'] );
-				$query['orderby'] = $orderby;
-				$query['order'] = 'asc';
-			}
-		}
-
-		if ( is_page( 'my-patterns' ) ) {
-			$user_id = get_current_user_id();
-			if ( $user_id ) {
-				$query['post_type'] = 'wporg-pattern';
-				$query['post_status'] = 'any';
-				$query['author'] = get_current_user_id();
-			} else {
-				$query['post__in'] = [ -1 ];
-			}
-
-			if ( isset( $wp_query->query['status'] ) ) {
-				$query['post_status'] = $wp_query->query['status'];
-			}
-		}
-
-		if ( is_page( 'favorites' ) ) {
-			$favorites = get_favorites();
-			if ( ! empty( $favorites ) ) {
-				$query['post__in'] = get_favorites();
-			} else {
-				$query['post__in'] = [ -1 ];
-			}
-		}
-	}
-
-	// The `orderby_locale` meta_query will be transformed into a query orderby by Pattern_Post_Type\filter_orderby_locale().
-	$query['meta_query'] = array(
-		'orderby_locale' => array(
-			'key'     => 'wpop_locale',
-			'compare' => 'IN',
-			// Order in value determines result order
-			'value'   => array( get_locale(), 'en_US' ),
-		),
-	);
-
-	return $query;
 }
 
 /**

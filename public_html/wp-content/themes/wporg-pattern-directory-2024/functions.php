@@ -1,6 +1,8 @@
 <?php
 
 namespace WordPressdotorg\Theme\Pattern_Directory_2024;
+
+use function WordPressdotorg\Pattern_Directory\Favorite\{get_favorites, get_favorite_count};
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 // Block files
@@ -19,8 +21,11 @@ require_once( __DIR__ . '/inc/shortcodes.php' );
  * Actions and filters.
  */
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_assets' );
-add_filter( 'query_loop_block_query_vars', __NAMESPACE__ . '\update_query_loop_vars', 20, 3 );
 add_action( 'template_redirect', __NAMESPACE__ . '\do_pattern_actions' );
+add_action( 'query_vars', __NAMESPACE__ . '\add_patterns_query_vars' );
+add_action( 'pre_get_posts', __NAMESPACE__ . '\modify_patterns_query' );
+add_filter( 'query_loop_block_query_vars', __NAMESPACE__ . '\modify_query_loop_block_query_vars', 10, 3 );
+add_filter( 'query_loop_block_query_vars', __NAMESPACE__ . '\custom_query_loop_by_id', 20, 2 );
 
 add_action(
 	'init',
@@ -46,38 +51,6 @@ function enqueue_assets() {
 		array( 'wporg-parent-2021-style', 'wporg-global-fonts' ),
 		filemtime( __DIR__ . '/style.css' )
 	);
-}
-
-/**
- * Filter the query loop arguments.
- *
- * @param array    $query Array containing parameters for `WP_Query` as parsed by the block context.
- * @param WP_Block $block Block instance.
- * @param int      $page  Current query's page.
- */
-function update_query_loop_vars( $query, $block, $page ) {
-	if ( ! isset( $block->context['query']['_id'] ) ) {
-		return $query;
-	}
-
-	// This is used for the "more by this designer" section.
-	// The `[current]` author is a placeholder for the current post's author, and in this case
-	// we also want to exclude the current post from results.
-	$current_post = get_post();
-	if ( 'more-by-author' === $block->context['query']['_id'] && $current_post && $current_post->post_author ) {
-		$query['author'] = $current_post->post_author;
-		$query['post__not_in'] = [ $current_post->ID ];
-		$query['post_type'] = 'wporg-pattern';
-	}
-
-	if ( 'empty-favorites' === $block->context['query']['_id'] ) {
-		unset( $query['post__in'] );
-		$query['post_type'] = 'wporg-pattern';
-		$query['orderby'] = 'meta_value_num';
-		$query['meta_key'] = 'wporg-pattern-favorites';
-	}
-
-	return $query;
 }
 
 /**
@@ -119,6 +92,233 @@ function do_pattern_actions() {
 			}
 		}
 	}
+}
+
+/**
+ * Add custom query parameters.
+ *
+ * @param array $query_vars
+ *
+ * @return array
+ */
+function add_patterns_query_vars( $query_vars ) {
+	$query_vars[] = 'curation';
+	$query_vars[] = 'status';
+	return $query_vars;
+}
+
+/**
+ * Update the query to show patters according to the "curation" &
+ * sort order filters.
+ *
+ * @param WP_Query $query The WP_Query instance (passed by reference).
+ */
+function modify_patterns_query( $query ) {
+	if ( is_admin() || ! $query->is_main_query() ) {
+		return;
+	}
+
+	// If `curation` is passed and either `core` or `community`, we should
+	// filter the result. If `curation=all`, no filtering is needed.
+	$curation = $query->get( 'curation' );
+	if ( $curation ) {
+		$tax_query = isset( $query->tax_query->queries ) ? $query->tax_query->queries : [];
+		if ( 'core' === $curation ) {
+			// Patterns with the core keyword.
+			$tax_query['core_keyword'] = array(
+				'taxonomy' => 'wporg-pattern-keyword',
+				'field'    => 'slug',
+				'terms'    => [ 'core' ],
+				'operator' => 'IN',
+			);
+		} else if ( 'community' === $curation ) {
+			// Patterns without the core keyword.
+			$tax_query['core_keyword'] = array(
+				'taxonomy' => 'wporg-pattern-keyword',
+				'field'    => 'slug',
+				'terms'    => [ 'core' ],
+				'operator' => 'NOT IN',
+			);
+		}
+		$query->set( 'tax_query', $tax_query );
+	}
+
+	if ( str_ends_with( $query->get( 'orderby' ), '_desc' ) ) {
+		$orderby = str_replace( '_desc', '', $query->get( 'orderby' ) );
+		$query->set( 'orderby', $orderby );
+		$query->set( 'order', 'desc' );
+	} else if ( str_ends_with( $query->get( 'orderby' ), '_asc' ) ) {
+		$orderby = str_replace( '_asc', '', $query->get( 'orderby' ) );
+		$query->set( 'orderby', $orderby );
+		$query->set( 'order', 'asc' );
+	}
+
+	if ( $query->get( 'orderby' ) === 'favorite_count' ) {
+		$query->set( 'orderby', 'meta_value_num' );
+		$query->set( 'meta_key', 'wporg-pattern-favorites' );
+	}
+
+	if ( ! $query->is_singular() ) {
+		$query->set( 'post_type', array( POST_TYPE ) );
+
+		// The `orderby_locale` meta_query will be transformed into a query orderby by Pattern_Post_Type\filter_orderby_locale().
+		$query->set( 'meta_query', array(
+			'orderby_locale' => array(
+				'key'     => 'wpop_locale',
+				'compare' => 'IN',
+				// Order in value determines result order
+				'value'   => array( get_locale(), 'en_US' ),
+			),
+		) );
+	}
+}
+
+/**
+ * Set up query customizations for the Query Loop block.
+ *
+ * @param array    $query Array containing parameters for `WP_Query` as parsed by the block context.
+ * @param WP_Block $block Block instance.
+ * @param int      $page  Current query's page.
+ *
+ * @return array
+ */
+function modify_query_loop_block_query_vars( $query, $block, $page ) {
+	global $wp_query;
+
+	// Return early if this is a pattern.
+	if ( is_singular( POST_TYPE ) ) {
+		return $query;
+	}
+
+	if ( ! isset( $query['posts_per_page'] ) ) {
+		$query['posts_per_page'] = 24;
+	}
+
+	if ( isset( $page ) && ! isset( $query['offset'] ) ) {
+		$query['paged'] = $page;
+	}
+
+	if ( isset( $block->context['query']['curation'] ) ) {
+		if ( 'core' === $block->context['query']['curation'] ) {
+			// Patterns with the core keyword.
+			$query['tax_query']['core_keyword'] = array(
+				'taxonomy' => 'wporg-pattern-keyword',
+				'field'    => 'slug',
+				'terms'    => 'core',
+				'operator' => 'IN',
+			);
+		} else if ( 'community' === $block->context['query']['curation'] ) {
+			// Patterns without the core keyword.
+			$query['tax_query']['core_keyword'] = array(
+				'taxonomy' => 'wporg-pattern-keyword',
+				'field'    => 'slug',
+				'terms'    => [ 'core' ],
+				'operator' => 'NOT IN',
+			);
+		}
+	}
+
+	if ( isset( $block->context['query']['orderBy'] ) && 'favorite_count' === $block->context['query']['orderBy'] ) {
+		$query['orderby'] = 'meta_value_num';
+		$query['meta_key'] = 'wporg-pattern-favorites';
+	}
+
+	// Query Loops on My Patterns & Favorites pages
+	if ( is_page( [ 'my-patterns', 'favorites' ] ) ) {
+		// Get these values from the global wp_query, they're passed via the URL.
+		if ( isset( $wp_query->query['pattern-categories'] ) ) {
+			if ( ! isset( $query['tax_query'] ) || ! is_array( $query['tax_query'] ) ) {
+				$query['tax_query'] = array();
+			}
+			$query['tax_query'][] = array(
+				'taxonomy'         => 'wporg-pattern-category',
+				'field'            => 'slug',
+				'terms'            => $wp_query->query['pattern-categories'],
+				'include_children' => false,
+			);
+		}
+
+		if ( isset( $wp_query->query['orderby'] ) ) {
+			if ( str_ends_with( $wp_query->query['orderby'], '_desc' ) ) {
+				$orderby = str_replace( '_desc', '', $wp_query->query['orderby'] );
+				$query['orderby'] = $orderby;
+				$query['order'] = 'desc';
+			} else if ( str_ends_with( $wp_query->query['orderby'], '_asc' ) ) {
+				$orderby = str_replace( '_asc', '', $wp_query->query['orderby'] );
+				$query['orderby'] = $orderby;
+				$query['order'] = 'asc';
+			}
+		}
+
+		if ( is_page( 'my-patterns' ) ) {
+			$user_id = get_current_user_id();
+			if ( $user_id ) {
+				$query['post_type'] = 'wporg-pattern';
+				$query['post_status'] = 'any';
+				$query['author'] = get_current_user_id();
+			} else {
+				$query['post__in'] = [ -1 ];
+			}
+
+			if ( isset( $wp_query->query['status'] ) ) {
+				$query['post_status'] = $wp_query->query['status'];
+			}
+		}
+
+		if ( is_page( 'favorites' ) ) {
+			$favorites = get_favorites();
+			if ( ! empty( $favorites ) ) {
+				$query['post__in'] = get_favorites();
+			} else {
+				$query['post__in'] = [ -1 ];
+			}
+		}
+	}
+
+	// The `orderby_locale` meta_query will be transformed into a query orderby by Pattern_Post_Type\filter_orderby_locale().
+	$query['meta_query'] = array(
+		'orderby_locale' => array(
+			'key'     => 'wpop_locale',
+			'compare' => 'IN',
+			// Order in value determines result order
+			'value'   => array( get_locale(), 'en_US' ),
+		),
+	);
+
+	return $query;
+}
+
+/**
+ * Override Query Loop parameters if an `_id` property is found.
+ *
+ * This is a workaround to allow setting more complicated queries. For example,
+ * using the current author & excluding the current post.
+ *
+ * @param array    $query Array containing parameters for `WP_Query` as parsed by the block context.
+ * @param WP_Block $block Block instance.
+ *
+ * @return array
+ */
+function custom_query_loop_by_id( $query, $block ) {
+	if ( ! isset( $block->context['query']['_id'] ) ) {
+		return $query;
+	}
+
+	$current_post = get_post();
+	if ( 'more-by-author' === $block->context['query']['_id'] && $current_post && $current_post->post_author ) {
+		$query['author'] = $current_post->post_author;
+		$query['post__not_in'] = [ $current_post->ID ];
+		$query['post_type'] = 'wporg-pattern';
+	}
+
+	if ( 'empty-favorites' === $block->context['query']['_id'] ) {
+		unset( $query['post__in'] );
+		$query['post_type'] = 'wporg-pattern';
+		$query['orderby'] = 'meta_value_num';
+		$query['meta_key'] = 'wporg-pattern-favorites';
+	}
+
+	return $query;
 }
 
 /**
