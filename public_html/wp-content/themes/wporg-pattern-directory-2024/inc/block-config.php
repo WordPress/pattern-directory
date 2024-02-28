@@ -306,17 +306,17 @@ function add_site_navigation_menus( $menus ) {
 
 	$menu[] = array(
 		'label' => __( 'Favorites', 'wporg-patterns' ),
-		'url' => home_url( '/favorites/' ),
+		'url' => '/favorites/',
 	);
 	if ( is_user_logged_in() ) {
 		$menu[] = array(
 			'label' => __( 'My Patterns', 'wporg-patterns' ),
-			'url' => home_url( '/my-patterns/' ),
+			'url' => '/my-patterns/',
 		);
 	}
 	$menu[] = array(
 		'label' => __( 'New Pattern', 'wporg-patterns' ),
-		'url' => home_url( '/new-pattern/' ),
+		'url' => '/new-pattern/',
 	);
 	return array(
 		'main' => $menu,
