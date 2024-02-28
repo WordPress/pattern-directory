@@ -17,8 +17,9 @@ jobs:
               with:
                 token: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Build
-              run: yarn build:theme
+            - name: Remove build artifacts
+              run: |
+                  rm -rf public_html/wp-content/themes/wporg-pattern-directory-2024/node_modules
 
             - name: Ignore .gitignore
               run: |
