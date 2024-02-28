@@ -128,7 +128,9 @@ function locale( $locale ) {
 	if (
 		defined( 'WPORG_IS_API' ) &&
 		WPORG_IS_API &&
-		! empty( $_GET['locale'] )
+		! empty( $_GET['locale'] ) &&
+		is_string( $_GET['locale'] ) &&
+		sanitize_locale_name( $_GET['locale'] ) === $_GET['locale']
 	) {
 		return $_GET['locale'];
 	}
