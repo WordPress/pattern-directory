@@ -19,7 +19,7 @@ if ( ! $user_id && 'small' !== $variant ) {
 wp_enqueue_script( 'wp-api-fetch' );
 
 $is_favorite = is_favorite( $post_id, $user_id );
-$classes = [ 'is-style-text' ];
+$classes = [ 'is-style-text is-small' ];
 if ( 'small' === $variant ) {
 	$classes[] = 'is-variant-small';
 }
