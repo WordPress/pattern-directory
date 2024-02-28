@@ -19,6 +19,7 @@
 		"start:directory": "yarn workspace wporg-pattern-directory start",
 		"start:theme:old": "yarn workspace wporg-pattern-directory-theme start",
 		"start:theme": "yarn workspace wporg-pattern-directory-2024-theme start",
+		"setup:tools": "echo \"Not used.\"",
 		"create": "./bin/index.sh",
 		"wp-env": "wp-env",
 		"lint:php": "composer run lint",
