@@ -185,8 +185,8 @@ function modify_patterns_query( $query ) {
 function modify_query_loop_block_query_vars( $query, $block, $page ) {
 	global $wp_query;
 
-	// Return early if this is a pattern.
-	if ( is_singular( POST_TYPE ) ) {
+	// Return early if this is a pattern view page.
+	if ( isset( $wp_query->query_vars['view'] ) ) {
 		return $query;
 	}
 
