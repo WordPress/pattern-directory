@@ -16,7 +16,7 @@
 	> * {
 
 		/* Align children. */
-		display: flex;
+		display: flex !important;
 		align-items: center;
 		gap: calc(var(--wp--preset--spacing--10) / 2);
 	}
