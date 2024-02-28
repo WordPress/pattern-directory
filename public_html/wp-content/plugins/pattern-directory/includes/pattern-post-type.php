@@ -82,6 +82,7 @@ function register_post_type_data() {
 			'rewrite'           => array(
 				'slug' => 'categories',
 			),
+			'query_var' => 'pattern-categories',
 			'capabilities' => array(
 				'assign_terms' => 'edit_patterns',
 				'edit_terms'   => 'edit_patterns',
