@@ -36,6 +36,7 @@
 	margin-top: 0;
 }
 
+/* Both blocks are in the local header, but  */
 body.blog .wp-block-wporg-local-navigation-bar .wp-block-post-title,
 body.archive .wp-block-wporg-local-navigation-bar .wp-block-post-title,
 body.search .wp-block-wporg-local-navigation-bar .wp-block-post-title {
@@ -47,10 +48,15 @@ body.page .wp-block-wporg-local-navigation-bar .wp-block-query-title {
 	display: none;
 }
 
+/*
+ * A linked post title should be blueberry (needed to override parent setting,
+ * where post title is the same for linked or not).
+ */
 .wp-block-post-title a:where(:not(.wp-element-button)) {
 	color: var(--wp--preset--color--blueberry-1);
 }
 
+/* Add default focus style. */
 :where(main) a:where(:not(.wp-element-button)):focus,
 :where(main) button:where(:not([class*="wp-block-button"])):focus {
 	outline: none;
@@ -64,7 +70,7 @@ body.page .wp-block-wporg-local-navigation-bar .wp-block-query-title {
 	}
 }
 
-/* Pages using this the 1760 wide width. */
+/* Pages using this have the 1760 wide width. */
 .wporg-patterns-nested-alignfull {
 	width: 100vw;
 	margin-inline-start: calc(1760px / 2 - 50vw);
