@@ -1010,3 +1010,20 @@ function decode_pattern_content( $content ) {
 	$content = preg_replace( '/"ref":\d+,?/', '', $content );
 	return $content;
 }
+
+/**
+ * Given a post, return the unlisted reason (if one exists).
+ *
+ * @param int $post_id Post ID.
+ *
+ * @return string
+ */
+function get_pattern_unlisted_reason( $post_id ) {
+	$reasons = wp_get_object_terms( get_the_ID(), FLAG_REASON );
+	if ( count( $reasons ) > 0 ) {
+		$reason = array_shift( $reasons );
+		return $reason->description;
+	}
+
+	return '';
+}
