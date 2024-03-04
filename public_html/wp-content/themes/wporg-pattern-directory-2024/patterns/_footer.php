@@ -12,11 +12,11 @@
 	<!-- wp:column {"style":{"spacing":{"padding":{"top":"var:preset|spacing|50","right":"var:preset|spacing|edge-space","bottom":"var:preset|spacing|50","left":"var:preset|spacing|edge-space"}},"border":{"right":{"color":"var:preset|color|white-opacity-15","width":"1px"},"top":{},"bottom":{},"left":{}}}} -->
 	<div class="wp-block-column" style="border-right-color:var(--wp--preset--color--white-opacity-15);border-right-width:1px;padding-top:var(--wp--preset--spacing--50);padding-right:var(--wp--preset--spacing--edge-space);padding-bottom:var(--wp--preset--spacing--50);padding-left:var(--wp--preset--spacing--edge-space)">
 		<!-- wp:heading {"fontSize":"heading-4"} -->
-		<h2 class="wp-block-heading has-heading-4-font-size">What's a pattern?</h2>
+		<h2 class="wp-block-heading has-heading-4-font-size"><?php _e( 'What&#8217;s a pattern?', 'wporg' ); ?></h2>
 		<!-- /wp:heading -->
 
 		<!-- wp:paragraph {"className":"is-style-short-text"} -->
-		<p class="is-style-short-text">Block Patterns are a collection of blocks that you can insert into posts and pages and then customize with your own content. Using a Block Pattern can reduce the time required to create content on your site, as well as being a great way to learn how different blocks can be combined to produce interesting effects. </p>
+		<p class="is-style-short-text"><?php _e( 'A block pattern is a collection of blocks you can insert into your site and customize with your own content. Patterns save you time when composing pages of any kind and are a great way to learn how blocks can be combined to achieve specific layouts.', 'wporg' ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:buttons -->
@@ -32,11 +32,11 @@
 	<!-- wp:column {"style":{"spacing":{"padding":{"top":"var:preset|spacing|50","right":"var:preset|spacing|edge-space","bottom":"var:preset|spacing|50","left":"var:preset|spacing|edge-space"}}}} -->
 	<div class="wp-block-column" style="padding-top:var(--wp--preset--spacing--50);padding-right:var(--wp--preset--spacing--edge-space);padding-bottom:var(--wp--preset--spacing--50);padding-left:var(--wp--preset--spacing--edge-space)">
 		<!-- wp:heading {"fontSize":"heading-4"} -->
-		<h2 class="wp-block-heading has-heading-4-font-size">Create a pattern</h2>
+		<h2 class="wp-block-heading has-heading-4-font-size"><?php _e( 'Share your patterns', 'wporg' ); ?></h2>
 		<!-- /wp:heading -->
 
 		<!-- wp:paragraph {"className":"is-style-short-text"} -->
-		<p class="is-style-short-text">It is now possible for designers, site builders, and site owners to share their creations with the world and submit their best designs to the Block Pattern Directory. Themes can reference patterns from the Directory, without loading them with the theme on every site. This helps to share block patterns from one site to the next.</p>
+		<p class="is-style-short-text"><?php _e( 'Showcase your creations and make them publicly available in the Block Pattern Directory. Submitting a pattern to the directory means it can be referenced in themes and easily reused across sites—without requiring theme authors to bundle pattern code with each theme.', 'wporg' ); ?></p>
 		<!-- /wp:paragraph -->
 
 		<!-- wp:buttons -->

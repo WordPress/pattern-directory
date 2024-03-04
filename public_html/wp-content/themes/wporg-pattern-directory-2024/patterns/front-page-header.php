@@ -23,7 +23,7 @@
 		<!-- wp:site-title {"fontSize":"heading-1"} /-->
 
 		<!-- wp:paragraph {"textColor":"white"} -->
-		<p class="has-white-color has-text-color"><?php esc_html_e( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ); ?></p>
+		<p class="has-white-color has-text-color"><?php esc_html_e( 'Add a beautiful, ready-to-go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ); ?></p>
 		<!-- /wp:paragraph -->
 	</div>
 	<!-- /wp:group -->
