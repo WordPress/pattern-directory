@@ -4,6 +4,8 @@ namespace WordPressdotorg\Theme\Pattern_Directory_2024;
 
 use function WordPressdotorg\Pattern_Directory\Favorite\{get_favorites, get_favorite_count};
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG_POST_TYPE;
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\PENDING_STATUS;
 
 // Block files
 require_once( __DIR__ . '/src/blocks/copy-button/index.php' );
@@ -12,6 +14,7 @@ require_once( __DIR__ . '/src/blocks/favorite-button/index.php' );
 require_once( __DIR__ . '/src/blocks/pattern-preview/index.php' );
 require_once( __DIR__ . '/src/blocks/pattern-thumbnail/index.php' );
 require_once( __DIR__ . '/src/blocks/post-status/index.php' );
+require_once( __DIR__ . '/src/blocks/report-pattern/index.php' );
 require_once( __DIR__ . '/src/blocks/status-notice/index.php' );
 
 require_once( __DIR__ . '/inc/block-config.php' );
@@ -64,8 +67,8 @@ function do_pattern_actions() {
 		return;
 	}
 
-	$action = isset( $_GET['action'] ) ? $_GET['action'] : false;
-	$nonce = isset( $_GET['_wpnonce'] ) ? $_GET['_wpnonce'] : false;
+	$action = isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : false;
+	$nonce = isset( $_REQUEST['_wpnonce'] ) ? $_REQUEST['_wpnonce'] : false;
 	$post_id = get_the_ID();
 
 	if ( 'draft' === $action ) {
@@ -91,6 +94,35 @@ function do_pattern_actions() {
 				wp_safe_redirect( $url );
 			}
 		}
+	} else if ( 'report' === $action ) {
+		if ( wp_verify_nonce( $nonce, 'report-' . $post_id ) && current_user_can( 'read' ) ) {
+			$success = wp_insert_post(
+				array(
+					'post_type'   => FLAG_POST_TYPE,
+					'post_parent' => $post_id,
+					'post_excerpt'  => sanitize_text_field( $_POST['report-details'] ),
+					'post_status' => PENDING_STATUS,
+					'tax_input'  => array(
+						'wporg-pattern-flag-reason' => intval( $_POST['report-reason'] ),
+					),
+				)
+			);
+			if ( $success ) {
+				$args = array(
+					'success' => 'reported'
+				);
+			} else {
+				$args = array(
+					'error' => 'report-failed'
+				);
+			}
+		} else {
+			$args = array(
+				'error' => 'logged-out'
+			);
+		}
+
+		wp_safe_redirect( add_query_arg( $args, get_the_permalink() ) );
 	}
 }
 
@@ -359,4 +391,22 @@ function get_patterns_count() {
 		set_transient( $cache_key, $count, $ttl );
 	}
 	return $count;
+}
+
+/**
+ * Checks whether the user has a pending flag for a specific pattern.
+ *
+ * @return bool
+ */
+function user_has_flagged_pattern() {
+	$args = array(
+		'author' => get_current_user_id(),
+		'post_parent' => get_the_ID(),
+		'post_type' => FLAG_POST_TYPE,
+		'post_status' => PENDING_STATUS,
+	);
+
+	$items = new \WP_Query( $args );
+
+	return $items->have_posts();
 }

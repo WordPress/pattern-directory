@@ -5,9 +5,35 @@
  * Inserter: no
  */
 
+$error = isset( $_GET['error'] ) ? $_GET['error'] : false;
+$success = isset( $_GET['success'] ) ? $_GET['success'] : false;
+$notice = '';
+$notice_type = 'warning';
+if ( ! $success ) {
+	if ( 'report-failed' === $error ) {
+		$notice = __( 'Your pattern report could not be saved. Please try again.', 'wporg-patterns' );
+	} else if ( 'logged-out' === $error ) {
+		$notice = __( 'You must be logged in to report a pattern.', 'wporg-patterns' );
+	}
+} else if ( 'reported' === $success ) {
+	$notice_type = 'info';
+	$notice = __( 'Your report has been submitted.', 'wporg-patterns' );
+}
+
 ?>
 <!-- wp:group {"layout":{"type":"default"},"style":{"spacing":{"padding":{"top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"}}},"align":"wide"} -->
 <div class="wp-block-group alignwide" style="padding-top:var(--wp--preset--spacing--50);padding-bottom:var(--wp--preset--spacing--50);">
+	<?php if ( $notice ) : ?>
+	<!-- wp:wporg/notice {"type":"<?php echo $notice_type; ?>","style":{"spacing":{"margin":{"bottom":"var:preset|spacing|30"}}}} -->
+	<div class="wp-block-wporg-notice is-<?php echo $notice_type; ?>-notice" style="margin-bottom:var(--wp--preset--spacing--30);">
+		<div class="wp-block-wporg-notice__icon"></div>
+		<div class="wp-block-wporg-notice__content">
+			<p><?php echo esc_html( $notice ) ?></p>
+		</div>
+	</div>
+	<!-- /wp:wporg/notice -->
+	<?php endif; ?>
+
 	<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"},"align":"wide"} -->
 	<div class="wp-block-group alignwide">
 		<!-- wp:post-title {"style":{"typography":{"fontWeight":"700"}},"fontSize":"heading-3","fontFamily":"inter"} /-->
@@ -34,9 +60,7 @@
 
 	<!-- wp:group {"align":"wide"} -->
 	<div class="wp-block-group alignwide">
-		<!-- wp:paragraph {"fontSize":"small"} -->
-		<p class="has-small-font-size">Report this pattern</p>
-		<!-- /wp:paragraph -->
+		<!-- wp:wporg/report-pattern /-->
 	</div>
 	<!-- /wp:group -->
 </div>
