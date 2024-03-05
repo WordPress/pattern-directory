@@ -6,6 +6,7 @@
 namespace WordPressdotorg\Theme\Pattern_Directory_2024\Block_Config;
 
 use WP_Block_Supports;
+use function WordPressdotorg\Theme\Pattern_Directory_2024\get_patterns_count;
 
 add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\update_query_total_label', 10, 2 );
 add_filter( 'wporg_query_filter_options_category', __NAMESPACE__ . '\get_category_options' );
@@ -72,13 +73,11 @@ function get_filter_action_url() {
  */
 function update_query_total_label( $label, $found_posts ) {
 	if ( is_front_page() ) {
-		// Override the current query count, instead display the total number of posts.
-		// Note: This may be different than the result count on /archive/, because that
-		// includes private posts when the viewer can see them.
-		$counts = wp_count_posts( 'wporg-pattern' );
+		// Override the current query count, instead display the total number of patterns.
+		$count = get_patterns_count();
 
 		/* translators: %s: the result count. */
-		return sprintf( _n( '%s pattern', '%s patterns', $counts->publish, 'wporg' ), $counts->publish );
+		return sprintf( _n( '%s pattern', '%s patterns', $count, 'wporg' ), number_format_i18n( $count ) );
 	}
 	/* translators: %s: the result count. */
 	return _n( '%s pattern', '%s patterns', $found_posts, 'wporg' );

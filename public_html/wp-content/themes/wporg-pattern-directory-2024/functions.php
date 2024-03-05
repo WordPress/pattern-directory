@@ -332,3 +332,31 @@ function get_pattern_preview_url( $post = 0 ) {
 	$view_url = add_query_arg( 'view', true, get_permalink( $post ) );
 	return apply_filters( 'wporg_pattern_preview_url', $view_url, $post );
 }
+
+/**
+ * Get the count of all patterns on the site (for the current locale).
+ *
+ * @return int
+ */
+function get_patterns_count() {
+	global $wpdb;
+	$locale = get_locale();
+
+	// Cache for an hour to avoid extra DB lookup.
+	$cache_key = 'wporg-patterns-count-' . $locale;
+	$ttl = HOUR_IN_SECONDS;
+
+	$count = get_transient( $cache_key );
+	if ( ! $count ) {
+		$sql = "SELECT COUNT(*) FROM $wpdb->posts
+			INNER JOIN $wpdb->postmeta
+			ON {$wpdb->posts}.ID = {$wpdb->postmeta}.post_id
+			WHERE {$wpdb->posts}.post_status = 'publish'
+			AND {$wpdb->postmeta}.meta_key = 'wpop_locale'
+			AND {$wpdb->postmeta}.meta_value = '%s'";
+
+		$count = $wpdb->get_var( $wpdb->prepare( $sql, $locale ) );
+		set_transient( $cache_key, $count, $ttl );
+	}
+	return $count;
+}
