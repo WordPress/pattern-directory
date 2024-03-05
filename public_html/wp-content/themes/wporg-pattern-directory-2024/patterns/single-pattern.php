@@ -42,8 +42,8 @@
 </div>
 <!-- /wp:group -->
 
-<!-- wp:group {"layout":{"type":"constrained"},"style":{"spacing":{"padding":{"top":"var:preset|spacing|40","bottom":"var:preset|spacing|40"}}},"backgroundColor":"light-grey-2","align":"full"} -->
-<div class="wp-block-group has-light-grey-2-background-color has-background alignfull" style="padding-top:var(--wp--preset--spacing--40);padding-bottom:var(--wp--preset--spacing--40);">
+<!-- wp:group {"style":{"spacing":{"padding":{"left":"var:preset|spacing|edge-space","right":"var:preset|spacing|edge-space","top":"var:preset|spacing|50","bottom":"var:preset|spacing|50"}}},"backgroundColor":"light-grey-2","layout":{"type":"constrained"},"align":"full","className":"wporg-patterns-nested-alignfull"} -->
+<div class="wp-block-group alignfull wporg-patterns-nested-alignfull has-light-grey-2-background-color has-background" style="padding-top:var(--wp--preset--spacing--50);padding-right:var(--wp--preset--spacing--edge-space);padding-bottom:var(--wp--preset--spacing--50);padding-left:var(--wp--preset--spacing--edge-space)">
 	<!-- wp:group {"align":"wide"} -->
 	<div class="wp-block-group alignwide">
 		<!-- wp:heading {"fontSize":"heading-4"} -->
