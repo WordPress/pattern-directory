@@ -26,6 +26,7 @@ add_filter( 'posts_orderby', __NAMESPACE__ . '\filter_orderby_locale', 10, 2 );
 add_action( 'init', __NAMESPACE__ . '\add_preview_endpoint' );
 add_action( 'setup_theme', __NAMESPACE__ . '\setup_preview_theme', 1 );
 add_action( 'template_include', __NAMESPACE__ . '\load_pattern_preview', 100 );
+add_filter( 'jetpack_sitemap_post_types', __NAMESPACE__ . '\jetpack_sitemap_post_types' );
 
 /**
  * Registers post types and associated taxonomies, meta data, etc.
@@ -1026,4 +1027,17 @@ function get_pattern_unlisted_reason( $post_id ) {
 	}
 
 	return '';
+}
+
+/**
+ * Allow the Patterns to be included in the Jetpack Sitemaps.
+ *
+ * @param array $post_types The post types to include.
+ *
+ * @return array
+ */
+function jetpack_sitemap_post_types( $post_types ) {
+	$post_types[] = POST_TYPE;
+
+	return $post_types;
 }
