@@ -36,7 +36,7 @@ if ( ! $success ) {
 
 	<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"},"align":"wide"} -->
 	<div class="wp-block-group alignwide">
-		<!-- wp:post-title {"style":{"typography":{"fontWeight":"700"}},"fontSize":"heading-3","fontFamily":"inter"} /-->
+		<!-- wp:post-title {"fontSize":"heading-3"} /-->
 
 		<!-- wp:wporg/copy-button /-->
 	</div>

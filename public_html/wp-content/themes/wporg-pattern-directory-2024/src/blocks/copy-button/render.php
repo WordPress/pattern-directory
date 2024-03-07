@@ -8,7 +8,7 @@ if ( ! $post_id ) {
 }
 
 $label = 'small' === $variant ? __( 'Copy', 'wporg-patterns' ) : __( 'Copy pattern', 'wporg-patterns' );
-$label_success = 'small' === $variant ? __( 'Copied', 'wporg-patterns' ) : __( 'Copied pattern', 'wporg-patterns' );
+$label_success = 'small' === $variant ? __( 'Copied', 'wporg-patterns' ) : __( 'Copied!', 'wporg-patterns' );
 
 $classes = [];
 if ( 'small' === $variant ) {

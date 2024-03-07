@@ -2,7 +2,7 @@
 	position: relative;
 	width: 100%;
 	--wp--custom--wporg-pattern-preview--border--width: clamp(4px, calc(1.33vw - 1.33px), 20px);
-	--wp--custom--wporg-pattern-preview--border--radius: calc(clamp(4px, calc(1.33vw - 1.33px), 20px) * 2);
+	--wp--custom--wporg-pattern-preview--border--radius: clamp(4px, calc(1.33vw - 1.33px), 20px);
 }
 
 .wporg-pattern-view-control__controls {

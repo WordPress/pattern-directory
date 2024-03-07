@@ -9,10 +9,6 @@
 		font-size: 14px;
 	}
 
-	&.is-favorite svg path {
-		fill: #d24c49;
-	}
-
 	> * {
 
 		/* Align children. */
@@ -22,57 +18,37 @@
 	}
 
 	svg {
-		height: 1rem;
-		width: 1rem;
-		transition: all 0.15s ease-out;
+		margin-top: 2px;
+		height: 24px;
+		width: 24px;
 		overflow: visible;
 
 		path {
 			fill: var(--wp--preset--color--charcoal-4);
 		}
+
+		&.is-star-empty {
+			display: block;
+		}
+
+		&.is-star-filled {
+			display: none;
+		}
+	}
+
+	&.is-favorite {
+		svg.is-star-empty {
+			display: none;
+		}
+
+		svg.is-star-filled {
+			display: block;
+		}
 	}
 
 	&:not(.is-variant-small) {
 		svg path {
-			fill: transparent;
-			stroke: var(--wp--preset--color--blueberry-1);
-			stroke-width: 2px;
+			fill: currentColor;
 		}
-
-		&.is-favorite svg path {
-			fill: #d24c49;
-			stroke-width: 0;
-		}
-
-		&:hover svg path {
-			transform-origin: center;
-			animation: 0.9s infinite HeartBeat;
-
-			@media (prefers-reduced-motion) {
-				animation: none;
-			}
-		}
-	}
-}
-
-@keyframes HeartBeat {
-	0% {
-		transform: scale(1);
-	}
-
-	25% {
-		transform: scale(1.2);
-	}
-
-	40% {
-		transform: scale(1);
-	}
-
-	60% {
-		transform: scale(1.2);
-	}
-
-	100% {
-		transform: scale(1);
 	}
 }
