@@ -6,8 +6,8 @@
  */
 
 ?>
-<!-- wp:query {"queryId":0,"query":{"inherit":false,"postType":"wporg-pattern"}} -->
-<div class="wp-block-query">
+<!-- wp:query {"queryId":0,"query":{"inherit":false,"postType":"wporg-pattern"},"className":"wporg-my-patterns"} -->
+<div class="wp-block-query wporg-my-patterns">
 	<!-- wp:group {"align":"wide","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
 	<div class="wp-block-group alignwide">
 		<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap"}} -->
@@ -33,11 +33,15 @@
 		<div class="wp-block-group">
 			<!-- wp:wporg/pattern-preview {"isLink":true} /-->
 
+			<!-- wp:wporg/post-status /-->
+
 			<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap","justifyContent":"space-between"}} -->
 			<div class="wp-block-group">
 				<!-- wp:post-title {"isLink":true,"fontSize":"small","fontFamily":"inter"} /-->
 
-				<!-- wp:wporg/post-status /-->
+				<!-- wp:button {"className":"is-style-text is-small is-edit-link","metadata":{"bindings":{"text":{"source":"wporg-pattern/edit-label"},"url":{"source":"wporg-pattern/edit-url"}}}} -->
+				<div class="wp-block-button is-style-text is-small is-edit-link"><a href="#" class="wp-block-button__link wp-element-button">Edit</a></div>
+				<!-- /wp:paragraph -->
 			</div>
 			<!-- /wp:group -->
 		</div>

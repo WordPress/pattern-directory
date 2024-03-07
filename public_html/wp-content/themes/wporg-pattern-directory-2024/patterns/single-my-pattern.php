@@ -59,8 +59,8 @@ if ( 'draft-failed' === $error ) {
 	<div class="wp-block-group alignwide">
 		<!-- wp:buttons {"layout":{"type":"flex"}} -->
 		<div class="wp-block-buttons">
-			<!-- wp:button {"className":"is-style-fill is-small"} -->
-			<div class="wp-block-button is-small is-style-fill"><a href="[pattern_edit_link]" class="wp-block-button__link wp-element-button">Open in editor</a></div>
+			<!-- wp:button {"className":"is-style-fill is-small","metadata":{"bindings":{"url":{"source":"wporg-pattern/edit-url"}}}} -->
+			<div class="wp-block-button is-small is-style-fill"><a href="[pattern_edit_link]" class="wp-block-button__link wp-element-button">Edit pattern</a></div>
 			<!-- /wp:button -->
 
 			<!-- wp:button {"className":"is-style-outline is-small"} -->

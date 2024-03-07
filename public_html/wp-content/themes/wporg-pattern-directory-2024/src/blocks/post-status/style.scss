@@ -3,7 +3,6 @@
 	padding: 0.1rem 0.75rem;
 	border-radius: 2px;
 	background: var(--wp--preset--color--blueberry-4);
-	border: 1px solid var(--wp--preset--color--blueberry-1);
 	color: var(--wp--preset--color--charcoal-1);
 	font-weight: 600;
 	font-size: var(--wp--preset--font-size--extra-small);
@@ -12,17 +11,26 @@
 
 	&.is-pending,
 	&.is-pending-review {
-		background: var(--wp--preset--color--lemon-3);
-		border-color: var(--wp--preset--color--lemon-1);
+		background: var(--wp--preset--color--lemon-2);
 	}
 
 	&.is-unlisted {
 		background: var(--wp--preset--color--pomegrade-3);
-		border-color: var(--wp--preset--color--pomegrade-1);
 	}
 
 	&.is-published {
-		background: var(--wp--preset--color--acid-green-3);
-		border-color: var(--wp--preset--color--acid-green-1);
+		background: var(--wp--preset--color--acid-green-2);
+	}
+}
+
+// Adjust position of the post status chip when in my patterns grid.
+.wporg-my-patterns .wp-block-post {
+	position: relative;
+
+	.wp-block-wporg-post-status {
+		position: absolute;
+		top: calc(var(--wp--preset--spacing--10) * -1);
+		left: var(--wp--preset--spacing--10);
+		margin-block-start: 0 !important;
 	}
 }

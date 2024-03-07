@@ -8,6 +8,7 @@ namespace WordPressdotorg\Theme\Pattern_Directory_2024\Block_Config;
 use WP_Block_Supports;
 use function WordPressdotorg\Theme\Pattern_Directory_2024\get_patterns_count;
 
+add_action( 'init', __NAMESPACE__ . '\register_block_bindings' );
 add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\update_query_total_label', 10, 2 );
 add_filter( 'wporg_query_filter_options_category', __NAMESPACE__ . '\get_category_options' );
 add_filter( 'wporg_query_filter_options_curation', __NAMESPACE__ . '\get_curation_options' );
@@ -18,6 +19,36 @@ add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigatio
 add_filter( 'render_block_core/query-title', __NAMESPACE__ . '\update_archive_title', 10, 3 );
 add_filter( 'wporg_block_site_breadcrumbs', __NAMESPACE__ . '\update_site_breadcrumbs' );
 add_filter( 'render_block_data', __NAMESPACE__ . '\modify_pattern_include' );
+
+function register_block_bindings() {
+	register_block_bindings_source(
+		'wporg-pattern/edit-label',
+		array(
+			'label' => __( 'Edit label', 'wporg-patterns' ),
+			'uses_context' => [ 'postId' ],
+			'get_value_callback' => function( $args, $block ) {
+				$post_id = $block->context['postId'];
+				/* translators: %s: Post title. Only visible to screen readers. */
+				return sprintf(
+					__( 'Edit <span class="screen-reader-text">"%s"</span>', 'wporg-patterns' ),
+					get_the_title( $post_id )
+				);
+			}
+		)
+	);
+
+	register_block_bindings_source(
+		'wporg-pattern/edit-url',
+		array(
+			'label' => __( 'Edit link', 'wporg-patterns' ),
+			'uses_context' => [ 'postId' ],
+			'get_value_callback' => function( $args, $block ) {
+				$post_id = $block->context['postId'];
+				return site_url( "pattern/$post_id/edit/" );
+			}
+		)
+	);
+}
 
 /**
  * Get a list of the currently-applied filters.
