@@ -8,11 +8,13 @@
 ?>
 <!-- wp:query {"align":"wide","queryId":0,"query":{"inherit":true},"layout":{"type":"constrained","wideSize":"1760px"}} -->
 <div class="wp-block-query alignwide">
+	<!-- wp:navigation {"menuSlug":"categories","ariaLabel":"<?php esc_attr_e( 'Category menu', 'wporg-patterns' ); ?>","overlayMenu":"never","layout":{"type":"flex","orientation":"horizontal","justifyContent":"left","flexWrap":"nowrap"},"fontSize":"small","className":"is-style-button-list"} /-->
+
 	<!-- wp:group {"align":"wide","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
 	<div class="wp-block-group alignwide">
 		<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap"}} -->
 		<div class="wp-block-group">
-			<!-- wp:search {"showLabel":false,"placeholder":"<?php esc_html_e( 'Search patterns', 'wporg' ); ?>","width":100,"widthUnit":"%","buttonText":"<?php esc_html_e( 'Search', 'wporg' ); ?>","buttonPosition":"button-inside","buttonUseIcon":true,"className":"is-style-secondary-search-control"} /-->
+			<!-- wp:search {"showLabel":false,"placeholder":"<?php esc_html_e( 'Search patterns', 'wporg-patterns' ); ?>","width":100,"widthUnit":"%","buttonText":"<?php esc_html_e( 'Search', 'wporg' ); ?>","buttonPosition":"button-inside","buttonUseIcon":true,"className":"is-style-secondary-search-control"} /-->
 
 			<!-- wp:wporg/query-total /-->
 		</div>
@@ -20,7 +22,6 @@
 
 		<!-- wp:group {"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","flexWrap":"nowrap"},"className":"wporg-query-filters"} -->
 		<div class="wp-block-group wporg-query-filters">
-			<!-- wp:wporg/query-filter {"key":"category"} /-->
 			<!-- wp:wporg/query-filter {"key":"curation","multiple":false} /-->
 			<!-- wp:wporg/query-filter {"key":"sort","multiple":false} /-->
 		</div>

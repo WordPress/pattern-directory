@@ -10,11 +10,11 @@ use function WordPressdotorg\Theme\Pattern_Directory_2024\get_patterns_count;
 
 add_action( 'init', __NAMESPACE__ . '\register_block_bindings' );
 add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\update_query_total_label', 10, 2 );
-add_filter( 'wporg_query_filter_options_category', __NAMESPACE__ . '\get_category_options' );
 add_filter( 'wporg_query_filter_options_curation', __NAMESPACE__ . '\get_curation_options' );
 add_filter( 'wporg_query_filter_options_sort', __NAMESPACE__ . '\get_sort_options' );
 add_filter( 'wporg_query_filter_options_status', __NAMESPACE__ . '\get_status_options' );
 add_action( 'wporg_query_filter_in_form', __NAMESPACE__ . '\inject_other_filters' );
+add_filter( 'render_block_core/search', __NAMESPACE__ . '\inject_category_search_block' );
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
 add_filter( 'render_block_core/query-title', __NAMESPACE__ . '\update_archive_title', 10, 3 );
 add_filter( 'wporg_block_site_breadcrumbs', __NAMESPACE__ . '\update_site_breadcrumbs' );
@@ -112,40 +112,6 @@ function update_query_total_label( $label, $found_posts ) {
 	}
 	/* translators: %s: the result count. */
 	return _n( '%s pattern', '%s patterns', $found_posts, 'wporg' );
-}
-
-/**
- * Get the list of categories for the filters.
- *
- * @param array $options The options for this filter.
- * @return array New list of category options.
- */
-function get_category_options( $options ) {
-	global $wp_query;
-
-	$args = array(
-		'taxonomy' => 'wporg-pattern-category',
-		'orderby' => 'name',
-	);
-	$categories = get_terms( $args );
-
-	$selected = isset( $wp_query->query['pattern-categories'] ) ? (array) $wp_query->query['pattern-categories'] : array();
-
-	$count = count( $selected );
-	$label = sprintf(
-		/* translators: The dropdown label for filtering, %s is the selected term count. */
-		_n( 'Categories <span>%s</span>', 'Categories <span>%s</span>', $count, 'wporg' ),
-		$count
-	);
-
-	return array(
-		'label' => $label,
-		'title' => __( 'Categories', 'wporg' ),
-		'key' => 'pattern-categories',
-		'action' => get_filter_action_url(),
-		'options' => array_combine( wp_list_pluck( $categories, 'slug' ), wp_list_pluck( $categories, 'name' ) ),
-		'selected' => $selected,
-	);
 }
 
 /**
@@ -329,10 +295,34 @@ function inject_other_filters( $key ) {
 }
 
 /**
+ * Inject the current category into the search form.
+ *
+ * @param string $block_content
+ *
+ * @return string
+ */
+function inject_category_search_block( $block_content ) {
+	global $wp_query;
+	$category_inputs = '';
+	$query_var = 'pattern-categories';
+	if ( isset( $wp_query->query[ $query_var ] ) ) {
+		$values = (array) $wp_query->query[ $query_var ];
+		foreach ( $values as $value ) {
+			$category_inputs .= sprintf( '<input type="hidden" name="%s" value="%s" />', esc_attr( $query_var ), esc_attr( $value ) );
+		}
+	}
+
+	return str_replace( '</form>', $category_inputs . '</form>', $block_content );
+}
+
+/**
  * Provide a list of local navigation menus.
  */
 function add_site_navigation_menus( $menus ) {
+	global $wp_query;
+
 	$menu = array();
+	$categories = array();
 
 	$menu[] = array(
 		'label' => __( 'Favorites', 'wporg-patterns' ),
@@ -348,8 +338,38 @@ function add_site_navigation_menus( $menus ) {
 		'label' => __( 'New Pattern', 'wporg-patterns' ),
 		'url' => '/new-pattern/',
 	);
+
+	// Build category list, given a specific list/order of terms to display.
+	$terms = get_terms(
+		array(
+			'taxonomy' => 'wporg-pattern-category',
+			'slug' => array(
+				// `query` is "Posts".
+				'featured', 'query', 'text', 'gallery', 'call-to-action',
+				'banner', 'header', 'footer', 'wireframe'
+			),
+			'orderby' => 'slug__in',
+		)
+	);
+	if ( ! is_wp_error( $terms ) ) {
+		$is_category = false;
+		$current_cats = isset( $wp_query->query['pattern-categories'] ) ? (array) $wp_query->query['pattern-categories'] : array();
+		foreach ( $terms as $term ) {
+			$cat = array(
+				'label' => $term->name,
+				'url' => get_term_link( $term ),
+			);
+			if ( in_array( $term->slug, $current_cats ) ) {
+				$cat['className'] = 'current-menu-item';
+				$is_category = true;
+			}
+			$categories[] = $cat;
+		}
+	}
+
 	return array(
 		'main' => $menu,
+		'categories' => $categories,
 	);
 }
 
