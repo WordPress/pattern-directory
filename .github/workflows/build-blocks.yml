@@ -1,9 +1,13 @@
-name: Build and push to `build-blocks` branch.
+name: Build new theme and push to `build-blocks` branch.
 
 on:
     push:
         branches:
-            - try/blocks-2
+            - trunk
+        paths:
+            - public_html/wp-content/themes/wporg-pattern-directory-2024/**
+    # Enable manually running action if necessary.
+    workflow_dispatch:
 
 jobs:
     build:
