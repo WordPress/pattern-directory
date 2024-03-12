@@ -1,0 +1,40 @@
+.wp-block-wporg-pattern-view-control {
+	position: relative;
+	width: 100%;
+	--wp--custom--wporg-pattern-preview--border--width: clamp(4px, calc(1.33vw - 1.33px), 20px);
+	--wp--custom--wporg-pattern-preview--border--radius: clamp(4px, calc(1.33vw - 1.33px), 20px);
+}
+
+.wporg-pattern-view-control__controls {
+	margin-top: calc(var(--wp--preset--spacing--20) + var(--wp--custom--wporg-pattern-preview--border--width));
+	display: flex;
+	justify-content: center;
+	gap: var(--wp--preset--spacing--10);
+
+	.wp-element-button {
+		display: flex !important;
+		flex-direction: column;
+		align-items: center;
+
+		svg {
+			fill: currentColor !important;
+		}
+	}
+}
+
+.wp-block-wporg-pattern-view-control .wp-block-wporg-pattern-preview {
+	// The height is calculated based on the child iframe, `content-box` means
+	// this does not need to include the padding.
+	box-sizing: content-box;
+	border: none;
+	padding: var(--wp--custom--wporg-pattern-preview--border--width);
+
+	> iframe {
+		margin: 0 auto;
+		display: block;
+		border-radius: var(--wp--custom--wporg-pattern-preview--border--radius);
+		outline-color: var(--wp--custom--wporg-pattern-preview--border--color);
+		outline-style: solid;
+		outline-width: var(--wp--custom--wporg-pattern-preview--border--width);
+	}
+}

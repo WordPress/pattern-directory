@@ -14,11 +14,12 @@
 		"build:creator": "yarn workspace wporg-pattern-creator build",
 		"build:directory": "yarn workspace wporg-pattern-directory build",
 		"build:theme:old": "yarn workspace wporg-pattern-directory-theme build",
-		"build:theme": "yarn workspace wporg-pattern-directory-2022-theme build",
+		"build:theme": "yarn workspace wporg-pattern-directory-2024-theme build",
 		"start:creator": "yarn workspace wporg-pattern-creator start",
 		"start:directory": "yarn workspace wporg-pattern-directory start",
 		"start:theme:old": "yarn workspace wporg-pattern-directory-theme start",
-		"start:theme": "yarn workspace wporg-pattern-directory-2022-theme start",
+		"start:theme": "yarn workspace wporg-pattern-directory-2024-theme start",
+		"setup:tools": "echo \"Not used.\"",
 		"create": "./bin/index.sh",
 		"wp-env": "wp-env",
 		"lint:php": "composer run lint",
@@ -28,6 +29,7 @@
 	"workspaces": [
 		"public_html/wp-content/plugins/pattern-creator",
 		"public_html/wp-content/plugins/pattern-directory",
-		"public_html/wp-content/themes/pattern-directory"
+		"public_html/wp-content/themes/pattern-directory",
+		"public_html/wp-content/themes/wporg-pattern-directory-2024"
 	]
 }

@@ -1,0 +1,31 @@
+{
+	"name": "wporg-pattern-directory-2024-theme",
+	"version": "1.0.0",
+	"description": "",
+	"author": "WordPress.org",
+	"license": "GPL-2.0-or-later",
+	"private": true,
+	"dependencies": {
+		"a11y-dialog": "^8.0.4"
+	},
+	"devDependencies": {
+		"@wordpress/scripts": "27.2.0"
+	},
+	"eslintConfig": {
+		"extends": "../../../../.eslintrc.js"
+	},
+	"stylelint": {
+		"extends": "../../../../.stylelintrc",
+		"ignoreFiles": [
+			"**/*.css",
+			"**/*.css.map"
+		]
+	},
+	"scripts": {
+		"build": "wp-scripts build --experimental-modules",
+		"start": "wp-scripts start --experimental-modules",
+		"lint:js": "wp-scripts lint-js src",
+		"lint:css": "wp-scripts lint-style src/**/*.scss",
+		"format": "wp-scripts format src -- --config=../../../../.prettierrc.js"
+	}
+}
