@@ -21,7 +21,7 @@
 		<!-- wp:buttons -->
 		<div class="wp-block-buttons">
 			<!-- wp:button {"className":"is-style-outline-on-dark"} -->
-			<div class="wp-block-button is-style-outline-on-dark"><a class="wp-block-button__link wp-element-button" href="https://wordpress.org/documentation/article/block-pattern/"><?php _e( 'Learn more<span class="screen-reader-text">about using patterns</span>', 'wporg-patterns' ); ?></a></div>
+			<div class="wp-block-button is-style-outline-on-dark"><a class="wp-block-button__link wp-element-button" href="https://wordpress.org/documentation/article/block-pattern/"><?php _e( 'Learn more <span class="screen-reader-text">about using patterns</span>', 'wporg-patterns' ); ?></a></div>
 			<!-- /wp:button -->
 		</div>
 		<!-- /wp:buttons -->
