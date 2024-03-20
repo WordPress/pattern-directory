@@ -8,6 +8,8 @@
 ?>
 <!-- wp:query {"queryId":0,"query":{"inherit":false,"postType":"wporg-pattern"}} -->
 <div class="wp-block-query">
+	<!-- wp:navigation {"menuSlug":"categories","ariaLabel":"<?php esc_attr_e( 'Category menu', 'wporg-patterns' ); ?>","overlayMenu":"never","layout":{"type":"flex","orientation":"horizontal","justifyContent":"left","flexWrap":"nowrap"},"fontSize":"small","className":"is-style-button-list"} /-->
+
 	<!-- wp:group {"align":"wide","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
 	<div class="wp-block-group alignwide">
 		<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap"}} -->
@@ -18,7 +20,6 @@
 
 		<!-- wp:group {"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","flexWrap":"nowrap"},"className":"wporg-query-filters"} -->
 		<div class="wp-block-group wporg-query-filters">
-			<!-- wp:wporg/query-filter {"key":"category"} /-->
 			<!-- wp:wporg/query-filter {"key":"sort","multiple":false} /-->
 		</div>
 		<!-- /wp:group -->

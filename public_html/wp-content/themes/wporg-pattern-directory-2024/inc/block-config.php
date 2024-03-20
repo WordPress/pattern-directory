@@ -12,7 +12,6 @@ add_action( 'init', __NAMESPACE__ . '\register_block_bindings' );
 add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\update_query_total_label', 10, 2 );
 add_filter( 'wporg_query_filter_options_curation', __NAMESPACE__ . '\get_curation_options' );
 add_filter( 'wporg_query_filter_options_sort', __NAMESPACE__ . '\get_sort_options' );
-add_filter( 'wporg_query_filter_options_status', __NAMESPACE__ . '\get_status_options' );
 add_action( 'wporg_query_filter_in_form', __NAMESPACE__ . '\inject_other_filters' );
 add_filter( 'render_block_core/search', __NAMESPACE__ . '\inject_category_search_block' );
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
@@ -207,37 +206,6 @@ function get_sort_options( $options ) {
 }
 
 /**
- * Provide a list of post status options.
- *
- * @param array $options The options for this filter.
- * @return array New list of status options.
- */
-function get_status_options( $options ) {
-	global $wp_query;
-	$selected = isset( $wp_query->query['status'] ) ? (array) $wp_query->query['status'] : array();
-
-	$count = count( $selected );
-	$label = sprintf(
-		/* translators: The dropdown label for filtering, %s is the selected term count. */
-		_n( 'Status <span>%s</span>', 'Status <span>%s</span>', $count, 'wporg' ),
-		$count
-	);
-
-	return array(
-		'label' => $label,
-		'title' => __( 'Status', 'wporg' ),
-		'key' => 'status',
-		'action' => get_filter_action_url(),
-		'options' => array(
-			'draft' => __( 'Draft', 'wporg' ),
-			'pending' => __( 'Pending Review', 'wporg' ),
-			'publish' => __( 'Published', 'wporg' ),
-		),
-		'selected' => $selected,
-	);
-}
-
-/**
  * Add in the other existing filters as hidden inputs in the filter form.
  *
  * Enables combining filters by building up the correct URL on submit,
@@ -308,6 +276,7 @@ function add_site_navigation_menus( $menus ) {
 
 	$menu = array();
 	$categories = array();
+	$statuses = array();
 
 	$menu[] = array(
 		'label' => __( 'Favorites', 'wporg-patterns' ),
@@ -324,6 +293,25 @@ function add_site_navigation_menus( $menus ) {
 		'url' => '/new-pattern/',
 	);
 
+	$current_status = isset( $wp_query->query['status'] ) ? $wp_query->query['status'] : false;
+	$statuses = array(
+		array(
+			'label' => __( 'Draft', 'wporg' ),
+			'url' => add_query_arg( 'status', 'draft', get_permalink() ),
+			'className' => 'draft' === $current_status ? 'current-menu-item' : '',
+		),
+		array(
+			'label' => __( 'Pending Review', 'wporg' ),
+			'url' => add_query_arg( 'status', 'pending', get_permalink() ),
+			'className' => 'pending' === $current_status ? 'current-menu-item' : '',
+		),
+		array(
+			'label' => __( 'Published', 'wporg' ),
+			'url' => add_query_arg( 'status', 'publish', get_permalink() ),
+			'className' => 'publish' === $current_status ? 'current-menu-item' : '',
+		),
+	);
+
 	// Build category list, given a specific list/order of terms to display.
 	$terms = get_terms(
 		array(
@@ -337,7 +325,6 @@ function add_site_navigation_menus( $menus ) {
 		)
 	);
 	if ( ! is_wp_error( $terms ) ) {
-		$is_category = false;
 		$current_cats = isset( $wp_query->query['pattern-categories'] ) ? (array) $wp_query->query['pattern-categories'] : array();
 		foreach ( $terms as $term ) {
 			$cat = array(
@@ -346,8 +333,11 @@ function add_site_navigation_menus( $menus ) {
 			);
 			if ( in_array( $term->slug, $current_cats ) ) {
 				$cat['className'] = 'current-menu-item';
-				$is_category = true;
 			}
+			if ( is_page( 'favorites' ) ) {
+				$cat['url'] = add_query_arg( 'pattern-categories', $term->slug, get_permalink() );
+			}
+
 			$categories[] = $cat;
 		}
 	}
@@ -355,6 +345,7 @@ function add_site_navigation_menus( $menus ) {
 	return array(
 		'main' => $menu,
 		'categories' => $categories,
+		'statuses' => $statuses,
 	);
 }
 

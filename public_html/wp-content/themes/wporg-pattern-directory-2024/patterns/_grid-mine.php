@@ -8,6 +8,8 @@
 ?>
 <!-- wp:query {"queryId":0,"query":{"inherit":false,"postType":"wporg-pattern"},"className":"wporg-my-patterns"} -->
 <div class="wp-block-query wporg-my-patterns">
+	<!-- wp:navigation {"menuSlug":"statuses","ariaLabel":"<?php esc_attr_e( 'Status menu', 'wporg-patterns' ); ?>","overlayMenu":"never","layout":{"type":"flex","orientation":"horizontal","justifyContent":"left","flexWrap":"nowrap"},"fontSize":"small","className":"is-style-button-list"} /-->
+
 	<!-- wp:group {"align":"wide","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
 	<div class="wp-block-group alignwide">
 		<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap"}} -->
