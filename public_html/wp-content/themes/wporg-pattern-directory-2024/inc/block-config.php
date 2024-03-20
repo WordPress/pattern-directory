@@ -16,6 +16,7 @@ add_action( 'wporg_query_filter_in_form', __NAMESPACE__ . '\inject_other_filters
 add_filter( 'render_block_core/search', __NAMESPACE__ . '\inject_category_search_block' );
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
 add_filter( 'render_block_core/query-title', __NAMESPACE__ . '\update_archive_title', 10, 3 );
+add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\update_site_title', 10, 3 );
 add_filter( 'wporg_block_site_breadcrumbs', __NAMESPACE__ . '\update_site_breadcrumbs' );
 add_filter( 'render_block_data', __NAMESPACE__ . '\modify_pattern_include' );
 
@@ -397,6 +398,19 @@ function update_archive_title( $block_content, $block, $instance ) {
 		);
 	}
 	return $block_content;
+}
+
+/**
+ * Update the archive title for all filter views.
+ *
+ * @param string   $block_content The block content.
+ */
+function update_site_title( $block_content, $block, $instance ) {
+	return str_replace(
+		get_bloginfo( 'name' ),
+		__( 'Patterns', 'wporg-patterns' ),
+		$block_content
+	);
 }
 
 /**
