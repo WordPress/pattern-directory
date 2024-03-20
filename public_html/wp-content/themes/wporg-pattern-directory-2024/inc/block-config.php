@@ -404,6 +404,8 @@ function update_archive_title( $block_content, $block, $instance ) {
  */
 function update_site_breadcrumbs( $breadcrumbs ) {
 	global $wp_query;
+	// Get the current applied filters (except search, handled separately).
+	$term_names = get_applied_filter_list( false );
 
 	// Build up the breadcrumbs from scratch.
 	$breadcrumbs = array(
@@ -415,9 +417,24 @@ function update_site_breadcrumbs( $breadcrumbs ) {
 
 	if ( is_page() || is_single() ) {
 		$breadcrumbs[] = array(
-			'url' => false,
+			'url' => $term_names || isset( $wp_query->query['status'] ) ? get_permalink() : false,
 			'title' => get_the_title(),
 		);
+		if ( $term_names ) {
+			$term_names = wp_list_pluck( $term_names, 'name' );
+			$breadcrumbs[] = array(
+				'url' => false,
+				// translators: %s list of terms used for filtering.
+				'title' => implode( ', ', $term_names ),
+			);
+		}
+		// For the "My patterns" page, add status.
+		if ( isset( $wp_query->query['status'] ) ) {
+			$breadcrumbs[] = array(
+				'url' => false,
+				'title' => get_post_status_object( $wp_query->query['status'] )->label
+			);
+		}
 		return $breadcrumbs;
 	}
 
@@ -436,8 +453,6 @@ function update_site_breadcrumbs( $breadcrumbs ) {
 	// `is_home` matches the "posts page", the All Patterns page.
 	// `is_archive` matches any core archive (category, date, etc).
 	if ( is_home() || is_archive() ) {
-		// Get the current applied filters (except search, handled above).
-		$term_names = get_applied_filter_list( false );
 		$author = isset( $wp_query->query['author_name'] ) ? get_user_by( 'slug', $wp_query->query['author_name'] ) : false;
 
 		$breadcrumbs[] = array(
