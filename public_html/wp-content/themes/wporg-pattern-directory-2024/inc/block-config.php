@@ -249,23 +249,8 @@ function get_status_options( $options ) {
 function inject_other_filters( $key ) {
 	global $wp_query;
 
-	// Multiple-select query parameters.
-	$query_vars = [ 'pattern-categories' ];
-	foreach ( $query_vars as $query_var ) {
-		if ( ! isset( $wp_query->query[ $query_var ] ) ) {
-			continue;
-		}
-		if ( $key === $query_var ) {
-			continue;
-		}
-		$values = (array) $wp_query->query[ $query_var ];
-		foreach ( $values as $value ) {
-			printf( '<input type="hidden" name="%s[]" value="%s" />', esc_attr( $query_var ), esc_attr( $value ) );
-		}
-	}
-
 	// Single-select query parameters.
-	$query_vars = [ 'order', 'orderby', 'curation' ];
+	$query_vars = [ 'pattern-categories', 'order', 'orderby', 'curation' ];
 	foreach ( $query_vars as $query_var ) {
 		if ( ! isset( $wp_query->query[ $query_var ] ) ) {
 			continue;
