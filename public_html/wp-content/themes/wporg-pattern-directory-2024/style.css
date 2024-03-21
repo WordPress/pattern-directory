@@ -36,7 +36,7 @@
 	margin-top: 0;
 }
 
-/* Both blocks are in the local header, but  */
+/* Both blocks are in the local header, but only one should be shown at any given time. */
 body.blog .wp-block-wporg-local-navigation-bar .wp-block-post-title,
 body.archive .wp-block-wporg-local-navigation-bar .wp-block-post-title,
 body.search .wp-block-wporg-local-navigation-bar .wp-block-post-title {
@@ -90,6 +90,7 @@ body.page .wp-block-wporg-local-navigation-bar .wp-block-query-title {
 	width: var(--wp--preset--spacing--10);
 }
 
+/* Styles for the `is-edit-link` helper class. */
 .wp-block-button.is-edit-link a {
 	display: flex;
 	align-items: center;
@@ -115,10 +116,45 @@ body.page .wp-block-wporg-local-navigation-bar .wp-block-query-title {
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='25' fill='none' viewBox='0 0 24 25'%3E%3Cpath fill='%23ffffff' d='m19 7.478-3-3-8.5 8.5-1 4 4-1 8.5-8.5ZM12 18.978H5v1.5h7v-1.5Z'/%3E%3C/svg%3E");
 }
 
+/* Style the pattern grid. */
+.wp-block-query .wp-block-post-title {
+	flex-shrink: 1;
+	overflow: hidden;
+	padding: 1.5px; /* Add space for the focus style. */
+}
+
+.wp-block-query .wp-block-button,
+.wp-block-query .wp-block-wporg-favorite-button {
+	flex-shrink: 0;
+}
+
+.wp-block-query .wp-block-post-title a {
+	max-width: 100%;
+	overflow-x: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	vertical-align: middle;
+}
+
+/* Style "My patterns" grid. */
+.wporg-my-patterns .wporg-pattern-thumbnail__container {
+	aspect-ratio: 4 / 3;
+	display: flex;
+	align-items: center;
+}
+
 /* Drop to a two column layout for grids (except the "more by"). */
 @media (max-width: 1280px) {
 	:where(body:not(.single-wporg-pattern)) .wp-block-post-template.is-layout-grid.columns-3 {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+/* Prevent pattern cells from breaking out of page on small screens. */
+@media (max-width: 600px) {
+	/* This selector comes from gutenberg. */
+	.wp-block-post-template-is-layout-grid.wp-block-post-template-is-layout-grid.wp-block-post-template-is-layout-grid.wp-block-post-template-is-layout-grid {
+		grid-template-columns: minmax(0, 1fr);
 	}
 }
 

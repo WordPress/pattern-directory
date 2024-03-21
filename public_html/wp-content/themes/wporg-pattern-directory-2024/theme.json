@@ -4,10 +4,8 @@
 	"settings": {
 		"custom": {
 			"wporg-pattern-thumbnail": {
-				"border": {
-					"color": "rgba(0, 0, 0, 0.10)",
-					"width": "1px",
-					"radius": "2px"
+				"color": {
+					"background": "var(--wp--preset--color--light-grey-2)"
 				}
 			},
 			"wporg-pattern-preview": {

@@ -58,6 +58,7 @@ if ( $has_link ) {
 	<?php endif; ?>
 
 	<div
+		class="wporg-pattern-thumbnail__container"
 		data-wp-class--wporg-pattern-thumbnail__loader="!state.hasLoaded"
 		data-wp-class--wporg-pattern-thumbnail__error="state.hasError"
 	>

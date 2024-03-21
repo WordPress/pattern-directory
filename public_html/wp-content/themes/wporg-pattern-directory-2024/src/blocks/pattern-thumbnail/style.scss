@@ -1,16 +1,16 @@
 .wp-block-wporg-pattern-thumbnail {
-	border-color: var(--wp--custom--wporg-pattern-thumbnail--border--color);
-	border-radius: var(--wp--custom--wporg-pattern-thumbnail--border--radius);
-	border-style: solid;
-	border-width: var(--wp--custom--wporg-pattern-thumbnail--border--width);
-	margin: 0;
 	position: relative;
-	width: 100%;
-	overflow: hidden;
+	margin: 0;
+	background-color: var(--wp--custom--wporg-pattern-thumbnail--color--background);
+	border-radius: 4px;
 
-	&:where(.is-linked-image):hover,
-	&:where(.is-linked-image):focus-within {
-		--wp--custom--wporg-pattern-thumbnail--border--color: rgba(30, 30, 30, 0.25);
+	&:where(.is-linked-image) a {
+		display: block;
+		padding: var(--wp--preset--spacing--40);
+	}
+
+	&:where(.is-linked-image):hover {
+		--wp--custom--wporg-pattern-thumbnail--color--background: rgba(0, 0, 0, 0.1);
 	}
 
 	&:where(.is-linked-image):focus-within {
@@ -18,13 +18,21 @@
 		outline-offset: -1.5px;
 	}
 
-	img {
-		width: 100%;
-		vertical-align: middle;
+	&:where(.is-linked-image) a:focus {
+		box-shadow: none;
 	}
 
-	&:not(.has-loaded) {
-		aspect-ratio: 21 / 9;
+	.wporg-pattern-thumbnail__container {
+		aspect-ratio: 4 / 3;
+		display: flex;
+		align-items: center;
+	}
+
+	img {
+		display: block;
+		margin: auto;
+		max-width: 100%;
+		max-height: 100%;
 	}
 
 	.wporg-pattern-thumbnail__loader {
@@ -46,8 +54,8 @@
 			width: 16px;
 			border: 1.5px solid;
 			border-color:
-				var(--wp--custom--wporg-pattern-thumbnail--border--color)
-				var(--wp--custom--wporg-pattern-thumbnail--border--color)
+				var(--wp--custom--wporg-pattern-thumbnail--color--background)
+				var(--wp--custom--wporg-pattern-thumbnail--color--background)
 				var(--wp--custom--link--color--text);
 			border-radius: 50%;
 			animation: rotate-360 1.4s linear infinite;
