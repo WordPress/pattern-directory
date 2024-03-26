@@ -6,12 +6,12 @@
  */
 
 ?>
-<!-- wp:query {"queryId":0,"query":{"inherit":false,"postType":"wporg-pattern"},"className":"wporg-my-patterns"} -->
-<div class="wp-block-query wporg-my-patterns">
+<!-- wp:query {"align":"wide","queryId":0,"query":{"inherit":false,"postType":"wporg-pattern"},"className":"wporg-my-patterns","layout":{"type":"default"}} -->
+<div class="wp-block-query alignwide wporg-my-patterns">
 	<!-- wp:navigation {"menuSlug":"statuses","ariaLabel":"<?php esc_attr_e( 'Status menu', 'wporg-patterns' ); ?>","overlayMenu":"never","layout":{"type":"flex","orientation":"horizontal","justifyContent":"left","flexWrap":"nowrap"},"fontSize":"small","className":"is-style-button-list"} /-->
 
-	<!-- wp:group {"align":"wide","layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
-	<div class="wp-block-group alignwide">
+	<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap","justifyContent":"space-between"}} -->
+	<div class="wp-block-group">
 		<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap"}} -->
 		<div class="wp-block-group">
 			<!-- wp:wporg/query-total /-->

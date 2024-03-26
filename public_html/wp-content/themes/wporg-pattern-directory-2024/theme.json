@@ -14,6 +14,10 @@
 					"width": "20px"
 				}
 			}
+		},
+		"layout": {
+			"contentSize": "680px",
+			"wideSize": "1160px"
 		}
 	},
 	"styles": {

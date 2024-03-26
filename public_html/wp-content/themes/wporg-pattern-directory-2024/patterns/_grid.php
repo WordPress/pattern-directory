@@ -6,7 +6,7 @@
  */
 
 ?>
-<!-- wp:query {"align":"wide","queryId":0,"query":{"inherit":true},"layout":{"type":"constrained","wideSize":"1760px"}} -->
+<!-- wp:query {"align":"wide","queryId":0,"query":{"inherit":true},"layout":{"type":"default"}} -->
 <div class="wp-block-query alignwide">
 	<!-- wp:navigation {"menuSlug":"categories","ariaLabel":"<?php esc_attr_e( 'Category menu', 'wporg-patterns' ); ?>","overlayMenu":"never","layout":{"type":"flex","orientation":"horizontal","justifyContent":"left","flexWrap":"nowrap"},"fontSize":"small","className":"is-style-button-list"} /-->
 
