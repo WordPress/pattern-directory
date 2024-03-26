@@ -70,7 +70,6 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 		handleOnResize() {
 			const context = getContext();
 			const { ref } = getElement();
-			console.log( ref.querySelector( 'div' )?.clientWidth );
 			context.pageWidth = ref.querySelector( 'div' )?.clientWidth;
 		},
 	},
