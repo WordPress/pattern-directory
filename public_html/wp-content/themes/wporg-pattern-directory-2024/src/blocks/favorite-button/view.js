@@ -11,7 +11,7 @@ store( 'wporg/patterns/favorite-button', {
 		},
 		get labelCount() {
 			const { count } = getContext();
-			return `(${ count })`;
+			return `${ count }`;
 		},
 		get labelAction() {
 			const { label, isFavorite } = getContext();

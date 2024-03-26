@@ -64,30 +64,23 @@ body.page .wp-block-wporg-local-navigation-bar .wp-block-query-title {
 	box-shadow: 0 0 0 1.5px var(--wp--custom--link--color--text);
 }
 
-/* Style pattern tags. */
-.wp-block-post-terms {
-	line-height: var(--wp--custom--body--small--typography--line-height);
+/* Remove the underline from author link. */
+.wp-block-post-author-name a {
+	text-decoration: none;
 }
 
+.wp-block-post-author-name a:hover {
+	text-decoration: underline;
+}
+
+/* Style pattern tags. */
 .wp-block-post-terms a {
 	text-decoration: none;
-	display: inline-block;
-	padding: 0.25rem 1rem;
-	border-radius: 1.5em;
-	background: var(--wp--preset--color--blueberry-4);
-	color: var(--wp--preset--color--blueberry-1);
 }
 
 .wp-block-post-terms a:hover,
 .wp-block-post-terms a:focus {
 	text-decoration: underline;
-}
-
-/* Hide the separator so it still takes up space. */
-.wp-block-post-terms .wp-block-post-terms__separator {
-	display: inline-block;
-	visibility: hidden;
-	width: var(--wp--preset--spacing--10);
 }
 
 /* Styles for the `is-edit-link` helper class. */

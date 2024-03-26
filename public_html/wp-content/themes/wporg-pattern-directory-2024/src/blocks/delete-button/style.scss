@@ -1,11 +1,17 @@
 .wp-block-wporg-delete-button {
-	--wp--custom--button--outline--color--text: #d63638;
+	.wp-block-button__link {
+		--wp--custom--button--outline--color--text: #d63638 !important;
+		display: flex !important;
+		align-items: center;
+	}
 
-	--wp--custom--button--outline--hover--color--text: var(--wp--preset--color--white);
-	--wp--custom--button--outline--hover--color--background: #d63638;
-	--wp--custom--button--outline--hover--border--color: #d63638;
+	svg {
+		height: 24px;
+		width: 24px;
+		overflow: visible;
 
-	--wp--custom--button--outline--focus--border--color: #d63638;
-	--wp--custom--button--outline--focus--color--background: #d63638;
-	--wp--custom--button--outline--focus--color--text: var(--wp--preset--color--white);
+		path {
+			fill: currentColor;
+		}
+	}
 }

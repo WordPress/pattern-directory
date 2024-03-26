@@ -46,7 +46,7 @@
 				<!-- wp:post-title {"isLink":true,"fontSize":"small","fontFamily":"inter"} /-->
 
 				<!-- wp:button {"className":"is-style-text is-small is-edit-link","metadata":{"bindings":{"text":{"source":"wporg-pattern/edit-label"},"url":{"source":"wporg-pattern/edit-url"}}}} -->
-				<div class="wp-block-button is-style-text is-small is-edit-link"><a href="#" class="wp-block-button__link wp-element-button">Edit</a></div>
+				<div class="wp-block-button is-style-text is-small is-edit-link"><a href="#" class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Edit', 'wporg-patterns' ); ?></a></div>
 				<!-- /wp:paragraph -->
 			</div>
 			<!-- /wp:group -->

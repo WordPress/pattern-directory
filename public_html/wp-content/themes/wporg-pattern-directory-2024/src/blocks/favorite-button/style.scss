@@ -18,7 +18,6 @@
 	}
 
 	svg {
-		margin-top: 2px;
 		height: 24px;
 		width: 24px;
 		overflow: visible;
@@ -47,6 +46,28 @@
 	}
 
 	&:not(.is-variant-small) {
+		button {
+			padding-top: var(--wp--custom--button--small--spacing--padding--top);
+			padding-bottom: var(--wp--custom--button--small--spacing--padding--bottom);
+			padding-left: calc(var(--wp--custom--button--small--spacing--padding--left) - 4px);
+			padding-right: var(--wp--custom--button--small--spacing--padding--right);
+			border: var(--wp--custom--button--border--width) solid var(--wp--preset--color--light-grey-1);
+
+			&:hover {
+				background-color: var(--wp--preset--color--light-grey-2);
+			}
+
+			&:focus {
+				border-color: transparent;
+			}
+
+			&:active {
+				border-color: transparent;
+				background-color: var(--wp--preset--color--charcoal-1);
+				color: var(--wp--preset--color--white);
+			}
+		}
+
 		svg path {
 			fill: currentColor;
 		}

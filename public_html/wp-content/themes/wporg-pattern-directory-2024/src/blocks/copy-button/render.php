@@ -10,7 +10,7 @@ if ( ! $post_id ) {
 $label = 'small' === $variant ? __( 'Copy', 'wporg-patterns' ) : __( 'Copy pattern', 'wporg-patterns' );
 $label_success = 'small' === $variant ? __( 'Copied', 'wporg-patterns' ) : __( 'Copied!', 'wporg-patterns' );
 
-$classes = [];
+$classes = [ 'is-small' ];
 if ( 'small' === $variant ) {
 	$classes[] = 'is-variant-small';
 	$classes[] = 'is-style-outline';

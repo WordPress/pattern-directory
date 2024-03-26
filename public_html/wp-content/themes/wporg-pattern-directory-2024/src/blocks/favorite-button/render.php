@@ -19,7 +19,7 @@ if ( ! $user_id && 'small' !== $variant ) {
 wp_enqueue_script( 'wp-api-fetch' );
 
 $is_favorite = is_favorite( $post_id, $user_id );
-$classes = [ 'is-style-text is-small' ];
+$classes = [ 'is-small' ];
 if ( 'small' === $variant ) {
 	$classes[] = 'is-variant-small';
 }
@@ -60,45 +60,26 @@ $encoded_state = wp_json_encode( $init_state );
 	data-wp-context="<?php echo esc_attr( $encoded_state ); ?>"
 	data-wp-class--is-favorite="context.isFavorite"
 >
-	<?php if ( 'small' === $variant ) : ?>
-		<<?php echo $tag_name; ?>
-			class="wporg-favorite-button__button"
-			disabled="disabled"
-			data-wp-bind--disabled="!context.postId"
-			data-wp-on--click="actions.triggerAction"
-		>
-			<svg class="is-star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
-				<path d="M11.776 4.454a.25.25 0 01.448 0l2.069 4.192a.25.25 0 00.188.137l4.626.672a.25.25 0 01.139.426l-3.348 3.263a.25.25 0 00-.072.222l.79 4.607a.25.25 0 01-.362.263l-4.138-2.175a.25.25 0 00-.232 0l-4.138 2.175a.25.25 0 01-.363-.263l.79-4.607a.25.25 0 00-.071-.222L4.754 9.881a.25.25 0 01.139-.426l4.626-.672a.25.25 0 00.188-.137l2.069-4.192z"></path>
-			</svg>
-			<svg class="is-star-empty" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
-				<path fill-rule="evenodd" d="M9.706 8.646a.25.25 0 01-.188.137l-4.626.672a.25.25 0 00-.139.427l3.348 3.262a.25.25 0 01.072.222l-.79 4.607a.25.25 0 00.362.264l4.138-2.176a.25.25 0 01.233 0l4.137 2.175a.25.25 0 00.363-.263l-.79-4.607a.25.25 0 01.072-.222l3.347-3.262a.25.25 0 00-.139-.427l-4.626-.672a.25.25 0 01-.188-.137l-2.069-4.192a.25.25 0 00-.448 0L9.706 8.646zM12 7.39l-.948 1.921a1.75 1.75 0 01-1.317.957l-2.12.308 1.534 1.495c.412.402.6.982.503 1.55l-.362 2.11 1.896-.997a1.75 1.75 0 011.629 0l1.895.997-.362-2.11a1.75 1.75 0 01.504-1.55l1.533-1.495-2.12-.308a1.75 1.75 0 01-1.317-.957L12 7.39z" clip-rule="evenodd"></path>
-			</svg>
-			<span class="wporg-favorite-button__count">
-				<span class="screen-reader-text" data-wp-text="state.labelScreenReader">
-					<?php echo esc_html( $sr_label ); ?>
-				</span>
-				<span aria-hidden="true" data-wp-text="state.labelCount">(<?php echo $favorite_count; ?>)</span>
+	<<?php echo $tag_name; ?>
+		class="wporg-favorite-button__button"
+		disabled="disabled"
+		data-wp-bind--disabled="!context.postId"
+		data-wp-on--click="actions.triggerAction"
+	>
+		<svg class="is-star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+			<path d="M11.776 4.454a.25.25 0 01.448 0l2.069 4.192a.25.25 0 00.188.137l4.626.672a.25.25 0 01.139.426l-3.348 3.263a.25.25 0 00-.072.222l.79 4.607a.25.25 0 01-.362.263l-4.138-2.175a.25.25 0 00-.232 0l-4.138 2.175a.25.25 0 01-.363-.263l.79-4.607a.25.25 0 00-.071-.222L4.754 9.881a.25.25 0 01.139-.426l4.626-.672a.25.25 0 00.188-.137l2.069-4.192z"></path>
+		</svg>
+		<svg class="is-star-empty" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+			<path fill-rule="evenodd" d="M9.706 8.646a.25.25 0 01-.188.137l-4.626.672a.25.25 0 00-.139.427l3.348 3.262a.25.25 0 01.072.222l-.79 4.607a.25.25 0 00.362.264l4.138-2.176a.25.25 0 01.233 0l4.137 2.175a.25.25 0 00.363-.263l-.79-4.607a.25.25 0 01.072-.222l3.347-3.262a.25.25 0 00-.139-.427l-4.626-.672a.25.25 0 01-.188-.137l-2.069-4.192a.25.25 0 00-.448 0L9.706 8.646zM12 7.39l-.948 1.921a1.75 1.75 0 01-1.317.957l-2.12.308 1.534 1.495c.412.402.6.982.503 1.55l-.362 2.11 1.896-.997a1.75 1.75 0 011.629 0l1.895.997-.362-2.11a1.75 1.75 0 01.504-1.55l1.533-1.495-2.12-.308a1.75 1.75 0 01-1.317-.957L12 7.39z" clip-rule="evenodd"></path>
+		</svg>
+		<span class="wporg-favorite-button__count">
+			<span class="screen-reader-text" data-wp-text="state.labelScreenReader">
+				<?php echo esc_html( $sr_label ); ?>
 			</span>
-			<span class="wporg-favorite-button__label screen-reader-text" data-wp-text="state.labelAction">
-				<?php echo $is_favorite ? $remove_label : $add_label; ?>
-			</span>
-		</<?php echo $tag_name; ?>>
-	<?php else : ?>
-		<button
-			class="wp-block-button__link wp-element-button"
-			disabled="disabled"
-			data-wp-bind--disabled="!context.postId"
-			data-wp-on--click="actions.triggerAction"
-		>
-			<svg class="is-star-filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
-				<path d="M11.776 4.454a.25.25 0 01.448 0l2.069 4.192a.25.25 0 00.188.137l4.626.672a.25.25 0 01.139.426l-3.348 3.263a.25.25 0 00-.072.222l.79 4.607a.25.25 0 01-.362.263l-4.138-2.175a.25.25 0 00-.232 0l-4.138 2.175a.25.25 0 01-.363-.263l.79-4.607a.25.25 0 00-.071-.222L4.754 9.881a.25.25 0 01.139-.426l4.626-.672a.25.25 0 00.188-.137l2.069-4.192z"></path>
-			</svg>
-			<svg class="is-star-empty" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
-				<path fill-rule="evenodd" d="M9.706 8.646a.25.25 0 01-.188.137l-4.626.672a.25.25 0 00-.139.427l3.348 3.262a.25.25 0 01.072.222l-.79 4.607a.25.25 0 00.362.264l4.138-2.176a.25.25 0 01.233 0l4.137 2.175a.25.25 0 00.363-.263l-.79-4.607a.25.25 0 01.072-.222l3.347-3.262a.25.25 0 00-.139-.427l-4.626-.672a.25.25 0 01-.188-.137l-2.069-4.192a.25.25 0 00-.448 0L9.706 8.646zM12 7.39l-.948 1.921a1.75 1.75 0 01-1.317.957l-2.12.308 1.534 1.495c.412.402.6.982.503 1.55l-.362 2.11 1.896-.997a1.75 1.75 0 011.629 0l1.895.997-.362-2.11a1.75 1.75 0 01.504-1.55l1.533-1.495-2.12-.308a1.75 1.75 0 01-1.317-.957L12 7.39z" clip-rule="evenodd"></path>
-			</svg>
-			<span class="wporg-favorite-button__label" data-wp-text="state.labelAction">
-				<?php echo $is_favorite ? $remove_label : $add_label; ?>
-			</span>
-		</button>
-	<?php endif; ?>
+			<span aria-hidden="true" data-wp-text="state.labelCount"><?php echo $favorite_count; ?></span>
+		</span>
+		<span class="wporg-favorite-button__label screen-reader-text" data-wp-text="state.labelAction">
+			<?php echo $is_favorite ? $remove_label : $add_label; ?>
+		</span>
+	</<?php echo $tag_name; ?>>
 </div>
