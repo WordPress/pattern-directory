@@ -3,38 +3,54 @@
 	width: 100%;
 	--wp--custom--wporg-pattern-preview--border--width: clamp(4px, calc(1.33vw - 1.33px), 20px);
 	--wp--custom--wporg-pattern-preview--border--radius: clamp(4px, calc(1.33vw - 1.33px), 20px);
-}
 
-.wporg-pattern-view-control__controls {
-	margin-top: calc(var(--wp--preset--spacing--20) + var(--wp--custom--wporg-pattern-preview--border--width));
-	display: flex;
-	justify-content: center;
-	gap: var(--wp--preset--spacing--10);
-
-	.wp-element-button {
-		display: flex !important;
-		flex-direction: column;
-		align-items: center;
-
-		svg {
-			fill: currentColor !important;
-		}
+	.wp-block-wporg-pattern-preview {
+		box-sizing: content-box;
+		border: none;
+		width: calc(100% - var(--wp--custom--wporg-pattern-preview--border--width) * 2);
+		padding: var(--wp--custom--wporg-pattern-preview--border--width);
+		display: flex;
+		justify-content: center;
 	}
-}
 
-.wp-block-wporg-pattern-view-control .wp-block-wporg-pattern-preview {
-	// The height is calculated based on the child iframe, `content-box` means
-	// this does not need to include the padding.
-	box-sizing: content-box;
-	border: none;
-	padding: var(--wp--custom--wporg-pattern-preview--border--width);
-
-	> iframe {
-		margin: 0 auto;
-		display: block;
+	.wp-block-wporg-pattern-preview__container {
+		max-width: 100%;
 		border-radius: var(--wp--custom--wporg-pattern-preview--border--radius);
 		outline-color: var(--wp--custom--wporg-pattern-preview--border--color);
 		outline-style: solid;
 		outline-width: var(--wp--custom--wporg-pattern-preview--border--width);
+
+		> iframe {
+			margin: 0;
+			display: block;
+			border-radius: var(--wp--custom--wporg-pattern-preview--border--radius);
+			pointer-events: none;
+		}
+	}
+
+	&.is-mobile-view .wp-block-wporg-pattern-preview__container > iframe {
+		pointer-events: auto;
+	}
+}
+
+.wporg-pattern-view-control__controls {
+	margin-bottom: var(--wp--preset--spacing--20);
+	display: flex;
+	justify-content: center;
+	gap: 0;
+
+	.wp-element-button {
+		--wp--custom--button--spacing--padding--top: 1px !important;
+		--wp--custom--button--spacing--padding--bottom: 1px !important;
+		--wp--custom--button--spacing--padding--left: 8px !important;
+
+		display: flex !important;
+		gap: 4px;
+		align-items: center;
+		border-color: transparent !important;
+
+		svg {
+			fill: currentColor !important;
+		}
 	}
 }

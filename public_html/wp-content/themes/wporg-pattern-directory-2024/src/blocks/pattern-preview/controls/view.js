@@ -22,17 +22,14 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 		get transformCSS() {
 			return `scale(${ state.scale })`;
 		},
-		get isWidth1200() {
+		get isWidthWide() {
 			return 1200 === getContext().previewWidth;
 		},
-		get isWidth960() {
-			return 960 === getContext().previewWidth;
+		get isWidthMedium() {
+			return 800 === getContext().previewWidth;
 		},
-		get isWidth600() {
-			return 600 === getContext().previewWidth;
-		},
-		get isWidth480() {
-			return 480 === getContext().previewWidth;
+		get isWidthNarrow() {
+			return 400 === getContext().previewWidth;
 		},
 	},
 	actions: {
@@ -55,6 +52,12 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 			const context = getContext();
 			const { ref } = getElement();
 
+			// If this is the "narrow" (mobile) view, it should use a fixed height.
+			if ( state.isWidthNarrow ) {
+				context.previewHeight = 600;
+				return;
+			}
+
 			// Need to "use" previewWidth so that `data-wp-watch` will re-run this action when it changes.
 			context.previewWidth; // eslint-disable-line no-unused-expressions
 
@@ -67,7 +70,8 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 		handleOnResize() {
 			const context = getContext();
 			const { ref } = getElement();
-			context.pageWidth = ref.clientWidth;
+			console.log( ref.querySelector( 'div' )?.clientWidth );
+			context.pageWidth = ref.querySelector( 'div' )?.clientWidth;
 		},
 	},
 } );
