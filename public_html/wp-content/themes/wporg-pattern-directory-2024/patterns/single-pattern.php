@@ -5,17 +5,15 @@
  * Inserter: no
  */
 
-$error = isset( $_GET['error'] ) ? $_GET['error'] : false;
-$success = isset( $_GET['success'] ) ? $_GET['success'] : false;
+$status = isset( $_GET['status'] ) ? $_GET['status'] : false;
 $notice = '';
 $notice_type = 'warning';
-if ( ! $success ) {
-	if ( 'report-failed' === $error ) {
-		$notice = __( 'Your pattern report could not be saved. Please try again.', 'wporg-patterns' );
-	} else if ( 'logged-out' === $error ) {
-		$notice = __( 'You must be logged in to report a pattern.', 'wporg-patterns' );
-	}
-} else if ( 'reported' === $success ) {
+
+if ( 'report-failed' === $status ) {
+	$notice = __( 'Your pattern report could not be saved. Please try again.', 'wporg-patterns' );
+} else if ( 'logged-out' === $status ) {
+	$notice = __( 'You must be logged in to report a pattern.', 'wporg-patterns' );
+} else if ( 'reported' === $status ) {
 	$notice_type = 'info';
 	$notice = __( 'Your report has been submitted.', 'wporg-patterns' );
 }

@@ -87,7 +87,7 @@ function do_pattern_actions() {
 				// Reload the page with an error flag.
 				$url = add_query_arg(
 					array(
-						'error' => 'draft-failed'
+						'status' => 'draft-failed'
 					),
 					get_the_permalink()
 				);
@@ -109,16 +109,16 @@ function do_pattern_actions() {
 			);
 			if ( $success ) {
 				$args = array(
-					'success' => 'reported'
+					'status' => 'reported'
 				);
 			} else {
 				$args = array(
-					'error' => 'report-failed'
+					'status' => 'report-failed'
 				);
 			}
 		} else {
 			$args = array(
-				'error' => 'logged-out'
+				'status' => 'logged-out'
 			);
 		}
 
