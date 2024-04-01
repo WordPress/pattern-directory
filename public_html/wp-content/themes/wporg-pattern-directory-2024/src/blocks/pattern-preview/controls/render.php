@@ -23,12 +23,16 @@ $p->remove_attribute( 'data-wp-interactive' );
 $p->remove_attribute( 'data-wp-context' );
 $content = $p->get_updated_html();
 
+$html_id = wp_unique_id( 'pattern-preview-help-' );
+
 ?>
 <div
 	<?php echo get_block_wrapper_attributes(); // phpcs:ignore ?>
 	data-wp-interactive="wporg/patterns/preview"
 	data-wp-context="<?php echo esc_attr( $encoded_state ); ?>"
 	data-wp-class--is-mobile-view="state.isWidthNarrow"
+	data-wp-on-window--mousemove="actions.onDrag"
+	data-wp-on-window--mouseup="actions.onDragEnd"
 >
 	<section class="wporg-pattern-view-control__controls wp-block-buttons" aria-label="<?php esc_attr_e( 'Preview width', 'wporg-patterns' ); ?>">
 		<div class="wp-block-button is-style-toggle is-small">
@@ -66,8 +70,37 @@ $content = $p->get_updated_html();
 		</div>
 	</section>
 
-	<?php
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Content from child blocks.
-		echo $content;
-	?>
+	<div class="wporg-pattern-preview__drag-container">
+		<div class="wporg-pattern-preview__drag-handle">
+			<button
+				class="wporg-pattern-view-control__drag-handle is-left"
+				aria-label="<?php esc_attr( 'Drag to resize', 'wporg-patterns' ); ?>"
+				aria-describedby="<?php echo esc_attr( $html_id ); ?>-left"
+				data-direction="left"
+				data-wp-on--keydown="actions.onLeftKeyDown"
+				data-wp-on--mousedown="actions.onDragStart"
+			></button>
+		</div>
+		<?php
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Content from child blocks.
+			echo $content;
+		?>
+		<div class="wporg-pattern-preview__drag-handle">
+			<button
+				class="wporg-pattern-view-control__drag-handle is-right"
+				aria-label="<?php esc_attr( 'Drag to resize', 'wporg-patterns' ); ?>"
+				aria-describedby="<?php echo esc_attr( $html_id ); ?>-right"
+				data-direction="right"
+				data-wp-on--keydown="actions.onRightKeyDown"
+				data-wp-on--mousedown="actions.onDragStart"
+			></button>
+		</div>
+	</div>
+
+	<span id="<?php echo esc_attr( $html_id ); ?>-left" class="screen-reader-text">
+		<?php esc_attr_e( 'Drag or use arrow keys to resize the pattern preview. Left to make larger, right to make smaller.', 'wporg-patterns' ); ?>
+	</span>
+	<span id="<?php echo esc_attr( $html_id ); ?>-right" class="screen-reader-text">
+		<?php esc_attr_e( 'Drag or use arrow keys to resize the pattern preview. Right to make larger, left to make smaller.', 'wporg-patterns' ); ?>
+	</span>
 </div>

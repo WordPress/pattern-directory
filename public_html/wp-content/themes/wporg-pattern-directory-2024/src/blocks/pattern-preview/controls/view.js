@@ -3,6 +3,11 @@
  */
 import { getContext, getElement, store } from '@wordpress/interactivity';
 
+/**
+ * Module constants
+ */
+const THROTTLE_DELAY = 10;
+
 const { actions, state } = store( 'wporg/patterns/preview', {
 	state: {
 		get scale() {
@@ -23,20 +28,73 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 			return `scale(${ state.scale })`;
 		},
 		get isWidthWide() {
-			return 1200 === getContext().previewWidth;
+			return getContext().previewWidth >= 1200;
 		},
 		get isWidthMedium() {
-			return 800 === getContext().previewWidth;
+			return getContext().previewWidth >= 800 && getContext().previewWidth < 1200;
 		},
 		get isWidthNarrow() {
-			return 400 === getContext().previewWidth;
+			return getContext().previewWidth < 800;
 		},
+		isDrag: false,
+		throttleTimeout: 0,
+		prevX: 0,
+		direction: '',
 	},
 	actions: {
+		updatePreviewWidth( newWidth ) {
+			const context = getContext();
+			if ( newWidth > 320 && newWidth < 2400 ) {
+				context.previewWidth = newWidth;
+			}
+		},
 		onWidthChange() {
 			const { ref } = getElement();
 			const context = getContext();
 			context.previewWidth = parseInt( ref.dataset.width, 10 );
+		},
+		onLeftKeyDown( event ) {
+			const context = getContext();
+			if ( 'ArrowLeft' === event.code ) {
+				actions.updatePreviewWidth( context.previewWidth + 20 );
+			} else if ( 'ArrowRight' === event.code ) {
+				actions.updatePreviewWidth( context.previewWidth - 20 );
+			}
+		},
+		onRightKeyDown( event ) {
+			const context = getContext();
+			if ( 'ArrowRight' === event.code ) {
+				actions.updatePreviewWidth( context.previewWidth + 20 );
+			} else if ( 'ArrowLeft' === event.code ) {
+				actions.updatePreviewWidth( context.previewWidth - 20 );
+			}
+		},
+		onDragStart( event ) {
+			const { ref } = getElement();
+			state.isDrag = true;
+			state.prevX = event.x;
+			state.direction = ref.dataset.direction;
+		},
+		onDrag( event ) {
+			if ( ! state.isDrag || state.throttleTimeout > Date.now() ) {
+				return;
+			}
+
+			const context = getContext();
+			const delta = event.x - state.prevX;
+			if ( ( delta < 0 && 'left' === state.direction ) || ( delta > 0 && 'right' === state.direction ) ) {
+				actions.updatePreviewWidth( context.previewWidth + 2 * Math.abs( delta ) );
+			} else {
+				actions.updatePreviewWidth( context.previewWidth - 2 * Math.abs( delta ) );
+			}
+
+			state.prevX = event.x;
+			state.throttleTimeout = Date.now() + THROTTLE_DELAY;
+		},
+		onDragEnd() {
+			state.throttleTimeout = 0;
+			state.isDrag = false;
+			state.direction = '';
 		},
 		*onLoad() {
 			const { ref } = getElement();
@@ -50,22 +108,7 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 		},
 		updatePreviewHeight() {
 			const context = getContext();
-			const { ref } = getElement();
-
-			// If this is the "narrow" (mobile) view, it should use a fixed height.
-			if ( state.isWidthNarrow ) {
-				context.previewHeight = 600;
-				return;
-			}
-
-			// Need to "use" previewWidth so that `data-wp-watch` will re-run this action when it changes.
-			context.previewWidth; // eslint-disable-line no-unused-expressions
-
-			const iframeDoc = ref.contentDocument;
-			const height = iframeDoc.querySelector( '.entry-content' )?.clientHeight;
-			if ( height ) {
-				context.previewHeight = height * state.scale;
-			}
+			context.previewHeight = 600;
 		},
 		handleOnResize() {
 			const context = getContext();

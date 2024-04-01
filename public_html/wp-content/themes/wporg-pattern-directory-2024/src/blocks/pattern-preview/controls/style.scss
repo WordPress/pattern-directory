@@ -1,3 +1,5 @@
+@use "sass:math";
+
 .wp-block-wporg-pattern-view-control {
 	position: relative;
 	width: 100%;
@@ -7,7 +9,7 @@
 	.wp-block-wporg-pattern-preview {
 		box-sizing: content-box;
 		border: none;
-		width: calc(100% - var(--wp--custom--wporg-pattern-preview--border--width) * 2);
+		width: auto;
 		padding: var(--wp--custom--wporg-pattern-preview--border--width);
 		display: flex;
 		justify-content: center;
@@ -24,12 +26,9 @@
 			margin: 0;
 			display: block;
 			border-radius: var(--wp--custom--wporg-pattern-preview--border--radius);
+			// @todo This breaks scrolling.
 			pointer-events: none;
 		}
-	}
-
-	&.is-mobile-view .wp-block-wporg-pattern-preview__container > iframe {
-		pointer-events: auto;
 	}
 }
 
@@ -52,5 +51,43 @@
 		svg {
 			fill: currentColor !important;
 		}
+	}
+}
+
+.wporg-pattern-preview__drag-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+}
+
+.wporg-pattern-view-control__drag-handle {
+	$height: 52px;
+	$width: 8px;
+	height: $height;
+	width: $width;
+	padding: 0;
+	border-radius: math.div($width, 2);
+	z-index: 2;
+	border: none;
+	background: var(--wp--preset--color--charcoal-5);
+
+	&:hover {
+		background: var(--wp--preset--color--charcoal-4);
+	}
+
+	&:focus {
+		border-radius: math.div($width, 2);
+		box-shadow: none;
+		background: var(--wp--preset--color--charcoal-4);
+	}
+
+	&:focus-visible {
+		box-shadow: 0 0 0 1.5px var(--wp--custom--link--color--text);
+	}
+
+	&.is-right {
+		left: auto;
+		right: -20px;
 	}
 }
