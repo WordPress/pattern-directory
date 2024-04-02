@@ -12,9 +12,15 @@ const RETRY_DELAY = 2000;
 
 const { actions, state } = store( 'wporg/patterns/thumbnail', {
 	state: {
-		attempts: 0,
-		shouldRetry: true,
-		hasError: false,
+		get attempts() {
+			return getContext().attempts;
+		},
+		get shouldRetry() {
+			return getContext().shouldRetry;
+		},
+		get hasError() {
+			return getContext().hasError;
+		},
 		get base64Image() {
 			return getContext().base64Image;
 		},
@@ -24,11 +30,13 @@ const { actions, state } = store( 'wporg/patterns/thumbnail', {
 	},
 	actions: {
 		setShouldRetry( value ) {
-			state.shouldRetry = value;
+			const context = getContext();
+			context.shouldRetry = value;
 		},
 
 		setHasError( value ) {
-			state.hasError = value;
+			const context = getContext();
+			context.hasError = value;
 		},
 
 		setBase64Image( value ) {
@@ -38,8 +46,9 @@ const { actions, state } = store( 'wporg/patterns/thumbnail', {
 
 		*fetchImage( fullUrl ) {
 			try {
+				const context = getContext();
 				const res = yield fetch( fullUrl );
-				state.attempts++;
+				context.attempts++;
 
 				if ( res.redirected ) {
 					actions.setShouldRetry( true );
