@@ -161,8 +161,8 @@ function get_curation_options( $options ) {
  */
 function get_sort_options( $options ) {
 	global $wp_query;
-	$orderby = strtolower( $wp_query->get( 'orderby' ) );
-	$order = strtolower( $wp_query->get( 'order' ) );
+	$orderby = strtolower( $wp_query->get( 'orderby', 'date' ) );
+	$order = strtolower( $wp_query->get( 'order', 'desc' ) );
 	$sort = $orderby . '_' . $order;
 
 	$label = __( 'Sort', 'wporg' );
