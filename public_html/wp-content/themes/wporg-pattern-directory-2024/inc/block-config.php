@@ -132,6 +132,9 @@ function get_curation_options( $options ) {
 		case 'core':
 			$label = __( 'Curated', 'wporg' );
 			break;
+		default:
+			$label = __( 'All', 'wporg' );
+			break;
 	}
 
 	// Show the correct filters on the front page.
@@ -146,6 +149,7 @@ function get_curation_options( $options ) {
 		'key' => 'curation',
 		'action' => get_filter_action_url(),
 		'options' => array(
+			'' => __( 'All', 'wporg' ),
 			'community' => __( 'Community', 'wporg' ),
 			'core' => __( 'Curated', 'wporg' ),
 		),
