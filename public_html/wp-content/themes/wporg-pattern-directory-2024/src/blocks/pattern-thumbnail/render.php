@@ -72,6 +72,7 @@ if ( $has_link ) {
 		/>
 		<span
 			data-wp-bind--hidden="state.base64Image"
+			data-wp-class--screen-reader-text="!state.base64Image"
 			data-wp-text="context.alt"
 		></span>
 	</div>
