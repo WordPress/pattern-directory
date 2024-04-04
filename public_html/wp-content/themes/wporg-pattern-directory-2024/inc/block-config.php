@@ -169,6 +169,11 @@ function get_sort_options( $options ) {
 	$order = strtolower( $wp_query->get( 'order', 'desc' ) );
 	$sort = $orderby . '_' . $order;
 
+	// Popular is a special case since it's not a true "order" value.
+	if ( 'meta_value_num' === $orderby && 'wporg-pattern-favorites' === $wp_query->get( 'meta_key' ) ) {
+		$sort = 'favorite_count_desc';
+	}
+
 	$label = __( 'Sort', 'wporg' );
 	switch ( $sort ) {
 		case 'date_desc':
@@ -177,11 +182,9 @@ function get_sort_options( $options ) {
 		case 'date_asc':
 			$label = __( 'Oldest', 'wporg' );
 			break;
-	}
-
-	// Popular is a special case since it's not a true "order" value.
-	if ( 'meta_value_num' === $orderby && 'wporg-pattern-favorites' === $wp_query->get( 'meta_key' ) ) {
-		$label = __( 'Popular', 'wporg' );
+		case 'favorite_count_desc':
+			$label = __( 'Popular', 'wporg' );
+			break;
 	}
 
 	// Show the correct filters on the front page.
