@@ -60,36 +60,50 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 4px;
 }
 
 .wporg-pattern-view-control__drag-handle {
 	$height: 52px;
-	$width: 8px;
+	$width: 4px;
 	height: $height;
 	width: $width;
+	box-sizing: content-box;
 	padding: 0;
-	border-radius: math.div($width, 2);
 	z-index: 2;
 	border: none;
-	background: var(--wp--preset--color--charcoal-5);
+	background-color: transparent;
+	cursor: col-resize;
 
-	&:hover {
+	&::before {
+		content: "";
+		display: block;
+		height: $height;
+		width: $width;
+		border-radius: math.div($width, 2);
+		background: var(--wp--preset--color--charcoal-5);
+	}
+
+	&:hover::before {
 		background: var(--wp--preset--color--charcoal-4);
 	}
 
 	&:focus {
-		border-radius: math.div($width, 2);
 		box-shadow: none;
-		background: var(--wp--preset--color--charcoal-4);
+
+		&::before {
+			background: var(--wp--preset--color--charcoal-4);
+		}
 	}
 
-	&:focus-visible {
+	&:focus-visible::before {
 		box-shadow: 0 0 0 1.5px var(--wp--custom--link--color--text);
 	}
 
 	&.is-right {
-		left: auto;
-		right: -20px;
+		padding-left: 10px;
+	}
+
+	&.is-left {
+		padding-right: 10px;
 	}
 }
