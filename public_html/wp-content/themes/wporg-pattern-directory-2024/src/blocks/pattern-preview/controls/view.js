@@ -40,7 +40,7 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 	actions: {
 		updatePreviewWidth( newWidth ) {
 			const context = getContext();
-			if ( newWidth > 320 && newWidth < 2400 ) {
+			if ( newWidth > 320 && newWidth < 1400 ) {
 				context.previewWidth = newWidth;
 			}
 		},
