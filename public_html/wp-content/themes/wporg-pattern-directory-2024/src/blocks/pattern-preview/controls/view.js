@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { getContext, getElement, store } from '@wordpress/interactivity';
+import { getContext, getElement, store, withScope } from '@wordpress/interactivity';
 
 const { actions, state } = store( 'wporg/patterns/preview', {
 	state: {
@@ -48,6 +48,10 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 			const { ref } = getElement();
 			const context = getContext();
 			context.previewWidth = parseInt( ref.dataset.width, 10 );
+			setTimeout(
+				withScope( () => actions.handleOnResize() ),
+				0
+			);
 		},
 		onLeftKeyDown( event ) {
 			const context = getContext();
@@ -111,7 +115,14 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 		handleOnResize() {
 			const context = getContext();
 			const { ref } = getElement();
-			context.pageWidth = ref.querySelector( '.wp-block-wporg-pattern-preview__container' )?.clientWidth;
+
+			// Back up to the block container, so that this works regardless
+			// of which element interaction triggered it.
+			const container = ref.closest( '.wp-block-wporg-pattern-view-control' );
+			if ( container ) {
+				const preview = container.querySelector( '.wp-block-wporg-pattern-preview__container' );
+				context.pageWidth = preview?.clientWidth;
+			}
 		},
 	},
 } );
