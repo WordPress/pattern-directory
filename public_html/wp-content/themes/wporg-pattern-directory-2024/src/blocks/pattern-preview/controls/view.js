@@ -3,11 +3,6 @@
  */
 import { getContext, getElement, store } from '@wordpress/interactivity';
 
-/**
- * Module constants
- */
-const THROTTLE_DELAY = 10;
-
 const { actions, state } = store( 'wporg/patterns/preview', {
 	state: {
 		get scale() {
@@ -36,6 +31,7 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 		get isWidthNarrow() {
 			return getContext().previewWidth < 800;
 		},
+		dragPos: 0,
 		isDrag: false,
 		throttleTimeout: 0,
 		prevX: 0,
@@ -74,22 +70,23 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 			state.isDrag = true;
 			state.prevX = event.x;
 			state.direction = ref.dataset.direction;
+			state.dragPos = getContext().previewWidth;
 		},
 		onDrag( event ) {
-			if ( ! state.isDrag || state.throttleTimeout > Date.now() ) {
+			if ( ! state.isDrag ) {
 				return;
 			}
 
-			const context = getContext();
 			const delta = event.x - state.prevX;
 			if ( ( delta < 0 && 'left' === state.direction ) || ( delta > 0 && 'right' === state.direction ) ) {
-				actions.updatePreviewWidth( context.previewWidth + 2 * Math.abs( delta ) );
+				state.dragPos += 2 * Math.abs( delta );
+				actions.updatePreviewWidth( state.dragPos );
 			} else {
-				actions.updatePreviewWidth( context.previewWidth - 2 * Math.abs( delta ) );
+				state.dragPos -= 2 * Math.abs( delta );
+				actions.updatePreviewWidth( state.dragPos );
 			}
 
 			state.prevX = event.x;
-			state.throttleTimeout = Date.now() + THROTTLE_DELAY;
 		},
 		onDragEnd() {
 			state.throttleTimeout = 0;
