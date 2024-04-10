@@ -85,6 +85,7 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 				state.dragPos -= 2 * Math.abs( delta );
 				actions.updatePreviewWidth( state.dragPos );
 			}
+			actions.handleOnResize();
 
 			state.prevX = event.x;
 		},
@@ -110,7 +111,7 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 		handleOnResize() {
 			const context = getContext();
 			const { ref } = getElement();
-			context.pageWidth = ref.querySelector( 'div' )?.clientWidth;
+			context.pageWidth = ref.querySelector( '.wp-block-wporg-pattern-preview__container' )?.clientWidth;
 		},
 	},
 } );
