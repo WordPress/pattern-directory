@@ -26,9 +26,11 @@
 			margin: 0;
 			display: block;
 			border-radius: var(--wp--custom--wporg-pattern-preview--border--radius);
-			// @todo This breaks scrolling.
-			pointer-events: none;
 		}
+	}
+
+	&.is-dragging .wp-block-wporg-pattern-preview__container > iframe {
+		pointer-events: none;
 	}
 }
 

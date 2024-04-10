@@ -31,6 +31,7 @@ $html_id = wp_unique_id( 'pattern-preview-help-' );
 	data-wp-interactive="wporg/patterns/preview"
 	data-wp-context="<?php echo esc_attr( $encoded_state ); ?>"
 	data-wp-class--is-mobile-view="state.isWidthNarrow"
+	data-wp-class--is-dragging="state.isDrag"
 	data-wp-on-window--mousemove="actions.onDrag"
 	data-wp-on-window--mouseup="actions.onDragEnd"
 >
