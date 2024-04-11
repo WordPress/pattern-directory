@@ -106,4 +106,8 @@
 	&.is-left {
 		padding-right: 10px;
 	}
+
+	@media (max-width: 782px) {
+		display: none;
+	}
 }
