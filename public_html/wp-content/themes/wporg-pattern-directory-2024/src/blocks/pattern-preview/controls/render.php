@@ -98,10 +98,10 @@ $html_id = wp_unique_id( 'pattern-preview-help-' );
 		</div>
 	</div>
 
-	<span id="<?php echo esc_attr( $html_id ); ?>-left" class="screen-reader-text">
+	<span id="<?php echo esc_attr( $html_id ); ?>-left" hidden>
 		<?php esc_attr_e( 'Drag or use arrow keys to resize the pattern preview. Left to make larger, right to make smaller.', 'wporg-patterns' ); ?>
 	</span>
-	<span id="<?php echo esc_attr( $html_id ); ?>-right" class="screen-reader-text">
+	<span id="<?php echo esc_attr( $html_id ); ?>-right" hidden>
 		<?php esc_attr_e( 'Drag or use arrow keys to resize the pattern preview. Right to make larger, left to make smaller.', 'wporg-patterns' ); ?>
 	</span>
 </div>
