@@ -126,7 +126,7 @@ function update_query_total_label( $label, $found_posts ) {
 		return sprintf( _n( '%s pattern', '%s patterns', $count, 'wporg-patterns' ), number_format_i18n( $count ) );
 	}
 
-	$current = strtolower( $wp_query->get( 'curation' ) );
+	$current = is_string( $wp_query->get( 'curation' ) ) ? strtolower( $wp_query->get( 'curation' ) ) : '';
 	if ( $wp_query->is_archive() ) {
 		if ( 'core' === $current ) {
 			/* translators: %s: the result count. */
@@ -149,7 +149,7 @@ function update_query_total_label( $label, $found_posts ) {
  */
 function get_curation_options( $options ) {
 	global $wp_query;
-	$current = strtolower( $wp_query->get( 'curation' ) );
+	$current = is_string( $wp_query->get( 'curation' ) ) ? strtolower( $wp_query->get( 'curation' ) ) : '';
 
 	$label = __( 'Filter by', 'wporg-patterns' );
 	switch ( $current ) {
