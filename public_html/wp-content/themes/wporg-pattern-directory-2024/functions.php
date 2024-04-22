@@ -474,7 +474,7 @@ function add_social_meta_tags() {
 			'og:url'         => home_url(),
 			'og:image'       => esc_url( $default_image ),
 		];
-	} else if ( is_tax() ) {
+	} else if ( is_tax() && get_queried_object() ) {
 		$og_fields = [
 			'og:title'       => sprintf( __( 'Block Patterns: %s', 'wporg-patterns' ), esc_attr( single_term_title( '', false ) ) ),
 			'og:description' => __( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ),
