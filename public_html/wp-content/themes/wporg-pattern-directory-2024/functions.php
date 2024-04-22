@@ -475,12 +475,18 @@ function add_social_meta_tags() {
 			'og:image'       => esc_url( $default_image ),
 		];
 	} else if ( is_tax() ) {
+		// Make sure URL is going to be a string since `get_term_link` can return wp_error.
+		$og_url_field = get_term_link( get_queried_object_id() );
+		if ( is_wp_error( $og_url_field ) ) {
+			$og_url_field = '';
+		}
+
 		$og_fields = [
 			'og:title'       => sprintf( __( 'Block Patterns: %s', 'wporg-patterns' ), esc_attr( single_term_title( '', false ) ) ),
 			'og:description' => __( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ),
 			'og:site_name'   => $site_title,
 			'og:type'        => 'website',
-			'og:url'         => esc_url( get_term_link( get_queried_object_id() ) ),
+			'og:url'         => esc_url( $og_url_field ),
 			'og:image'       => esc_url( $default_image ),
 		];
 	} else if ( is_singular( POST_TYPE ) ) {
