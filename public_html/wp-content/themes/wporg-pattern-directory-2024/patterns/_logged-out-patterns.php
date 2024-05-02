@@ -12,8 +12,8 @@ $login_url = wp_login_url();
 $register_url = wp_registration_url();
 
 ?>
-<!-- wp:group {"layout":{"type":"constrained","contentSize":"30rem","justifyContent":"left"}} -->
-<div class="wp-block-group">
+<!-- wp:group {"layout":{"type":"constrained","contentSize":"30rem","justifyContent":"left"},"align":"wide"} -->
+<div class="wp-block-group alignwide">
 	<!-- wp:paragraph -->
 	<p><?php esc_html_e( 'Anyone can create and share patterns using the familiar block editor. Design helpful starting points for yourself and any WordPress site.', 'wporg-patterns' ); ?></p>
 	<!-- /wp:paragraph -->
