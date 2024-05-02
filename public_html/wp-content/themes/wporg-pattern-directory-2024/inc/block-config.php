@@ -6,6 +6,7 @@
 namespace WordPressdotorg\Theme\Pattern_Directory_2024\Block_Config;
 
 use WP_Block_Supports;
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 use function WordPressdotorg\Theme\Pattern_Directory_2024\get_patterns_count;
 
 add_action( 'init', __NAMESPACE__ . '\register_block_bindings' );
@@ -18,7 +19,8 @@ add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigatio
 add_filter( 'render_block_core/query-title', __NAMESPACE__ . '\update_archive_title', 10, 3 );
 add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\update_site_title', 10, 3 );
 add_filter( 'wporg_block_site_breadcrumbs', __NAMESPACE__ . '\update_site_breadcrumbs' );
-add_filter( 'render_block_data', __NAMESPACE__ . '\modify_pattern_include' );
+add_filter( 'page_template_hierarchy', __NAMESPACE__ . '\modify_page_template' );
+add_filter( 'single_template_hierarchy', __NAMESPACE__ . '\modify_single_template' );
 
 /**
  * Register block bindings.
@@ -535,37 +537,30 @@ function update_site_breadcrumbs( $breadcrumbs ) {
 }
 
 /**
- * Update header template based on current query.
+ * Switch to the "anon" templates when logged out for favorites and my patterns.
  *
- * @param array $parsed_block The block being rendered.
- *
- * @return array The updated block.
+ * @param string[] $templates A list of template candidates, in descending order of priority.
  */
-function modify_pattern_include( $parsed_block ) {
-	if ( 'core/pattern' !== $parsed_block['blockName'] || empty( $parsed_block['attrs']['slug'] ) ) {
-		return $parsed_block;
+function modify_page_template( $templates ) {
+	if ( ! get_current_user_id() ) {
+		if ( is_page( 'favorites' ) ) {
+			array_unshift( $templates, 'page-favorites-anon.html' );
+		} else if ( is_page( 'my-patterns' ) ) {
+			array_unshift( $templates, 'page-my-patterns-anon.html' );
+		}
 	}
+	return $templates;
+}
 
-	if (
-		'wporg-pattern-directory-2024/single-pattern' === $parsed_block['attrs']['slug'] &&
-		get_current_user_id() === get_the_author_meta( 'ID' )
-	) {
-			$parsed_block['attrs']['slug'] = 'wporg-pattern-directory-2024/single-my-pattern';
+/**
+ * Switch to the single-mine.html template on patterns owned by the current user.
+ *
+ * @param string[] $templates A list of template candidates, in descending order of priority.
+ */
+function modify_single_template( $templates ) {
+	$pattern = get_post();
+	if ( POST_TYPE === get_post_type() && get_current_user_id() === (int) $pattern->post_author ) {
+		array_unshift( $templates, 'single-mine.html' );
 	}
-
-	if (
-		'wporg-pattern-directory-2024/grid-mine' === $parsed_block['attrs']['slug'] &&
-		! get_current_user_id()
-	) {
-			$parsed_block['attrs']['slug'] = 'wporg-pattern-directory-2024/logged-out-patterns';
-	}
-
-	if (
-		'wporg-pattern-directory-2024/grid-favorites' === $parsed_block['attrs']['slug'] &&
-		! get_current_user_id()
-	) {
-			$parsed_block['attrs']['slug'] = 'wporg-pattern-directory-2024/logged-out-favorites';
-	}
-
-	return $parsed_block;
+	return $templates;
 }
