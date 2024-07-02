@@ -45,7 +45,7 @@
 			<div class="wp-block-group">
 				<!-- wp:post-title {"isLink":true,"fontSize":"small","fontFamily":"inter"} /-->
 
-				<!-- wp:wporg/favorite-button {"variant":"small"} /-->
+				<!-- wp:wporg/favorite-button {"showCount":true,"variant":"small"} /-->
 			</div>
 			<!-- /wp:group -->
 		</div>

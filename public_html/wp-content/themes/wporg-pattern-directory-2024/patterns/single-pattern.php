@@ -37,7 +37,7 @@ if ( 'report-failed' === $action_status ) {
 	<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap"}} -->
 	<div class="wp-block-group">
 		<!-- wp:wporg/copy-button /-->
-		<!-- wp:wporg/favorite-button /-->
+		<!-- wp:wporg/favorite-button {"showCount":true} /-->
 		<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
 		<div class="wp-block-group">
 			<!-- wp:avatar {"size":24,"style":{"border":{"radius":"100%"}}} /-->

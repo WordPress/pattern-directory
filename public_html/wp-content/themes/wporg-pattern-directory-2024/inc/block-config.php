@@ -5,15 +5,17 @@
 
 namespace WordPressdotorg\Theme\Pattern_Directory_2024\Block_Config;
 
-use WP_Block_Supports;
+use WP_Block_Supports, WP_Error;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 use function WordPressdotorg\Theme\Pattern_Directory_2024\get_patterns_count;
+use function WordPressdotorg\Pattern_Directory\Favorite\{add_favorite, get_favorite_count, is_favorite, remove_favorite};
 
 add_action( 'init', __NAMESPACE__ . '\register_block_bindings' );
 add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\update_query_total_label', 10, 2 );
 add_filter( 'wporg_query_filter_options_curation', __NAMESPACE__ . '\get_curation_options' );
 add_filter( 'wporg_query_filter_options_sort', __NAMESPACE__ . '\get_sort_options' );
 add_action( 'wporg_query_filter_in_form', __NAMESPACE__ . '\inject_other_filters' );
+add_filter( 'wporg_favorite_button_settings', __NAMESPACE__ . '\get_favorite_settings', 10, 2 );
 add_filter( 'render_block_core/search', __NAMESPACE__ . '\inject_category_search_block' );
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
 add_filter( 'render_block_core/query-title', __NAMESPACE__ . '\update_archive_title', 10, 3 );
@@ -266,6 +268,49 @@ function inject_other_filters( $key ) {
 	if ( isset( $wp_query->query['s'] ) ) {
 		printf( '<input type="hidden" name="s" value="%s" />', esc_attr( $wp_query->query['s'] ) );
 	}
+}
+
+/**
+ * Configure the favorite button.
+ *
+ * @param array $settings Array of settings for this filter.
+ * @param int   $post_id  The current post ID.
+ *
+ * @return array|bool Settings array or false if not a theme.
+ */
+function get_favorite_settings( $settings, $post_id ) {
+	if ( ! $post_id ) {
+		return false;
+	}
+
+	return array(
+		'count' => get_favorite_count( $post_id ),
+		'is_favorite' => is_favorite( $post_id ),
+		'add_callback' => function( $_post_id ) {
+			$success = add_favorite( $_post_id );
+			if ( $success ) {
+				return get_favorite_count( $_post_id );
+			}
+
+			return new WP_Error(
+				'favorite-failed',
+				__( 'Unable to favorite this pattern.', 'wporg-patterns' ),
+				array( 'status' => 500 )
+			);
+		},
+		'delete_callback' => function( $_post_id ) {
+			$success = remove_favorite( $_post_id );
+			if ( $success ) {
+				return get_favorite_count( $_post_id );
+			}
+
+			return new WP_Error(
+				'unfavorite-failed',
+				__( 'Unable to remove this pattern from your favorites.', 'wporg-patterns' ),
+				array( 'status' => 500 )
+			);
+		},
+	);
 }
 
 /**

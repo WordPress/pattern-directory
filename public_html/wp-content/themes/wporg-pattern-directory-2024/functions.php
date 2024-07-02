@@ -11,7 +11,6 @@ use function WordPressdotorg\Theme\Pattern_Directory_2024\Block_Config\get_appli
 // Block files
 require_once( __DIR__ . '/src/blocks/copy-button/index.php' );
 require_once( __DIR__ . '/src/blocks/delete-button/index.php' );
-require_once( __DIR__ . '/src/blocks/favorite-button/index.php' );
 require_once( __DIR__ . '/src/blocks/pattern-preview/index.php' );
 require_once( __DIR__ . '/src/blocks/pattern-thumbnail/index.php' );
 require_once( __DIR__ . '/src/blocks/post-status/index.php' );
