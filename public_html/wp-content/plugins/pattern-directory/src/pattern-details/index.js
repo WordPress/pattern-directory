@@ -8,6 +8,12 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
 
+/**
+ * Internal dependencies
+ */
+import PatternCategoriesControl from './pattern-categories-control';
+import './index.scss';
+
 const KEYWORD_SLUG = 'wpop_keywords';
 const DESCRIPTION_SLUG = 'wpop_description';
 const LOCALE_SLUG = 'wpop_locale';
@@ -23,10 +29,11 @@ for ( const [ key, value ] of Object.entries( localeData ) ) {
 
 const PatternDetails = () => {
 	const { editPost } = useDispatch( 'core/editor' );
-	const { description, keywords, locale, meta, title } = useSelect( ( select ) => {
+	const { categories, description, keywords, locale, meta, title } = useSelect( ( select ) => {
 		const { getEditedPostAttribute } = select( editorStore );
 		const _meta = getEditedPostAttribute( 'meta' ) || {};
 		return {
+			categories: getEditedPostAttribute( 'pattern-categories' ),
 			description: _meta[ DESCRIPTION_SLUG ],
 			keywords: _meta[ KEYWORD_SLUG ].split( ', ' ).filter( ( item ) => item.length ),
 			locale: _meta[ LOCALE_SLUG ],
@@ -41,9 +48,11 @@ const PatternDetails = () => {
 	return (
 		<PluginDocumentSettingPanel
 			name="pattern-details"
-			title={ __( 'Pattern Details', 'wporg-patterns' ) }
-			icon="nothing"
+			title={ false }
+			icon={ false }
+			className="wporg-pattern-details"
 		>
+			<h2>{ __( 'Pattern Details', 'wporg-patterns' ) }</h2>
 			<TextControl
 				key="title"
 				label={ __( 'Title', 'wporg-patterns' ) }
@@ -72,10 +81,23 @@ const PatternDetails = () => {
 					'wporg-patterns'
 				) }
 			/>
-			<div>
+			<div className="wporg-pattern-details__panel">
+				<h3>{ __( 'Categories', 'wporg-patterns' ) }</h3>
 				<p>
-					<strong>{ __( 'Keywords', 'wporg-patterns' ) }</strong>
+					{ __(
+						'Patterns are grouped into defined categories to help people browse.',
+						'wporg-patterns'
+					) }
 				</p>
+				<PatternCategoriesControl
+					selectedTerms={ categories }
+					setTerms={ ( newValue ) => {
+						editPost( { 'pattern-categories': newValue } );
+					} }
+				/>
+			</div>
+			<div className="wporg-pattern-details__panel">
+				<h3>{ __( 'Keywords', 'wporg-patterns' ) }</h3>
 				<p>
 					{ __(
 						'Keywords are words or short phrases that will help people find your pattern. There is a maximum of 10 keywords.',
