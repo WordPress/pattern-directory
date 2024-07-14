@@ -58,6 +58,10 @@
 		},
 		{
 			"type": "vcs",
+			"url": "git@github.com:WordPress/wporg-parent-2021.git"
+		},
+		{
+			"type": "vcs",
 			"url": "git@github.com:WordPress/wporg-internal-notes.git"
 		}
 	],
@@ -78,7 +82,8 @@
 		"rmccue/requests": "^1.8.1",
 		"wp-coding-standards/wpcs": "2.*",
 		"wp-phpunit/wp-phpunit": "~6.0",
-		"yoast/phpunit-polyfills": "^1.1"
+		"yoast/phpunit-polyfills": "^1.1",
+		"wporg/wporg-parent-2021": "dev-build"
 	},
 	"scripts": {
 		"format": "phpcbf -p",

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "74ea5900c960f7fe6903d62deaf576ae",
+    "content-hash": "947286dfc1dcddc6d71563ffd3e46184",
     "packages": [
         {
             "name": "adhocore/jwt",
@@ -2629,6 +2629,27 @@
             "time": "2024-05-07T16:46:52+00:00"
         },
         {
+            "name": "wporg/wporg-parent-2021",
+            "version": "dev-build",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/WordPress/wporg-parent-2021.git",
+                "reference": "86f1594c0ee71bfc0ce86930f36170ec5871fecc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/WordPress/wporg-parent-2021/zipball/86f1594c0ee71bfc0ce86930f36170ec5871fecc",
+                "reference": "86f1594c0ee71bfc0ce86930f36170ec5871fecc",
+                "shasum": ""
+            },
+            "type": "wordpress-theme",
+            "support": {
+                "source": "https://github.com/WordPress/wporg-parent-2021/tree/build",
+                "issues": "https://github.com/WordPress/wporg-parent-2021/issues"
+            },
+            "time": "2024-07-09T23:11:35+00:00"
+        },
+        {
             "name": "yoast/phpunit-polyfills",
             "version": "1.1.1",
             "source": {
@@ -2696,7 +2717,8 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "wporg/wporg-internal-notes": 20,
-        "wporg/wporg-mu-plugins": 20
+        "wporg/wporg-mu-plugins": 20,
+        "wporg/wporg-parent-2021": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
@@ -2705,5 +2727,5 @@
     "platform-overrides": {
         "php": "7.4"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.6.0"
 }
