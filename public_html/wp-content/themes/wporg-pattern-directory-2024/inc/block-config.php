@@ -300,8 +300,13 @@ function add_site_navigation_menus( $menus ) {
 	$statuses = array();
 
 	$menu[] = array(
+		'label' => __( 'New pattern', 'wporg-patterns' ),
+		'url' => '/new-pattern/',
+	);
+	$menu[] = array(
 		'label' => __( 'My favorites', 'wporg-patterns' ),
 		'url' => '/favorites/',
+		'className' => 'has-separator'
 	);
 	if ( is_user_logged_in() ) {
 		$menu[] = array(
@@ -309,10 +314,7 @@ function add_site_navigation_menus( $menus ) {
 			'url' => '/my-patterns/',
 		);
 	}
-	$menu[] = array(
-		'label' => __( 'New pattern', 'wporg-patterns' ),
-		'url' => '/new-pattern/',
-	);
+
 
 	$current_status = isset( $wp_query->query['status'] ) ? $wp_query->query['status'] : false;
 	$statuses = array(
