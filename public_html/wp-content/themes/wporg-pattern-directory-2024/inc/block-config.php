@@ -306,7 +306,7 @@ function add_site_navigation_menus( $menus ) {
 	$menu[] = array(
 		'label' => __( 'My favorites', 'wporg-patterns' ),
 		'url' => '/favorites/',
-		'className' => 'has-separator'
+		'className' => 'has-separator',
 	);
 	if ( is_user_logged_in() ) {
 		$menu[] = array(
@@ -314,7 +314,6 @@ function add_site_navigation_menus( $menus ) {
 			'url' => '/my-patterns/',
 		);
 	}
-
 
 	$current_status = isset( $wp_query->query['status'] ) ? $wp_query->query['status'] : false;
 	$statuses = array(
