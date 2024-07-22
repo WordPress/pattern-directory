@@ -293,8 +293,10 @@ function register_rest_fields() {
 		array(
 			'get_callback' => function() {
 				$slugs = wp_list_pluck( wp_get_object_terms( get_the_ID(), 'wporg-pattern-category' ), 'slug' );
+				$slugs = array_map( 'sanitize_title', $slugs );
+				$slugs = array_diff( $slugs, [ 'featured' ] );
 
-				return array_map( 'sanitize_title', $slugs );
+				return $slugs;
 			},
 
 			'schema' => array(
