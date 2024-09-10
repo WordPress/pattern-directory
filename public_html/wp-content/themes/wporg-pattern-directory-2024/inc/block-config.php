@@ -358,6 +358,13 @@ function add_site_navigation_menus( $menus ) {
 			'label' => __( 'My patterns', 'wporg-patterns' ),
 			'url' => '/my-patterns/',
 		);
+	} else {
+		global $wp;
+		$redirect_url = home_url( $wp->request );
+		$menu[] = array(
+			'label' => __( 'Log in', 'wporg-patterns' ),
+			'url' => wp_login_url( $redirect_url ),
+		);
 	}
 
 	$current_status = isset( $wp_query->query['status'] ) ? $wp_query->query['status'] : false;
