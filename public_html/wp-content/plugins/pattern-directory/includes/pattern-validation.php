@@ -184,7 +184,7 @@ function validate_title( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
-	$title = isset( $request['title'] ) ? $request['title'] : get_the_title( $prepared_post->ID );
+	$title = isset( $request['title']['raw'] ) ? $request['title']['raw'] : get_the_title( $prepared_post->ID );
 
 	// A title exists, but is empty -- invalid.
 	if ( isset( $title ) && empty( trim( $title ) ) ) {
