@@ -23,7 +23,6 @@ export default function MediaPlaceholder( {
 	multiple = false,
 	notices,
 	onSelect,
-	placeholder,
 	style,
 	value = {},
 } ) {
@@ -84,9 +83,8 @@ export default function MediaPlaceholder( {
 			</Placeholder>
 		);
 	};
-	const renderPlaceholder = placeholder ?? defaultRenderPlaceholder;
 
-	const content = renderPlaceholder(
+	const content = defaultRenderPlaceholder(
 		<MediaUpload
 			addToGallery={ addToGallery }
 			gallery={ multiple && onlyAllowsImages }
