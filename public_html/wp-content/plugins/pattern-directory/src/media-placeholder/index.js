@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * WordPress dependencies
@@ -64,7 +64,7 @@ export default function MediaPlaceholder( {
 			instructions = __( 'The pattern directory does not support this media type yet.', 'wporg-patterns' );
 		}
 
-		const placeholderClassName = classnames( 'block-editor-media-placeholder', className, {
+		const placeholderClassName = clsx( 'block-editor-media-placeholder', className, {
 			'is-appender': isAppender,
 		} );
 

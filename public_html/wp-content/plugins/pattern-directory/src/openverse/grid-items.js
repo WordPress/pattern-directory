@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * WordPress dependencies
@@ -37,7 +37,7 @@ export default function OpenverseGridItems( { items, multiple, selected, onSelec
 			aria-multiselectable={ multiple }
 		>
 			{ items.map( ( item ) => {
-				const classes = classnames( {
+				const classes = clsx( {
 					'pattern-openverse__grid-item': true,
 					'is-selected': includesById( selected, item ),
 				} );
