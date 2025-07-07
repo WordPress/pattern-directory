@@ -182,7 +182,6 @@ function pattern_creator_init() {
 		'after'
 	);
 
-	wp_enqueue_script( 'wp-edit-site' );
 	wp_enqueue_script( 'wp-format-library' );
 	wp_enqueue_style( 'wp-edit-site' );
 	wp_enqueue_style( 'wp-format-library' );
