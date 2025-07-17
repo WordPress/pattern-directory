@@ -6,6 +6,7 @@ on:
             - trunk
         paths:
             - public_html/wp-content/themes/wporg-pattern-directory-2024/**
+            - public_html/wp-content/plugins/**
     # Enable manually running action if necessary.
     workflow_dispatch:
 
