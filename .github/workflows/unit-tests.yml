@@ -5,10 +5,12 @@ on:
     pull_request:
         paths:
             - public_html/**
+            - .github/workflows/unit-tests.yml
     push:
         branches: [trunk]
         paths:
             - public_html/**
+            - .github/workflows/unit-tests.yml
     # Enable manually running action if necessary.
     workflow_dispatch:
 
