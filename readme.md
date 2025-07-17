@@ -56,7 +56,6 @@ The available workspaces are:
 
 	"wporg-pattern-creator": "public_html/wp-content/plugins/pattern-creator"
 	"wporg-pattern-directory": "public_html/wp-content/plugins/pattern-directory"
-	"wporg-pattern-directory-theme": "public_html/wp-content/themes/pattern-directory"
 
 ### Linting
 
