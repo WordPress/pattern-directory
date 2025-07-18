@@ -13,6 +13,7 @@
 	"scripts": {
 		"build:directory": "npm run build --workspace=wporg-pattern-directory",
 		"build:theme": "npm run build --workspace=wporg-pattern-directory-2024-theme",
+		"build": "npm run build --workspaces",
 		"start:directory": "npm run start --workspace=wporg-pattern-directory",
 		"start:theme": "npm run start --workspace=wporg-pattern-directory-2024-theme",
 		"setup:tools": "echo \"Not used.\"",
