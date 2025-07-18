@@ -2,8 +2,7 @@
 
 namespace WordPressdotorg\Pattern_Directory\Pattern_Post_Type;
 
-use Error, WP_Block_Type_Registry;
-use function WordPressdotorg\Locales\{ get_locales, get_locales_with_english_names, get_locales_with_native_names };
+use function WordPressdotorg\Locales\{ get_locales };
 use function WordPressdotorg\Pattern_Directory\Favorite\get_favorite_count;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 
@@ -16,9 +15,6 @@ add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'init', __NAMESPACE__ . '\register_post_statuses' );
 add_action( 'transition_post_status', __NAMESPACE__ . '\status_transitions', 10, 3 );
 add_action( 'post_updated', __NAMESPACE__ . '\update_contains_block_types_meta' );
-add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
-add_filter( 'allowed_block_types_all', __NAMESPACE__ . '\remove_disallowed_blocks', 10, 2 );
-add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
 add_filter( 'rest_' . POST_TYPE . '_collection_params', __NAMESPACE__ . '\filter_patterns_collection_params' );
 add_filter( 'rest_' . POST_TYPE . '_query', __NAMESPACE__ . '\filter_patterns_rest_query', 10, 2 );
 add_filter( 'user_has_cap', __NAMESPACE__ . '\set_pattern_caps' );
@@ -80,6 +76,7 @@ function register_post_type_data() {
 			'show_in_rest'      => true,
 			'rest_base'         => 'pattern-categories',
 			'show_admin_column' => true,
+			'show_ui'           => current_user_can( 'manage_options' ),
 			'rewrite'           => array(
 				'slug' => 'categories',
 			),
@@ -100,14 +97,14 @@ function register_post_type_data() {
 			'show_in_rest'      => true,
 			'rest_base'         => 'pattern-keywords',
 			'show_admin_column' => true,
+			'show_ui'           => current_user_can( 'manage_options' ),
 			'rewrite'           => array(
 				'slug' => 'pattern-keywords',
 			),
 			'capabilities' => array(
-				'assign_terms' => 'edit_patterns',
-				'edit_terms'   => 'edit_patterns',
+				'assign_terms' => 'manage_options',
+				'edit_terms'   => 'manage_options',
 			),
-
 			'labels' => array(
 				'name'                       => _x( 'Keywords (Internal)', 'taxonomy general name', 'wporg-patterns' ),
 				'singular_name'              => _x( 'Keyword', 'taxonomy singular name', 'wporg-patterns' ),
@@ -551,103 +548,6 @@ function can_edit_this_pattern( $allowed, $meta_key, $pattern_id ) {
 }
 
 /**
- * Enqueue scripts for the block editor.
- *
- * @throws Error If the build files don't exist.
- */
-function enqueue_editor_assets() {
-	if ( function_exists( 'get_current_screen' ) && POST_TYPE !== get_current_screen()->id ) {
-		return;
-	}
-
-	$dir = dirname( dirname( __FILE__ ) );
-
-	$script_asset_path = "$dir/build/pattern-post-type.asset.php";
-	if ( ! file_exists( $script_asset_path ) ) {
-		throw new Error( 'You need to run `npm run start:directory` or `npm run build:directory` for the Pattern Directory.' );
-	}
-
-	$script_asset = require $script_asset_path;
-	wp_enqueue_script(
-		'wporg-pattern-post-type',
-		plugins_url( 'build/pattern-post-type.js', dirname( __FILE__ ) ),
-		$script_asset['dependencies'],
-		$script_asset['version'],
-		true
-	);
-
-	wp_set_script_translations( 'wporg-pattern-post-type', 'wporg-patterns' );
-
-	$locales = ( is_admin() ) ? get_locales_with_english_names() : get_locales_with_native_names();
-
-	wp_add_inline_script(
-		'wporg-pattern-post-type',
-		'var wporgLocaleData = ' . wp_json_encode( $locales ) . ';',
-		'before'
-	);
-
-	wp_enqueue_style(
-		'wporg-pattern-post-type',
-		plugins_url( 'build/pattern-post-type.css', dirname( __FILE__ ) ),
-		array(),
-		$script_asset['version'],
-	);
-}
-
-/**
- * Restrict the set of blocks allowed in block patterns.
- *
- * @param bool|array              $allowed_block_types  Array of block type slugs, or boolean to enable/disable all.
- * @param WP_Block_Editor_Context $block_editor_context The post resource data.
- *
- * @return bool|array A (possibly) filtered list of block types.
- */
-function remove_disallowed_blocks( $allowed_block_types, $block_editor_context ) {
-	$disallowed_block_types = array(
-		// Remove blocks that don't make sense in Block Patterns
-		'core/freeform', // Classic block
-		'core/legacy-widget',
-		'core/more',
-		'core/nextpage',
-		'core/block', // Reusable blocks
-		'core/shortcode',
-		'core/template-part',
-	);
-
-	if ( isset( $block_editor_context->post ) && POST_TYPE === $block_editor_context->post->post_type ) {
-		// This can be true if all block types are allowed, so to filter them we
-		// need to get the list of all registered blocks first.
-		if ( true === $allowed_block_types ) {
-			$allowed_block_types = array_keys( WP_Block_Type_Registry::get_instance()->get_all_registered() );
-		}
-		$allowed_block_types = array_diff( $allowed_block_types, $disallowed_block_types );
-
-		// Remove the "WordPress.org" blocks, like Global Header & Global Footer.
-		$allowed_block_types = array_filter(
-			$allowed_block_types,
-			function ( $block_type ) {
-				return 'wporg/' !== substr( $block_type, 0, 6 );
-			}
-		);
-	}
-
-	return is_array( $allowed_block_types ) ? array_values( $allowed_block_types ) : $allowed_block_types;
-}
-
-/**
- * Disable the block directory in wp-admin for patterns.
- *
- * The block directory file isn't loaded on the frontend, so this is only needed for site admins who can open
- * the pattern in the "real" wp-admin editor.
- */
-function disable_block_directory() {
-	if ( is_admin() && POST_TYPE === get_post_type() ) {
-		remove_action( 'enqueue_block_editor_assets', 'wp_enqueue_editor_block_directory_assets' );
-		remove_action( 'enqueue_block_editor_assets', 'gutenberg_enqueue_block_editor_assets_block_directory' );
-	}
-}
-
-/**
  * Filter the collection parameters:
  * - set a new default for per_page.
  * - add a new parameter, `author_name`, for a user's nicename slug.
@@ -851,6 +751,8 @@ function get_block_pattern( $post ) {
  * @return array
  */
 function set_pattern_caps( $user_caps ) {
+	global $current_screen;
+
 	// Set corresponding caps for all roles.
 	$cap_args = array(
 		'capability_type' => array( 'pattern', 'patterns' ),
@@ -868,7 +770,7 @@ function set_pattern_caps( $user_caps ) {
 	}
 
 	// Set caps to allow for front end pattern creation.
-	if ( is_user_logged_in() && ! is_admin() ) {
+	if ( is_user_logged_in() ) {
 		$user_caps['read']                       = true;
 		$user_caps['publish_patterns']           = true;
 		$user_caps['edit_patterns']              = true;
@@ -876,6 +778,11 @@ function set_pattern_caps( $user_caps ) {
 		$user_caps['delete_patterns']            = true;
 		$user_caps['delete_published_patterns']  = true;
 		// Note that `edit_others_patterns` & `delete_others_patterns` are separate capabilities.
+	}
+
+	// Filter out `upload_files` from all non-admin users.
+	if ( ! isset( $user_caps['manage_options'] ) ) {
+		$user_caps['upload_files'] = false;
 	}
 
 	return $user_caps;

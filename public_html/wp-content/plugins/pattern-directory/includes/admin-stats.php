@@ -32,7 +32,7 @@ function add_subpage() {
 		$parent_slug,
 		__( 'Pattern Stats', 'wporg-patterns' ),
 		__( 'Stats', 'wporg-patterns' ),
-		$post_type_object->cap->edit_posts,
+		$post_type_object->cap->edit_others_posts,
 		PATTERN_POST_TYPE . '-stats',
 		__NAMESPACE__ . '\render_subpage'
 	);
@@ -143,7 +143,7 @@ function handle_csv_export() {
 		return;
 	}
 
-	if ( ! current_user_can( $cpt->cap->edit_posts ) ) {
+	if ( ! current_user_can( $cpt->cap->edit_others_posts ) ) {
 		$csv->error->add( 'no_permission', 'Sorry, you do not have permission to do this.' );
 		$csv->emit_file();
 	}

@@ -422,6 +422,11 @@ function add_row_actions( $actions, $post ) {
 		return $actions;
 	}
 
+	$post_type_object = get_post_type_object( $post->post_type );
+	if ( ! current_user_can( $post_type_object->cap->edit_others_posts ) ) {
+		return array_intersect_key( $actions, array_fill_keys( array( 'edit', 'view', 'trash', 'untrash', 'delete' ), true ) );
+	}
+
 	$saved_actions = array_intersect_key( $actions, array_fill_keys( array( 'trash', 'untrash', 'delete' ), true ) );
 	$actions       = array_intersect_key( $actions, array_fill_keys( array( 'edit', 'view' ), true ) );
 
@@ -494,6 +499,11 @@ function add_row_actions( $actions, $post ) {
  */
 function add_bulk_actions( $actions ) {
 	$saved_actions = array_intersect_key( $actions, array_fill_keys( array( 'trash', 'untrash', 'delete' ), true ) );
+
+	$post_type_object = get_post_type_object( PATTERN );
+	if ( ! current_user_can( $post_type_object->cap->edit_others_posts ) ) {
+		return $saved_actions;
+	}
 
 	$actions = array(
 		'publish' => __( 'Publish', 'wporg-patterns' ),

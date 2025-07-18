@@ -53,8 +53,7 @@ function register_block_bindings() {
 			'label' => __( 'Edit link', 'wporg-patterns' ),
 			'uses_context' => [ 'postId' ],
 			'get_value_callback' => function( $args, $block ) {
-				$post_id = $block->context['postId'];
-				return site_url( "pattern/$post_id/edit/" );
+				return get_edit_post_link( $block->context['postId'], 'raw' );
 			},
 		)
 	);
@@ -346,7 +345,7 @@ function add_site_navigation_menus( $menus ) {
 
 	$menu[] = array(
 		'label' => __( 'New pattern', 'wporg-patterns' ),
-		'url' => '/new-pattern/',
+		'url' => add_query_arg( array( 'post_type' => POST_TYPE ), admin_url( 'post-new.php' ) ),
 	);
 	$menu[] = array(
 		'label' => __( 'My favorites', 'wporg-patterns' ),

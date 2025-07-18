@@ -26,14 +26,14 @@ function filter_admin_bar_links( $wp_admin_bar ) {
 	// "New Block Pattern" link.
 	$new_pattern = $wp_admin_bar->get_node( 'new-wporg-pattern' );
 	if ( $new_pattern ) {
-		$new_pattern->href = site_url( 'new-pattern/' );
+		$new_pattern->href = add_query_arg( array( 'post_type' => POST_TYPE ), admin_url( 'post-new.php' ) );
 		$wp_admin_bar->add_node( $new_pattern );
 	}
 
 	// Top-level "+ New" link, if New Block Pattern is the only item.
 	$new_content = $wp_admin_bar->get_node( 'new-content' );
 	if ( $new_content && str_contains( $new_content->href, POST_TYPE ) ) {
-		$new_content->href = site_url( 'new-pattern/' );
+		$new_content->href = add_query_arg( array( 'post_type' => POST_TYPE ), admin_url( 'post-new.php' ) );
 		$wp_admin_bar->add_node( $new_content );
 	}
 
@@ -41,8 +41,6 @@ function filter_admin_bar_links( $wp_admin_bar ) {
 	if ( is_singular( POST_TYPE ) ) {
 		$edit_pattern = $wp_admin_bar->get_node( 'edit' );
 		if ( $edit_pattern ) {
-			$pattern_id = wp_get_post_parent_id() ?: get_the_ID();
-			$edit_pattern->href = site_url( "pattern/$pattern_id/edit/" );
 			if ( wp_get_post_parent_id() !== 0 ) {
 				$edit_pattern->title = __( 'Edit Original Pattern', 'wporg-patterns' );
 			}

@@ -60,7 +60,7 @@ if ( 'draft-failed' === $action_status ) {
 		<!-- wp:buttons {"layout":{"type":"flex"},"style":{"spacing":{"blockGap":"var:preset|spacing|10"}}} -->
 		<div class="wp-block-buttons">
 			<!-- wp:button {"className":"is-style-toggle is-small","metadata":{"bindings":{"text":{"source":"wporg-pattern/edit-label"},"url":{"source":"wporg-pattern/edit-url"}}}} -->
-			<div class="wp-block-button is-style-toggle is-small"><a href="[pattern_edit_link]" class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Edit', 'wporg-patterns' ); ?></a></div>
+			<div class="wp-block-button is-style-toggle is-small"><a href="#" class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Edit', 'wporg-patterns' ); ?></a></div>
 			<!-- /wp:button -->
 
 			<!-- wp:button {"className":"is-style-toggle is-small is-draft-button"} -->
