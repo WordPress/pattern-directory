@@ -9,6 +9,7 @@ const config = {
 		// See https://github.com/uuidjs/uuid/issues/451
 		uuid: require.resolve( 'uuid' ),
 	},
+	transformIgnorePatterns: [ 'node_modules/(?!(parsel-js)/)' ],
 };
 
 module.exports = config;
