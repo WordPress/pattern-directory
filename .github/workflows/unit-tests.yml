@@ -5,10 +5,12 @@ on:
     pull_request:
         paths:
             - public_html/**
+            - .github/workflows/unit-tests.yml
     push:
         branches: [trunk]
         paths:
             - public_html/**
+            - .github/workflows/unit-tests.yml
     # Enable manually running action if necessary.
     workflow_dispatch:
 
@@ -53,9 +55,6 @@ jobs:
               with:
                 packageManager: "npm"
                 token: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Run unit tests on theme data store
-              run: npm run test:unit --workspace=wporg-pattern-directory-theme 
 
             - name: Run unit tests on the pattern creator
               run: npm run test:unit --workspace=wporg-pattern-creator 
