@@ -7,7 +7,6 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 import { __, _x } from '@wordpress/i18n';
-import { ToolSelector } from '@wordpress/block-editor';
 import { Button, VisuallyHidden } from '@wordpress/components';
 import { Icon, arrowLeft, listView, plus } from '@wordpress/icons';
 import { PinnedItems } from '@wordpress/interface';
@@ -89,7 +88,6 @@ export default function Header() {
 					/>
 					{ isLargeViewport && (
 						<>
-							<ToolSelector />
 							<UndoButton />
 							<RedoButton />
 							<Button
