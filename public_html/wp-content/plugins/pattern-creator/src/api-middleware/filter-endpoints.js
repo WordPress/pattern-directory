@@ -57,6 +57,14 @@ export default async function ( options, next ) {
 			if ( response[ 'wporg-pattern' ] ) {
 				response[ 'wporg-pattern' ].viewable = false;
 			}
+		} else if ( options.path.includes( '/wp/v2/posts' ) ) {
+			response.forEach( ( post, index ) => {
+				if ( post.content && ! post.content.raw ) {
+					const content = post.content.rendered || '';
+					post.content.raw = content;
+				}
+				response[ index ] = post;
+			} );
 		}
 	}
 

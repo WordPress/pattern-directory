@@ -12,6 +12,7 @@
 
 namespace WordPressdotorg\Pattern_Creator;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+use function WordPressdotorg\MU_Plugins\Global_Header_Footer\{ is_rosetta_site, get_rosetta_name };
 use WP_Block_Editor_Context;
 
 const AUTOSAVE_INTERVAL = 30;
@@ -78,11 +79,15 @@ function pattern_creator_init() {
 	}
 
 	wp_deregister_style( 'wporg-style' );
+	// These will have no effect if the styles are not registered.
+	wp_deregister_style( 'wporg-pattern-directory-2024-style' );
+	wp_deregister_style( 'wporg-parent-2021-style' );
+	wp_deregister_style( 'global-styles' );
 
 	$dir = dirname( __FILE__ );
 	$script_asset_path = "$dir/build/index.asset.php";
 	if ( ! file_exists( $script_asset_path ) ) {
-		throw new \Error( 'You need to run `yarn start` or `yarn build` for the Pattern Creator.' );
+		throw new \Error( 'You need to run `npm run start:creator` or `npm run build:creator` for the Pattern Creator.' );
 	}
 
 	$script_asset = require( $script_asset_path );
@@ -98,8 +103,11 @@ function pattern_creator_init() {
 	wp_add_inline_script(
 		'wp-pattern-creator',
 		sprintf(
-			'var wporgLocale = JSON.parse( decodeURIComponent( \'%s\' ) );',
-			rawurlencode( wp_json_encode( get_locale() ) )
+			"var wporgLocale = JSON.parse( decodeURIComponent( '%s' ) );",
+			rawurlencode( wp_json_encode( array(
+				'id' => get_locale(),
+				'displayName' => is_rosetta_site() ? get_rosetta_name() : '',
+			) ) ),
 		),
 		'before'
 	);
@@ -135,6 +143,10 @@ function pattern_creator_init() {
 		update_post_meta( $post_id, 'wpop_locale', 'en_US' );
 	}
 
+	add_filter( 'should_load_separate_core_block_assets', '__return_false', 100 );
+	add_filter( 'template', __NAMESPACE__ . '\set_theme_twentytwentythree' );
+	add_filter( 'stylesheet', __NAMESPACE__ . '\set_theme_twentytwentythree' );
+
 	$custom_settings = array(
 		'postId'                               => $post_id,
 		'siteUrl'                              => site_url(),
@@ -145,10 +157,14 @@ function pattern_creator_init() {
 	);
 
 	wp_deregister_script( 'wporg-global-header-script' );
+
 	$editor_context = new WP_Block_Editor_Context( array( 'post' => $post ) );
 	$settings       = get_block_editor_settings( $custom_settings, $editor_context );
 
 	$settings['defaultStatus'] = get_option( 'wporg-pattern-default_status', 'publish' );
+
+	remove_filter( 'template', __NAMESPACE__ . '\set_theme_twentytwentythree' );
+	remove_filter( 'stylesheet', __NAMESPACE__ . '\set_theme_twentytwentythree' );
 
 	gutenberg_initialize_editor(
 		'block-pattern-creator',
@@ -166,12 +182,9 @@ function pattern_creator_init() {
 		'after'
 	);
 
-	wp_enqueue_script( 'wp-edit-site' );
 	wp_enqueue_script( 'wp-format-library' );
 	wp_enqueue_style( 'wp-edit-site' );
 	wp_enqueue_style( 'wp-format-library' );
-	// Load layout and margin styles.
-	wp_enqueue_style( 'wp-editor-classic-layout-styles' );
 	wp_enqueue_media();
 }
 add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\pattern_creator_init', 20 );
@@ -253,32 +266,72 @@ function rest_api_init() {
 add_action( 'rest_api_init', __NAMESPACE__ . '\rest_api_init' );
 
 /**
- * Filter editor settings to add extra styles to the Pattern Creator editor.
+ * Return the appropriate theme slug for the current environment.
  *
- * This adds `link` & `style` tags to be loaded into the editor's iframe.
- * - Load Twenty Twenty-One styles for a theme preview
- * - Set the editor background to white for a cleaner preview
- * - Add layout styles for the pattern container so that alignments work
- *
- * @param array $settings Default editor settings.
- * @return array Updated settings.
+ * @return string Theme slug.
  */
-function add_theme_styles_to_editor( $settings ) {
-	if ( ! isset( $settings['__unstableResolvedAssets']['styles'] ) ) {
-		return $settings;
+function set_theme_twentytwentythree() {
+	if ( 'local' === wp_get_environment_type() ) {
+		return 'twentytwentythree';
+	} else {
+		return 'core/twentytwentythree';
 	}
-
-	// Build up the alignment styles to match the layout set in theme.json.
-	// See https://github.com/WordPress/gutenberg/blob/9d4b83cbbafcd6c6cbd20c86b572f458fc65ff16/lib/block-supports/layout.php#L38
-	$block_gap = wp_get_global_styles( array( 'spacing', 'blockGap' ) );
-	$layout = wp_get_global_settings( array( 'layout' ) );
-	$style = gutenberg_get_layout_style( '.pattern-block-editor__block-list.is-root-container', $layout, true, $block_gap );
-
-	$settings['__unstableResolvedAssets']['styles'] .=
-		'\n<link rel="stylesheet" id="theme-editor-styles" href="https://wp-themes.com/wp-content/themes/twentytwentyone/assets/css/style-editor.css" media="all" />'; //phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-	$settings['__unstableResolvedAssets']['styles'] .=
-		'\n<style>body.editor-styles-wrapper { background-color: white; --global--color-background: #ffffff; --global--color-primary: #000; --global--color-secondary: #000; --button--color-background: #000; --button--color-text-hover: #000; }' . $style . '</style>';
-
-	return $settings;
 }
-add_filter( 'block_editor_settings_all', __NAMESPACE__ . '\add_theme_styles_to_editor', 20 );
+
+/**
+ * Temporarily restore gutenberg_initialize_editor() for compat with Gutenberg 16.5.0
+ *
+ * @see https://github.com/WordPress/pattern-directory/issues/601
+ */
+function gutenberg_initialize_editor( $editor_name, $editor_script_handle, $settings ) {
+
+	$defaults = array(
+		'preload_paths'    => array(),
+		'initializer_name' => 'initialize',
+		'editor_settings'  => array(),
+	);
+
+	$settings = wp_parse_args( $settings, $defaults );
+
+	/**
+	 * Preload common data by specifying an array of REST API paths that will be preloaded.
+	 *
+	 * Filters the array of paths that will be preloaded.
+	 *
+	 * @param string[] $preload_paths Array of paths to preload.
+	 */
+	$preload_paths = apply_filters( "{$editor_name}_preload_paths", $settings['preload_paths'] );
+
+	$preload_data = array_reduce(
+		$preload_paths,
+		'rest_preload_api_request',
+		array()
+	);
+
+	wp_add_inline_script(
+		'wp-api-fetch',
+		sprintf(
+			'wp.apiFetch.use( wp.apiFetch.createPreloadingMiddleware( %s ) );',
+			wp_json_encode( $preload_data )
+		),
+		'after'
+	);
+	wp_add_inline_script(
+		"wp-{$editor_script_handle}",
+		sprintf(
+			'wp.domReady( function() {
+				wp.%s.%s( "%s", %s );
+			} );',
+			lcfirst( str_replace( '-', '', ucwords( $editor_script_handle, '-' ) ) ),
+			$settings['initializer_name'],
+			str_replace( '_', '-', $editor_name ),
+			wp_json_encode( $settings['editor_settings'] )
+		)
+	);
+
+	// Preload server-registered block schemas.
+	wp_add_inline_script(
+		'wp-blocks',
+		'wp.blocks.unstable__bootstrapServerSideBlockDefinitions(' . wp_json_encode( get_block_editor_server_block_settings() ) . ');'
+	);
+}

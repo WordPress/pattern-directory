@@ -28,6 +28,7 @@ function sync_pattern_meta( $post_meta_safelist ) {
 	$post_meta_safelist[] = 'wpop_keywords';
 	$post_meta_safelist[] = 'wpop_viewport_width';
 	$post_meta_safelist[] = 'wpop_locale';
+	$post_meta_safelist[] = 'wpop_contains_block_types';
 
 	return $post_meta_safelist;
 }
@@ -45,13 +46,7 @@ function sync_pattern_meta( $post_meta_safelist ) {
  * @return bool
  */
 function should_handle_query( $handle_query, $query ) {
-	/*
-	 * This isn't really what `wp_is_json_request()` is meant for, but it's the best option until something like
-	 * `wp_doing_rest()` is available.
-	 *
-	 * @link https://core.trac.wordpress.org/ticket/42061
-	 */
-	return wp_is_json_request() && $query->is_search() && POST_TYPE === $query->get( 'post_type' );
+	return defined( 'REST_REQUEST' ) && REST_REQUEST && $query->is_search() && POST_TYPE === $query->get( 'post_type' );
 }
 
 /**
@@ -119,17 +114,18 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 
 		// Boost the primary locale over the `en_US` fallback.
 		$should_query[] = [
-			'term' => [
-				'meta.wpop_locale.value.raw' => $primary_locale,
-				'boost'                      => 2,
-			],
-		];
-
-		$should_query[] = [
-			'term' => [
-				'meta.wpop_locale.value.raw' => 'en_US',
-				'boost'                      => 0.00001,
-				// todo ^ isn't working. might not need the positive boost on $primary_locale once this works.
+			'boosting' => [
+				'positive' => [
+					'term' => [
+						'meta.wpop_locale.value.raw' => $primary_locale,
+					],
+				],
+				'negative' => [
+					'term' => [
+						'meta.wpop_locale.value.raw' => 'en_US',
+					],
+				],
+				'negative_boost' => 0.001,
 			],
 		];
 	}

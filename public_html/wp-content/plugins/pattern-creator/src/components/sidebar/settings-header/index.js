@@ -10,7 +10,6 @@ import { store as interfaceStore } from '@wordpress/interface';
  * Internal dependencies
  */
 import { STORE_NAME } from '../../../store/constants';
-
 import { SIDEBAR_BLOCK, SIDEBAR_PATTERN } from '../constants';
 
 const SettingsHeader = ( { sidebarName } ) => {
@@ -40,11 +39,11 @@ const SettingsHeader = ( { sidebarName } ) => {
 					onClick={ openPatternSettings }
 					className={ `pattern-sidebar__panel-tab ${ patternActiveClass }` }
 					aria-label={ patternAriaLabel }
-					// translators: Data label for the Template Settings Sidebar tab.
+					// translators: Data label for the Pattern Settings Sidebar tab.
 					data-label={ __( 'Pattern', 'wporg-patterns' ) }
 				>
 					{
-						// translators: Text label for the Template Settings Sidebar tab.
+						// translators: Text label for the Pattern Settings Sidebar tab.
 						__( 'Pattern', 'wporg-patterns' )
 					}
 				</Button>

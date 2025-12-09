@@ -12,9 +12,10 @@ import {
 	BlockTools,
 	__unstableEditorStyles as EditorStyles,
 	__unstableIframe as Iframe,
+	privateApis as blockEditorPrivateApis,
 	__unstableUseMouseMoveTypingReset as useMouseMoveTypingReset,
 	__experimentalUseResizeCanvas as useResizeCanvas,
-	useSetting,
+	useSettings,
 	__unstableUseTypingObserver as useTypingObserver,
 } from '@wordpress/block-editor';
 /* eslint-enable @wordpress/no-unsafe-wp-apis */
@@ -26,6 +27,9 @@ import { useMergeRefs } from '@wordpress/compose';
  */
 import { POST_TYPE, store as patternStore } from '../../store';
 import { SidebarInspectorFill } from '../sidebar';
+import { unlock } from '../../lock-unlock';
+
+const { LayoutStyle } = unlock( blockEditorPrivateApis );
 
 export default function BlockEditor( { setIsInserterOpen } ) {
 	const { settings, deviceType } = useSelect(
@@ -38,7 +42,7 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 		},
 		[ setIsInserterOpen ]
 	);
-	const layout = useSetting( 'layout' );
+	const [ layout ] = useSettings( 'layout' );
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor( 'postType', POST_TYPE );
 	const resizedCanvasStyles = useResizeCanvas( deviceType, true );
 	const ref = useMouseMoveTypingReset();
@@ -63,15 +67,19 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 				</div>
 				<Iframe
 					style={ resizedCanvasStyles }
-					assets={ settings.__unstableResolvedAssets }
 					head={ <EditorStyles styles={ settings.styles } /> }
 					ref={ ref }
 					contentRef={ mergedRefs }
 					name="editor-canvas"
 				>
+					<LayoutStyle
+						selector=".pattern-block-editor__block-list.is-root-container"
+						layout={ { ...layout, type: 'constrained' } }
+						layoutDefinitions={ layout?.definitions }
+					/>
 					<BlockList
 						className="pattern-block-editor__block-list wp-site-blocks"
-						__experimentalLayout={ layout }
+						__experimentalLayout={ { ...layout, type: 'constrained' } }
 					/>
 				</Iframe>
 			</BlockTools>

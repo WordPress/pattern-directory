@@ -15,6 +15,7 @@ add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
 add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'init', __NAMESPACE__ . '\register_post_statuses' );
 add_action( 'transition_post_status', __NAMESPACE__ . '\status_transitions', 10, 3 );
+add_action( 'post_updated', __NAMESPACE__ . '\update_contains_block_types_meta' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
 add_filter( 'allowed_block_types_all', __NAMESPACE__ . '\remove_disallowed_blocks', 10, 2 );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
@@ -23,9 +24,9 @@ add_filter( 'rest_' . POST_TYPE . '_query', __NAMESPACE__ . '\filter_patterns_re
 add_filter( 'user_has_cap', __NAMESPACE__ . '\set_pattern_caps' );
 add_filter( 'posts_orderby', __NAMESPACE__ . '\filter_orderby_locale', 10, 2 );
 add_action( 'init', __NAMESPACE__ . '\add_preview_endpoint' );
-add_action( 'setup_theme', __NAMESPACE__ . '\setup_preview_theme' );
-add_action( 'template_redirect', __NAMESPACE__ . '\load_pattern_preview' );
-
+add_action( 'setup_theme', __NAMESPACE__ . '\setup_preview_theme', 1 );
+add_action( 'template_include', __NAMESPACE__ . '\load_pattern_preview', 100 );
+add_filter( 'jetpack_sitemap_post_types', __NAMESPACE__ . '\jetpack_sitemap_post_types' );
 
 /**
  * Registers post types and associated taxonomies, meta data, etc.
@@ -82,6 +83,7 @@ function register_post_type_data() {
 			'rewrite'           => array(
 				'slug' => 'categories',
 			),
+			'query_var' => 'pattern-categories',
 			'capabilities' => array(
 				'assign_terms' => 'edit_patterns',
 				'edit_terms'   => 'edit_patterns',
@@ -176,7 +178,7 @@ function register_post_type_data() {
 			'type'              => 'number',
 			'description'       => 'The width of the pattern in the block inserter.',
 			'single'            => true,
-			'default'           => 800,
+			'default'           => 1200,
 			'sanitize_callback' => 'absint',
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
 			'show_in_rest'      => array(
@@ -249,6 +251,24 @@ function register_post_type_data() {
 			),
 		)
 	);
+
+	register_post_meta(
+		POST_TYPE,
+		'wpop_contains_block_types',
+		array(
+			'type'              => 'string',
+			'description'       => 'A list of block types used in this pattern',
+			'single'            => true,
+			'default'           => '',
+			'sanitize_callback' => 'sanitize_text_field',
+			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
+			'show_in_rest'      => array(
+				'schema' => array(
+					'type'     => 'string',
+				),
+			),
+		)
+	);
 }
 
 /**
@@ -273,8 +293,11 @@ function register_rest_fields() {
 		array(
 			'get_callback' => function() {
 				$slugs = wp_list_pluck( wp_get_object_terms( get_the_ID(), 'wporg-pattern-category' ), 'slug' );
+				$slugs = array_map( 'sanitize_title', $slugs );
+				$slugs = array_diff( $slugs, [ 'featured' ] );
+				$slugs = array_values( $slugs );
 
-				return array_map( 'sanitize_title', $slugs );
+				return $slugs;
 			},
 
 			'schema' => array(
@@ -317,8 +340,9 @@ function register_rest_fields() {
 		POST_TYPE,
 		'pattern_content',
 		array(
-			'get_callback' => function() {
-				return decode_pattern_content( get_the_content() );
+			'get_callback' => function( $response_data ) {
+				$pattern = get_post( $response_data['id'] );
+				return decode_pattern_content( $pattern->post_content );
 			},
 
 			'schema' => array(
@@ -491,6 +515,26 @@ function status_transitions( $new_status, $old_status, $post ) {
 }
 
 /**
+ * Given a post ID, parse out the block types and update the `wpop_contains_block_types` meta field.
+ *
+ * @param int $pattern_id Pattern ID.
+ */
+function update_contains_block_types_meta( $pattern_id ) {
+	$pattern    = get_post( $pattern_id );
+	$blocks     = parse_blocks( $pattern->post_content );
+	$all_blocks = _flatten_blocks( $blocks );
+
+	// Get the list of block names and convert it to a single string.
+	$block_names = wp_list_pluck( $all_blocks, 'blockName' );
+	$block_names = array_filter( $block_names ); // Filter out null values (extra line breaks).
+	$block_names = array_unique( $block_names );
+	sort( $block_names );
+	$used_blocks = implode( ',', $block_names );
+
+	update_post_meta( $pattern_id, 'wpop_contains_block_types', $used_blocks );
+}
+
+/**
  * Determines if the current user can edit the given pattern post.
  *
  * This is a callback for the `auth_{$object_type}_meta_{$meta_key}` filter, and it's used to authorize access to
@@ -520,10 +564,10 @@ function enqueue_editor_assets() {
 
 	$script_asset_path = "$dir/build/pattern-post-type.asset.php";
 	if ( ! file_exists( $script_asset_path ) ) {
-		throw new Error( 'You need to run `yarn start` or `yarn build` for the Pattern Directory.' );
+		throw new Error( 'You need to run `npm run start:directory` or `npm run build:directory` for the Pattern Directory.' );
 	}
 
-	$script_asset = require( $script_asset_path );
+	$script_asset = require $script_asset_path;
 	wp_enqueue_script(
 		'wporg-pattern-post-type',
 		plugins_url( 'build/pattern-post-type.js', dirname( __FILE__ ) ),
@@ -607,6 +651,7 @@ function disable_block_directory() {
  * Filter the collection parameters:
  * - set a new default for per_page.
  * - add a new parameter, `author_name`, for a user's nicename slug.
+ * - add a new parameter, `curation`, to filter between curated, community, and all patterns.
  *
  * @param array $query_params JSON Schema-formatted collection parameters.
  * @return array Filtered parameters.
@@ -626,6 +671,17 @@ function filter_patterns_collection_params( $query_params ) {
 		},
 	);
 
+	$query_params['curation'] = array(
+		'description' => __( 'Limit result to either curated core, community, or all patterns.', 'wporg-patterns' ),
+		'type'        => 'string',
+		'default'     => 'all',
+		'enum'        => array(
+			'all',
+			'core',
+			'community',
+		),
+	);
+
 	if ( isset( $query_params['orderby'] ) ) {
 		$query_params['orderby']['enum'][] = 'favorite_count';
 	}
@@ -633,6 +689,14 @@ function filter_patterns_collection_params( $query_params ) {
 	$query_params['wp-version'] = array(
 		'description' => __( 'The version of the requesting site, used to filter out newer patterns.', 'wporg-patterns' ),
 		'type'        => 'string',
+	);
+
+	$query_params['allowed_blocks'] = array(
+		'description' => __( 'Filter the request to only return patterns with blocks on this list.', 'wporg-patterns' ),
+		'type'        => 'array',
+		'items'       => array(
+			'type' => 'string',
+		),
 	);
 
 	return $query_params;
@@ -669,6 +733,28 @@ function filter_patterns_rest_query( $args, $request ) {
 		}
 	}
 
+	// If `curation` is passed and either `core` or `community`, we should
+	// filter the result. If `curation=all`, no filtering is needed.
+	if ( isset( $request['curation'] ) ) {
+		if ( 'core' === $request['curation'] ) {
+			// Patterns with the core keyword.
+			$args['tax_query']['core_keyword'] = array(
+				'taxonomy' => 'wporg-pattern-keyword',
+				'field'    => 'slug',
+				'terms'    => 'core',
+				'operator' => 'IN',
+			);
+		} else if ( 'community' === $request['curation'] ) {
+			// Patterns without the core keyword.
+			$args['tax_query']['core_keyword'] = array(
+				'taxonomy' => 'wporg-pattern-keyword',
+				'field'    => 'slug',
+				'terms'    => 'core',
+				'operator' => 'NOT IN',
+			);
+		}
+	}
+
 	$orderby = $request->get_param( 'orderby' );
 	if ( 'favorite_count' === $orderby ) {
 		$args['orderby'] = 'meta_value_num';
@@ -697,6 +783,16 @@ function filter_patterns_rest_query( $args, $request ) {
 				'key'     => 'wpop_wp_version',
 				'compare' => 'NOT EXISTS',
 			),
+		);
+	}
+
+	$allowed_blocks = $request->get_param( 'allowed_blocks' );
+	if ( $allowed_blocks ) {
+		// Only return a pattern if all contained blocks are in the allowed blocks list.
+		$args['meta_query']['allowed_blocks'] = array(
+			'key'     => 'wpop_contains_block_types',
+			'compare' => 'REGEXP',
+			'value'   => '^((' . implode( '|', $allowed_blocks ) . '),?)+$',
 		);
 	}
 
@@ -810,22 +906,18 @@ function setup_preview_theme() {
 
 		add_filter( 'template', function() {
 			if ( 'local' === wp_get_environment_type() ) {
-				return 'twentytwentyone';
+				return 'twentytwentythree';
 			} else {
-				return 'core/twentytwentyone';
+				return 'core/twentytwentythree';
 			}
 		} );
 
 		add_filter( 'stylesheet', function() {
 			if ( 'local' === wp_get_environment_type() ) {
-				return 'twentytwentyone';
+				return 'twentytwentythree';
 			} else {
-				return 'core/twentytwentyone';
+				return 'core/twentytwentythree';
 			}
-		} );
-
-		add_filter( 'theme_mod_background_color', function( $value ) {
-			return 'ffffff';
 		} );
 
 		add_filter( 'wp_enqueue_scripts', function() {
@@ -837,6 +929,7 @@ function setup_preview_theme() {
 		add_filter( 'render_block_core/image', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
 		add_filter( 'render_block_core/media-text', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
 		add_filter( 'render_block_core/video', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
+		add_filter( 'render_block_core/site-logo', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
 	}
 }
 
@@ -853,9 +946,9 @@ function inject_placeholder_svg( $block_content, $block ) {
 	$svg .= '<path vector-effect="non-scaling-stroke" d="M60 60 0 0" stroke="currentColor" stroke-width="1" stroke-opacity="0.25" />';
 	$svg .= '</svg>';
 
-	// Image block, find img without `src`, replace with svg.
+	// Image block, find img without `src` or with wmark.png (logo), replace with svg.
 	if ( preg_match( '/<img([^>]*)\/?>/', $block_content, $match ) ) {
-		if ( false === strpos( $match[1], 'src=' ) ) {
+		if ( ! str_contains( $match[1], 'src=' ) || str_contains( $match[1], 'wmark.png' ) ) {
 			$new_content = str_replace( '<svg ', '<svg ' . $match[1], $svg );
 			$block_content = str_replace( $match[0], $new_content, $block_content );
 			return $block_content;
@@ -882,17 +975,16 @@ function inject_placeholder_svg( $block_content, $block ) {
 }
 
 /**
- * If this is the `view` query, load the view template file.
+ * If this is the `view` query, use our version of the `template-canvas.php`.
  */
-function load_pattern_preview() {
+function load_pattern_preview( $template ) {
 	global $wp_query;
 
-	if ( ! isset( $wp_query->query_vars['view'] ) || ! is_singular() ) {
-		return;
+	if ( ! isset( $wp_query->query_vars['view'] ) ) {
+		return $template;
 	}
 
-	include dirname( __DIR__ ) . '/views/view.php';
-	exit;
+	return dirname( __DIR__ ) . '/views/view.php';
 }
 
 /**
@@ -906,7 +998,7 @@ add_action(
 );
 
 /**
- * Process post content, replacing broken encoding.
+ * Process post content, replacing broken encoding & removing refs.
  *
  * Some image URLs have &s, which are double-encoded and sanitized to become malformed,
  * for example, `https://img.rawpixel.com/s3fs-private/rawpixel_images/website_content/a010-markuss-0964.jpg?w=1200\u0026amp;h=1200\u0026amp;fit=clip\u0026amp;crop=default\u0026amp;dpr=1\u0026amp;q=75\u0026amp;vib=3\u0026amp;con=3\u0026amp;usm=15\u0026amp;cs=srgb\u0026amp;bg=F4F4F3\u0026amp;ixlib=js-2.2.1\u0026amp;s=7d494bd5db8acc2a34321c15ed18ace5`.
@@ -917,5 +1009,38 @@ add_action(
  */
 function decode_pattern_content( $content ) {
 	// Sometimes the initial `\` is missing, so look for both versions.
-	return str_replace( [ '\u0026amp;', 'u0026amp;' ], '&', $content );
+	$content = str_replace( [ '\u0026amp;', 'u0026amp;' ], '&', $content );
+	// Remove `ref` from all content.
+	$content = preg_replace( '/"ref":\d+,?/', '', $content );
+	return $content;
+}
+
+/**
+ * Given a post, return the unlisted reason (if one exists).
+ *
+ * @param int $post_id Post ID.
+ *
+ * @return string
+ */
+function get_pattern_unlisted_reason( $post_id ) {
+	$reasons = wp_get_object_terms( get_the_ID(), FLAG_REASON );
+	if ( count( $reasons ) > 0 ) {
+		$reason = array_shift( $reasons );
+		return $reason->description;
+	}
+
+	return '';
+}
+
+/**
+ * Allow the Patterns to be included in the Jetpack Sitemaps.
+ *
+ * @param array $post_types The post types to include.
+ *
+ * @return array
+ */
+function jetpack_sitemap_post_types( $post_types ) {
+	$post_types[] = POST_TYPE;
+
+	return $post_types;
 }

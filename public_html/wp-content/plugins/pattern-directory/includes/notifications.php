@@ -30,6 +30,11 @@ function trigger_notifications( $post_id, $post, $update, $post_before ) {
 		return;
 	}
 
+	// Skip notifications on translated patterns.
+	if ( 'en_US' !== get_post_meta( $post_id, 'wpop_locale', true ) ) {
+		return;
+	}
+
 	if ( ! $update || is_null( $post_before ) ) {
 		return;
 	}

@@ -1,0 +1,12 @@
+.wp-block-wporg-pattern-preview {
+	margin: 0;
+	position: relative;
+	width: 100%;
+	overflow: hidden;
+
+	iframe {
+		border: none;
+		max-width: none;
+		pointer-events: none;
+	}
+}

@@ -19,24 +19,16 @@
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
 	<exclude-pattern>*/build/*</exclude-pattern>
 
-	<!-- Exclude all themes except the pattern directory theme -->
-	<exclude-pattern>/wp-content/themes/(?!pattern-directory)</exclude-pattern>
-
-	<!-- Exclude all plugins except the pattern directory plugin -->
-	<exclude-pattern>/wp-content/plugins/(?!pattern-)</exclude-pattern>
-
-	<!-- Exclude all mu-plugin files except the ones we're changing -->
-    <exclude-pattern>/wp-content/mu-plugins</exclude-pattern>
-
-    <!-- Exclude alternate wp-content directories -->
-    <exclude-pattern>/wp-content_*</exclude-pattern>
-
 	<!-- Show sniff codes in all reports -->
 	<arg value="psn" />
 	<arg name="colors" />
 
-	<!-- Scan all (php) files in the current folder and subfolders -->
-	<file>.</file>
+	<!-- Scan theme & plugins -->
+	<file>./public_html/wp-content/themes/wporg-pattern-directory-2024/</file>
+	<file>./public_html/wp-content/plugins/pattern-creator/</file>
+	<file>./public_html/wp-content/plugins/pattern-directory/</file>
+	<file>./public_html/wp-content/plugins/pattern-translations/</file>
+
 	<arg name="extensions" value="php" />
 
 	<rule ref="WordPress-Core">

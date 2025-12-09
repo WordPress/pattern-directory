@@ -1,25 +1,32 @@
 {
-	"name": "wporg-pattern-directory",
+	"name": "wporg-pattern-directory-project",
 	"version": "0.0.0",
 	"description": "wordpress.org/pattern-directory website",
 	"author": "WordPress.org",
 	"license": "GPL-2.0-or-later",
 	"private": true,
 	"dependencies": {
-		"@wordpress/env": "5.5.0",
-		"@wordpress/scripts": "24.4.0",
-		"@wordpress/stylelint-config": "21.3.0"
+		"@wordpress/env": "10.14.0",
+		"@wordpress/scripts": "30.7.0",
+		"@wordpress/stylelint-config": "23.6.0"
 	},
 	"scripts": {
+		"build:creator": "npm run build --workspace=wporg-pattern-creator",
+		"build:directory": "npm run build --workspace=wporg-pattern-directory",
+		"build:theme": "npm run build --workspace=wporg-pattern-directory-2024-theme",
+		"start:creator": "npm run start --workspace=wporg-pattern-creator",
+		"start:directory": "npm run start --workspace=wporg-pattern-directory",
+		"start:theme": "npm run start --workspace=wporg-pattern-directory-2024-theme",
+		"setup:tools": "echo \"Not used.\"",
 		"create": "./bin/index.sh",
 		"wp-env": "wp-env",
 		"lint:php": "composer run lint",
 		"format:php": "composer run format",
-		"test:php": "wp-env run phpunit 'WP_MULTISITE=1 phpunit -c /var/www/html/wp-content/tests/phpunit/phpunit.xml --verbose'"
+		"test:php": "wp-env run tests-cli --env-cwd=/var/www/html/ ./vendor/bin/phpunit -c wp-content/tests/phpunit/phpunit.xml"
 	},
 	"workspaces": [
 		"public_html/wp-content/plugins/pattern-creator",
 		"public_html/wp-content/plugins/pattern-directory",
-		"public_html/wp-content/themes/pattern-directory"
+		"public_html/wp-content/themes/wporg-pattern-directory-2024"
 	]
 }

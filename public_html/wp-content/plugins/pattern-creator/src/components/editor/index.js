@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { AsyncModeProvider, useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { BlockBreadcrumb } from '@wordpress/block-editor';
 import { useCallback, useEffect, useState } from '@wordpress/element';
 import {
@@ -84,11 +84,7 @@ function Editor( { onError, postId } ) {
 			return <InserterSidebar />;
 		}
 		if ( isListViewOpen ) {
-			return (
-				<AsyncModeProvider value="true">
-					<ListViewSidebar />
-				</AsyncModeProvider>
-			);
+			return <ListViewSidebar />;
 		}
 		return null;
 	};

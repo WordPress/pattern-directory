@@ -168,6 +168,9 @@ module.exports = {
 		 * connection, and will default back to vanilla prettier configuration.
 		 */
 		'prettier/prettier': [ 'error', prettierConfig ],
+
+		// Remove deprecated rule.
+		'jsdoc/newline-after-description': 'off',
 	},
 	overrides: [
 		{

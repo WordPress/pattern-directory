@@ -1,0 +1,188 @@
+/*
+ * Theme Name: WordPress.org Pattern Directory 2024
+ * Theme URI: https://github.com/WordPress/pattern-directory
+ * Author: WordPress.org
+ * Author URI: https://wordpress.org/
+ * Description:
+ * Version: 1.0.0
+ * License: GNU General Public License v2 or later
+ * Text Domain: wporg
+ * Template: wporg-parent-2021
+ */
+
+/*
+ * Note: only add styles here in cases where you can't achieve the style with
+ * templates or theme.json settings.
+ */
+
+/* Fix image alignment */
+.wp-block-avatar__image {
+	vertical-align: middle;
+}
+
+.wp-block-query-pagination.wp-block-query-pagination {
+	margin-bottom: 0;
+}
+
+/*
+ * If two spacers are immediate siblings, something isn't rendering
+ * (like pagination, etc). So hide the subsequent spacers.
+ */
+.wp-block-query .wp-block-spacer + .wp-block-spacer {
+	display: none;
+}
+
+.wp-block-query-no-results {
+	margin-top: 0;
+}
+
+/* Both blocks are in the local header, but only one should be shown at any given time. */
+body.blog .wp-block-wporg-local-navigation-bar .wp-block-post-title,
+body.archive .wp-block-wporg-local-navigation-bar .wp-block-post-title,
+body.search .wp-block-wporg-local-navigation-bar .wp-block-post-title {
+	display: none;
+}
+
+body.single .wp-block-wporg-local-navigation-bar .wp-block-query-title,
+body.page .wp-block-wporg-local-navigation-bar .wp-block-query-title {
+	display: none;
+}
+
+/* Hide the grid `h1` on the homepage, as the header has an h1. */
+body.blog:not(.paged) .wp-block-query .wp-block-query-title {
+	display: none;
+}
+
+/*
+ * A linked post title should be blueberry (needed to override parent setting,
+ * where post title is the same for linked or not).
+ */
+.wp-block-post-title a:where(:not(.wp-element-button)) {
+	color: var(--wp--preset--color--blueberry-1);
+}
+
+/* Add default focus style. */
+:where(main) a:where(:not(.wp-element-button)):focus,
+:where(main) button:where(:not([class*="wp-block-button"])):focus {
+	outline: none;
+	border-radius: 2px;
+	box-shadow: 0 0 0 1.5px var(--wp--custom--link--color--text);
+}
+
+/* Remove the underline from author link. */
+.wp-block-post-author-name a {
+	text-decoration: none;
+}
+
+.wp-block-post-author-name a:hover {
+	text-decoration: underline;
+}
+
+/* Style pattern tags. */
+.wp-block-post-terms a {
+	text-decoration: none;
+}
+
+.wp-block-post-terms a:hover,
+.wp-block-post-terms a:focus {
+	text-decoration: underline;
+}
+
+/* Styles for the `is-edit-link` helper class. */
+.wp-block-button.is-edit-link a {
+	display: flex;
+	align-items: center;
+	gap: 0.25em;
+
+	/* Adjust the size of the button to make it more inline with the title. */
+	--wp--custom--button--spacing--padding--top: 3px !important;
+	--wp--custom--button--spacing--padding--bottom: 3px !important;
+	--wp--custom--button--spacing--padding--left: 6px !important;
+	--wp--custom--button--spacing--padding--right: 6px !important;
+}
+
+.wp-block-button.is-edit-link a:before {
+	content: '';
+	display: inline-block;
+	height: 1.5em;
+	width: 1.5em;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='25' fill='none' viewBox='0 0 24 25'%3E%3Cpath fill='%233858E9' d='m19 7.478-3-3-8.5 8.5-1 4 4-1 8.5-8.5ZM12 18.978H5v1.5h7v-1.5Z'/%3E%3C/svg%3E");
+	background-size: contain;
+}
+
+.wp-block-button.is-edit-link a:active:before {
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='25' fill='none' viewBox='0 0 24 25'%3E%3Cpath fill='%23ffffff' d='m19 7.478-3-3-8.5 8.5-1 4 4-1 8.5-8.5ZM12 18.978H5v1.5h7v-1.5Z'/%3E%3C/svg%3E");
+}
+
+/* Hide the draft button if we're already on a draft. */
+body.single-wporg-pattern.is-status-draft .is-draft-button {
+	display: none;
+}
+
+/* Style the pattern grid. */
+.wp-block-query .wp-block-post-title {
+	flex-shrink: 1;
+	overflow: hidden;
+	padding: 1.5px; /* Add space for the focus style. */
+}
+
+.wp-block-query .wp-block-button,
+.wp-block-query .wp-block-wporg-favorite-button {
+	flex-shrink: 0;
+}
+
+.wp-block-query .wp-block-post-title a {
+	max-width: 100%;
+	overflow-x: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	vertical-align: middle;
+}
+
+/* Style "My patterns" grid. */
+.wporg-my-patterns .wporg-pattern-thumbnail__container {
+	aspect-ratio: 4 / 3;
+	display: flex;
+	align-items: center;
+	overflow: hidden;
+}
+
+.wporg-my-patterns .wp-block-wporg-pattern-preview {
+	max-height: 100%;
+}
+
+/* Add background to spacers. These are custom classes, not attached as block styles. */
+.wp-block-spacer.has-dots-background {
+	background-position: top center;
+	background-repeat: repeat-x;
+	background-size: auto;
+	background-image: url(images/dots-banner.svg);
+}
+
+/* Drop to a two column layout for grids (except the "more by"). */
+@media (max-width: 1280px) {
+	:where(body:not(.single-wporg-pattern)) .wp-block-post-template.is-layout-grid.columns-3 {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+/* Prevent pattern cells from breaking out of page on small screens. */
+@media (max-width: 600px) {
+	/* This selector comes from gutenberg. */
+	.wp-block-post-template-is-layout-grid.wp-block-post-template-is-layout-grid.wp-block-post-template-is-layout-grid.wp-block-post-template-is-layout-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* Pages using this have the 1760 wide width. */
+.wporg-patterns-nested-alignfull {
+	width: 100vw;
+	margin-inline-start: calc(1760px / 2 - 50vw);
+}
+
+/* 1920 = 1760 + 2 * edge-space. */
+@media (max-width: 1920px) {
+	.wporg-patterns-nested-alignfull {
+		margin-inline-start: calc(var(--wp--preset--spacing--edge-space) * -1);
+	}
+}

@@ -5,10 +5,14 @@ on:
     pull_request:
         paths:
             - public_html/**
+            - .github/workflows/unit-tests.yml
     push:
         branches: [trunk]
         paths:
             - public_html/**
+            - .github/workflows/unit-tests.yml
+    # Enable manually running action if necessary.
+    workflow_dispatch:
 
 jobs:
     unit-php:
@@ -20,37 +24,21 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
 
-            - name: Set PHP version
-              uses: shivammathur/setup-php@e04e1d97f0c0481c6e1ba40f8a538454fe5d7709 # v2.21.2
+            - name: Setup
+              uses: WordPress/wporg-repo-tools/.github/actions/setup@trunk
               with:
-                  php-version: 7.4
-                  coverage: none
-                  tools: composer:v2
-
-            - name: Install PHP dependencies
-              run: |
-                  composer install
-
-            - name: Install NodeJS
-              uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # v3.5.1
-              with:
-                  node-version-file: '.nvmrc'
-                  cache: yarn
-
-            - name: Install JS dependencies
-              run: |
-                  yarn
-
-            - name: Build
-              run: yarn workspaces run build
+                packageManager: "npm"
+                token: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Install WordPress
               run: |
                   chmod -R 767 ./ # TODO: Possibly integrate in wp-env
-                  yarn wp-env start
+                  npm run wp-env start --update
+                  npm run wp-env run tests-cli wp core version
+                  npm run wp-env run tests-cli wp plugin list
 
             - name: Running multisite unit tests
-              run: yarn test:php
+              run: npm run test:php
               if: ${{ success() || failure() }}
 
     unit-js:
@@ -62,32 +50,11 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
 
-            - name: Install NodeJS
-              uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # v3.5.1
+            - name: Setup
+              uses: WordPress/wporg-repo-tools/.github/actions/setup@trunk
               with:
-                  node-version-file: '.nvmrc'
-                  cache: yarn
-
-            - name: Set PHP version
-              uses: shivammathur/setup-php@e04e1d97f0c0481c6e1ba40f8a538454fe5d7709 # v2.21.2
-              with:
-                  php-version: 7.4
-                  coverage: none
-                  tools: composer:v2
-
-            - name: Install PHP dependencies
-              run: |
-                  composer install
-
-            - name: Install JS dependencies
-              run: |
-                  yarn
-
-            - name: Build
-              run: yarn workspaces run build
-
-            - name: Run unit tests on theme data store
-              run: yarn workspace wporg-pattern-directory-theme test:unit
+                packageManager: "npm"
+                token: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Run unit tests on the pattern creator
-              run: yarn workspace wporg-pattern-creator test:unit
+              run: npm run test:unit --workspace=wporg-pattern-creator 

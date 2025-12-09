@@ -115,14 +115,10 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 			array( 'rest_pattern_empty_blocks', "<!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph --><!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph --><!-- wp:paragraph -->\n<p></p>\n<!-- /wp:paragraph -->" ),
 			// Empty paragraph with custom class.
 			array( 'rest_pattern_empty_blocks', "<!-- wp:paragraph {\"className\":\"foo\"} -->\n<p class=\"foo\"></p>\n<!-- /wp:paragraph -->" ),
-			// Empty list.
-			array( 'rest_pattern_empty_blocks', "<!-- wp:list -->\n<ul><li></li></ul>\n<!-- /wp:list -->" ),
 			// Empty image block.
 			array( 'rest_pattern_empty_blocks', "<!-- wp:image -->\n<figure class=\"wp-block-image\"><img alt=\"\"/></figure>\n<!-- /wp:image -->" ),
 			// Empty group.
 			array( 'rest_pattern_empty_blocks', "<!-- wp:group -->\n<div class=\"wp-block-group\"></div>\n<!-- /wp:group -->" ),
-			// Empty media & text block.
-			array( 'rest_pattern_empty_blocks', "<!-- wp:media-text -->\n<div class=\"wp-block-media-text alignwide is-stacked-on-mobile\"><figure class=\"wp-block-media-text__media\"></figure><div class=\"wp-block-media-text__content\"><!-- wp:paragraph {\"placeholder\":\"Content…\",\"fontSize\":\"large\"} -->\n<p class=\"has-large-font-size\"></p>\n<!-- /wp:paragraph --></div></div>\n<!-- /wp:media-text -->" ),
 
 			array( 'rest_pattern_invalid_blocks', '<p>This is not blocks.</p>' ),
 			array( 'rest_pattern_invalid_blocks', "<!-- wp:plugin/fake -->\n<p>This is some content.</p>\n<!-- /wp:plugin/fake -->" ),

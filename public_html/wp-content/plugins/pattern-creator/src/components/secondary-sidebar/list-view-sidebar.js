@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 /* eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK. */
-import { __experimentalListView as ListView, store as blockEditorStore } from '@wordpress/block-editor';
+import { __experimentalListView as ListView } from '@wordpress/block-editor';
 import { Button } from '@wordpress/components';
 import { useFocusOnMount, useFocusReturn, useInstanceId, useMergeRefs } from '@wordpress/compose';
 import { useDispatch } from '@wordpress/data';
@@ -15,17 +15,14 @@ import { ESCAPE } from '@wordpress/keycodes';
  */
 import { store as patternStore } from '../../store';
 
+// Forked from https://raw.githubusercontent.com/WordPress/gutenberg/1b9157577fce4133e9be89c1d89cdd02918f6ba3/packages/edit-site/src/components/secondary-sidebar/list-view-sidebar.js
+
 export default function ListViewSidebar() {
 	const { setIsListViewOpened } = useDispatch( patternStore );
 
-	const { clearSelectedBlock, selectBlock } = useDispatch( blockEditorStore );
-	async function selectEditorBlock( clientId ) {
-		await clearSelectedBlock();
-		selectBlock( clientId, -1 );
-	}
-
 	const focusOnMountRef = useFocusOnMount( 'firstElement' );
-	const focusReturnRef = useFocusReturn();
+	const headerFocusReturnRef = useFocusReturn();
+	const contentFocusReturnRef = useFocusReturn();
 	function closeOnEscape( event ) {
 		if ( event.keyCode === ESCAPE && ! event.defaultPrevented ) {
 			setIsListViewOpened( false );
@@ -38,23 +35,19 @@ export default function ListViewSidebar() {
 	return (
 		// eslint-disable-next-line jsx-a11y/no-static-element-interactions
 		<div aria-labelledby={ labelId } className="pattern__list-view-panel" onKeyDown={ closeOnEscape }>
-			<div className="pattern__list-view-panel-header">
-				<strong id={ labelId }>{ __( 'List view', 'wporg-patterns' ) }</strong>
+			<div className="pattern__list-view-panel-header" ref={ headerFocusReturnRef }>
+				<strong id={ labelId }>{ __( 'List View', 'wporg-patterns' ) }</strong>
 				<Button
 					icon={ closeSmall }
-					label={ __( 'Close list view sidebar', 'wporg-patterns' ) }
+					label={ __( 'Close List View Sidebar', 'wporg-patterns' ) }
 					onClick={ () => setIsListViewOpened( false ) }
 				/>
 			</div>
 			<div
 				className="pattern__list-view-panel-content"
-				ref={ useMergeRefs( [ focusReturnRef, focusOnMountRef ] ) }
+				ref={ useMergeRefs( [ contentFocusReturnRef, focusOnMountRef ] ) }
 			>
-				<ListView
-					onSelect={ selectEditorBlock }
-					showNestedBlocks
-					__experimentalPersistentListViewFeatures
-				/>
+				<ListView />
 			</div>
 		</div>
 	);

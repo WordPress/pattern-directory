@@ -1,0 +1,89 @@
+.wp-block-wporg-pattern-thumbnail {
+	position: relative;
+	margin: 0;
+	background-color: var(--wp--custom--wporg-pattern-thumbnail--color--background);
+	border-radius: 4px;
+
+	&:where(.is-linked-image) a {
+		display: block;
+		padding: var(--wp--preset--spacing--40);
+	}
+
+	&:where(.is-linked-image):hover {
+		--wp--custom--wporg-pattern-thumbnail--color--background: rgba(0, 0, 0, 0.1);
+	}
+
+	&:where(.is-linked-image):focus-within {
+		outline: 1.5px solid var(--wp--custom--link--color--text);
+		outline-offset: -1.5px;
+	}
+
+	&:where(.is-linked-image) a:focus {
+		box-shadow: none;
+	}
+
+	.wporg-pattern-thumbnail__container {
+		aspect-ratio: 4 / 3;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
+	}
+
+	img {
+		display: none;
+		margin: auto;
+		max-width: 100%;
+		max-height: 100%;
+		flex-basis: 0;
+	}
+
+	&.has-loaded:not(.has-error) {
+		img {
+			display: block;
+		}
+	}
+
+	.wporg-pattern-thumbnail__loader {
+		&::after {
+			content: "";
+			display: inline-block;
+			box-sizing: border-box;
+			height: 16px;
+			width: 16px;
+			border: 1.5px solid;
+			border-color:
+				var(--wp--custom--wporg-pattern-thumbnail--color--background)
+				var(--wp--custom--wporg-pattern-thumbnail--color--background)
+				var(--wp--custom--link--color--text);
+			border-radius: 50%;
+			animation: rotate-360 1.4s linear infinite;
+		}
+	}
+
+	.wporg-pattern-thumbnail__error {
+		flex-direction: column;
+
+		&::before {
+			content: "";
+			display: inline-block;
+			box-sizing: border-box;
+			height: 24px;
+			width: 24px;
+			// stylelint-disable-next-line function-url-quotes
+			background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M5 3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5l-.121-.121 1.379-1.379H5a.5.5 0 0 1-.5-.5v-2.436l4.096-2.987 2.996 1.941a.75.75 0 0 0 .93-.091L16 12.046l1.375 1.337 1.06-1.06-1.912-1.86a.75.75 0 0 0-1.046 0l-3.571 3.471-2.927-1.897a.75.75 0 0 0-.85.024L4.5 14.707V5a.5.5 0 0 1 .5-.5h14a.5.5 0 0 1 .5.5v6.258l1.5-1.5V5a2 2 0 0 0-2-2H5Zm16 11-1.5 1.5V19a.5.5 0 0 1-.5.5h-3.5L14 21h5a2 2 0 0 0 2-2v-5Z' fill='%231E1E1E'/%3E%3C/svg%3E");
+			background-position: center;
+			background-repeat: no-repeat;
+		}
+	}
+}
+
+@keyframes rotate-360 {
+	0% {
+		transform: rotate(0deg);
+	}
+
+	100% {
+		transform: rotate(360deg);
+	}
+}

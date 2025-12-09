@@ -5,14 +5,9 @@ import { __, _x, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 
 /**
- * Theme dependencies
+ * Internal dependencies
  */
-// eslint-disable-next-line import/no-unresolved -- imported via alias in webpack.config.js.
-import getPaginationList from 'themes/pattern-directory/utils/get-pagination-list';
-
-/*
- * Note: forked from theme, `pattern-directory/src/components/pattern-grid/pagination.js`
- */
+import { getPaginationList } from './utils';
 
 export default function OpenversePagination( { currentPage = 1, onNavigation, totalPages } ) {
 	if ( ! totalPages || totalPages <= 1 ) {

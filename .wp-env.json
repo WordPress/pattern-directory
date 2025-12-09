@@ -17,6 +17,9 @@
 	},
 	"env": {
 		"tests": {
+			"config": {
+				"WP_ENVIRONMENT_TYPE": false
+			},
 			"mappings": {
 				".htaccess": "./.wp-env/.htaccess",
 				"wp-content": "./public_html/wp-content",

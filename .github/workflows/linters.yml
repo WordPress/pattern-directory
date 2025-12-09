@@ -16,32 +16,11 @@ jobs:
             - name: Checkout repository
               uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
 
-            - name: Install NodeJS
-              uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # v3.5.1
+            - name: Setup
+              uses: WordPress/wporg-repo-tools/.github/actions/setup@trunk
               with:
-                  node-version-file: '.nvmrc'
-                  cache: yarn
+                packageManager: "npm"
+                token: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Install JS dependencies
-              run: |
-                  yarn
-
-            - name: Set PHP version
-              uses: shivammathur/setup-php@e04e1d97f0c0481c6e1ba40f8a538454fe5d7709 # v2.21.2
-              with:
-                  php-version: 7.4
-                  coverage: none
-                  tools: composer:v2
-
-            - name: Install PHP dependencies
-              run: |
-                  composer install
-
-            - name: Lint JavaScript and Styles
-              run: |
-                  yarn workspaces run lint:js
-                  yarn workspaces run lint:css
-
-            - name: Lint PHP
-              run: |
-                  composer run lint
+            - name: Lint
+              uses: WordPress/wporg-repo-tools/.github/actions/lint@trunk
