@@ -7,7 +7,7 @@
 		"WP_ENVIRONMENT_TYPE": "local"
 	},
 	"core": "WordPress/WordPress#master",
-	"phpVersion": "8.0",
+	"phpVersion": "8.1",
 	"plugins": [],
 	"mappings": {
 		".htaccess": "./.wp-env/.htaccess",
