@@ -4,6 +4,7 @@
 import { dispatch } from '@wordpress/data';
 import { registerCoreBlocks } from '@wordpress/block-library';
 import { render, unmountComponentAtNode } from '@wordpress/element';
+import { removeFilter } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -45,3 +46,8 @@ export function initialize( id, settings ) {
 	registerCoreBlocks();
 	reinitializeEditor( target, settings );
 }
+
+// The hook for the pattern editor somehow triggers a critical error.
+// The pattern editor cannot use the pattern directory in the first place,
+// so disables the filter itself.
+removeFilter( 'editor.BlockEdit', 'core/editor/with-pattern-override-controls' );
