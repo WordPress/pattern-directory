@@ -101,6 +101,12 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
 	$attributes = $block_instance->attributes;
 	$list_items_markup = '';
 
+	if ( isset( $attributes['displayExcerpt'] ) ) {
+		$display_content = $attributes['displayExcerpt'] ? 'excerpt' : 'none';
+	} else {
+		$display_content = isset( $attributes['displayContent'] ) ? $attributes['displayContent'] : 'excerpt';
+	}
+
 	/* Note: This is not translated (for now) because the post content is also not translated. */
 	$comments = array(
 		[
@@ -151,7 +157,9 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
 			);
 		}
 		$list_items_markup .= '</footer>';
-		if ( $attributes['displayExcerpt'] ) {
+		if ( 'full' === $display_content ) {
+			$list_items_markup .= '<div class="wp-block-latest-comments__comment-excerpt">' . wpautop( $comment['content'] ) . '</div>';
+		} elseif ( 'excerpt' === $display_content ) {
 			$list_items_markup .= '<div class="wp-block-latest-comments__comment-excerpt">' . $comment['content'] . '</div>';
 		}
 		$list_items_markup .= '</article></li>';
@@ -164,7 +172,7 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
 	if ( $attributes['displayDate'] ) {
 		$classnames[] = 'has-dates';
 	}
-	if ( $attributes['displayExcerpt'] ) {
+	if ( 'none' !== $display_content ) {
 		$classnames[] = 'has-excerpts';
 	}
 
