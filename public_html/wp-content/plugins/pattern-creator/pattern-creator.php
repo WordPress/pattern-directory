@@ -201,6 +201,33 @@ function inject_editor_template( $template ) {
 add_filter( 'template_include', __NAMESPACE__ . '\inject_editor_template' );
 
 /**
+ * Enqueue block frontend styles for the editor canvas.
+ *
+ * _wp_get_iframed_editor_assets() fires enqueue_block_assets with an isolated WP_Styles
+ * instance, then captures its output into __unstableResolvedAssets. It enqueues
+ * editor_style_handles but not style_handles, so block frontend styles (style.min.css)
+ * are absent from the canvas — breaking blocks like Cover that need them for layout/background.
+ *
+ * Mirroring the fix proposed for WordPress core (_wp_get_iframed_editor_assets should loop
+ * over style_handles too), we enqueue them here so they are captured in the same window.
+ */
+function enqueue_block_frontend_styles_for_canvas() {
+	if ( ! should_load_creator() ) {
+		return;
+	}
+
+	$block_registry = \WP_Block_Type_Registry::get_instance();
+	foreach ( $block_registry->get_all_registered() as $block_type ) {
+		if ( isset( $block_type->style_handles ) && is_array( $block_type->style_handles ) ) {
+			foreach ( $block_type->style_handles as $style_handle ) {
+				wp_enqueue_style( $style_handle );
+			}
+		}
+	}
+}
+add_action( 'enqueue_block_assets', __NAMESPACE__ . '\enqueue_block_frontend_styles_for_canvas' );
+
+/**
  * Add a rewrite rule to handle editing a pattern.
  */
 function rewrite_for_pattern_editing() {

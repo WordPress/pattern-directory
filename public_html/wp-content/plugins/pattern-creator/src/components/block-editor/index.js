@@ -67,11 +67,11 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 				</div>
 				<Iframe
 					style={ resizedCanvasStyles }
-					head={ <EditorStyles styles={ settings.styles } /> }
 					ref={ ref }
 					contentRef={ mergedRefs }
 					name="editor-canvas"
 				>
+					<EditorStyles styles={ settings.styles } />
 					<LayoutStyle
 						selector=".pattern-block-editor__block-list.is-root-container"
 						layout={ { ...layout, type: 'constrained' } }
