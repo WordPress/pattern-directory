@@ -65,13 +65,8 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 				<div className="pattern-visual-editor__post-title-wrapper">
 					<PostTitle />
 				</div>
-				<Iframe
-					style={ resizedCanvasStyles }
-					head={ <EditorStyles styles={ settings.styles } /> }
-					ref={ ref }
-					contentRef={ mergedRefs }
-					name="editor-canvas"
-				>
+				<Iframe style={ resizedCanvasStyles } ref={ ref } contentRef={ mergedRefs } name="editor-canvas">
+					<EditorStyles styles={ settings.styles } />
 					<LayoutStyle
 						selector=".pattern-block-editor__block-list.is-root-container"
 						layout={ { ...layout, type: 'constrained' } }
