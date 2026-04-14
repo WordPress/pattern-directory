@@ -318,6 +318,14 @@ function allow_reading_global_styles( $caps, $cap, $user_id, $args ) {
 	) {
 		return $caps;
 	}
+	$request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( $_SERVER['REQUEST_METHOD'] ) : '';
+	$request_uri    = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '';
+	if (
+		( 'GET' !== $request_method && 'HEAD' !== $request_method ) ||
+		false === strpos( $request_uri, '/wp/v2/global-styles' )
+	) {
+		return $caps;
+	}
 	$post = get_post( (int) $args[0] );
 	if ( $post && 'wp_global_styles' === $post->post_type ) {
 		return array( 'read' ); // all logged-in users have 'read'
