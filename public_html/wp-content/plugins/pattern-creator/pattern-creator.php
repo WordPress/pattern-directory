@@ -298,9 +298,10 @@ add_filter( 'block_editor_settings_all', __NAMESPACE__ . '\fix_editor_style_impo
  * capability — which regular users don't have — returning 403. Browsers can
  * surface this as a CORS error in the console.
  *
- * Global styles are CSS configuration that is already compiled and served
- * publicly through the site's front-end <style> tag, so granting authenticated
- * users REST read access to these posts is safe.
+ * The published global styles post is already compiled and served publicly
+ * through the site's front-end <style> tag, so granting authenticated users
+ * REST read access to published wp_global_styles posts is safe. Draft and
+ * private revisions are excluded.
  *
  * @param string[] $caps    Required primitive capabilities.
  * @param string   $cap     Capability being checked.
@@ -330,7 +331,7 @@ function allow_reading_global_styles( $caps, $cap, $user_id, $args ) {
 		return $caps;
 	}
 	$post = get_post( (int) $args[0] );
-	if ( $post && 'wp_global_styles' === $post->post_type ) {
+	if ( $post && 'wp_global_styles' === $post->post_type && 'publish' === $post->post_status ) {
 		return array( 'read' ); // all logged-in users have 'read'
 	}
 	return $caps;
