@@ -274,7 +274,10 @@ function fix_editor_style_import_paths( $settings ) {
 			continue;
 		}
 		array_splice( $parts, -2 ); // drop sibling-dir/filename, keep parent
-		$base                                    = implode( '/', $parts ) . '/';
+		$base = implode( '/', $parts ) . '/';
+		if ( 0 !== strpos( $m[1], $base ) ) {
+			continue; // inferred base isn't a prefix of the matched url() — depth assumption wrong
+		}
 		$settings['styles'][ $key ]['css']       = preg_replace_callback(
 			'/@import\s+["\']\.\/([^"\']+)["\']/',
 			fn( $x ) => '@import "' . $base . $x[1] . '"',
