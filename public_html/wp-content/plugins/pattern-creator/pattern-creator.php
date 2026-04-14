@@ -270,7 +270,7 @@ function fix_editor_style_import_paths( $settings ) {
 			continue;
 		}
 		$parts = explode( '/', preg_replace( '/[?#].*$/', '', $m[1] ) );
-		if ( count( $parts ) < 5 ) { // scheme + '' + host + ≥1 path segment + sibling + file
+		if ( count( $parts ) < 6 ) { // scheme + '' + host + ≥1 path segment + sibling + file
 			continue;
 		}
 		array_splice( $parts, -2 ); // drop sibling-dir/filename, keep parent
