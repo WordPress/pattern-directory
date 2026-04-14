@@ -248,6 +248,9 @@ add_action( 'enqueue_block_assets', __NAMESPACE__ . '\enqueue_block_frontend_sty
  * @return array
  */
 function fix_editor_style_import_paths( $settings ) {
+	if ( ! should_load_creator() ) {
+		return $settings;
+	}
 	if ( empty( $settings['styles'] ) ) {
 		return $settings;
 	}
