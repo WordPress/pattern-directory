@@ -228,6 +228,117 @@ function enqueue_block_frontend_styles_for_canvas() {
 add_action( 'enqueue_block_assets', __NAMESPACE__ . '\enqueue_block_frontend_styles_for_canvas' );
 
 /**
+ * Fix relative @import paths in editor styles that lack a baseURL.
+ *
+ * WordPress core fetches external editor styles (added via add_editor_style()
+ * with an https:// URL) using wp_remote_get(), but unlike local files it
+ * never sets baseURL on the returned object. Gutenberg's transformStyles
+ * rewrites url() property values using baseURL but silently ignores @import
+ * at-rules, so a path like @import "./NotoSerif/NotoSerifJP/style.css" from
+ * global-fonts/style.css ends up resolving against the iframe's page URL
+ * (/new-pattern/) instead of the CSS file's own directory, producing 404s.
+ *
+ * Fix: for any entry in settings.styles that has no baseURL and contains a
+ * relative @import path, infer the base URL from the absolute url() font
+ * references already present in the same CSS — they point to sibling
+ * directories, so removing their last two path segments (sibling-dir/file)
+ * yields the shared parent, which is the correct base for the @import paths.
+ *
+ * @param array $settings Block editor settings.
+ * @return array
+ */
+function fix_editor_style_import_paths( $settings ) {
+	if ( ! should_load_creator() ) {
+		return $settings;
+	}
+	if ( empty( $settings['styles'] ) ) {
+		return $settings;
+	}
+	// Use index-based iteration so modifications apply to the original array,
+	// not a copy. foreach...&$ref is unsafe when the iterable is an expression
+	// (e.g. $arr ?? []) because the ?? operator returns a value, not a reference.
+	foreach ( array_keys( $settings['styles'] ) as $key ) {
+		$style = $settings['styles'][ $key ];
+		if ( ! empty( $style['baseURL'] ) || empty( $style['css'] ) ) {
+			continue;
+		}
+		if ( ! preg_match( '/@import\s+["\']\.\//', $style['css'] ) ) {
+			continue;
+		}
+		// Find any absolute url() reference to infer the shared parent directory.
+		if ( ! preg_match( '/url\(\s*[\'"]?(https?:\/\/[^\s\'")\s]+)[\'"]?\s*\)/', $style['css'], $m ) ) {
+			continue;
+		}
+		$parts = explode( '/', preg_replace( '/[?#].*$/', '', $m[1] ) );
+		if ( count( $parts ) < 6 ) { // scheme + '' + host + ≥1 path segment + sibling + file
+			continue;
+		}
+		array_splice( $parts, -2 ); // drop sibling-dir/filename, keep parent
+		$base = implode( '/', $parts ) . '/';
+		if ( 0 !== strpos( $m[1], $base ) ) {
+			continue; // inferred base isn't a prefix of the matched url() — depth assumption wrong
+		}
+		$settings['styles'][ $key ]['css']       = preg_replace_callback(
+			'/@import\s+["\']\.\/([^"\']+)["\']/',
+			fn( $x ) => '@import "' . $base . $x[1] . '"',
+			$style['css']
+		);
+		$settings['styles'][ $key ]['baseURL']   = $base;
+	}
+	return $settings;
+}
+add_filter( 'block_editor_settings_all', __NAMESPACE__ . '\fix_editor_style_import_paths' );
+
+/**
+ * Allow logged-in users to read wp_global_styles posts via the REST API.
+ *
+ * The block editor fetches GET /wp/v2/global-styles/{id} to load the site's
+ * active theme customisations. wp_global_styles is a non-public post type
+ * authored by an admin, so WordPress maps read_post to the read_private_posts
+ * capability — which regular users don't have — returning 403. Browsers can
+ * surface this as a CORS error in the console.
+ *
+ * The published global styles post is already compiled and served publicly
+ * through the site's front-end <style> tag, so granting authenticated users
+ * REST read access to published wp_global_styles posts is safe. Draft and
+ * private revisions are excluded.
+ *
+ * @param string[] $caps    Required primitive capabilities.
+ * @param string   $cap     Capability being checked.
+ * @param int      $user_id User performing the check.
+ * @param mixed[]  $args    Extra args (post ID for read_post checks).
+ * @return string[]
+ */
+function allow_reading_global_styles( $caps, $cap, $user_id, $args ) {
+	// $cap is the original meta cap (e.g. 'read_post'); $caps are the derived
+	// primitive caps WordPress resolved it to. We check $cap directly so we
+	// intercept regardless of which primitive cap wp_global_styles maps read_post
+	// to — it varies by WordPress version and post-type registration.
+	if (
+		'read_post' !== $cap ||
+		! defined( 'REST_REQUEST' ) || ! REST_REQUEST ||
+		! $user_id ||
+		empty( $args[0] )
+	) {
+		return $caps;
+	}
+	$request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( $_SERVER['REQUEST_METHOD'] ) : '';
+	$request_uri    = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '';
+	if (
+		( 'GET' !== $request_method && 'HEAD' !== $request_method ) ||
+		false === strpos( $request_uri, '/wp/v2/global-styles' )
+	) {
+		return $caps;
+	}
+	$post = get_post( (int) $args[0] );
+	if ( $post && 'wp_global_styles' === $post->post_type && 'publish' === $post->post_status ) {
+		return array( 'read' ); // all logged-in users have 'read'
+	}
+	return $caps;
+}
+add_filter( 'map_meta_cap', __NAMESPACE__ . '\allow_reading_global_styles', 10, 4 );
+
+/**
  * Add a rewrite rule to handle editing a pattern.
  */
 function rewrite_for_pattern_editing() {
