@@ -101,6 +101,17 @@ function do_pattern_actions() {
 		}
 	} else if ( 'report' === $action ) {
 		if ( wp_verify_nonce( $nonce, 'report-' . $post_id ) && current_user_can( 'read' ) ) {
+			$existing = new \WP_Query( array(
+				'post_type'   => FLAG_POST_TYPE,
+				'post_parent' => $post_id,
+				'post_status' => PENDING_STATUS,
+				'author'      => get_current_user_id(),
+			) );
+			if ( $existing->found_posts > 0 ) {
+				wp_safe_redirect( add_query_arg( array( 'status' => 'already-reported' ), get_the_permalink() ) );
+				return;
+			}
+
 			$success = wp_insert_post(
 				array(
 					'post_type'   => FLAG_POST_TYPE,

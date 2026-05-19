@@ -16,6 +16,8 @@ if ( 'report-failed' === $action_status ) {
 } else if ( 'reported' === $action_status ) {
 	$notice_type = 'info';
 	$notice = __( 'Your report has been submitted.', 'wporg-patterns' );
+} else if ( 'already-reported' === $action_status ) {
+	$notice = __( 'You have already reported this pattern.', 'wporg-patterns' );
 }
 
 ?>
