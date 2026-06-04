@@ -6,13 +6,16 @@
 	"license": "GPL-2.0-or-later",
 	"private": true,
 	"dependencies": {
+		"@wordpress/a11y": "4.47.0",
+		"@wordpress/block-editor": "15.20.0",
+		"@wordpress/blocks": "15.20.0",
+		"@wordpress/i18n": "6.20.0",
+		"@wordpress/interactivity": "6.47.0",
+		"@wordpress/server-side-render": "6.23.0",
 		"a11y-dialog": "^8.0.4"
 	},
 	"devDependencies": {
-		"@wordpress/scripts": "27.2.0"
-	},
-	"eslintConfig": {
-		"extends": "../../../../.eslintrc.js"
+		"@wordpress/scripts": "32.3.0"
 	},
 	"stylelint": {
 		"extends": "../../../../.stylelintrc",

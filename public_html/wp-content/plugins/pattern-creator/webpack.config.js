@@ -24,33 +24,6 @@ const config = {
 				) {
 					return false;
 				}
-
-				// Externalize the JSX runtime to the `react-jsx-runtime`
-				// script WordPress provides at runtime, instead of bundling
-				// our own (React 18) copy. The bundled copy stamps elements
-				// with the legacy `react.element` type, which React 19's
-				// react-dom rejects (error #525). The pinned
-				// dependency-extraction-webpack-plugin (5.2.0) predates this
-				// mapping, so we add it here. This is version-agnostic: the
-				// handle always matches the runtime's own React.
-				//
-				// TODO: Remove this (and the requestToHandle mapping below)
-				// once @wordpress/scripts is bumped to a React-19-aware
-				// version, which externalizes react/jsx-runtime by default.
-				if (
-					request === 'react/jsx-runtime' ||
-					request === 'react/jsx-dev-runtime'
-				) {
-					return 'ReactJSXRuntime';
-				}
-			},
-			requestToHandle( request ) {
-				if (
-					request === 'react/jsx-runtime' ||
-					request === 'react/jsx-dev-runtime'
-				) {
-					return 'react-jsx-runtime';
-				}
 			},
 		} ),
 	],

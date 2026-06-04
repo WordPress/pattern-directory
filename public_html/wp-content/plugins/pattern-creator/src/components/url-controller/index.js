@@ -1,3 +1,4 @@
+/* global wporgBlockPattern */
 /**
  * WordPress dependencies
  */

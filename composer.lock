@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "479cad4c3a4539cff4b683d254a6fac4",
+    "content-hash": "6cc3f076541e82842035264fae168138",
     "packages": [
         {
             "name": "adhocore/jwt",
@@ -240,15 +240,15 @@
         },
         {
             "name": "wpackagist-plugin/gutenberg",
-            "version": "21.1.0",
+            "version": "23.3.0",
             "source": {
                 "type": "svn",
                 "url": "https://plugins.svn.wordpress.org/gutenberg/",
-                "reference": "tags/21.1.0"
+                "reference": "tags/23.3.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://downloads.wordpress.org/plugin/gutenberg.21.1.0.zip"
+                "url": "https://downloads.wordpress.org/plugin/gutenberg.23.3.0.zip"
             },
             "require": {
                 "composer/installers": "^1.0 || ^2.0"
@@ -2743,10 +2743,10 @@
     },
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
-    "platform-dev": [],
+    "platform": {},
+    "platform-dev": {},
     "platform-overrides": {
         "php": "7.4"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

@@ -1,3 +1,4 @@
+/* global wporgBlockPattern, wporgLocale */
 /**
  * WordPress dependencies
  */
@@ -75,7 +76,7 @@ export default function SubmissionModal( { onClose, onSubmit, status } ) {
 				...meta,
 				wpop_description: description,
 			},
-			title: title,
+			title,
 			'pattern-categories': selectedCategories,
 		} );
 	}, [ title, description, selectedCategories ] );

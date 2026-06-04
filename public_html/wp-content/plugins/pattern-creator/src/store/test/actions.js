@@ -9,7 +9,7 @@ describe( 'actions', () => {
 			const feature = 'name';
 			expect( toggleFeature( feature ) ).toEqual( {
 				type: 'TOGGLE_FEATURE',
-				feature: feature,
+				feature,
 			} );
 		} );
 	} );
