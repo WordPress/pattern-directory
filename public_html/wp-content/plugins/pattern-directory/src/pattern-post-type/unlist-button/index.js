@@ -2,13 +2,11 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
 // `PluginPostStatusInfo` moved from `@wordpress/edit-post` to `@wordpress/editor`.
 // Import from both and use whichever the running WordPress version provides.
-import { PluginPostStatusInfo as PluginPostStatusInfoFromEditor } from '@wordpress/editor';
+import { PluginPostStatusInfo as PluginPostStatusInfoFromEditor, store as editorStore } from '@wordpress/editor';
 import { PluginPostStatusInfo as PluginPostStatusInfoFromEditPost } from '@wordpress/edit-post';
-const PluginPostStatusInfo = PluginPostStatusInfoFromEditor || PluginPostStatusInfoFromEditPost;
-import { Button } from '@wordpress/components';
-import { store as editorStore } from '@wordpress/editor';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 
@@ -18,6 +16,8 @@ import { useState } from '@wordpress/element';
 import { UNLISTED_STATUS } from '../settings';
 import UnlistModal from './modal';
 import './unlist.scss';
+
+const PluginPostStatusInfo = PluginPostStatusInfoFromEditor || PluginPostStatusInfoFromEditPost;
 
 export const UnlistButton = () => {
 	const status = useSelect( ( select ) => {
