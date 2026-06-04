@@ -2,7 +2,11 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { PluginPostStatusInfo } from '@wordpress/edit-post';
+// `PluginPostStatusInfo` moved from `@wordpress/edit-post` to `@wordpress/editor`.
+// Import from both and use whichever the running WordPress version provides.
+import { PluginPostStatusInfo as PluginPostStatusInfoFromEditor } from '@wordpress/editor';
+import { PluginPostStatusInfo as PluginPostStatusInfoFromEditPost } from '@wordpress/edit-post';
+const PluginPostStatusInfo = PluginPostStatusInfoFromEditor || PluginPostStatusInfoFromEditPost;
 import { Button } from '@wordpress/components';
 import { store as editorStore } from '@wordpress/editor';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -23,10 +27,11 @@ export const UnlistButton = () => {
 	const { editPost, savePost } = useDispatch( editorStore );
 	const [ showModal, setShowModal ] = useState( false );
 
-	const onSubmit = ( reasonId ) => {
+	const onSubmit = ( reasonId, details = '' ) => {
 		editPost( {
 			status: UNLISTED_STATUS,
 			'wporg-pattern-flag-reason': [ reasonId ],
+			meta: { _wporg_unlist_reason_detail: details },
 		} );
 		savePost();
 	};
