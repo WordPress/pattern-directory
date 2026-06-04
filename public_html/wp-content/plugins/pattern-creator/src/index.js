@@ -3,7 +3,7 @@
  */
 import { dispatch } from '@wordpress/data';
 import { registerCoreBlocks } from '@wordpress/block-library';
-import { render, unmountComponentAtNode } from '@wordpress/element';
+import { createRoot } from '@wordpress/element';
 import { removeFilter } from '@wordpress/hooks';
 
 /**
@@ -16,6 +16,14 @@ import './api-middleware';
 import './style.scss';
 
 /**
+ * Holds the React root for the editor so it can be unmounted and re-created on
+ * reboot. `createRoot` is the React 18+ API and works under React 18 and 19.
+ *
+ * @type {ReturnType<import('@wordpress/element').createRoot>|undefined}
+ */
+let root;
+
+/**
  * Reinitializes the editor after the user chooses to reboot the editor after
  * an unhandled error occurs, replacing previously mounted editor element using
  * an initial state from prior to the crash.
@@ -25,13 +33,25 @@ import './style.scss';
  * @param {number}  settings.postId ID of the current post.
  */
 export function reinitializeEditor( target, { postId, ...settings } ) {
-	unmountComponentAtNode( target );
+	/*
+	 * Tear down a previously mounted editor before re-mounting (e.g. after a
+	 * reboot following an unhandled error). `createRoot()` / `root.unmount()`
+	 * replace `render()` / `unmountComponentAtNode()`, which React 19 removed,
+	 * and are available in both React 18 and React 19.
+	 */
+	if ( root ) {
+		root.unmount();
+		root = undefined;
+	}
+
 	const reboot = reinitializeEditor.bind( null, target, settings );
 
 	// Update the store synchronously before rendering so that we won't trigger
 	// unnecessary re-renders with useEffect.
 	dispatch( patternStore ).updateSettings( settings );
-	render( <Editor onError={ reboot } postId={ postId } />, target );
+
+	root = createRoot( target );
+	root.render( <Editor onError={ reboot } postId={ postId } /> );
 }
 
 /**
