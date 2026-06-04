@@ -29,7 +29,7 @@ CI (`.github/workflows/`) runs linters on every PR and PHP+JS unit tests on chan
 
 ## Workspaces & architecture
 
-Three workspaces, each a standard `@wordpress/scripts` project extending the root `.eslintrc.js` / `.stylelintrc` / `.prettierrc.js`:
+Three workspaces, each a standard `@wordpress/scripts` project extending the root `eslint.config.js` / `.stylelintrc` / `.prettierrc.js`:
 
 | Workspace | Path | Role |
 |---|---|---|
