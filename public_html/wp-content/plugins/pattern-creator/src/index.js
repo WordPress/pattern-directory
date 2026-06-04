@@ -44,7 +44,9 @@ export function reinitializeEditor( target, { postId, ...settings } ) {
 		root = undefined;
 	}
 
-	const reboot = reinitializeEditor.bind( null, target, settings );
+	// Re-include `postId` so a reboot reinitializes the same post; without it
+	// the remounted editor would receive `postId === undefined` and render blank.
+	const reboot = reinitializeEditor.bind( null, target, { postId, ...settings } );
 
 	// Update the store synchronously before rendering so that we won't trigger
 	// unnecessary re-renders with useEffect.
