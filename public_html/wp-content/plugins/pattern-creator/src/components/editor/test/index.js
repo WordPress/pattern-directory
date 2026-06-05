@@ -26,7 +26,7 @@ const mockSettings = {};
  * before mounting its heavy render tree — but the `useSelect` mapping still
  * runs, which is what reads `postId`.
  */
-const makeStore = ( name, selectors, actions = {} ) => {
+const mockMakeStore = ( name, selectors, actions = {} ) => {
 	const { createReduxStore, register } = jest.requireActual( '@wordpress/data' );
 	const store = createReduxStore( name, { reducer: ( state = {} ) => state, selectors, actions } );
 	register( store );
@@ -35,7 +35,7 @@ const makeStore = ( name, selectors, actions = {} ) => {
 
 jest.mock( '../../../store', () => ( {
 	POST_TYPE: 'wporg-pattern',
-	store: makeStore(
+	store: mockMakeStore(
 		'test/editor-pattern',
 		{
 			isInserterOpened: () => false,
@@ -46,18 +46,18 @@ jest.mock( '../../../store', () => ( {
 	),
 } ) );
 jest.mock( '@wordpress/core-data', () => ( {
-	store: makeStore( 'test/editor-core', {
+	store: mockMakeStore( 'test/editor-core', {
 		getEntityRecord: ( state, kind, postType, id ) => mockGetEntityRecord( kind, postType, id ),
 	} ),
 } ) );
 jest.mock( '@wordpress/notices', () => ( {
-	store: makeStore( 'test/editor-notices', {}, { createInfoNotice: () => ( { type: 'NOOP' } ) } ),
+	store: mockMakeStore( 'test/editor-notices', {}, { createInfoNotice: () => ( { type: 'NOOP' } ) } ),
 } ) );
 jest.mock( '@wordpress/interface', () => {
 	const { createElement: el } = jest.requireActual( '@wordpress/element' );
 	const Noop = () => null;
 	return {
-		store: makeStore( 'test/editor-interface', { getActiveComplementaryArea: () => undefined } ),
+		store: mockMakeStore( 'test/editor-interface', { getActiveComplementaryArea: () => undefined } ),
 		ComplementaryArea: Object.assign( Noop, { Slot: Noop } ),
 		FullscreenMode: Noop,
 		InterfaceSkeleton: () => el( 'div', null ),
