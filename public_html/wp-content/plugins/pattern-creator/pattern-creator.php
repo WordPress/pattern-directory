@@ -3,7 +3,7 @@
  * Plugin Name: Block Pattern Creator
  * Description: Create block patterns on the frontend of a site.
  * Version: 1.0.0
- * Requires at least: 5.5
+ * Requires at least: 6.2
  * Author: WordPress Meta Team
  * Text Domain: wporg-patterns
  * License: GPL v2 or later

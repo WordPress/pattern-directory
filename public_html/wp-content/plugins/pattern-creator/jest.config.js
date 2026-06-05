@@ -10,6 +10,10 @@ const config = {
 		uuid: require.resolve( 'uuid' ),
 	},
 	transformIgnorePatterns: [ 'node_modules/(?!(parsel-js)/)' ],
+	setupFiles: [
+		...( defaultConfig.setupFiles || [] ),
+		require.resolve( './jest.setup.js' ),
+	],
 };
 
 module.exports = config;

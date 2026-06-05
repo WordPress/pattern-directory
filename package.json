@@ -7,8 +7,8 @@
 	"private": true,
 	"dependencies": {
 		"@wordpress/env": "10.14.0",
-		"@wordpress/scripts": "30.7.0",
-		"@wordpress/stylelint-config": "23.6.0"
+		"@wordpress/scripts": "32.3.0",
+		"@wordpress/stylelint-config": "23.39.0"
 	},
 	"scripts": {
 		"build:creator": "npm run build --workspace=wporg-pattern-creator",

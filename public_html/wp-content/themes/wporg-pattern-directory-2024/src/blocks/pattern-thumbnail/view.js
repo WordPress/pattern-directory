@@ -64,7 +64,7 @@ const { actions, state } = store( 'wporg/patterns/thumbnail', {
 					actions.setBase64Image( value );
 					actions.setShouldRetry( false );
 				}
-			} catch ( error ) {
+			} catch {
 				actions.setHasError( true );
 				actions.setShouldRetry( false );
 			}

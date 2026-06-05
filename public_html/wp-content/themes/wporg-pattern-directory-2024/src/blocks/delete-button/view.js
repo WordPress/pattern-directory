@@ -14,7 +14,7 @@ store( 'wporg/patterns/delete-button', {
 						path: `/wp/v2/wporg-pattern/${ postId }/`,
 						method: 'DELETE',
 					} );
-				} catch ( error ) {
+				} catch {
 					return;
 				}
 				window.location = redirectUrl;

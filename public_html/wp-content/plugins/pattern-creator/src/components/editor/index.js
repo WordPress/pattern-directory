@@ -1,3 +1,4 @@
+/* global wporgLocale */
 /**
  * WordPress dependencies
  */

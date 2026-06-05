@@ -110,7 +110,6 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 		},
 		updatePreviewHeight() {
 			const context = getContext();
-			const { ref } = getElement();
 
 			// If this is a "controlled" preview (has the toggles and
 			// drag handles), it should also have a fixed height.
@@ -122,6 +121,7 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 			// Need to "use" previewWidth so that `data-wp-watch` will re-run this action when it changes.
 			context.previewWidth; // eslint-disable-line no-unused-expressions
 
+			const { ref } = getElement();
 			const iframeDoc = ref.contentDocument;
 			const height = iframeDoc.querySelector( '.entry-content' )?.clientHeight;
 			if ( height ) {
