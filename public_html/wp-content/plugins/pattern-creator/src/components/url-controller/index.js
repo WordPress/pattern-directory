@@ -18,7 +18,7 @@ export default function UrlController( { postId } ) {
 			const newUrl = `${ BASE_URL }/pattern/${ postId }/edit/`;
 			window.history.replaceState( {}, '', newUrl );
 		}
-	}, [ post.status ] );
+	}, [ post.status, postId ] );
 
 	return null;
 }

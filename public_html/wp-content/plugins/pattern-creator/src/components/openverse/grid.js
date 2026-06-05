@@ -52,7 +52,7 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 	// Set up a debounced search term, so we don't query constantly while someone is typing.
 	useEffect( () => {
 		setDebouncedSearchTerm( searchTerm );
-	}, [ searchTerm ] );
+	}, [ searchTerm, setDebouncedSearchTerm ] );
 
 	// When the search changes, reset back to page 1, and trigger a search.
 	useEffect( () => {
@@ -91,7 +91,7 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 		}
 
 		onClose();
-	}, [ selected, multiple ] );
+	}, [ selected, multiple, onSelect, onClose ] );
 
 	const onClick = useCallback(
 		( newValue ) => {

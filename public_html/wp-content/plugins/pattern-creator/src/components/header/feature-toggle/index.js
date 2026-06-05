@@ -26,9 +26,7 @@ export default function FeatureToggle( { feature, label, info, messageActivated,
 		}
 	};
 
-	const isActive = useSelect( ( select ) => {
-		return select( patternStore ).isFeatureActive( feature );
-	}, [] );
+	const isActive = useSelect( ( select ) => select( patternStore ).isFeatureActive( feature ), [ feature ] );
 
 	const { toggleFeature } = useDispatch( patternStore );
 

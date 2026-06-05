@@ -79,6 +79,10 @@ export default function SubmissionModal( { onClose, onSubmit, status } ) {
 			title,
 			'pattern-categories': selectedCategories,
 		} );
+		// Only sync the editor when the local form fields change. `meta` is
+		// intentionally omitted: this effect edits `meta`, so including it would
+		// loop, and `editPost` is a stable dispatcher.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ title, description, selectedCategories ] );
 
 	const goBack = () => {
