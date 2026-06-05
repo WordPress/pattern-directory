@@ -210,9 +210,23 @@ add_filter( 'template_include', __NAMESPACE__ . '\inject_editor_template' );
  *
  * Mirroring the fix proposed for WordPress core (_wp_get_iframed_editor_assets should loop
  * over style_handles too), we enqueue them here so they are captured in the same window.
+ *
+ * enqueue_block_assets also fires on the outer creator page's normal front-end render.
+ * Enqueuing there would print every block's frontend stylesheet into the outer <head>,
+ * where Gutenberg's iframe onLoad clones each one into the canvas and logs a
+ * "<handle> was added to the iframe incorrectly" warning. The outer page renders no
+ * blocks, so those styles are pure leakage. _wp_get_iframed_editor_assets() brackets its
+ * enqueue_block_assets dispatch with a `should_load_block_editor_scripts_and_styles` =>
+ * __return_false filter; its presence is what distinguishes the capture from the outer
+ * render, so we only enqueue when that filter is active.
  */
 function enqueue_block_frontend_styles_for_canvas() {
 	if ( ! should_load_creator() ) {
+		return;
+	}
+
+	// Only run inside the iframed-editor asset capture, not on the outer page.
+	if ( false === has_filter( 'should_load_block_editor_scripts_and_styles', '__return_false' ) ) {
 		return;
 	}
 
