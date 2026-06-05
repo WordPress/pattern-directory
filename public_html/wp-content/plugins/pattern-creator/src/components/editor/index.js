@@ -45,18 +45,21 @@ const interfaceLabels = {
 };
 
 function Editor( { onError, postId } ) {
-	const { isInserterOpen, isListViewOpen, post, sidebarIsOpened, settings } = useSelect( ( select ) => {
-		const { isInserterOpened, isListViewOpened, getSettings } = select( patternStore );
-		const { getEntityRecord } = select( coreStore );
+	const { isInserterOpen, isListViewOpen, post, sidebarIsOpened, settings } = useSelect(
+		( select ) => {
+			const { isInserterOpened, isListViewOpened, getSettings } = select( patternStore );
+			const { getEntityRecord } = select( coreStore );
 
-		return {
-			isInserterOpen: isInserterOpened(),
-			isListViewOpen: isListViewOpened(),
-			post: getEntityRecord( 'postType', POST_TYPE, postId ),
-			sidebarIsOpened: !! select( interfaceStore ).getActiveComplementaryArea( STORE_NAME ),
-			settings: getSettings(),
-		};
-	}, [] );
+			return {
+				isInserterOpen: isInserterOpened(),
+				isListViewOpen: isListViewOpened(),
+				post: getEntityRecord( 'postType', POST_TYPE, postId ),
+				sidebarIsOpened: !! select( interfaceStore ).getActiveComplementaryArea( STORE_NAME ),
+				settings: getSettings(),
+			};
+		},
+		[ postId ]
+	);
 	const { setIsInserterOpened } = useDispatch( patternStore );
 	const { createInfoNotice } = useDispatch( noticesStore );
 	const [ isEntitiesSavedStatesOpen, setIsEntitiesSavedStatesOpen ] = useState( false );
@@ -73,7 +76,7 @@ function Editor( { onError, postId } ) {
 				isDismissible: false,
 			} );
 		}
-	}, [] );
+	}, [ createInfoNotice ] );
 
 	// Don't render the Editor until the settings are set and loaded
 	if ( ! settings?.siteUrl || ! post ) {

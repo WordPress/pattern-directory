@@ -42,7 +42,7 @@ export function SidebarComplementaryAreaFills() {
 		} else {
 			enableComplementaryArea( STORE_NAME, SIDEBAR_PATTERN );
 		}
-	}, [ hasBlockSelection, isEditorSidebarOpened ] );
+	}, [ hasBlockSelection, isEditorSidebarOpened, enableComplementaryArea ] );
 
 	let sidebarName = sidebar;
 	if ( ! isEditorSidebarOpened ) {
