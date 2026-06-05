@@ -45,12 +45,13 @@ describe( 'UrlController', () => {
 		container = document.createElement( 'div' );
 		document.body.appendChild( container );
 		root = createRoot( container );
-		window.history.replaceState = jest.fn();
+		jest.spyOn( window.history, 'replaceState' ).mockImplementation( () => {} );
 	} );
 
 	afterEach( () => {
 		act( () => root.unmount() );
 		container.remove();
+		jest.restoreAllMocks();
 	} );
 
 	const render = ( postId ) => {
