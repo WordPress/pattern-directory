@@ -148,10 +148,15 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 			if ( ! in_array( $taxonomy, array( 'wporg-pattern-category', 'wporg-pattern-keyword' ) ) ) {
 				continue;
 			}
-
-			$filter['bool']['must'][] = [
-				'terms' => [ "taxonomy.$taxonomy.term_id" => $term['terms'] ],
-			];
+			if ( is_string( $term['terms'] ) ) {
+				$filter['bool']['must'][] = [
+					'term' => [ "taxonomy.$taxonomy.slug" => $term['terms'] ],
+				];
+			} else if ( is_int( $term['terms'] ) ) {
+				$filter['bool']['must'][] = [
+					'term' => [ "taxonomy.$taxonomy.term_id" => $term['terms'] ],
+				];
+			}
 		}
 	}
 
