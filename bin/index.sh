@@ -32,6 +32,13 @@ npm run wp-env run cli -- wp theme activate wporg-pattern-directory-2024
 # Change permalinks
 npm run wp-env run cli wp rewrite structure '/%postname%/'
 
+# Write .htaccess — wp rewrite flush --hard doesn't work from the CLI container
+# because WordPress doesn't detect Apache in that context. Route the file through
+# the already-mapped data directory so the content stays in one place (.wp-env/.htaccess).
+cp .wp-env/.htaccess .wp-env/data/.htaccess.tmp
+npm run wp-env run cli -- bash -c "cp /var/www/html/wp-content/uploads/data/.htaccess.tmp /var/www/html/.htaccess"
+rm .wp-env/data/.htaccess.tmp
+
 # Set up site title
 npm run wp-env run cli wp option update blogname "Pattern Directory"
 npm run wp-env run cli wp option update blogdescription "Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste."
