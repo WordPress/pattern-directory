@@ -9,6 +9,20 @@ const config = {
 		libraryTarget: 'window',
 	},
 
+	module: {
+		...defaultConfig.module,
+		rules: [
+			...defaultConfig.module.rules,
+			// Bundled @wordpress/* ESM packages (e.g. @wordpress/editor) import CommonJS
+			// dependencies such as `diff` via extensionless subpaths. Webpack 5 treats
+			// `.mjs` sources as fully specified and would otherwise refuse to resolve them.
+			{
+				test: /\.m?js$/,
+				resolve: { fullySpecified: false },
+			},
+		],
+	},
+
 	plugins: [
 		...defaultConfig.plugins.filter(
 			( plugin ) => plugin.constructor.name !== 'DependencyExtractionWebpackPlugin'
