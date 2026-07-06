@@ -15,13 +15,9 @@ const wordpressScope = path.dirname(
 );
 
 /*
- * Resolve bare @wordpress/* imports to their built CommonJS entry.
- *
- * These packages ship a `react-native` field pointing at untranspiled `src`,
- * which jsdom's `browser` export condition falls back to, leaving Jest to
- * execute raw ESM/TypeScript source and pull in untransformed dependencies
- * (uuid, marked, …). Mapping each package to its `build/index.cjs` runs the
- * tests against the same output the site ships.
+ * Map bare @wordpress/* imports to their built CommonJS entry. Their
+ * `react-native` field points at untranspiled `src`, which jsdom resolves and
+ * then fails to parse as ESM/TypeScript.
  */
 const wordpressPackageMappers = {};
 for ( const name of fs.readdirSync( wordpressScope ) ) {
@@ -49,9 +45,7 @@ const config = {
 		// See https://github.com/uuidjs/uuid/issues/451
 		uuid: require.resolve( 'uuid' ),
 	},
-	// @wordpress/* packages are mapped to their built CommonJS above, but a few
-	// of their third-party dependencies ship ESM-only builds that still need to
-	// be transpiled for Jest.
+	// Transpile the ESM-only dependencies pulled in by the built @wordpress packages.
 	transformIgnorePatterns: [ 'node_modules/(?!(parsel-js|uuid|marked)/)' ],
 	setupFiles: [
 		...( defaultConfig.setupFiles || [] ),

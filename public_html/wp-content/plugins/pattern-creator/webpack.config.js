@@ -13,10 +13,11 @@ const config = {
 		...defaultConfig.module,
 		rules: [
 			...defaultConfig.module.rules,
-			// Bundled @wordpress/* ESM packages (e.g. @wordpress/editor) import CommonJS
-			// dependencies such as `diff` via extensionless subpaths. Webpack 5 treats
-			// `.mjs` sources as fully specified and would otherwise refuse to resolve them.
-			// Scoped to node_modules so project source keeps strict ESM resolution.
+			/*
+			 * Bundled @wordpress/* ESM (e.g. @wordpress/editor) imports CommonJS
+			 * `diff` via extensionless subpaths webpack 5 rejects. Scoped to
+			 * node_modules to keep strict resolution for project source.
+			 */
 			{
 				test: /\.m?js$/,
 				include: /node_modules/,
