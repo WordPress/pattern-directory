@@ -14,11 +14,11 @@ if ( ! current_user_can( 'edit_post', $current_post_id ) ) {
 wp_enqueue_script( 'wp-api-fetch' );
 
 // Initial state to pass to Interactivity API.
-$init_state = [
+$init_state = array(
 	'postId' => $current_post_id,
 	'message' => __( 'Are you sure you want to delete this pattern?', 'wporg-patterns' ),
 	'redirectUrl' => home_url( '/my-patterns/' ),
-];
+);
 $encoded_state = wp_json_encode( $init_state );
 
 ?>

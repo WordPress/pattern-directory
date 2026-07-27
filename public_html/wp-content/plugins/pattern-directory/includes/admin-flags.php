@@ -303,10 +303,10 @@ function flag_list_table_views( $views ) {
 	if ( $parent_id ) {
 		$views = array_map(
 			// Add a post_parent parameter to each view's URL.
-			function( $item ) use ( $parent_id ) {
+			function ( $item ) use ( $parent_id ) {
 				return preg_replace_callback(
 					'|href=[\'"]+([^\'"]+)[\'"]+|',
-					function( $matches ) use ( $parent_id ) {
+					function ( $matches ) use ( $parent_id ) {
 						$old_url = wp_kses_decode_entities( $matches[1] );
 						$new_url = add_query_arg( array( 'post_parent' => $parent_id ), $old_url );
 

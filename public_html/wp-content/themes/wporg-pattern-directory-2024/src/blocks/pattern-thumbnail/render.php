@@ -32,14 +32,14 @@ $url = add_query_arg(
 );
 
 // Initial state to pass to Interactivity API.
-$init_state = [
+$init_state = array(
 	'base64Image' => '',
 	'src' => esc_url( $url ),
 	'alt' => the_title_attribute( array( 'echo' => false ) ),
 	'attempts' => 0,
 	'shouldRetry' => true,
 	'hasError' => false,
-];
+);
 $encoded_state = wp_json_encode( $init_state );
 
 $classname = '';

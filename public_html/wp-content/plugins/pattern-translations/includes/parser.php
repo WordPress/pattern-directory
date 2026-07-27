@@ -14,13 +14,13 @@ require_once __DIR__ . '/parsers/TextNode.php'; // Unused
 
 class PatternParser {
 	public $pattern;
-	public $parsers = [];
+	public $parsers = array();
 	public $fallback;
 
 	public function __construct( Pattern $pattern ) {
 		$this->pattern = $pattern;
 
-		$this->parsers = [
+		$this->parsers = array(
 			// Blocks that have custom parsers.
 			'core/paragraph'   => new Parsers\Paragraph(),
 			'core/heading'     => new Parsers\Heading(),
@@ -38,12 +38,12 @@ class PatternParser {
 			'core/media-text'  => new Parsers\BasicText(),
 			'core/separator'   => new Parsers\BasicText(),
 			'core/social-link' => new Parsers\BasicText(),
-		];
+		);
 
 		$this->fallback = new Parsers\BasicText();
 	}
 
-	public function block_parser_to_strings( array $block ) : array {
+	public function block_parser_to_strings( array $block ): array {
 		$parser = $this->parsers[ $block['blockName'] ] ?? $this->fallback;
 
 		$strings = $parser->to_strings( $block );
@@ -55,7 +55,7 @@ class PatternParser {
 		return $strings;
 	}
 
-	public function block_parser_replace_strings( array &$block, array $replacements ) : array {
+	public function block_parser_replace_strings( array &$block, array $replacements ): array {
 		$parser = $this->parsers[ $block['blockName'] ] ?? $this->fallback;
 		$block = $parser->replace_strings( $block, $replacements );
 
@@ -66,13 +66,13 @@ class PatternParser {
 		return $block;
 	}
 
-	public function to_strings() : array {
+	public function to_strings(): array {
 		$blocks = parse_blocks( $this->pattern->html );
 
-		$strings = [];
+		$strings = array();
 
 		if ( ! empty( $this->pattern->title ) ) {
-			$strings = [ $this->pattern->title ];
+			$strings = array( $this->pattern->title );
 		}
 
 		if ( ! empty( $this->pattern->description ) ) {
@@ -91,7 +91,7 @@ class PatternParser {
 		return array_unique( $strings );
 	}
 
-	public function replace_strings_with_kses( array $replacements ) : Pattern {
+	public function replace_strings_with_kses( array $replacements ): Pattern {
 		// Sanitize replacement strings before injecting them into blocks and block attributes.
 		$sanitized_replacements = $replacements;
 		foreach ( $sanitized_replacements as &$replacement ) {
@@ -100,12 +100,12 @@ class PatternParser {
 		return $this->replace_strings( $sanitized_replacements );
 	}
 
-	public function replace_strings( array $replacements ) : Pattern {
+	public function replace_strings( array $replacements ): Pattern {
 		$translated = clone $this->pattern;
 		$translated->title = $replacements[ $translated->title ] ?? $translated->title;
 		$translated->description = $replacements[ $translated->description ] ?? $translated->description;
 
-		$translated_keywords = [];
+		$translated_keywords = array();
 		foreach ( explode( ', ', $translated->keywords ) as $keyword ) {
 			$translated_keywords[] = $replacements[ $keyword ] ?? $keyword;
 		}
@@ -142,13 +142,13 @@ class PatternParser {
 		// in the placeholder attribute: <!-- wp:paragraph {"placeholder":"dangerous characters go here"} -->
 		// Reference: https://github.com/WordPress/WordPress/blob/HEAD/wp-includes/blocks.php#L367
 
-		$excluded_characters = [
+		$excluded_characters = array(
 			'\\u002d\\u002d', // '--'
 			'\\u003c',        // '<'
 			'\\u003e',        // '>'
 			'\\u0026',        // '&'
 			'\\u0022',        // '"'
-		];
+		);
 
 		// Match any uninterrupted sequence of \u escaped unicode characters.
 		$decoded_string = preg_replace_callback(

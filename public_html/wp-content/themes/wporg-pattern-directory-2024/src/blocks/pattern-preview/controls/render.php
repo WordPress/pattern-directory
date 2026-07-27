@@ -9,12 +9,12 @@ if ( ! isset( $block->context['postId'] ) ) {
 $view_url = get_pattern_preview_url( $block->context['postId'] );
 
 // Initial state to pass to Interactivity API.
-$init_state = [
+$init_state = array(
 	'url' => $view_url,
 	'previewWidth' => 1200,
 	'previewHeight' => 200,
 	'isControlled' => true,
-];
+);
 $encoded_state = wp_json_encode( $init_state );
 
 // Remove the nested context for child blocks, so that it uses this context.

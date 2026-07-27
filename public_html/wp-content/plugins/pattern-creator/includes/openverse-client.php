@@ -28,7 +28,7 @@ class Openverse_Client {
 	/**
 	 * Openverse_Client constructor.
 	 */
-	public function __construct( array $params = [] ) {
+	public function __construct( array $params = array() ) {
 		$defaults = array(
 			'per_page' => 30,
 			'page' => 1,
@@ -228,7 +228,7 @@ class Openverse_Client {
 				trigger_error( $results->get_error_code() . ' ' . $results->get_error_message(), E_USER_WARNING ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 				// Set a short timeout to avoid hammering the API during outages.
-				set_transient( $cache_key, [], 0.5 * MINUTE_IN_SECONDS );
+				set_transient( $cache_key, array(), 0.5 * MINUTE_IN_SECONDS );
 
 				return new WP_Error(
 					'search-request-failed',

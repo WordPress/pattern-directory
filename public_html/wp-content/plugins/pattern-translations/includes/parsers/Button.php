@@ -7,7 +7,7 @@ class Button implements BlockParser {
 	use GetSetAttribute;
 	use TextNodesXPath;
 
-	public function to_strings( array $block ) : array {
+	public function to_strings( array $block ): array {
 		$strings = $this->get_attribute( 'placeholder', $block );
 
 		$encoded_html = $this->encode_tags( $block['innerHTML'] );
@@ -24,7 +24,7 @@ class Button implements BlockParser {
 		return $strings;
 	}
 
-	public function replace_strings( array $block, array $replacements ) : array {
+	public function replace_strings( array $block, array $replacements ): array {
 		$this->set_attribute( 'placeholder', $block, $replacements );
 
 		$encoded_html = $this->encode_tags( $block['innerHTML'] );
@@ -47,7 +47,7 @@ class Button implements BlockParser {
 
 		$decoded_html = $this->decode_tags( $this->removeHtml( $dom->saveHTML() ) );
 		$block['innerHTML']    = $decoded_html;
-		$block['innerContent'] = [ $decoded_html ];
+		$block['innerContent'] = array( $decoded_html );
 
 		return $block;
 	}

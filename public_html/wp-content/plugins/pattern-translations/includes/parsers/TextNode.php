@@ -4,11 +4,11 @@ namespace WordPressdotorg\Pattern_Translations\Parsers;
 class TextNode implements BlockParser {
 	use DomUtils;
 
-	public function to_strings( array $block ) : array {
+	public function to_strings( array $block ): array {
 		$dom   = $this->get_dom( serialize_block( $block ) );
 		$xpath = new \DOMXPath( $dom );
 
-		$strings = [];
+		$strings = array();
 
 		foreach ( $xpath->query( '//text()' ) as $text ) {
 			if ( trim( $text->nodeValue ) ) {
@@ -19,7 +19,7 @@ class TextNode implements BlockParser {
 		return $strings;
 	}
 
-	public function replace_strings( array $block, array $replacements ) : array {
+	public function replace_strings( array $block, array $replacements ): array {
 		$dom   = $this->get_dom( serialize_block( $block ) );
 		$xpath = new \DOMXPath( $dom );
 
@@ -29,6 +29,6 @@ class TextNode implements BlockParser {
 			}
 		}
 
-		return parse_blocks( $this->removeHtml( $dom->saveHTML() ) )[0] ?? [];
+		return parse_blocks( $this->removeHtml( $dom->saveHTML() ) )[0] ?? array();
 	}
 }

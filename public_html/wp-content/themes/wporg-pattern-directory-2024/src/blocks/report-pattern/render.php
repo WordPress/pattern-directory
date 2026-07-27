@@ -29,11 +29,11 @@ if ( user_has_flagged_pattern() ) {
 	return;
 }
 
-$reasons = get_terms( [
+$reasons = get_terms( array(
 	'taxonomy' => FLAG_REASON,
 	'hide_empty' => false,
 	'orderby' => 'slug',
-] );
+) );
 
 ?>
 <div <?php echo get_block_wrapper_attributes(); // phpcs:ignore ?>>

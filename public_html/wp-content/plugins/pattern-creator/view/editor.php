@@ -6,7 +6,7 @@
 namespace WordPressdotorg\Pattern_Creator;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
-add_filter( 'body_class', function( $classes ) {
+add_filter( 'body_class', function ( $classes ) {
 	$classes[] = 'admin-color-modern';
 	return $classes;
 } );

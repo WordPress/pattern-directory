@@ -10,14 +10,14 @@ namespace WordPressdotorg\Pattern_Translations\Parsers;
 class ShortcodeBlock implements BlockParser {
 	use GetSetAttribute;
 
-	public $attribute_names = [];
+	public $attribute_names = array();
 
 	public function __construct( array $attribute_names ) {
 		$this->attribute_names = $attribute_names;
 	}
 
-	public function to_strings( array $block ) : array {
-		$strings = [];
+	public function to_strings( array $block ): array {
+		$strings = array();
 		foreach ( $this->attribute_names as $attribute_name ) {
 			$strings = array_merge( $strings, $this->get_attribute( $attribute_name, $block ) );
 		}
@@ -25,7 +25,7 @@ class ShortcodeBlock implements BlockParser {
 		return $strings;
 	}
 
-	public function replace_strings( array $block, array $replacements ) : array {
+	public function replace_strings( array $block, array $replacements ): array {
 		foreach ( $this->attribute_names as $attribute_name ) {
 			$this->set_attribute( $attribute_name, $block, $replacements );
 
@@ -35,7 +35,7 @@ class ShortcodeBlock implements BlockParser {
 
 					$block['innerContent'][ $i ] = preg_replace_callback(
 						$shortcode_param_regex,
-						function( $matches ) use ( $replacements ) {
+						function ( $matches ) use ( $replacements ) {
 							return $this->preg_replace_gutenberg_attributes_handler( $matches, $replacements );
 						},
 						$inner_content
@@ -47,7 +47,7 @@ class ShortcodeBlock implements BlockParser {
 		$regex              = '/\b(\w*?)="(.*?)(")/';
 		$block['innerHTML'] = preg_replace_callback(
 			$regex,
-			function( $matches ) use ( $replacements ) {
+			function ( $matches ) use ( $replacements ) {
 				return $this->preg_replace_gutenberg_attributes_handler( $matches, $replacements );
 			},
 			$block['innerHTML']
@@ -60,7 +60,7 @@ class ShortcodeBlock implements BlockParser {
 		return ltrim(
 			preg_replace_callback(
 				'/([A-Z]+)/',
-				function( $matches ) {
+				function ( $matches ) {
 					return '_' . strtolower( $matches[1] ); },
 				$camelCaseString
 			),
