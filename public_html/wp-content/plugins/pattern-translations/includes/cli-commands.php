@@ -21,7 +21,7 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 		$patterns = $this->get_patterns_or_exit( $args );
 
 		// Flatten parent to just being the slug.
-		array_walk( $patterns, function( $pattern ) {
+		array_walk( $patterns, function ( $pattern ) {
 			$pattern->parent = $pattern->parent->name ?? $pattern->parent;
 		} );
 
@@ -50,7 +50,7 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 	public function strings( $_, $args ) {
 		$patterns = $this->get_patterns_or_exit( $args );
 
-		$strings = [];
+		$strings = array();
 
 		foreach ( $patterns as $pattern ) {
 			$parser  = new PatternParser( $pattern );
@@ -103,7 +103,7 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 		$all_posts = isset( $args['all-posts'] );
 		$locale = $args['locale'] ?? false;
 
-		$query = [];
+		$query = array();
 
 		if ( false !== $post && ctype_digit( $post ) ) {
 			$query['p'] = $post;
@@ -139,5 +139,4 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 
 		return $patterns;
 	}
-
 }

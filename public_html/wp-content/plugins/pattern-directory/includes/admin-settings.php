@@ -50,7 +50,7 @@ function admin_init() {
 		'wporg-pattern-default_status',
 		array(
 			'type' => 'string',
-			'sanitize_callback' => function( $value ) {
+			'sanitize_callback' => function ( $value ) {
 				return in_array( $value, array( 'publish', 'pending' ) ) ? $value : 'publish';
 			},
 			'default' => 'publish',
@@ -73,7 +73,7 @@ function admin_init() {
 		'wporg-pattern-flag_threshold',
 		array(
 			'type' => 'integer',
-			'sanitize_callback' => function( $value ) {
+			'sanitize_callback' => function ( $value ) {
 				$value = absint( $value );
 
 				if ( $value < 1 || $value > 100 ) {

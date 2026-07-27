@@ -2,8 +2,8 @@
 
 namespace WordPressdotorg\Pattern_Directory\Favorites_API;
 
-use function WordPressdotorg\Pattern_Directory\Favorite\{add_favorite, get_favorite_count, get_favorites, remove_favorite};
 use WP_Error, WP_REST_Server, WP_REST_Response;
+use function WordPressdotorg\Pattern_Directory\Favorite\{add_favorite, get_favorite_count, get_favorites, remove_favorite};
 
 add_action( 'rest_api_init', __NAMESPACE__ . '\init' );
 
@@ -23,7 +23,7 @@ function init() {
 
 	$args = array(
 		'id' => array(
-			'validate_callback' => function( $param, $request, $key ) {
+			'validate_callback' => function ( $param, $request, $key ) {
 				return is_numeric( $param );
 			},
 		),

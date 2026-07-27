@@ -1,10 +1,10 @@
 <?php
 
 namespace WordPressdotorg\Pattern_Directory\Pattern_Validation;
-use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 
 use WordPressdotorg\Pattern_Translations\Pattern as Translations_Pattern;
 use WordPressdotorg\Pattern_Translations\PatternParser as Translations_PatternParser;
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content', 10, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
@@ -55,7 +55,7 @@ function is_not_empty_block( $block ) {
 	}
 
 	// Exceptions - these contain no content and maybe no attributes.
-	$allowed_empty = [ 'core/separator', 'core/spacer' ];
+	$allowed_empty = array( 'core/separator', 'core/spacer' );
 	if ( in_array( $block['blockName'], $allowed_empty ) ) {
 		return true;
 	}
@@ -124,7 +124,7 @@ function validate_content( $prepared_post, $request ) {
 
 	// Check that each block in the list has a blockName and is registered.
 	$registry = \WP_Block_Type_Registry::get_instance();
-	$invalid_blocks = array_filter( $all_blocks, function( $block ) use ( $registry ) {
+	$invalid_blocks = array_filter( $all_blocks, function ( $block ) use ( $registry ) {
 		$block_type = $registry->get_registered( $block['blockName'] );
 		return is_null( $block['blockName'] ) || is_null( $block_type );
 	} );
@@ -222,7 +222,7 @@ function validate_status( $prepared_post, $request ) {
 	$current_status = get_post_status( $prepared_post->ID );
 
 	// Drafts or unlisted patterns are OK.
-	if ( in_array( $target_status, [ 'draft', 'auto-draft', UNLISTED_STATUS ] ) ) {
+	if ( in_array( $target_status, array( 'draft', 'auto-draft', UNLISTED_STATUS ) ) ) {
 		return $prepared_post;
 	}
 

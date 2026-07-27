@@ -11,9 +11,10 @@
  */
 
 namespace WordPressdotorg\Pattern_Creator;
-use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
-use function WordPressdotorg\MU_Plugins\Global_Header_Footer\{ is_rosetta_site, get_rosetta_name };
+
 use WP_Block_Editor_Context;
+use function WordPressdotorg\MU_Plugins\Global_Header_Footer\{ is_rosetta_site, get_rosetta_name };
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 const AUTOSAVE_INTERVAL = 30;
 const IS_EDIT_VAR = 'edit-pattern';
@@ -84,13 +85,13 @@ function pattern_creator_init() {
 	wp_deregister_style( 'wporg-parent-2021-style' );
 	wp_deregister_style( 'global-styles' );
 
-	$dir = dirname( __FILE__ );
+	$dir = __DIR__;
 	$script_asset_path = "$dir/build/index.asset.php";
 	if ( ! file_exists( $script_asset_path ) ) {
 		throw new \Error( 'You need to run `npm run start:creator` or `npm run build:creator` for the Pattern Creator.' );
 	}
 
-	$script_asset = require( $script_asset_path );
+	$script_asset = require $script_asset_path;
 	wp_enqueue_script(
 		'wp-pattern-creator',
 		plugins_url( 'build/index.js', __FILE__ ),

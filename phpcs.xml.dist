@@ -151,4 +151,8 @@
 			<property name="text_domain" type="array" value="wporg-patterns" />
 		</properties>
 	</rule>
+	<!-- Short ternaries are used deliberately throughout; expanding them is a style call for maintainers. -->
+	<rule ref="Universal.Operators.DisallowShortTernary">
+		<severity>0</severity>
+	</rule>
 </ruleset>

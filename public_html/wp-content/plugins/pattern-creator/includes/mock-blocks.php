@@ -109,31 +109,31 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
 
 	/* Note: This is not translated (for now) because the post content is also not translated. */
 	$comments = array(
-		[
+		array(
 			'author' => 'Noah',
 			'post_title' => 'Jupiter',
 			'date' => strtotime( '5 days ago' ),
 			'content' => 'Since its orbital revolution occupies nearly twelve years, Jupiter comes back into opposition with the Sun every 399 days.',
-		],
-		[
+		),
+		array(
 			'author' => 'Sabrina',
 			'post_title' => 'Jupiter',
 			'date' => strtotime( '1 week ago' ),
 			'content' => 'Most conspicuous upon this globe are the larger or smaller bands or markings (gray and white, sometimes tinted yellow, or of a maroon or chocolate hue) by which its surface is streaked, particularly in the vicinity of the equator.',
-		],
-		[
+		),
+		array(
 			'author' => 'Yvonne',
 			'post_title' => 'The November Meteors',
 			'date' => strtotime( '2 weeks ago' ),
 			'content' => 'One or two unknown planets, some wandering comets, and swarms of meteors, doubtless traverse those unknown spaces, but all invisible to us.',
-		],
+		),
 	);
 
 	$comments = array_slice( $comments, 0, min( 3, $attributes['commentsToShow'] ) );
 	foreach ( $comments as $comment ) {
 		$list_items_markup .= '<li class="wp-block-latest-comments__comment">';
 		if ( $attributes['displayAvatar'] ) {
-			$list_items_markup .= get_avatar( null, 48, '', '', [ 'class' => 'wp-block-latest-comments__comment-avatar' ] );
+			$list_items_markup .= get_avatar( null, 48, '', '', array( 'class' => 'wp-block-latest-comments__comment-avatar' ) );
 		}
 
 		$list_items_markup .= '<article>';

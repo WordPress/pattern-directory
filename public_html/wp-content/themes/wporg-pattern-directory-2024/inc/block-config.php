@@ -35,8 +35,8 @@ function register_block_bindings() {
 		'wporg-pattern/edit-label',
 		array(
 			'label' => __( 'Edit label', 'wporg-patterns' ),
-			'uses_context' => [ 'postId' ],
-			'get_value_callback' => function( $args, $block ) {
+			'uses_context' => array( 'postId' ),
+			'get_value_callback' => function ( $args, $block ) {
 				$post_id = $block->context['postId'];
 				/* translators: %s: Post title. Only visible to screen readers. */
 				return sprintf(
@@ -51,8 +51,8 @@ function register_block_bindings() {
 		'wporg-pattern/edit-url',
 		array(
 			'label' => __( 'Edit link', 'wporg-patterns' ),
-			'uses_context' => [ 'postId' ],
-			'get_value_callback' => function( $args, $block ) {
+			'uses_context' => array( 'postId' ),
+			'get_value_callback' => function ( $args, $block ) {
 				$post_id = $block->context['postId'];
 				return site_url( "pattern/$post_id/edit/" );
 			},
@@ -70,10 +70,10 @@ function register_block_bindings() {
  */
 function get_applied_filter_list( $include_extras = true ) {
 	global $wp_query;
-	$terms = [];
-	$taxes = [
+	$terms = array();
+	$taxes = array(
 		'pattern-categories' => 'wporg-pattern-category',
-	];
+	);
 	foreach ( $taxes as $query_var => $taxonomy ) {
 		if ( ! isset( $wp_query->query[ $query_var ] ) ) {
 			continue;
@@ -178,7 +178,7 @@ function get_curation_options( $options ) {
 			'community' => _x( 'Community', 'filter option label', 'wporg-patterns' ),
 			'core' => _x( 'Curated', 'filter option label', 'wporg-patterns' ),
 		),
-		'selected' => [ $current ],
+		'selected' => array( $current ),
 	);
 }
 
@@ -218,7 +218,7 @@ function get_sort_options( $options ) {
 	);
 
 	// These pages don't support sorting by favorite count.
-	if ( ! is_page( [ 'my-patterns', 'favorites' ] ) ) {
+	if ( ! is_page( array( 'my-patterns', 'favorites' ) ) ) {
 		$options = array_merge(
 			array(
 				'favorite_count_desc' => __( 'Popular', 'wporg-patterns' ),
@@ -233,7 +233,7 @@ function get_sort_options( $options ) {
 		'key' => 'orderby',
 		'action' => get_filter_action_url(),
 		'options' => $options,
-		'selected' => [ $sort ],
+		'selected' => array( $sort ),
 	);
 }
 
@@ -250,7 +250,7 @@ function inject_other_filters( $key ) {
 	global $wp_query;
 
 	// Single-select query parameters.
-	$query_vars = [ 'pattern-categories', 'order', 'orderby', 'curation' ];
+	$query_vars = array( 'pattern-categories', 'order', 'orderby', 'curation' );
 	foreach ( $query_vars as $query_var ) {
 		if ( ! isset( $wp_query->query[ $query_var ] ) ) {
 			continue;
@@ -286,7 +286,7 @@ function get_favorite_settings( $settings, $post_id ) {
 	return array(
 		'count' => get_favorite_count( $post_id ),
 		'is_favorite' => is_favorite( $post_id ),
-		'add_callback' => function( $_post_id ) {
+		'add_callback' => function ( $_post_id ) {
 			$success = add_favorite( $_post_id );
 			if ( $success ) {
 				return get_favorite_count( $_post_id );
@@ -298,7 +298,7 @@ function get_favorite_settings( $settings, $post_id ) {
 				array( 'status' => 500 )
 			);
 		},
-		'delete_callback' => function( $_post_id ) {
+		'delete_callback' => function ( $_post_id ) {
 			$success = remove_favorite( $_post_id );
 			if ( $success ) {
 				return get_favorite_count( $_post_id );

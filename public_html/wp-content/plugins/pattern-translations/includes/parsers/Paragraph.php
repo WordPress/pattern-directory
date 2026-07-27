@@ -4,10 +4,10 @@ namespace WordPressdotorg\Pattern_Translations\Parsers;
 class Paragraph implements BlockParser {
 	use GetSetAttribute;
 
-	public function to_strings( array $block ) : array {
+	public function to_strings( array $block ): array {
 		$strings = $this->get_attribute( 'placeholder', $block );
 
-		$matches = [];
+		$matches = array();
 
 		if ( preg_match( '/<p[^>]*>(.+)<\/p>/is', $block['innerHTML'], $matches ) ) {
 			if ( ! empty( $matches[1] ) ) {
@@ -19,7 +19,7 @@ class Paragraph implements BlockParser {
 	}
 
 	// todo: this needs a fix to properly rebuild innerContent - see ParagraphParserTest
-	public function replace_strings( array $block, array $replacements ) : array {
+	public function replace_strings( array $block, array $replacements ): array {
 		$this->set_attribute( 'placeholder', $block, $replacements );
 
 		$html = $block['innerHTML'];
@@ -32,7 +32,7 @@ class Paragraph implements BlockParser {
 		}
 
 		$block['innerHTML']    = $html;
-		$block['innerContent'] = [ $html ];
+		$block['innerContent'] = array( $html );
 
 		return $block;
 	}

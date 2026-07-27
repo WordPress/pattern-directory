@@ -1,7 +1,8 @@
 <?php
 namespace WordPressdotorg\Pattern_Translations;
-use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+
 use GlotPress_Translate_Bridge;
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 class Pattern {
 	public $ID = null;
@@ -44,7 +45,7 @@ class Pattern {
 
 		$parser = new PatternParser( $translated );
 
-		$translations = [];
+		$translations = array();
 		$translated   = false;
 		foreach ( $parser->to_strings() as $string ) {
 			$translations[ $string ] = apply_filters( 'gettext', GlotPress_Translate_Bridge::translate( $string, GLOTPRESS_PROJECT ), 'wporg-pattern' );
@@ -68,17 +69,17 @@ class Pattern {
 		$translated->ID     = 0;
 
 		// Find the actual post ID of the translated pattern
-		$children = get_posts( [
+		$children = get_posts( array(
 			'post_parent' => $parent->ID,
 			'post_type'   => POST_TYPE,
 			'post_status' => 'any',
-			'meta_query'  => [
-				[
+			'meta_query'  => array(
+				array(
 					'key'   => 'wpop_locale',
 					'value' => $locale,
-				],
-			],
-		] );
+				),
+			),
+		) );
 		if ( $children ) {
 			$post = array_shift( $children );
 			$translated->ID   = $post->ID;
@@ -94,7 +95,7 @@ class Pattern {
 	 * @param \WP_Post $post The post object.
 	 * @return Pattern The Pattern object.
 	 */
-	public static function from_post( \WP_Post $post ) : Pattern {
+	public static function from_post( \WP_Post $post ): Pattern {
 		$pattern              = new Pattern();
 		$pattern->ID          = $post->ID;
 		$pattern->title       = $post->post_title;
@@ -114,24 +115,24 @@ class Pattern {
 	 * @param array $args The WP_Query args.
 	 * @return array An array of Pattern objects.
 	 */
-	public static function get_patterns( array $args = [] ) : array {
-		$defaults = [
+	public static function get_patterns( array $args = array() ): array {
+		$defaults = array(
 			'post_type'      => POST_TYPE,
 			// Note: This must be set for cli context, in isolated test context this is defaulted to 'publish'
 			// Prevents unexpected patterns in translations
 			'post_status'    => 'publish',
 			'posts_per_page' => -1,
-			'orderby'        => [
+			'orderby'        => array(
 				'post_date' => 'DESC',
-			],
+			),
 			// Only select en_US patterns.
-			'meta_query' => [
-				[
+			'meta_query' => array(
+				array(
 					'key'   => 'wpop_locale',
 					'value' => 'en_US',
-				],
-			],
-		];
+				),
+			),
+		);
 
 		$options = wp_parse_args( $args, $defaults );
 
@@ -141,7 +142,7 @@ class Pattern {
 		wp_reset_postdata();
 
 		if ( 'ids' !== $query->get( 'fields' ) ) {
-			$patterns = array_map( [ self::class, 'from_post' ], $patterns );
+			$patterns = array_map( array( self::class, 'from_post' ), $patterns );
 		}
 
 		return $patterns;

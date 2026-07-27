@@ -11,11 +11,11 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 const GLOTPRESS_PROJECT = 'patterns/core';
 
-const TRANSLATED_TAXONOMIES = [
+const TRANSLATED_TAXONOMIES = array(
 	// Taxonomy => Translation Context, see pattern-directory/bin/i18n.php
 	'wporg-pattern-category'    => 'Categories term name',
 	'wporg-pattern-flag-reason' => 'Flag Reasons term name',
-];
+);
 
 require __DIR__ . '/includes/pattern.php';
 require __DIR__ . '/includes/parser.php';
@@ -36,7 +36,7 @@ function create_or_update_translated_pattern( Pattern $pattern ) {
 		$parent = get_post( $pattern->parent->ID );
 	}
 
-	$args = [
+	$args = array(
 		'ID'           => $pattern->ID,
 		'post_type'    => POST_TYPE,
 		'post_title'   => $pattern->title,
@@ -46,7 +46,7 @@ function create_or_update_translated_pattern( Pattern $pattern ) {
 		'post_parent'  => $pattern->parent->ID ?? 0,
 		'post_author'  => $parent->post_author ?? 0,
 		'post_status'  => $parent->post_status ?? 'pending',
-		'meta_input'   => [
+		'meta_input'   => array(
 			'wpop_description'          => $pattern->description,
 			'wpop_locale'               => $pattern->locale,
 			'wpop_keywords'             => $pattern->keywords,
@@ -55,8 +55,8 @@ function create_or_update_translated_pattern( Pattern $pattern ) {
 			'wpop_contains_block_types' => $parent->wpop_contains_block_types,
 			'wpop_wp_version'           => $parent->wpop_wp_version,
 			'wpop_is_translation'       => true,
-		],
-	];
+		),
+	);
 
 	if ( ! $args['ID'] ) {
 		unset( $args['ID'] );
@@ -66,8 +66,8 @@ function create_or_update_translated_pattern( Pattern $pattern ) {
 
 	// Copy the terms from the parent if required.
 	if ( $post_id && ! is_wp_error( $post_id ) && $pattern->parent ) {
-		foreach ( [ 'wporg-pattern-category', 'wporg-pattern-keyword' ] as $taxonomy ) {
-			$term_ids = wp_get_object_terms( $pattern->parent->ID, $taxonomy, [ 'fields' => 'ids' ] );
+		foreach ( array( 'wporg-pattern-category', 'wporg-pattern-keyword' ) as $taxonomy ) {
+			$term_ids = wp_get_object_terms( $pattern->parent->ID, $taxonomy, array( 'fields' => 'ids' ) );
 			wp_set_object_terms( $post_id, $term_ids, $taxonomy );
 		}
 	}

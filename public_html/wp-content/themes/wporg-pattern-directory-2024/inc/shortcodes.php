@@ -1,4 +1,8 @@
 <?php
+/**
+ * Shortcodes for the Pattern Directory theme.
+ */
+
 namespace WordPressdotorg\Theme\Pattern_Directory_2024;
 
 /**
@@ -6,7 +10,7 @@ namespace WordPressdotorg\Theme\Pattern_Directory_2024;
  */
 add_shortcode(
 	'pattern_edit_link',
-	function() {
+	function () {
 		$post_id = get_the_ID();
 		return site_url( "pattern/$post_id/edit/" );
 	}
@@ -17,7 +21,7 @@ add_shortcode(
  */
 add_shortcode(
 	'pattern_draft_link',
-	function() {
+	function () {
 		$post_id = get_the_ID();
 		return add_query_arg(
 			array(

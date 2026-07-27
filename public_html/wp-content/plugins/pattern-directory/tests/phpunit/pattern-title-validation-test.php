@@ -161,4 +161,3 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 		$this->assertSame( 'rest_pattern_empty_title', $data['code'] );
 	}
 }
-

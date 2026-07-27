@@ -17,7 +17,6 @@ function register_cron_tasks() {
 	if ( ! wp_next_scheduled( 'pattern_import_translations_to_directory' ) ) {
 		wp_schedule_event( time(), 'twicedaily', 'pattern_import_translations_to_directory' );
 	}
-
 }
 add_action( 'admin_init', __NAMESPACE__ . '\register_cron_tasks' );
 
@@ -46,7 +45,7 @@ add_action( 'pattern_import_to_glotpress', __NAMESPACE__ . '\pattern_import_to_g
  */
 function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 	if ( ! $pattern_ids ) {
-		$pattern_ids = Pattern::get_patterns( [ 'fields' => 'ids' ] );
+		$pattern_ids = Pattern::get_patterns( array( 'fields' => 'ids' ) );
 
 		if ( wp_doing_cron() ) {
 			// Chunk the patterns to avoid memory exhaustion.
@@ -72,7 +71,7 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 	// Raise the memory limit for this process to at least 512M.
 	add_filter(
 		'cron_memory_limit',
-		function() {
+		function () {
 			return '512M';
 		}
 	);
@@ -122,11 +121,11 @@ add_action( 'pattern_import_translations_to_directory', __NAMESPACE__ . '\patter
 function clear_memory_heavy_variables() {
 	global $wpdb, $wp_object_cache;
 
-	$wpdb->queries = [];
+	$wpdb->queries = array();
 
 	if ( is_object( $wp_object_cache ) ) {
-		$wp_object_cache->cache          = [];
-		$wp_object_cache->group_ops      = [];
-		$wp_object_cache->memcache_debug = [];
+		$wp_object_cache->cache          = array();
+		$wp_object_cache->group_ops      = array();
+		$wp_object_cache->memcache_debug = array();
 	}
 }

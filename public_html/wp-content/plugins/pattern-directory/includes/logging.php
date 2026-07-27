@@ -1,4 +1,7 @@
 <?php
+/**
+ * Logging for pattern status changes.
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Logging;
 

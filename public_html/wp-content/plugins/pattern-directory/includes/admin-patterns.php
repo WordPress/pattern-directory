@@ -9,7 +9,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTE
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\PENDING_STATUS;
-use const  WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ UNLISTED_STATUS, SPAM_STATUS };
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ UNLISTED_STATUS, SPAM_STATUS };
 
 defined( 'WPINC' ) || die();
 
@@ -399,7 +399,7 @@ function display_post_states( $post_states, $post ) {
 
 	if (
 		$post->post_status !== $post_status &&
-		in_array( $post->post_status, [ UNLISTED_STATUS, SPAM_STATUS ] )
+		in_array( $post->post_status, array( UNLISTED_STATUS, SPAM_STATUS ) )
 	) {
 		$post_states[ $post->post_status ] = get_post_status_object( $post->post_status )->label;
 	}

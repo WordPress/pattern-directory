@@ -9,11 +9,11 @@ class PatternMakepot {
 		$this->patterns = $patterns;
 	}
 
-	public function makepot( $revision_time = null ) : string {
+	public function makepot( $revision_time = null ): string {
 		return $this->makepo( $revision_time, $comment )->export();
 	}
 
-	public function makepo( $revision_time = null ) : \PO {
+	public function makepo( $revision_time = null ): \PO {
 		require_once ABSPATH . '/wp-includes/pomo/po.php';
 
 		$po = new \PO();
@@ -31,8 +31,8 @@ class PatternMakepot {
 		return $po;
 	}
 
-	public function entries() : array {
-		$entries = [];
+	public function entries(): array {
+		$entries = array();
 
 		foreach ( $this->patterns as $pattern ) {
 
@@ -41,11 +41,11 @@ class PatternMakepot {
 			foreach ( $parser->to_strings() as $string ) {
 				if ( ! isset( $entries[ $string ] ) ) {
 					$entries[ $string ] = new \Translation_Entry(
-						[
+						array(
 							'singular' => $string,
 							'extracted_comments' => "Found in the '{$pattern->title}' pattern.",
-							'references' => [],
-						]
+							'references' => array(),
+						)
 					);
 				}
 
@@ -77,9 +77,9 @@ class PatternMakepot {
 		$po = $this->makepo();
 
 		if ( true === $save ) {
-			add_filter( 'gp_import_project_originals', [ $this, 'extend_imported_originals' ], 10, 3 );
+			add_filter( 'gp_import_project_originals', array( $this, 'extend_imported_originals' ), 10, 3 );
 			list( $added, $existing, $fuzzied, $obsoleted, $error ) = \GP::$original->import_for_project( $project, $po );
-			remove_filter( 'gp_import_project_originals', [ $this, 'extend_imported_originals' ], 10, 3 );
+			remove_filter( 'gp_import_project_originals', array( $this, 'extend_imported_originals' ), 10, 3 );
 
 			$notice = sprintf(
 				'%1$s new strings added, %2$s updated, %3$s fuzzied, and %4$s obsoleted.',
@@ -121,7 +121,7 @@ class PatternMakepot {
 		// Let's get all the references that we are importing.
 		$import_references = array();
 		if ( ! empty( $po->entries ) ) {
-			$import_references = array_merge( ... array_column( $po->entries, 'references' ) );
+			$import_references = array_merge( ...array_column( $po->entries, 'references' ) );
 		}
 
 		foreach ( $originals_by_key as $entry_key => $original ) {
@@ -145,13 +145,13 @@ class PatternMakepot {
 				// otherwise, merge the original into the po as a new entry
 				$po->add_entry(
 					new \Translation_Entry(
-						[
+						array(
 							'context' => $original->context,
 							'singular' => $original->singular,
 							'plural' => $original->plural,
 							'extracted_comments' => $original->comment,
 							'references' => $original_references, // Only include references not covered by our import
-						]
+						)
 					)
 				);
 			}
@@ -177,8 +177,8 @@ class PatternMakepot {
 		$GLOBALS['gp_table_prefix'] = GLOTPRESS_TABLE_PREFIX;
 
 		// Load any GlotPress plugins as needed.
-		$plugins = get_option( 'active_plugins', [] );
-		array_walk( $plugins, function( $plugin ) {
+		$plugins = get_option( 'active_plugins', array() );
+		array_walk( $plugins, function ( $plugin ) {
 			include_once trailingslashit( WP_PLUGIN_DIR ) . $plugin;
 		} );
 

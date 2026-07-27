@@ -64,6 +64,6 @@ function render( $attributes, $content, $block ) {
 		return '';
 	}
 
-	$wrapper_attributes = get_block_wrapper_attributes( [ 'class' => 'is-' . $type ] );
+	$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => 'is-' . $type ) );
 	return sprintf( '<div %1s>%2s</div>', $wrapper_attributes, $label );
 }
