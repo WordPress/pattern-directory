@@ -5,9 +5,10 @@
  * Inserter: no
  */
 
-$action_status = isset( $_GET['status'] ) ? $_GET['status'] : false;
-$notice = '';
-$notice_type = 'warning';
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only notice flag set by our own redirect; nothing is written here.
+$action_status = isset( $_GET['status'] ) ? sanitize_key( wp_unslash( $_GET['status'] ) ) : false;
+$notice        = '';
+$notice_type   = 'warning';
 
 if ( 'report-failed' === $action_status ) {
 	$notice = __( 'Your pattern report could not be saved. Please try again.', 'wporg-patterns' );

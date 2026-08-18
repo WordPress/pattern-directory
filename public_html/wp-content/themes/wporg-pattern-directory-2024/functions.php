@@ -72,8 +72,8 @@ function do_pattern_actions() {
 		return;
 	}
 
-	$action = isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : false;
-	$nonce = isset( $_REQUEST['_wpnonce'] ) ? $_REQUEST['_wpnonce'] : false;
+	$action  = isset( $_REQUEST['action'] ) ? sanitize_key( wp_unslash( $_REQUEST['action'] ) ) : false;
+	$nonce   = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : false;
 	$post_id = get_the_ID();
 
 	if ( 'draft' === $action ) {
@@ -112,14 +112,17 @@ function do_pattern_actions() {
 				return;
 			}
 
+			$report_details = isset( $_POST['report-details'] ) ? sanitize_text_field( wp_unslash( $_POST['report-details'] ) ) : '';
+			$report_reason  = isset( $_POST['report-reason'] ) ? intval( $_POST['report-reason'] ) : 0;
+
 			$success = wp_insert_post(
 				array(
-					'post_type'   => FLAG_POST_TYPE,
-					'post_parent' => $post_id,
-					'post_excerpt'  => sanitize_text_field( $_POST['report-details'] ),
-					'post_status' => PENDING_STATUS,
-					'tax_input'  => array(
-						'wporg-pattern-flag-reason' => intval( $_POST['report-reason'] ),
+					'post_type'    => FLAG_POST_TYPE,
+					'post_parent'  => $post_id,
+					'post_excerpt' => $report_details,
+					'post_status'  => PENDING_STATUS,
+					'tax_input'    => array(
+						'wporg-pattern-flag-reason' => $report_reason,
 					),
 				)
 			);

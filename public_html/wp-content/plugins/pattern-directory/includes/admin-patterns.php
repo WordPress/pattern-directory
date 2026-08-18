@@ -391,11 +391,8 @@ function handle_pattern_list_table_views( WP_Query $query ) {
  * @return array
  */
 function display_post_states( $post_states, $post ) {
-	if ( isset( $_REQUEST['post_status'] ) ) {
-		$post_status = $_REQUEST['post_status'];
-	} else {
-		$post_status = '';
-	}
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only list table filter, compared against registered statuses.
+	$post_status = isset( $_REQUEST['post_status'] ) ? sanitize_key( wp_unslash( $_REQUEST['post_status'] ) ) : '';
 
 	if (
 		$post->post_status !== $post_status &&
