@@ -31,7 +31,57 @@
 
 	<arg name="extensions" value="php" />
 
-	<rule ref="WordPress-Core">
+	<!--
+	 ... Keep this block ABOVE the `WordPress` rule. `WordPress` includes `WordPress-Docs` itself, and whichever
+	 ... reference registers a sniff first is the one whose `<exclude-pattern>` sticks. Declared afterwards, the
+	 ... parser-file exemption below is silently ignored and the block pattern parsers pick up ~36 docblock errors.
+	 -->
+	<rule ref="WordPress-Docs">
+		<!-- If files/variables are given descriptive names like they should be, then an explicit description is usually unnecessary, so leave this as a judgement call. -->
+		<exclude name="Squiz.Commenting.FunctionComment.MissingParamComment" />
+		<exclude name="Squiz.Commenting.FileComment.Missing" />
+		<exclude name="Squiz.Commenting.ClassComment.Missing" />
+		<exclude name="Squiz.Commenting.FunctionComment.MissingParamTag" />
+		<exclude name="Generic.Commenting.DocComment.MissingShort" />
+		<exclude name="Squiz.Commenting.VariableComment.Missing" />
+		<exclude name="Squiz.Commenting.VariableComment.MissingVar" />
+
+		<!-- I don't see how these are useful. -->
+		<exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
+
+		<!-- We really only use basic exceptions, so this is kind of overkill and tedious. -->
+		<exclude name="Squiz.Commenting.FunctionComment.EmptyThrows" />
+
+		<!-- Whitespace makes things more readable. -->
+		<exclude name="Squiz.Commenting.FileComment.SpacingAfterOpen" />
+
+		<!-- There are some valid cases of this, like in identifying a closing tag from another file; e.g., in `themes/campsite-2017/footer.php`. -->
+		<exclude name="Squiz.Commenting.InlineComment.SpacingAfter" />
+
+		<!-- It's not wrong for WordPress plugin file headers. -->
+		<exclude name="Squiz.Commenting.FileComment.WrongStyle" />
+
+		<!-- Class comments are generally not useful, so they're left out, but then PHPCS confuses the plugin headers for a class comment -->
+		<exclude name="Squiz.Commenting.ClassComment.WrongStyle" />
+		<exclude name="Squiz.Commenting.ClassComment.SpacingAfter" />
+
+		<!-- WordPress have translators comment which requires no space after `//` -->
+		<exclude name="Squiz.Commenting.InlineComment.NoSpaceBefore" />
+
+		<!-- Ignore punctuation at the end of comments. -->
+		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar" />
+
+		<!-- Ignore docs issues in block pattern parser files. -->
+		<exclude-pattern>*/pattern-translations/includes/*.php$</exclude-pattern>
+	</rule>
+
+	<!--
+	 ... Reference the full `WordPress` standard rather than composing Core/Docs/Extra by hand. Only the meta
+	 ... standard carries the `namespace="WordPressCS\WordPress"` attribute that auto-includes every WordPressCS
+	 ... sniff; the sub-rulesets ref sniffs individually, which left WordPress.Security.ValidatedSanitizedInput
+	 ... out of the run entirely.
+	 -->
+	<rule ref="WordPress">
 		<!-- I don't see anything wrong with this :) -->
 		<exclude name="Squiz.PHP.EmbeddedPhp.ContentAfterOpen" />
 		<exclude name="Squiz.PHP.EmbeddedPhp.ContentBeforeEnd" />
@@ -79,11 +129,8 @@
 		<!-- print_r() is perfectly accepted in some circumstances, like WP_CLI commands. -->
 		<exclude name="WordPress.PHP.DevelopmentFunctions.error_log_print_r" />
 
-		<!-- Allow short ternary pattern. -->
-		<exclude name="WordPress.PHP.DisallowShortTernary.Found" />
-
-		<!-- Allow short array syntax. -->
-		<exclude name="Generic.Arrays.DisallowShortArraySyntax.Found" />
+		<!-- I think it's better to have all the `use` statements come right after the namespace line. -->
+		<exclude name="PSR2.Namespaces.NamespaceDeclaration.BlankLineAfter" />
 	</rule>
 
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
@@ -100,55 +147,24 @@
 		</properties>
 	</rule>
 
-	<rule ref="WordPress-Docs">
-		<!-- If files/variables are given descriptive names like they should be, then an explicit description is usually unnecessary, so leave this as a judgement call. -->
-		<exclude name="Squiz.Commenting.FunctionComment.MissingParamComment" />
-		<exclude name="Squiz.Commenting.FileComment.Missing" />
-		<exclude name="Squiz.Commenting.ClassComment.Missing" />
-		<exclude name="Squiz.Commenting.FunctionComment.MissingParamTag" />
-		<exclude name="Generic.Commenting.DocComment.MissingShort" />
-		<exclude name="Squiz.Commenting.VariableComment.Missing" />
-		<exclude name="Squiz.Commenting.VariableComment.MissingVar" />
-
-		<!-- I don't see how these are useful. -->
-		<exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
-
-		<!-- We really only use basic exceptions, so this is kind of overkill and tedious. -->
-		<exclude name="Squiz.Commenting.FunctionComment.EmptyThrows" />
-
-		<!-- Whitespace makes things more readable. -->
-		<exclude name="Squiz.Commenting.FileComment.SpacingAfterOpen" />
-
-		<!-- There are some valid cases of this, like in identifying a closing tag from another file; e.g., in `themes/campsite-2017/footer.php`. -->
-		<exclude name="Squiz.Commenting.InlineComment.SpacingAfter" />
-
-		<!-- It's not wrong for WordPress plugin file headers. -->
-		<exclude name="Squiz.Commenting.FileComment.WrongStyle" />
-
-		<!-- Class comments are generally not useful, so they're left out, but then PHPCS confuses the plugin headers for a class comment -->
-		<exclude name="Squiz.Commenting.ClassComment.WrongStyle" />
-		<exclude name="Squiz.Commenting.ClassComment.SpacingAfter" />
-
-		<!-- WordPress have translators comment which requires no space after `//` -->
-		<exclude name="Squiz.Commenting.InlineComment.NoSpaceBefore" />
-
-		<!-- Ignore punctuation at the end of comments. -->
-		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar" />
-
-		<!-- Ignore docs issues in block pattern parser files. -->
-		<exclude-pattern>*/pattern-translations/includes/*.php$</exclude-pattern>
+	<!--
+	 ... `<arg value="psn"/>` above reports errors only, so a security sniff that emits warnings is invisible
+	 ... in CI. Promote the whole category to errors rather than dropping the `n`, which would also surface
+	 ... ~380 array-alignment warnings that have nothing to do with security.
+	 ...
+	 ... Must stay after the `WordPress` rule above to take effect.
+	 -->
+	<rule ref="WordPress.Security">
+		<type>error</type>
 	</rule>
 
-	<rule ref="WordPress-Extra">
-		<!-- I think it's better to have all the `use` statements come right after the namespace line. -->
-		<exclude name="PSR2.Namespaces.NamespaceDeclaration.BlankLineAfter" />
-	</rule>
-
-	<!-- Verify that the text_domain is set to the desired text-domain. Multiple valid text domains can be
-	     provided as a comma-delimited list. -->
+	<!-- Verify that the text_domain is set to the desired text-domain. Additional valid text domains can be
+	     added as further `<element>` nodes. -->
 	<rule ref="WordPress.WP.I18n">
 		<properties>
-			<property name="text_domain" type="array" value="wporg-patterns" />
+			<property name="text_domain" type="array">
+				<element value="wporg-patterns" />
+			</property>
 		</properties>
 	</rule>
 	<!-- Short ternaries are used deliberately throughout; expanding them is a style call for maintainers. -->

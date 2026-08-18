@@ -41,6 +41,7 @@ require_once $_tests_dir . '/includes/functions.php';
 function _manually_load_plugins() {
 	require dirname( dirname( __DIR__ ) ) . '/plugins/pattern-directory/bootstrap.php';
 	require dirname( dirname( __DIR__ ) ) . '/plugins/pattern-creator/pattern-creator.php';
+	require dirname( dirname( __DIR__ ) ) . '/plugins/pattern-translations/pattern-translations.php';
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugins' );
 

@@ -124,15 +124,20 @@ add_filter( 'single_post_title', __NAMESPACE__ . '\translate_page_title', 1, 2 )
  * For REST API requests, the `_locale=user` GET parameter is ignored for authenticated requests, causing the rest to default to the Site locale.
  */
 function locale( $locale ) {
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- locale negotiation on GET; nothing is persisted, and the only write is to $_GET itself for the current request.
+
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- $raw_locale is the untouched baseline the next line is compared against.
+	$raw_locale  = isset( $_GET['locale'] ) && is_string( $_GET['locale'] ) ? wp_unslash( $_GET['locale'] ) : '';
+	$safe_locale = sanitize_locale_name( $raw_locale );
+
 	// When being requested through api.wordpress.org, respect the query variable.
 	if (
 		defined( 'WPORG_IS_API' ) &&
 		WPORG_IS_API &&
-		! empty( $_GET['locale'] ) &&
-		is_string( $_GET['locale'] ) &&
-		sanitize_locale_name( $_GET['locale'] ) === $_GET['locale']
+		! empty( $raw_locale ) &&
+		$safe_locale === $raw_locale
 	) {
-		return $_GET['locale'];
+		return $safe_locale;
 	}
 
 	// Respect the site locale otherwise for rest api queries.
@@ -144,6 +149,7 @@ function locale( $locale ) {
 	) {
 		$_GET['_locale'] = 'site';
 	}
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 	return $locale;
 }

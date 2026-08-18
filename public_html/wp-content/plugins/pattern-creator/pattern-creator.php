@@ -337,8 +337,8 @@ function allow_reading_global_styles( $caps, $cap, $user_id, $args ) {
 	) {
 		return $caps;
 	}
-	$request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( $_SERVER['REQUEST_METHOD'] ) : '';
-	$request_uri    = isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '';
+	$request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) : '';
+	$request_uri    = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 	if (
 		( 'GET' !== $request_method && 'HEAD' !== $request_method ) ||
 		false === strpos( $request_uri, '/wp/v2/global-styles' )
