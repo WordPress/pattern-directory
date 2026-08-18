@@ -42,9 +42,6 @@
 		<!-- It's often obvious what the placeholder is, so whether or not to include a comment is a judgement call. -->
 		<exclude name="WordPress.WP.I18n.MissingTranslatorsComment" />
 
-		<!-- I know it's a language construct, but it just looks better using the function call syntax. -->
-		<exclude name="PEAR.Files.IncludingFile.BracketsNotRequired" />
-
 		<!-- This requires passing a whitelist of prefixes in order to work, which is not practical for a large and varied codebase. It's also fixes a problem that we're unlikely to cause. -->
 		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound" />
 		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound" />
@@ -79,11 +76,17 @@
 		<!-- print_r() is perfectly accepted in some circumstances, like WP_CLI commands. -->
 		<exclude name="WordPress.PHP.DevelopmentFunctions.error_log_print_r" />
 
+		<!-- PSR-12's file-header grammar fixes the order of the docblock, namespace and `use` groups, and
+		     forbids interleaving them. This codebase groups its imports by what they import rather than by
+		     kind, and puts the `use` statements directly after the namespace, which is the same preference
+		     recorded below for PSR2.Namespaces.NamespaceDeclaration.BlankLineAfter. New in WPCS 3.0. -->
+		<exclude name="PSR12.Files.FileHeader" />
+
 		<!-- Allow short ternary pattern. -->
-		<exclude name="WordPress.PHP.DisallowShortTernary.Found" />
+		<exclude name="Universal.Operators.DisallowShortTernary.Found" />
 
 		<!-- Allow short array syntax. -->
-		<exclude name="Generic.Arrays.DisallowShortArraySyntax.Found" />
+		<exclude name="Universal.Arrays.DisallowShortArraySyntax.Found" />
 	</rule>
 
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
@@ -93,7 +96,7 @@
 
 	<rule ref="WordPress.NamingConventions.ValidVariableName">
 		<properties>
-			<property name="customPropertiesWhitelist" type="array">
+			<property name="allowed_custom_properties" type="array">
 				<element value="nodeValue"/>
 				<element value="parentNode"/>
 			</property>
@@ -148,7 +151,16 @@
 	     provided as a comma-delimited list. -->
 	<rule ref="WordPress.WP.I18n">
 		<properties>
-			<property name="text_domain" type="array" value="wporg-patterns" />
+			<property name="text_domain" type="array">
+				<element value="wporg-patterns" />
+			</property>
 		</properties>
+	</rule>
+
+	<!-- I know it's a language construct, but it just looks better using the function call syntax.
+	     Silenced here rather than excluded from `WordPress-Core`, because `WordPress-Extra` re-includes
+	     `WordPress-Core` and reinstates it; this must stay after the `WordPress-Extra` rule to win. -->
+	<rule ref="PEAR.Files.IncludingFile.BracketsNotRequired">
+		<severity>0</severity>
 	</rule>
 </ruleset>

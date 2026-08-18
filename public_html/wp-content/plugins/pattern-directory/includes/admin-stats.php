@@ -95,7 +95,7 @@ function get_snapshot_meta_data() {
  * @return array
  */
 function get_export_form_inputs() {
-	$date_filter = function( $string ) {
+	$date_filter = function ( $string ) {
 		$success = preg_match( '|([0-9]{4}\-[0-9]{2}\-[0-9]{2})|', $string, $match );
 
 		if ( $success ) {
@@ -230,7 +230,7 @@ function handle_csv_export() {
 	}
 
 	$data = array_map(
-		function( $snapshot ) use ( $schema ) {
+		function ( $snapshot ) use ( $schema ) {
 			$date = get_the_date( 'Y-m-d', $snapshot );
 			$row  = array( $date );
 

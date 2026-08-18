@@ -43,7 +43,7 @@ class PatternParser {
 		$this->fallback = new Parsers\BasicText();
 	}
 
-	public function block_parser_to_strings( array $block ) : array {
+	public function block_parser_to_strings( array $block ): array {
 		$parser = $this->parsers[ $block['blockName'] ] ?? $this->fallback;
 
 		$strings = $parser->to_strings( $block );
@@ -55,7 +55,7 @@ class PatternParser {
 		return $strings;
 	}
 
-	public function block_parser_replace_strings( array &$block, array $replacements ) : array {
+	public function block_parser_replace_strings( array &$block, array $replacements ): array {
 		$parser = $this->parsers[ $block['blockName'] ] ?? $this->fallback;
 		$block = $parser->replace_strings( $block, $replacements );
 
@@ -66,7 +66,7 @@ class PatternParser {
 		return $block;
 	}
 
-	public function to_strings() : array {
+	public function to_strings(): array {
 		$blocks = parse_blocks( $this->pattern->html );
 
 		$strings = [];
@@ -91,7 +91,7 @@ class PatternParser {
 		return array_unique( $strings );
 	}
 
-	public function replace_strings_with_kses( array $replacements ) : Pattern {
+	public function replace_strings_with_kses( array $replacements ): Pattern {
 		// Sanitize replacement strings before injecting them into blocks and block attributes.
 		$sanitized_replacements = $replacements;
 		foreach ( $sanitized_replacements as &$replacement ) {
@@ -100,7 +100,7 @@ class PatternParser {
 		return $this->replace_strings( $sanitized_replacements );
 	}
 
-	public function replace_strings( array $replacements ) : Pattern {
+	public function replace_strings( array $replacements ): Pattern {
 		$translated = clone $this->pattern;
 		$translated->title = $replacements[ $translated->title ] ?? $translated->title;
 		$translated->description = $replacements[ $translated->description ] ?? $translated->description;

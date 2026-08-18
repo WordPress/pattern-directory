@@ -103,10 +103,8 @@ while ( $query->have_posts() ) {
 				);
 			}
 		}
-	} else {
-		if ( $opts['verbose'] ) {
-			echo "{$pattern->ID}: Not spam.\n"; // phpcs:ignore
-		}
+	} elseif ( $opts['verbose'] ) {
+		echo "{$pattern->ID}: Not spam.\n"; // phpcs:ignore
 	}
 }
 

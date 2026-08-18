@@ -94,7 +94,7 @@ class Pattern {
 	 * @param \WP_Post $post The post object.
 	 * @return Pattern The Pattern object.
 	 */
-	public static function from_post( \WP_Post $post ) : Pattern {
+	public static function from_post( \WP_Post $post ): Pattern {
 		$pattern              = new Pattern();
 		$pattern->ID          = $post->ID;
 		$pattern->title       = $post->post_title;
@@ -114,7 +114,7 @@ class Pattern {
 	 * @param array $args The WP_Query args.
 	 * @return array An array of Pattern objects.
 	 */
-	public static function get_patterns( array $args = [] ) : array {
+	public static function get_patterns( array $args = [] ): array {
 		$defaults = [
 			'post_type'      => POST_TYPE,
 			// Note: This must be set for cli context, in isolated test context this is defaulted to 'publish'

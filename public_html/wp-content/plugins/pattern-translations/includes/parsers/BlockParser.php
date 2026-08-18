@@ -15,19 +15,19 @@ namespace WordPressdotorg\Pattern_Translations\Parsers;
 // A block transform is specific to a certain block type and contains
 // the know-how of how to both extract and replace strings
 interface BlockParser {
-	public function to_strings( array $block ) : array;
-	public function replace_strings( array $block, array $replacements ) : array;
+	public function to_strings( array $block ): array;
+	public function replace_strings( array $block, array $replacements ): array;
 }
 
 // DomDocument::loadHTML with LIBXML_HTML_NOIMPLIED causes dom doc settings to format / strip whitespace from our html
 // Add/remove html tags to avoid the need for noimplied html
 trait DomUtils {
 	// phpcs:disable WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
-	private function addHtml( string $html ) : string {
+	private function addHtml( string $html ): string {
 		return "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head><body>$html</body></html>";
 	}
 
-	private function removeHtml( string $html ) : string {
+	private function removeHtml( string $html ): string {
 		return preg_replace(
 			[
 				'/^\s*<html><head><meta http-equiv="Content-Type" content="text\/html; charset=utf-8"><\/head><body>/sm',
@@ -39,7 +39,7 @@ trait DomUtils {
 		);
 	}
 
-	private function get_dom( string $html ) : \DOMDocument {
+	private function get_dom( string $html ): \DOMDocument {
 		$previous = libxml_use_internal_errors( true );
 		$dom      = new \DomDocument();
 		$dom->loadHTML( $this->addHtml( $html ), LIBXML_HTML_NODEFDTD | LIBXML_COMPACT );
@@ -51,7 +51,7 @@ trait DomUtils {
 }
 
 trait GetSetAttribute {
-	private function get_attribute( string $attribute_name, array $block ) : array {
+	private function get_attribute( string $attribute_name, array $block ): array {
 		if ( isset( $block['attrs'][ $attribute_name ] ) && is_string( $block['attrs'][ $attribute_name ] ) ) {
 			return [ $block['attrs'][ $attribute_name ] ];
 		}
@@ -73,7 +73,7 @@ trait SwapTags {
 		'em',
 	];
 
-	private function encode_tags( string $raw_html ) : string {
+	private function encode_tags( string $raw_html ): string {
 		foreach ( $this->safe_tags as $tag ) {
 			$raw_html = preg_replace(
 				'#(<' . $tag . '([^>]*)>)(.*)(</' . $tag . '>)#',
@@ -84,7 +84,7 @@ trait SwapTags {
 		return $raw_html;
 	}
 
-	private function decode_tags( string $encoded_html ) : string {
+	private function decode_tags( string $encoded_html ): string {
 		foreach ( $this->safe_tags as $tag ) {
 			$encoded_html = preg_replace(
 				'#({' . $tag . '([^}]*)})(.*)({/' . $tag . '})#',

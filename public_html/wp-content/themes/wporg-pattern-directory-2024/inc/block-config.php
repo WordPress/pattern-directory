@@ -36,7 +36,7 @@ function register_block_bindings() {
 		array(
 			'label' => __( 'Edit label', 'wporg-patterns' ),
 			'uses_context' => [ 'postId' ],
-			'get_value_callback' => function( $args, $block ) {
+			'get_value_callback' => function ( $args, $block ) {
 				$post_id = $block->context['postId'];
 				/* translators: %s: Post title. Only visible to screen readers. */
 				return sprintf(
@@ -52,7 +52,7 @@ function register_block_bindings() {
 		array(
 			'label' => __( 'Edit link', 'wporg-patterns' ),
 			'uses_context' => [ 'postId' ],
-			'get_value_callback' => function( $args, $block ) {
+			'get_value_callback' => function ( $args, $block ) {
 				$post_id = $block->context['postId'];
 				return site_url( "pattern/$post_id/edit/" );
 			},
@@ -286,7 +286,7 @@ function get_favorite_settings( $settings, $post_id ) {
 	return array(
 		'count' => get_favorite_count( $post_id ),
 		'is_favorite' => is_favorite( $post_id ),
-		'add_callback' => function( $_post_id ) {
+		'add_callback' => function ( $_post_id ) {
 			$success = add_favorite( $_post_id );
 			if ( $success ) {
 				return get_favorite_count( $_post_id );
@@ -298,7 +298,7 @@ function get_favorite_settings( $settings, $post_id ) {
 				array( 'status' => 500 )
 			);
 		},
-		'delete_callback' => function( $_post_id ) {
+		'delete_callback' => function ( $_post_id ) {
 			$success = remove_favorite( $_post_id );
 			if ( $success ) {
 				return get_favorite_count( $_post_id );

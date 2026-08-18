@@ -21,7 +21,7 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 		$patterns = $this->get_patterns_or_exit( $args );
 
 		// Flatten parent to just being the slug.
-		array_walk( $patterns, function( $pattern ) {
+		array_walk( $patterns, function ( $pattern ) {
 			$pattern->parent = $pattern->parent->name ?? $pattern->parent;
 		} );
 
@@ -139,5 +139,4 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 
 		return $patterns;
 	}
-
 }

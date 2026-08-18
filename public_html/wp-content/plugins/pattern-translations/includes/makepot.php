@@ -9,11 +9,11 @@ class PatternMakepot {
 		$this->patterns = $patterns;
 	}
 
-	public function makepot( $revision_time = null ) : string {
+	public function makepot( $revision_time = null ): string {
 		return $this->makepo( $revision_time, $comment )->export();
 	}
 
-	public function makepo( $revision_time = null ) : \PO {
+	public function makepo( $revision_time = null ): \PO {
 		require_once ABSPATH . '/wp-includes/pomo/po.php';
 
 		$po = new \PO();
@@ -31,7 +31,7 @@ class PatternMakepot {
 		return $po;
 	}
 
-	public function entries() : array {
+	public function entries(): array {
 		$entries = [];
 
 		foreach ( $this->patterns as $pattern ) {
@@ -121,7 +121,7 @@ class PatternMakepot {
 		// Let's get all the references that we are importing.
 		$import_references = array();
 		if ( ! empty( $po->entries ) ) {
-			$import_references = array_merge( ... array_column( $po->entries, 'references' ) );
+			$import_references = array_merge( ...array_column( $po->entries, 'references' ) );
 		}
 
 		foreach ( $originals_by_key as $entry_key => $original ) {
@@ -178,7 +178,7 @@ class PatternMakepot {
 
 		// Load any GlotPress plugins as needed.
 		$plugins = get_option( 'active_plugins', [] );
-		array_walk( $plugins, function( $plugin ) {
+		array_walk( $plugins, function ( $plugin ) {
 			include_once trailingslashit( WP_PLUGIN_DIR ) . $plugin;
 		} );
 

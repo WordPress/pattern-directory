@@ -76,11 +76,11 @@
 		"wporg/wporg-mu-plugins": "dev-build"
 	},
 	"require-dev": {
-		"dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.0",
 		"phpcompatibility/phpcompatibility-wp": "*",
 		"phpunit/phpunit": "^9.5",
 		"rmccue/requests": "^1.8.1",
-		"wp-coding-standards/wpcs": "2.*",
+		"wp-coding-standards/wpcs": "^3.4",
 		"wp-phpunit/wp-phpunit": "~6.0",
 		"wporg/wporg-parent-2021": "dev-build",
 		"yoast/phpunit-polyfills": "^1.1"

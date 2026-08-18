@@ -142,7 +142,7 @@ function notify_pattern_flagged( $post ) {
 				}
 			}
 			$reasons = array_map(
-				function( \WP_Term $reason ) {
+				function ( \WP_Term $reason ) {
 					return wp_strip_all_tags( $reason->description );
 				},
 				$reasons

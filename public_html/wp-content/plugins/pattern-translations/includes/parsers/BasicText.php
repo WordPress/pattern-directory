@@ -5,7 +5,7 @@ class BasicText implements BlockParser {
 	use DomUtils;
 	use TextNodesXPath;
 
-	public function to_strings( array $block ) : array {
+	public function to_strings( array $block ): array {
 		$dom   = $this->get_dom( $block['innerHTML'] );
 		$xpath = new \DOMXPath( $dom );
 
@@ -20,7 +20,7 @@ class BasicText implements BlockParser {
 		return $strings;
 	}
 
-	public function replace_strings( array $block, array $replacements ) : array {
+	public function replace_strings( array $block, array $replacements ): array {
 		$dom         = $this->get_dom( $block['innerHTML'] );
 		$xpath       = new \DOMXPath( $dom );
 		$xpath_query = $this->text_nodes_xpath_query();
@@ -54,5 +54,4 @@ class BasicText implements BlockParser {
 
 		return $block;
 	}
-
 }

@@ -124,7 +124,7 @@ function validate_content( $prepared_post, $request ) {
 
 	// Check that each block in the list has a blockName and is registered.
 	$registry = \WP_Block_Type_Registry::get_instance();
-	$invalid_blocks = array_filter( $all_blocks, function( $block ) use ( $registry ) {
+	$invalid_blocks = array_filter( $all_blocks, function ( $block ) use ( $registry ) {
 		$block_type = $registry->get_registered( $block['blockName'] );
 		return is_null( $block['blockName'] ) || is_null( $block_type );
 	} );

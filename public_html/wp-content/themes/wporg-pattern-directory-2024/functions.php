@@ -37,7 +37,7 @@ add_filter( 'frontpage_template_hierarchy', __NAMESPACE__ . '\use_archive_templa
 
 add_action(
 	'init',
-	function() {
+	function () {
 		// Don't swap author link with w.org profile link.
 		remove_all_filters( 'author_link' );
 

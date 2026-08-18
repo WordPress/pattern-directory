@@ -197,7 +197,7 @@ function register_post_type_data() {
 			'type'              => 'string',
 			'description'       => 'A list of block types this pattern supports for transforms.',
 			'single'            => false,
-			'sanitize_callback' => function( $value, $key, $type ) {
+			'sanitize_callback' => function ( $value, $key, $type ) {
 				return preg_replace( '/[^a-z0-9-\/]/', '', $value );
 			},
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
@@ -216,7 +216,7 @@ function register_post_type_data() {
 			'type'              => 'string',
 			'description'       => 'The language used when creating this pattern.',
 			'single'            => true,
-			'sanitize_callback' => function( $value ) {
+			'sanitize_callback' => function ( $value ) {
 				if ( ! in_array( $value, array_keys( get_locales() ), true ) ) {
 					return 'en_US';
 				}
@@ -291,7 +291,7 @@ function register_rest_fields() {
 		POST_TYPE,
 		'category_slugs',
 		array(
-			'get_callback' => function() {
+			'get_callback' => function () {
 				$slugs = wp_list_pluck( wp_get_object_terms( get_the_ID(), 'wporg-pattern-category' ), 'slug' );
 				$slugs = array_map( 'sanitize_title', $slugs );
 				$slugs = array_diff( $slugs, [ 'featured' ] );
@@ -314,7 +314,7 @@ function register_rest_fields() {
 		POST_TYPE,
 		'keyword_slugs',
 		array(
-			'get_callback' => function() {
+			'get_callback' => function () {
 				$slugs = wp_list_pluck( wp_get_object_terms( get_the_ID(), 'wporg-pattern-keyword' ), 'slug' );
 
 				return array_map( 'sanitize_title', $slugs );
@@ -340,7 +340,7 @@ function register_rest_fields() {
 		POST_TYPE,
 		'pattern_content',
 		array(
-			'get_callback' => function( $response_data ) {
+			'get_callback' => function ( $response_data ) {
 				$pattern = get_post( $response_data['id'] );
 				return decode_pattern_content( $pattern->post_content );
 			},
@@ -358,7 +358,7 @@ function register_rest_fields() {
 		POST_TYPE,
 		'favorite_count',
 		array(
-			'get_callback' => function() {
+			'get_callback' => function () {
 				return get_favorite_count( get_the_ID() );
 			},
 
@@ -376,7 +376,7 @@ function register_rest_fields() {
 		POST_TYPE,
 		'author_meta',
 		array(
-			'get_callback' => function( $post ) {
+			'get_callback' => function ( $post ) {
 				return array(
 					'name'   => esc_html( get_the_author_meta( 'display_name', $post['author'] ) ),
 					'url'    => esc_url( home_url( '/author/' . get_the_author_meta( 'user_nicename', $post['author'] ) ) ),
@@ -420,7 +420,7 @@ function register_rest_fields() {
 		POST_TYPE,
 		'unlisted_reason',
 		array(
-			'get_callback' => function() {
+			'get_callback' => function () {
 				$reasons = wp_get_object_terms( get_the_ID(), FLAG_REASON );
 				if ( count( $reasons ) > 0 ) {
 					$reason = array_shift( $reasons );
@@ -560,7 +560,7 @@ function enqueue_editor_assets() {
 		return;
 	}
 
-	$dir = dirname( dirname( __FILE__ ) );
+	$dir = dirname( __DIR__ );
 
 	$script_asset_path = "$dir/build/pattern-post-type.asset.php";
 	if ( ! file_exists( $script_asset_path ) ) {
@@ -570,7 +570,7 @@ function enqueue_editor_assets() {
 	$script_asset = require $script_asset_path;
 	wp_enqueue_script(
 		'wporg-pattern-post-type',
-		plugins_url( 'build/pattern-post-type.js', dirname( __FILE__ ) ),
+		plugins_url( 'build/pattern-post-type.js', __DIR__ ),
 		$script_asset['dependencies'],
 		$script_asset['version'],
 		true
@@ -588,7 +588,7 @@ function enqueue_editor_assets() {
 
 	wp_enqueue_style(
 		'wporg-pattern-post-type',
-		plugins_url( 'build/pattern-post-type.css', dirname( __FILE__ ) ),
+		plugins_url( 'build/pattern-post-type.css', __DIR__ ),
 		array(),
 		$script_asset['version'],
 	);
@@ -665,7 +665,7 @@ function filter_patterns_collection_params( $query_params ) {
 	$query_params['author_name'] = array(
 		'description'       => __( 'Limit result set to patterns by a single author.', 'wporg-patterns' ),
 		'type'              => 'string',
-		'validate_callback' => function( $value ) {
+		'validate_callback' => function ( $value ) {
 			$user = get_user_by( 'slug', $value );
 			return (bool) $user;
 		},
@@ -904,7 +904,7 @@ function setup_preview_theme() {
 	if ( preg_match( '#/view/$#', $request_uri ) || preg_match( '#[?&]view=[1|true]#', $request_uri ) ) {
 		add_filter( 'show_admin_bar', '__return_false', 2000 );
 
-		add_filter( 'template', function() {
+		add_filter( 'template', function () {
 			if ( 'local' === wp_get_environment_type() ) {
 				return 'twentytwentythree';
 			} else {
@@ -912,7 +912,7 @@ function setup_preview_theme() {
 			}
 		} );
 
-		add_filter( 'stylesheet', function() {
+		add_filter( 'stylesheet', function () {
 			if ( 'local' === wp_get_environment_type() ) {
 				return 'twentytwentythree';
 			} else {
@@ -920,7 +920,7 @@ function setup_preview_theme() {
 			}
 		} );
 
-		add_filter( 'wp_enqueue_scripts', function() {
+		add_filter( 'wp_enqueue_scripts', function () {
 			wp_deregister_style( 'wp4-styles' );
 			wp_deregister_style( 'wporg-global-header-footer' );
 		}, 201 );
@@ -992,7 +992,7 @@ function load_pattern_preview( $template ) {
  */
 add_action(
 	'the_post',
-	function( $post ) {
+	function ( $post ) {
 		$post->post_content = decode_pattern_content( $post->post_content );
 	}
 );

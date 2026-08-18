@@ -84,7 +84,7 @@ function pattern_creator_init() {
 	wp_deregister_style( 'wporg-parent-2021-style' );
 	wp_deregister_style( 'global-styles' );
 
-	$dir = dirname( __FILE__ );
+	$dir = __DIR__;
 	$script_asset_path = "$dir/build/index.asset.php";
 	if ( ! file_exists( $script_asset_path ) ) {
 		throw new \Error( 'You need to run `npm run start:creator` or `npm run build:creator` for the Pattern Creator.' );

@@ -17,7 +17,6 @@ function register_cron_tasks() {
 	if ( ! wp_next_scheduled( 'pattern_import_translations_to_directory' ) ) {
 		wp_schedule_event( time(), 'twicedaily', 'pattern_import_translations_to_directory' );
 	}
-
 }
 add_action( 'admin_init', __NAMESPACE__ . '\register_cron_tasks' );
 
@@ -72,7 +71,7 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 	// Raise the memory limit for this process to at least 512M.
 	add_filter(
 		'cron_memory_limit',
-		function() {
+		function () {
 			return '512M';
 		}
 	);

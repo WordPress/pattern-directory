@@ -103,7 +103,7 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 
 	// Requests for a specific locale will still include `en_US` as a fallback.
 	if ( count( $locales ) > 1 ) {
-		$primary_locale = array_reduce( $locales, function( $carry, $item ) {
+		$primary_locale = array_reduce( $locales, function ( $carry, $item ) {
 			// This assumes there will only be 2 items in $locale.
 			if ( 'en_US' !== $item ) {
 				$carry = $item;
