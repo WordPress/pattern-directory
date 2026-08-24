@@ -350,12 +350,7 @@ function validate_against_spam( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
-	/*
-	 * Autosaves reach this filter too, because the autosave controller builds its revision through the parent
-	 * controller's `prepare_item_for_database()`. They write a revision rather than the live pattern, and the
-	 * creator fires them continuously, so checking them costs an Akismet round trip per keystroke batch and
-	 * can attach a note to the published post for content that was never published.
-	 */
+	// Autosaves write a revision rather than the live pattern, and the creator fires them continuously.
 	if ( '/autosaves' === substr( (string) $request->get_route(), -10 ) ) {
 		return $prepared_post;
 	}

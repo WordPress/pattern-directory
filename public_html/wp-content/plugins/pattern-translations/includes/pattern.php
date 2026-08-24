@@ -91,7 +91,6 @@ class Pattern {
 	 * @return \WP_Post|null The existing translation, or null if this pipeline has not created one.
 	 */
 	public static function find_existing_translation( int $parent_id, string $locale ): ?\WP_Post {
-		// `post_parent => 0` is a real constraint, not an absent one: it would match top-level patterns.
 		if ( $parent_id <= 0 ) {
 			return null;
 		}

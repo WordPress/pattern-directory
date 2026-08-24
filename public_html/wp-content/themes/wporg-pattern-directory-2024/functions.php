@@ -79,11 +79,7 @@ function do_pattern_actions() {
 	if ( 'draft' === $action ) {
 		$pattern_type = get_post_type_object( POST_TYPE );
 
-		/*
-		 * `unlisted` and spam are moderator-set. This runs through `wp_update_post()` rather than the REST
-		 * API, so `validate_status()` never sees it -- without this check an author could draft their way out
-		 * of a moderator's removal here and then publish the draft over REST.
-		 */
+		// `unlisted` and spam are moderator-set, and this path bypasses `validate_status()`.
 		if (
 			in_array( get_post_status( $post_id ), array( SPAM_STATUS, UNLISTED_STATUS ), true ) &&
 			! current_user_can( $pattern_type->cap->edit_others_posts )
