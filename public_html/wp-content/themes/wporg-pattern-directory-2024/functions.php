@@ -86,13 +86,7 @@ function do_pattern_actions() {
 		if ( wp_verify_nonce( $nonce, 'draft-' . $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
 			if ( $is_moderator_status ) {
 				// Tell the author why, rather than reloading the page with the action still in the URL.
-				$url = add_query_arg(
-					array(
-						'status' => 'draft-not-allowed',
-					),
-					get_the_permalink()
-				);
-				wp_safe_redirect( $url );
+				wp_safe_redirect( add_query_arg( array( 'status' => 'draft-not-allowed' ), get_the_permalink() ) );
 				return;
 			}
 
