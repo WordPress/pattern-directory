@@ -252,8 +252,34 @@ class Pattern_Status_Validation_Test extends WP_UnitTestCase {
 
 		$response = $this->update_pattern( array( 'content' => self::$spam_content ) );
 
+		$this->assertTrue( $response->is_error(), 'The swapped-in content must not be saved.' );
+		$this->assertSame( 'rest_pattern_spam_detected', $response->get_data()['code'] );
+		$this->assertSame( 'publish', get_post_status( self::$pattern_id ) );
+		$this->assertStringNotContainsString(
+			'PatternDirectorySpamTest',
+			get_post( self::$pattern_id )->post_content,
+			'The swapped-in content must not reach the published pattern.'
+		);
+	}
+
+	/**
+	 * A false positive on a live pattern doesn't strand its author: the edit is refused, the pattern stays
+	 * published, and they can still take it to draft and work on it.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\validate_against_spam
+	 */
+	public function test_refused_edit_leaves_the_author_in_control(): void {
+		$this->seed_pattern( 'publish' );
+		wp_set_current_user( self::$member );
+
+		$this->update_pattern( array( 'content' => self::$spam_content ) );
+		$this->assertSame( 'publish', get_post_status( self::$pattern_id ) );
+
+		// The author can still unpublish it themselves, which a demotion to the spam status would prevent.
+		$response = $this->update_pattern( array( 'status' => 'draft' ) );
+
 		$this->assertFalse( $response->is_error() );
-		$this->assertSame( SPAM_STATUS, get_post_status( self::$pattern_id ) );
+		$this->assertSame( 'draft', get_post_status( self::$pattern_id ) );
 	}
 
 	/**
@@ -324,7 +350,7 @@ class Pattern_Status_Validation_Test extends WP_UnitTestCase {
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\note_spam_status
 	 */
 	public function test_discarded_spam_verdict_is_not_noted(): void {
-		$this->seed_pattern( 'publish' );
+		$this->seed_pattern( 'pending' );
 		wp_set_current_user( self::$member );
 
 		$flagged     = null;
@@ -354,7 +380,7 @@ class Pattern_Status_Validation_Test extends WP_UnitTestCase {
 
 		$this->assertSame( SPAM_STATUS, $flagged, 'This case must reach the spam check, or it proves nothing.' );
 		$this->assertSame( 0, $transitions, 'A discarded verdict must not be noted against the pattern.' );
-		$this->assertSame( 'publish', get_post_status( self::$pattern_id ) );
+		$this->assertSame( 'pending', get_post_status( self::$pattern_id ) );
 	}
 
 	/**
@@ -363,12 +389,12 @@ class Pattern_Status_Validation_Test extends WP_UnitTestCase {
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\note_spam_status
 	 */
 	public function test_persisted_spam_status_is_noted(): void {
-		$this->seed_pattern( 'publish' );
+		$this->seed_pattern( 'draft', self::$spam_content );
 		wp_set_current_user( self::$member );
 
 		$transitions = $this->count_spam_transitions(
 			function () {
-				$this->update_pattern( array( 'content' => self::$spam_content ) );
+				$this->update_pattern( array( 'status' => 'publish' ) );
 			}
 		);
 

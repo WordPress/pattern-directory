@@ -379,8 +379,17 @@ function validate_against_spam( $prepared_post, $request ) {
 
 	list( $is_spam, $spam_reason ) = check_for_spam( $pattern );
 
-	// If it's been detected as spam, flag it as pending-review.
 	if ( $is_spam ) {
+		// Demoting a live pattern on a heuristic is unrecoverable for its author, so refuse the edit instead.
+		if ( 'publish' === $current_status ) {
+			return new \WP_Error(
+				'rest_pattern_spam_detected',
+				__( 'These changes were caught by the spam filter, so they have not been saved. The published version of this pattern is unchanged.', 'wporg-patterns' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		// Anything not yet public goes to the moderation queue as before.
 		$prepared_post->post_status = SPAM_STATUS;
 		spam_reason( $prepared_post->ID ?? 0, $spam_reason );
 	}

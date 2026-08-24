@@ -147,6 +147,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 				'post_title'  => 'Member pattern',
 				'post_type'   => POST_TYPE,
 				'post_author' => $member,
+				'post_status' => 'draft',
 			)
 		);
 		wp_set_current_user( $member );
@@ -177,6 +178,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 				'post_title'  => 'Member pattern',
 				'post_type'   => POST_TYPE,
 				'post_author' => $member,
+				'post_status' => 'draft',
 			)
 		);
 		wp_set_current_user( $member );
