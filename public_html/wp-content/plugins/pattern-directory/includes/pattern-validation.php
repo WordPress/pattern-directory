@@ -353,6 +353,15 @@ function validate_against_spam( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
+	/*
+	 * An autosave that names no status can't make anything public: the controller either files it as a
+	 * revision, throwing the verdict away, or updates the author's own draft while leaving its status alone.
+	 * One that does name a status can publish a draft in place, so it still gets checked.
+	 */
+	if ( ! isset( $request['status'] ) && '/autosaves' === substr( (string) $request->get_route(), -10 ) ) {
+		return $prepared_post;
+	}
+
 	// Moderators are trusted, the same way `validate_status()` trusts them.
 	if ( current_user_can( get_post_type_object( POST_TYPE )->cap->edit_others_posts ) ) {
 		return $prepared_post;
@@ -373,28 +382,42 @@ function validate_against_spam( $prepared_post, $request ) {
 	// If it's been detected as spam, flag it as pending-review.
 	if ( $is_spam ) {
 		$prepared_post->post_status = SPAM_STATUS;
-		spam_reason( $spam_reason );
+		spam_reason( $prepared_post->ID ?? 0, $spam_reason );
 	}
 
 	return $prepared_post;
 }
 
 /**
- * Hold the reason the pattern in this request was flagged as spam.
+ * Hold the reason a pattern was flagged as spam, until its status is actually saved.
  *
- * `validate_against_spam()` decides before anything is written, and the autosave route discards that decision
- * into a revision, so the note has to wait until a status is actually saved.
+ * `validate_against_spam()` decides before anything is written, and that decision can be discarded, so the
+ * note has to wait. Keyed by pattern because a single request can write more than one -- a `batch/v1`
+ * envelope, a WP-CLI import loop -- and one pattern's reason must not be noted against another. Reading
+ * consumes, so an unconsumed reason can't leak into a later write.
  *
- * @param string|null $reason Reason to store, or null to read back the stored one.
+ * @param int         $pattern_id The pattern the reason belongs to, 0 while it is still being created.
+ * @param string|null $reason     Reason to store, or null to read and consume the stored one.
  *
- * @return string The stored reason.
+ * @return string The stored reason, or '' if there isn't one for this pattern.
  */
-function spam_reason( $reason = null ) {
-	static $stored = '';
+function spam_reason( $pattern_id, $reason = null ) {
+	static $reasons = array();
+
+	$key = (int) $pattern_id;
 
 	if ( null !== $reason ) {
-		$stored = $reason;
+		$reasons[ $key ] = $reason;
+
+		return $reason;
 	}
+
+	if ( ! isset( $reasons[ $key ] ) ) {
+		return '';
+	}
+
+	$stored = $reasons[ $key ];
+	unset( $reasons[ $key ] );
 
 	return $stored;
 }
@@ -413,13 +436,16 @@ function note_spam_status( $new_status, $old_status, $post ) {
 		return;
 	}
 
-	$reason = spam_reason();
+	$reason = spam_reason( $post->ID );
+
+	// A pattern flagged as it was created had no ID to record against.
+	if ( ! $reason && in_array( $old_status, array( 'new', 'auto-draft' ), true ) ) {
+		$reason = spam_reason( 0 );
+	}
+
 	if ( ! $reason ) {
 		return;
 	}
-
-	// One note per decision, however many times the status is written.
-	spam_reason( '' );
 
 	if ( function_exists( '\WordPressdotorg\InternalNotes\create_note' ) ) {
 		\WordPressdotorg\InternalNotes\create_note(

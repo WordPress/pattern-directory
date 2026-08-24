@@ -10,6 +10,7 @@ namespace WordPressdotorg\Pattern_Directory\Tests;
 use WP_REST_Request;
 use WP_UnitTestCase;
 use WP_UnitTest_Factory;
+use function WordPressdotorg\Pattern_Directory\Pattern_Validation\spam_reason;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 
 /**
@@ -357,6 +358,78 @@ class Pattern_Status_Validation_Test extends WP_UnitTestCase {
 
 		$this->assertSame( 1, $transitions );
 		$this->assertSame( SPAM_STATUS, get_post_status( self::$pattern_id ) );
+	}
+
+	/**
+	 * A status-less autosave doesn't reach the spam check at all, so it costs no Akismet call for a verdict
+	 * that would be thrown away. Watch the prepared post: an unchecked request never carries the spam status.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\validate_against_spam
+	 */
+	public function test_status_less_autosave_is_not_spam_checked(): void {
+		$this->seed_pattern( 'publish' );
+		wp_set_current_user( self::$member );
+
+		$prepared_status = null;
+		$spy             = function ( $prepared_post ) use ( &$prepared_status ) {
+			$prepared_status = $prepared_post->post_status ?? '';
+			return $prepared_post;
+		};
+		add_filter( 'rest_pre_insert_' . POST_TYPE, $spy, 21 );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/' . POST_TYPE . '/' . self::$pattern_id . '/autosaves' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'content' => self::$spam_content ) ) );
+		rest_do_request( $request );
+
+		remove_filter( 'rest_pre_insert_' . POST_TYPE, $spy, 21 );
+
+		$this->assertNotNull( $prepared_status, 'The autosave must reach the filter for this to prove anything.' );
+		$this->assertNotSame( SPAM_STATUS, $prepared_status, 'A status-less autosave must not be spam-checked.' );
+	}
+
+	/**
+	 * One pattern's spam reason is never noted against another, which a batch request or an import loop
+	 * would otherwise do.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\spam_reason
+	 */
+	public function test_spam_reason_is_kept_per_pattern(): void {
+		$first  = self::$pattern_id;
+		$second = self::$pattern_id + 1;
+
+		spam_reason( $first, 'Reason for the first pattern.' );
+
+		$this->assertSame( '', spam_reason( $second ), "Another pattern must not pick up the first's reason." );
+		$this->assertSame( 'Reason for the first pattern.', spam_reason( $first ) );
+		$this->assertSame( '', spam_reason( $first ), 'Reading must consume, so it cannot be noted twice.' );
+	}
+
+	/**
+	 * A pattern flagged as it is created still gets its reason recorded, even though there was no ID to
+	 * record it against when the check ran.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\note_spam_status
+	 */
+	public function test_spam_on_create_is_noted(): void {
+		wp_set_current_user( self::$member );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/' . POST_TYPE );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'title'   => 'A new pattern',
+					'content' => self::$spam_content,
+					'status'  => 'publish',
+				)
+			)
+		);
+		$response = rest_do_request( $request );
+
+		$this->assertFalse( $response->is_error() );
+		$this->assertSame( SPAM_STATUS, get_post_status( $response->get_data()['id'] ) );
+		$this->assertSame( '', spam_reason( 0 ), 'The reason must have been consumed by the note.' );
 	}
 
 	/**
