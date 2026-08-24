@@ -13,8 +13,6 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, SPAM_
 class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	protected static $pattern_id;
 	protected static $user;
-	protected static $member;
-	protected static $member_pattern;
 
 	/**
 	 * Setup fixtures that are shared across all tests.
@@ -29,16 +27,6 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 		self::$user = $factory->user->create(
 			array(
 				'role' => 'administrator',
-			)
-		);
-
-		// Spam checks exempt moderators, so exercise them as a member acting on their own pattern.
-		self::$member         = $factory->user->create( array( 'role' => 'subscriber' ) );
-		self::$member_pattern = $factory->post->create(
-			array(
-				'post_title'  => 'Member pattern',
-				'post_type'   => POST_TYPE,
-				'post_author' => self::$member,
 			)
 		);
 	}
@@ -152,9 +140,18 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 * Test a block that's detected as spam should be pending.
 	 */
 	public function test_spam_should_be_pending() {
-		wp_set_current_user( self::$member );
+		// Spam checks exempt moderators, so act as a member on their own pattern.
+		$member         = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		$member_pattern = self::factory()->post->create(
+			array(
+				'post_title'  => 'Member pattern',
+				'post_type'   => POST_TYPE,
+				'post_author' => $member,
+			)
+		);
+		wp_set_current_user( $member );
 
-		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$member_pattern );
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . $member_pattern );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body( json_encode( array(
 			'title'   => 'Spam Check',
@@ -173,9 +170,18 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 * Test that paragraph-only posts should be detected as spam.
 	 */
 	public function test_only_paragraphs_are_spam() {
-		wp_set_current_user( self::$member );
+		// Spam checks exempt moderators, so act as a member on their own pattern.
+		$member         = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		$member_pattern = self::factory()->post->create(
+			array(
+				'post_title'  => 'Member pattern',
+				'post_type'   => POST_TYPE,
+				'post_author' => $member,
+			)
+		);
+		wp_set_current_user( $member );
 
-		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$member_pattern );
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . $member_pattern );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body( json_encode( array(
 			'title'   => 'Spam Check',
