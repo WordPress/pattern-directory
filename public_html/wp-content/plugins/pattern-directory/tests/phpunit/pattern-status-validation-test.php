@@ -314,30 +314,46 @@ class Pattern_Status_Validation_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * An autosave that is discarded into a revision must not record a spam note against the live pattern.
+	 * A spam verdict the autosave controller throws away must not be noted against the live pattern.
 	 *
-	 * `note_spam_status()` hangs off `transition_post_status`, so a pattern never transitioning to the spam
-	 * status is what proves no note was written. The internal-notes plugin isn't installed under test, and
-	 * standing in for it switches on the logging module that gates on it, so this is the observable.
+	 * A published pattern can't be updated in place, so the controller files the write as a revision -- but
+	 * naming a status still sends the request through the spam check, so the verdict is reached and then
+	 * discarded. `note_spam_status()` hangs off `transition_post_status` precisely so nothing is recorded
+	 * unless the status was actually saved.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\note_spam_status
 	 */
-	public function test_autosave_does_not_note_an_unsaved_spam_status(): void {
+	public function test_discarded_spam_verdict_is_not_noted(): void {
 		$this->seed_pattern( 'publish' );
 		wp_set_current_user( self::$member );
 
+		$flagged     = null;
+		$spy         = function ( $prepared_post ) use ( &$flagged ) {
+			$flagged = $prepared_post->post_status ?? '';
+			return $prepared_post;
+		};
+		add_filter( 'rest_pre_insert_' . POST_TYPE, $spy, 21 );
+
 		$transitions = $this->count_spam_transitions(
 			function () {
-				foreach ( array( 1, 2, 3 ) as $round ) {
-					$request = new WP_REST_Request( 'POST', '/wp/v2/' . POST_TYPE . '/' . self::$pattern_id . '/autosaves' );
-					$request->set_header( 'content-type', 'application/json' );
-					$request->set_body( wp_json_encode( array( 'content' => self::$spam_content ) ) );
-					rest_do_request( $request );
-				}
+				$request = new WP_REST_Request( 'POST', '/wp/v2/' . POST_TYPE . '/' . self::$pattern_id . '/autosaves' );
+				$request->set_header( 'content-type', 'application/json' );
+				$request->set_body(
+					wp_json_encode(
+						array(
+							'status'  => 'publish',
+							'content' => self::$spam_content,
+						)
+					)
+				);
+				rest_do_request( $request );
 			}
 		);
 
-		$this->assertSame( 0, $transitions, 'A discarded spam status must not be recorded against the pattern.' );
+		remove_filter( 'rest_pre_insert_' . POST_TYPE, $spy, 21 );
+
+		$this->assertSame( SPAM_STATUS, $flagged, 'This case must reach the spam check, or it proves nothing.' );
+		$this->assertSame( 0, $transitions, 'A discarded verdict must not be noted against the pattern.' );
 		$this->assertSame( 'publish', get_post_status( self::$pattern_id ) );
 	}
 
