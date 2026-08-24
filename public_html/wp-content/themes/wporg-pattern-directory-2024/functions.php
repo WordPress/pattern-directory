@@ -4,7 +4,7 @@ namespace WordPressdotorg\Theme\Pattern_Directory_2024;
 
 use function WordPressdotorg\Pattern_Directory\Favorite\{get_favorites, get_favorite_count};
 use function WordPressdotorg\Theme\Pattern_Directory_2024\Block_Config\get_applied_filter_list;
-use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG_POST_TYPE;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\PENDING_STATUS;
 
@@ -77,7 +77,19 @@ function do_pattern_actions() {
 	$post_id = get_the_ID();
 
 	if ( 'draft' === $action ) {
+		$pattern_type = get_post_type_object( POST_TYPE );
+
+		// `unlisted` and spam are moderator-set, and this path bypasses `validate_status()`.
+		$is_moderator_status = in_array( get_post_status( $post_id ), array( SPAM_STATUS, UNLISTED_STATUS ), true ) &&
+			! current_user_can( $pattern_type->cap->edit_others_posts );
+
 		if ( wp_verify_nonce( $nonce, 'draft-' . $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
+			if ( $is_moderator_status ) {
+				// Tell the author why, rather than reloading the page with the action still in the URL.
+				wp_safe_redirect( add_query_arg( array( 'status' => 'draft-not-allowed' ), get_the_permalink() ) );
+				return;
+			}
+
 			// Draft the post.
 			$success = wp_update_post(
 				array(

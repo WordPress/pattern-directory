@@ -11,6 +11,8 @@ $notice        = '';
 $notice_type   = 'warning';
 if ( 'draft-failed' === $action_status ) {
 	$notice = __( 'Your pattern could not be updated, please try again.', 'wporg-patterns' );
+} elseif ( 'draft-not-allowed' === $action_status ) {
+	$notice = __( 'Only a directory moderator can change the status of this pattern.', 'wporg-patterns' );
 }
 
 ?>
@@ -25,9 +27,9 @@ if ( 'draft-failed' === $action_status ) {
 		</div>
 	</div>
 	<!-- /wp:wporg/notice -->
-	<?php else : ?>
-	<!-- wp:wporg/status-notice /-->
 	<?php endif; ?>
+
+	<!-- wp:wporg/status-notice /-->
 
 	<!-- wp:post-title {"level":1,"fontSize":"heading-3"} /-->
 

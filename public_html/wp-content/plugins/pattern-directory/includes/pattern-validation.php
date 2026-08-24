@@ -9,7 +9,9 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLIS
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content', 10, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_status', 11, 2 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_parent', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_against_spam', 20, 2 );
+add_action( 'transition_post_status', __NAMESPACE__ . '\note_spam_status', 10, 3 );
 
 /**
  * Strip out basic HTML to get at the manually-entered content in block content.
@@ -178,13 +180,15 @@ function validate_title( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
-	$status = isset( $request['status'] ) ? $request['status'] : get_post_status( $prepared_post->ID );
+	$post   = isset( $prepared_post->ID ) ? get_post( $prepared_post->ID ) : null;
+	$status = isset( $request['status'] ) ? $request['status'] : ( $post ? $post->post_status : '' );
+
 	// Bypass this validation for drafts.
 	if ( 'draft' === $status || 'auto-draft' === $status ) {
 		return $prepared_post;
 	}
 
-	$title = isset( $request['title'] ) ? $request['title'] : get_the_title( $prepared_post->ID );
+	$title = isset( $request['title'] ) ? $request['title'] : ( $post ? $post->post_title : '' );
 
 	// A title exists, but is empty -- invalid.
 	if ( isset( $title ) && empty( trim( $title ) ) ) {
@@ -209,8 +213,10 @@ function validate_title( $prepared_post, $request ) {
 /**
  * Validate the pattern status.
  *
- * Ensures patterns created via the API have either a non-public status (draft, unlisted),
- * or they use the chosen status set in /wp-admin/options-general.php?page=wporg-pattern-creator.
+ * Ensures patterns created via the API are either drafts, or use the chosen status set in
+ * /wp-admin/options-general.php?page=wporg-pattern-creator. The `unlisted` and spam statuses
+ * are moderator-only, both as a target and as a source, so an author can neither self-unlist
+ * nor undo a moderator's removal.
  */
 function validate_status( $prepared_post, $request ) {
 	if ( is_wp_error( $prepared_post ) ) {
@@ -219,10 +225,24 @@ function validate_status( $prepared_post, $request ) {
 
 	$post_type      = get_post_type_object( POST_TYPE );
 	$target_status  = isset( $request['status'] ) ? $request['status'] : '';
-	$current_status = get_post_status( $prepared_post->ID );
+	$current_status = isset( $prepared_post->ID ) ? get_post_status( $prepared_post->ID ) : '';
 
-	// Drafts or unlisted patterns are OK.
-	if ( in_array( $target_status, array( 'draft', 'auto-draft', UNLISTED_STATUS ) ) ) {
+	// `unlisted` and spam are moderator-set; authors can't leave them. Must stay above the early returns below.
+	if (
+		in_array( $current_status, array( SPAM_STATUS, UNLISTED_STATUS ), true ) &&
+		'' !== $target_status &&
+		$current_status !== $target_status &&
+		! current_user_can( $post_type->cap->edit_others_posts )
+	) {
+		return new \WP_Error(
+			'rest_pattern_cannot_change_status',
+			__( 'Only a directory moderator can change the status of this pattern.', 'wporg-patterns' ),
+			array( 'status' => 403 )
+		);
+	}
+
+	// Drafts are OK.
+	if ( in_array( $target_status, array( 'draft', 'auto-draft' ), true ) ) {
 		return $prepared_post;
 	}
 
@@ -251,14 +271,54 @@ function validate_status( $prepared_post, $request ) {
 		);
 	}
 
-	// Do not allow for non-privledged users to move a spam post to another status.
-	if ( SPAM_STATUS === $current_status && SPAM_STATUS !== $target_status ) {
+	return $prepared_post;
+}
+
+/**
+ * Validate the pattern's parent.
+ *
+ * `parent` links a translated pattern to its English original and is written only by the translation cron,
+ * never by a submitter. Core accepts it over REST because the field is in the schema, and validates only that
+ * the id names an existing post — not its type, and not the caller's relationship to it. Left open, an author
+ * can point their own submission at any published pattern and have the translation job adopt it.
+ *
+ * @param object           $prepared_post The post object about to be inserted.
+ * @param \WP_REST_Request $request       The request.
+ *
+ * @return object|\WP_Error The post object, or an error if the parent is not the caller's to set.
+ */
+function validate_parent( $prepared_post, $request ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	if ( ! isset( $request['parent'] ) ) {
+		return $prepared_post;
+	}
+
+	$existing       = isset( $prepared_post->ID ) ? get_post( $prepared_post->ID ) : null;
+	$current_parent = $existing ? (int) $existing->post_parent : 0;
+	$target_parent  = (int) $request['parent'];
+
+	// Re-sending the stored value isn't a write.
+	if ( $target_parent === $current_parent ) {
+		return $prepared_post;
+	}
+
+	$post_type = get_post_type_object( POST_TYPE );
+	if ( ! current_user_can( $post_type->cap->edit_others_posts ) ) {
 		return new \WP_Error(
-			'rest_pattern_invalid_status',
-			sprintf(
-				__( 'Invalid post status. Status must be %s.', 'wporg-patterns' ),
-				SPAM_STATUS
-			),
+			'rest_pattern_cannot_set_parent',
+			__( 'Only a directory moderator can set the parent of a pattern.', 'wporg-patterns' ),
+			array( 'status' => 403 )
+		);
+	}
+
+	// A moderator's value still has to name another pattern.
+	if ( $target_parent && POST_TYPE !== get_post_type( $target_parent ) ) {
+		return new \WP_Error(
+			'rest_pattern_invalid_parent',
+			__( 'The parent of a pattern must be another pattern.', 'wporg-patterns' ),
 			array( 'status' => 400 )
 		);
 	}
@@ -274,44 +334,137 @@ function validate_against_spam( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
-	$target_status = isset( $request['status'] ) ? $request['status'] : '';
+	/*
+	 * `ID` is only set on an update: `WP_REST_Posts_Controller::prepare_item_for_database()` adds it when the
+	 * request names an existing post, so on a create there is no stored post to read a status from.
+	 */
+	$post           = isset( $prepared_post->ID ) ? get_post( $prepared_post->ID ) : null;
+	$current_status = $post ? $post->post_status : '';
 
-	// Run spam checks for publish & pending patterns.
+	/*
+	 * An update that omits `status` leaves the pattern at the status it already has, so resolve to that
+	 * rather than to nothing. Reading it as "no status" is what let an author publish clean content and then
+	 * swap in the real payload with a status-less edit that never reached Akismet.
+	 */
+	$target_status = isset( $request['status'] ) ? $request['status'] : $current_status;
+
+	// Only patterns that are, or are becoming, publicly visible are worth the check.
 	if ( 'publish' !== $target_status && 'pending' !== $target_status ) {
 		return $prepared_post;
 	}
 
-	$post = get_post( $prepared_post->ID );
+	/*
+	 * An autosave that names no status can't make anything public: the controller either files it as a
+	 * revision, throwing the verdict away, or updates the author's own draft while leaving its status alone.
+	 * One that does name a status can publish a draft in place, so it still gets checked.
+	 */
+	if ( ! isset( $request['status'] ) && '/autosaves' === substr( (string) $request->get_route(), -10 ) ) {
+		return $prepared_post;
+	}
+
+	// Moderators are trusted, the same way `validate_status()` trusts them.
+	if ( current_user_can( get_post_type_object( POST_TYPE )->cap->edit_others_posts ) ) {
+		return $prepared_post;
+	}
 
 	$pattern = array(
-		'ID'          => $post->ID,
-		'post_name'   => $post->post_name,
-		'post_author' => $post->post_author,
-		'title'       => $prepared_post->post_title ?? $post->post_title,
-		'content'     => $prepared_post->post_content ?? $post->post_content,
-		'description' => $request['meta']['wpop_description'] ?? ( $post->wpop_description ?: '' ),
-		'keywords'    => $request['meta']['wpop_keywords'] ?? ( $post->wpop_keywords ?: '' ),
+		'ID'          => $post->ID ?? 0,
+		'post_name'   => $post->post_name ?? '',
+		'post_author' => $post->post_author ?? get_current_user_id(),
+		'title'       => $prepared_post->post_title ?? ( $post->post_title ?? '' ),
+		'content'     => $prepared_post->post_content ?? ( $post->post_content ?? '' ),
+		'description' => $request['meta']['wpop_description'] ?? ( $post ? ( $post->wpop_description ?: '' ) : '' ),
+		'keywords'    => $request['meta']['wpop_keywords'] ?? ( $post ? ( $post->wpop_keywords ?: '' ) : '' ),
 	);
 
 	list( $is_spam, $spam_reason ) = check_for_spam( $pattern );
 
-	// If it's been detected as spam, flag it as pending-review.
 	if ( $is_spam ) {
-		$prepared_post->post_status = SPAM_STATUS;
-
-		// Add a note explaining why this post is in pending, if it's due to spam.
-		if ( function_exists( '\WordPressdotorg\InternalNotes\create_note' ) ) {
-			\WordPressdotorg\InternalNotes\create_note(
-				$prepared_post->ID,
-				array(
-					'post_author'  => get_user_by( 'login', 'wordpressdotorg' )->ID ?? 0,
-					'post_excerpt' => $spam_reason,
-				)
+		// Demoting an existing pattern on a heuristic is unrecoverable for its author, so refuse the edit.
+		if ( in_array( $current_status, array( 'publish', 'pending' ), true ) ) {
+			return new \WP_Error(
+				'rest_pattern_spam_detected',
+				__( 'These changes were caught by the spam filter, so they have not been saved. Your pattern is unchanged.', 'wporg-patterns' ),
+				array( 'status' => 400 )
 			);
 		}
+
+		// Anything not yet public goes to the moderation queue as before.
+		$prepared_post->post_status = SPAM_STATUS;
+		spam_reason( $prepared_post->ID ?? 0, $spam_reason );
 	}
 
 	return $prepared_post;
+}
+
+/**
+ * Hold the reason a pattern was flagged as spam, until its status is actually saved.
+ *
+ * `validate_against_spam()` decides before anything is written, and that decision can be discarded, so the
+ * note has to wait. Keyed by pattern because a single request can write more than one -- a `batch/v1`
+ * envelope, a WP-CLI import loop -- and one pattern's reason must not be noted against another. Reading
+ * consumes, so an unconsumed reason can't leak into a later write.
+ *
+ * @param int         $pattern_id The pattern the reason belongs to, 0 while it is still being created.
+ * @param string|null $reason     Reason to store, or null to read and consume the stored one.
+ *
+ * @return string The stored reason, or '' if there isn't one for this pattern.
+ */
+function spam_reason( $pattern_id, $reason = null ) {
+	static $reasons = array();
+
+	$key = (int) $pattern_id;
+
+	if ( null !== $reason ) {
+		$reasons[ $key ] = $reason;
+
+		return $reason;
+	}
+
+	if ( ! isset( $reasons[ $key ] ) ) {
+		return '';
+	}
+
+	$stored = $reasons[ $key ];
+	unset( $reasons[ $key ] );
+
+	return $stored;
+}
+
+/**
+ * Record why a pattern was quarantined, once that status has actually been saved.
+ *
+ * @param string   $new_status The status the pattern moved to.
+ * @param string   $old_status The status it moved from.
+ * @param \WP_Post $post       The pattern.
+ *
+ * @return void
+ */
+function note_spam_status( $new_status, $old_status, $post ) {
+	if ( POST_TYPE !== $post->post_type || SPAM_STATUS !== $new_status || $new_status === $old_status ) {
+		return;
+	}
+
+	$reason = spam_reason( $post->ID );
+
+	// A pattern flagged as it was created had no ID to record against.
+	if ( ! $reason && in_array( $old_status, array( 'new', 'auto-draft' ), true ) ) {
+		$reason = spam_reason( 0 );
+	}
+
+	if ( ! $reason ) {
+		return;
+	}
+
+	if ( function_exists( '\WordPressdotorg\InternalNotes\create_note' ) ) {
+		\WordPressdotorg\InternalNotes\create_note(
+			$post->ID,
+			array(
+				'post_author'  => get_user_by( 'login', 'wordpressdotorg' )->ID ?? 0,
+				'post_excerpt' => $reason,
+			)
+		);
+	}
 }
 
 /**
