@@ -259,9 +259,14 @@ class Pattern_Status_Validation_Test extends WP_UnitTestCase {
 
 		$request = new WP_REST_Request( 'POST', '/wp/v2/' . POST_TYPE . '/' . self::$pattern_id . '/autosaves' );
 		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( wp_json_encode( array(
-			'status' => 'publish', 'content' => self::$spam_content,
-		) ) );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'  => 'publish',
+					'content' => self::$spam_content,
+				)
+			)
+		);
 		$response = rest_do_request( $request );
 
 		$this->assertFalse( $response->is_error() );

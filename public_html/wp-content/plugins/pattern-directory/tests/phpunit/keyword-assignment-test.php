@@ -71,7 +71,7 @@ class Keyword_Assignment_Test extends WP_UnitTestCase {
 			)
 		);
 
-		self::$core_term_id = $factory->term->create(
+		self::$core_term_id     = $factory->term->create(
 			array(
 				'taxonomy' => 'wporg-pattern-keyword',
 				'name'     => 'core',
