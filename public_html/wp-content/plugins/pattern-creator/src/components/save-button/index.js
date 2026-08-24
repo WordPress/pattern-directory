@@ -29,6 +29,7 @@ export function SaveButton() {
 		isAutoSaving,
 		isSaveable,
 		isPublished,
+		isUnlisted,
 		isPublishedOrPending,
 		publishStatus,
 	} = useSelect( ( select ) => {
@@ -48,7 +49,8 @@ export function SaveButton() {
 			isAutoSaving: _isAutoSaving,
 			isSaveable: isPatternSaveable( getCurrentPostId() ),
 			isPublished: 'publish' === _post.status,
-			isPublishedOrPending: [ 'pending', 'publish' ].includes( _post.status ),
+			isUnlisted: 'unlisted' === _post.status,
+			isPublishedOrPending: [ 'pending', 'publish', 'unlisted' ].includes( _post.status ),
 			publishStatus: hasPublishAction ? settings.defaultStatus : 'pending',
 		};
 	} );
@@ -63,7 +65,7 @@ export function SaveButton() {
 		if ( isDisabled ) {
 			return;
 		}
-		if ( isPublished ) {
+		if ( isPublished || isUnlisted ) {
 			onSuccess();
 		} else {
 			setShowModal( true );
@@ -71,7 +73,10 @@ export function SaveButton() {
 	};
 
 	const onSuccess = () => {
-		editPost( { status: publishStatus }, { undoIgnore: true } );
+		// An unlisted pattern's status is the moderators' to change, so only save the content.
+		if ( ! isUnlisted ) {
+			editPost( { status: publishStatus }, { undoIgnore: true } );
+		}
 		savePost();
 	};
 
@@ -92,7 +97,7 @@ export function SaveButton() {
 				isBusy={ ! isAutoSaving && isSaving && isPublishedOrPending }
 				onClick={ isDisabled ? undefined : onClick }
 			>
-				{ isPublished ? __( 'Update', 'wporg-patterns' ) : __( 'Submit', 'wporg-patterns' ) }
+				{ isPublished || isUnlisted ? __( 'Update', 'wporg-patterns' ) : __( 'Submit', 'wporg-patterns' ) }
 			</Button>
 		</>
 	);

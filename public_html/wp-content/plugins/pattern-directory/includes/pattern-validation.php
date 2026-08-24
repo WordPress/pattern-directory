@@ -179,13 +179,15 @@ function validate_title( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
-	$status = isset( $request['status'] ) ? $request['status'] : get_post_status( $prepared_post->ID );
+	$post   = isset( $prepared_post->ID ) ? get_post( $prepared_post->ID ) : null;
+	$status = isset( $request['status'] ) ? $request['status'] : ( $post ? $post->post_status : '' );
+
 	// Bypass this validation for drafts.
 	if ( 'draft' === $status || 'auto-draft' === $status ) {
 		return $prepared_post;
 	}
 
-	$title = isset( $request['title'] ) ? $request['title'] : get_the_title( $prepared_post->ID );
+	$title = isset( $request['title'] ) ? $request['title'] : ( $post ? $post->post_title : '' );
 
 	// A title exists, but is empty -- invalid.
 	if ( isset( $title ) && empty( trim( $title ) ) ) {
@@ -350,8 +352,8 @@ function validate_against_spam( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
-	// Autosaves write a revision rather than the live pattern, and the creator fires them continuously.
-	if ( '/autosaves' === substr( (string) $request->get_route(), -10 ) ) {
+	// Moderators are trusted, the same way `validate_status()` trusts them.
+	if ( current_user_can( get_post_type_object( POST_TYPE )->cap->edit_others_posts ) ) {
 		return $prepared_post;
 	}
 

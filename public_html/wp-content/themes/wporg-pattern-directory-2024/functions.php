@@ -80,15 +80,10 @@ function do_pattern_actions() {
 		$pattern_type = get_post_type_object( POST_TYPE );
 
 		// `unlisted` and spam are moderator-set, and this path bypasses `validate_status()`.
-		if (
-			in_array( get_post_status( $post_id ), array( SPAM_STATUS, UNLISTED_STATUS ), true ) &&
-			! current_user_can( $pattern_type->cap->edit_others_posts )
-		) {
-			wp_safe_redirect( add_query_arg( array( 'status' => 'draft-failed' ), get_the_permalink() ) );
-			return;
-		}
+		$is_moderator_status = in_array( get_post_status( $post_id ), array( SPAM_STATUS, UNLISTED_STATUS ), true ) &&
+			! current_user_can( $pattern_type->cap->edit_others_posts );
 
-		if ( wp_verify_nonce( $nonce, 'draft-' . $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
+		if ( wp_verify_nonce( $nonce, 'draft-' . $post_id ) && current_user_can( 'edit_post', $post_id ) && ! $is_moderator_status ) {
 			// Draft the post.
 			$success = wp_update_post(
 				array(
