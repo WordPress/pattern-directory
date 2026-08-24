@@ -380,11 +380,11 @@ function validate_against_spam( $prepared_post, $request ) {
 	list( $is_spam, $spam_reason ) = check_for_spam( $pattern );
 
 	if ( $is_spam ) {
-		// Demoting a live pattern on a heuristic is unrecoverable for its author, so refuse the edit instead.
-		if ( 'publish' === $current_status ) {
+		// Demoting an existing pattern on a heuristic is unrecoverable for its author, so refuse the edit.
+		if ( in_array( $current_status, array( 'publish', 'pending' ), true ) ) {
 			return new \WP_Error(
 				'rest_pattern_spam_detected',
-				__( 'These changes were caught by the spam filter, so they have not been saved. The published version of this pattern is unchanged.', 'wporg-patterns' ),
+				__( 'These changes were caught by the spam filter, so they have not been saved. Your pattern is unchanged.', 'wporg-patterns' ),
 				array( 'status' => 400 )
 			);
 		}

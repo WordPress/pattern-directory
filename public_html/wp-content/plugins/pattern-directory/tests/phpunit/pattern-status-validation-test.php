@@ -283,6 +283,23 @@ class Pattern_Status_Validation_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The same holds for a pattern still awaiting review: a false positive must not strand it in the spam
+	 * queue, which its author can't get it out of.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\validate_against_spam
+	 */
+	public function test_pending_pattern_is_not_demoted_by_an_edit(): void {
+		$this->seed_pattern( 'pending' );
+		wp_set_current_user( self::$member );
+
+		$response = $this->update_pattern( array( 'content' => self::$spam_content ) );
+
+		$this->assertTrue( $response->is_error() );
+		$this->assertSame( 'rest_pattern_spam_detected', $response->get_data()['code'] );
+		$this->assertSame( 'pending', get_post_status( self::$pattern_id ) );
+	}
+
+	/**
 	 * A status-less edit with clean content leaves a published pattern published.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\validate_against_spam
@@ -350,7 +367,16 @@ class Pattern_Status_Validation_Test extends WP_UnitTestCase {
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\note_spam_status
 	 */
 	public function test_discarded_spam_verdict_is_not_noted(): void {
-		$this->seed_pattern( 'pending' );
+		$this->seed_pattern( 'draft' );
+
+		/*
+		 * A lock held by someone else -- a moderator with the draft open -- makes the controller file the
+		 * write as a revision instead of updating the post, so the verdict it reaches is thrown away.
+		 */
+		wp_set_current_user( self::$moderator );
+		require_once ABSPATH . 'wp-admin/includes/post.php';
+		wp_set_post_lock( self::$pattern_id );
+
 		wp_set_current_user( self::$member );
 
 		$flagged     = null;
@@ -380,7 +406,7 @@ class Pattern_Status_Validation_Test extends WP_UnitTestCase {
 
 		$this->assertSame( SPAM_STATUS, $flagged, 'This case must reach the spam check, or it proves nothing.' );
 		$this->assertSame( 0, $transitions, 'A discarded verdict must not be noted against the pattern.' );
-		$this->assertSame( 'pending', get_post_status( self::$pattern_id ) );
+		$this->assertSame( 'draft', get_post_status( self::$pattern_id ) );
 	}
 
 	/**
