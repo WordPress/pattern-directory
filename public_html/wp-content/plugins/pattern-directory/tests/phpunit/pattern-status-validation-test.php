@@ -123,6 +123,29 @@ class Pattern_Status_Validation_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Count the times a pattern actually transitions into the spam status while $action runs.
+	 *
+	 * This is the same condition `note_spam_status()` fires on, so it stands in for "a note was written".
+	 *
+	 * @param callable $action The work to measure.
+	 * @return int The number of transitions.
+	 */
+	protected function count_spam_transitions( callable $action ): int {
+		$count = 0;
+		$spy   = function ( $new_status, $old_status, $post ) use ( &$count ) {
+			if ( POST_TYPE === $post->post_type && SPAM_STATUS === $new_status && $new_status !== $old_status ) {
+				$count++;
+			}
+		};
+
+		add_action( 'transition_post_status', $spy, 10, 3 );
+		$action();
+		remove_action( 'transition_post_status', $spy, 10 );
+
+		return $count;
+	}
+
+	/**
 	 * Dispatch a pattern update with the given body.
 	 *
 	 * @param array $body Request body.
@@ -287,6 +310,53 @@ class Pattern_Status_Validation_Test extends WP_UnitTestCase {
 
 		$this->assertFalse( $response->is_error() );
 		$this->assertSame( 'publish', get_post_status( self::$pattern_id ) );
+	}
+
+	/**
+	 * An autosave that is discarded into a revision must not record a spam note against the live pattern.
+	 *
+	 * `note_spam_status()` hangs off `transition_post_status`, so a pattern never transitioning to the spam
+	 * status is what proves no note was written. The internal-notes plugin isn't installed under test, and
+	 * standing in for it switches on the logging module that gates on it, so this is the observable.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\note_spam_status
+	 */
+	public function test_autosave_does_not_note_an_unsaved_spam_status(): void {
+		$this->seed_pattern( 'publish' );
+		wp_set_current_user( self::$member );
+
+		$transitions = $this->count_spam_transitions(
+			function () {
+				foreach ( array( 1, 2, 3 ) as $round ) {
+					$request = new WP_REST_Request( 'POST', '/wp/v2/' . POST_TYPE . '/' . self::$pattern_id . '/autosaves' );
+					$request->set_header( 'content-type', 'application/json' );
+					$request->set_body( wp_json_encode( array( 'content' => self::$spam_content ) ) );
+					rest_do_request( $request );
+				}
+			}
+		);
+
+		$this->assertSame( 0, $transitions, 'A discarded spam status must not be recorded against the pattern.' );
+		$this->assertSame( 'publish', get_post_status( self::$pattern_id ) );
+	}
+
+	/**
+	 * A real update that does persist the spam status still reaches the note, once.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\note_spam_status
+	 */
+	public function test_persisted_spam_status_is_noted(): void {
+		$this->seed_pattern( 'publish' );
+		wp_set_current_user( self::$member );
+
+		$transitions = $this->count_spam_transitions(
+			function () {
+				$this->update_pattern( array( 'content' => self::$spam_content ) );
+			}
+		);
+
+		$this->assertSame( 1, $transitions );
+		$this->assertSame( SPAM_STATUS, get_post_status( self::$pattern_id ) );
 	}
 
 	/**

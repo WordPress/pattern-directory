@@ -11,6 +11,7 @@ add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 1
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_status', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_parent', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_against_spam', 20, 2 );
+add_action( 'transition_post_status', __NAMESPACE__ . '\note_spam_status', 10, 3 );
 
 /**
  * Strip out basic HTML to get at the manually-entered content in block content.
@@ -372,20 +373,63 @@ function validate_against_spam( $prepared_post, $request ) {
 	// If it's been detected as spam, flag it as pending-review.
 	if ( $is_spam ) {
 		$prepared_post->post_status = SPAM_STATUS;
-
-		// Add a note explaining the spam flag; a create has no post to attach it to yet.
-		if ( isset( $prepared_post->ID ) && function_exists( '\WordPressdotorg\InternalNotes\create_note' ) ) {
-			\WordPressdotorg\InternalNotes\create_note(
-				$prepared_post->ID,
-				array(
-					'post_author'  => get_user_by( 'login', 'wordpressdotorg' )->ID ?? 0,
-					'post_excerpt' => $spam_reason,
-				)
-			);
-		}
+		spam_reason( $spam_reason );
 	}
 
 	return $prepared_post;
+}
+
+/**
+ * Hold the reason the pattern in this request was flagged as spam.
+ *
+ * `validate_against_spam()` decides before anything is written, and the autosave route discards that decision
+ * into a revision, so the note has to wait until a status is actually saved.
+ *
+ * @param string|null $reason Reason to store, or null to read back the stored one.
+ *
+ * @return string The stored reason.
+ */
+function spam_reason( $reason = null ) {
+	static $stored = '';
+
+	if ( null !== $reason ) {
+		$stored = $reason;
+	}
+
+	return $stored;
+}
+
+/**
+ * Record why a pattern was quarantined, once that status has actually been saved.
+ *
+ * @param string   $new_status The status the pattern moved to.
+ * @param string   $old_status The status it moved from.
+ * @param \WP_Post $post       The pattern.
+ *
+ * @return void
+ */
+function note_spam_status( $new_status, $old_status, $post ) {
+	if ( POST_TYPE !== $post->post_type || SPAM_STATUS !== $new_status || $new_status === $old_status ) {
+		return;
+	}
+
+	$reason = spam_reason();
+	if ( ! $reason ) {
+		return;
+	}
+
+	// One note per decision, however many times the status is written.
+	spam_reason( '' );
+
+	if ( function_exists( '\WordPressdotorg\InternalNotes\create_note' ) ) {
+		\WordPressdotorg\InternalNotes\create_note(
+			$post->ID,
+			array(
+				'post_author'  => get_user_by( 'login', 'wordpressdotorg' )->ID ?? 0,
+				'post_excerpt' => $reason,
+			)
+		);
+	}
 }
 
 /**

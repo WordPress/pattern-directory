@@ -83,7 +83,19 @@ function do_pattern_actions() {
 		$is_moderator_status = in_array( get_post_status( $post_id ), array( SPAM_STATUS, UNLISTED_STATUS ), true ) &&
 			! current_user_can( $pattern_type->cap->edit_others_posts );
 
-		if ( wp_verify_nonce( $nonce, 'draft-' . $post_id ) && current_user_can( 'edit_post', $post_id ) && ! $is_moderator_status ) {
+		if ( wp_verify_nonce( $nonce, 'draft-' . $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
+			if ( $is_moderator_status ) {
+				// Tell the author why, rather than reloading the page with the action still in the URL.
+				$url = add_query_arg(
+					array(
+						'status' => 'draft-not-allowed',
+					),
+					get_the_permalink()
+				);
+				wp_safe_redirect( $url );
+				return;
+			}
+
 			// Draft the post.
 			$success = wp_update_post(
 				array(

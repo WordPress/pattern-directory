@@ -69,13 +69,22 @@ class Theme_Pattern_Actions_Test extends WP_UnitTestCase {
 	protected $suppress_redirect;
 
 	/**
+	 * The location the theme last tried to redirect to.
+	 *
+	 * @var string
+	 */
+	protected $redirected_to = '';
+
+	/**
 	 * Suppress redirects for the duration of each test.
 	 */
 	public function set_up(): void {
 		parent::set_up();
 
 		// An empty location makes `wp_redirect()` bail before it sends any header.
-		$this->suppress_redirect = function () {
+		$this->redirected_to     = '';
+		$this->suppress_redirect = function ( $location ) {
+			$this->redirected_to = (string) $location;
 			return '';
 		};
 		add_filter( 'wp_redirect', $this->suppress_redirect );
@@ -134,6 +143,11 @@ class Theme_Pattern_Actions_Test extends WP_UnitTestCase {
 		$this->do_draft_action( $pattern_id );
 
 		$this->assertSame( UNLISTED_STATUS, get_post_status( $pattern_id ) );
+		$this->assertStringContainsString(
+			'status=draft-not-allowed',
+			$this->redirected_to,
+			'The author must be told why, not left on a page that silently does nothing.'
+		);
 	}
 
 	/**
