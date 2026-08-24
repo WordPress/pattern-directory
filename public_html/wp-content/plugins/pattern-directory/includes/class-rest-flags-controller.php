@@ -78,7 +78,8 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 	public function get_items_permissions_check( $request ) {
 		$parent_post_type = get_post_type_object( PATTERN );
 
-		if ( ! current_user_can( $parent_post_type->cap->edit_posts ) ) {
+		// Flags name their reporter, so only moderators may list them.
+		if ( ! current_user_can( $parent_post_type->cap->edit_others_posts ) ) {
 			return new WP_Error(
 				'rest_forbidden_context',
 				__( 'Sorry, you are not allowed to view pattern flags.', 'wporg-patterns' ),
@@ -107,7 +108,10 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 			return $parent;
 		}
 
-		if ( ! current_user_can( 'edit_post', $parent->ID ) ) {
+		$parent_post_type = get_post_type_object( PATTERN );
+
+		// Flags name their reporter, so only moderators may read them.
+		if ( ! current_user_can( $parent_post_type->cap->edit_others_posts ) ) {
 			return new WP_Error(
 				'rest_cannot_read',
 				__( 'Sorry, you are not allowed to view flags for this pattern.', 'wporg-patterns' ),

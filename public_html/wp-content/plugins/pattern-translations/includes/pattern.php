@@ -68,25 +68,47 @@ class Pattern {
 		// Reset the ID.
 		$translated->ID     = 0;
 
-		// Find the actual post ID of the translated pattern
+		$existing = self::find_existing_translation( (int) $parent->ID, $locale );
+		if ( $existing ) {
+			$translated->ID   = $existing->ID;
+			$translated->name = $existing->post_name; // Preserve the existing translation's slug.
+		}
+
+		return $translated;
+	}
+
+	/**
+	 * Find the pattern this pipeline previously created as the $locale translation of $parent_id.
+	 *
+	 * `post_parent` and `wpop_locale` are both writable by any submitter on their own pattern, so the pair
+	 * alone is an attacker-controlled claim rather than an identification. `wpop_is_translation` is written
+	 * only by `create_or_update_translated_pattern()` and is not exposed over REST, so requiring it keeps the
+	 * job from adopting a user's own post and overwriting it with the parent's author and status.
+	 *
+	 * @param int    $parent_id The English original's post ID.
+	 * @param string $locale    The locale to find the existing translation for.
+	 *
+	 * @return \WP_Post|null The existing translation, or null if this pipeline has not created one.
+	 */
+	public static function find_existing_translation( int $parent_id, string $locale ): ?\WP_Post {
 		$children = get_posts( array(
-			'post_parent' => $parent->ID,
+			'post_parent' => $parent_id,
 			'post_type'   => POST_TYPE,
 			'post_status' => 'any',
 			'meta_query'  => array(
+				'relation' => 'AND',
 				array(
 					'key'   => 'wpop_locale',
 					'value' => $locale,
 				),
+				array(
+					'key'   => 'wpop_is_translation',
+					'value' => 1,
+				),
 			),
 		) );
-		if ( $children ) {
-			$post = array_shift( $children );
-			$translated->ID   = $post->ID;
-			$translated->name = $post->post_name; // ???
-		}
 
-		return $translated;
+		return $children ? array_shift( $children ) : null;
 	}
 
 	/**

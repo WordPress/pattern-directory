@@ -103,9 +103,10 @@ function register_post_type_data() {
 			'rewrite'           => array(
 				'slug' => 'pattern-keywords',
 			),
+			// Keywords are moderator-only (the `core` term feeds Core's pattern distribution), unlike categories.
 			'capabilities' => array(
-				'assign_terms' => 'edit_patterns',
-				'edit_terms'   => 'edit_patterns',
+				'assign_terms' => 'edit_others_patterns',
+				'edit_terms'   => 'edit_others_patterns',
 			),
 
 			'labels' => array(
