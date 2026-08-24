@@ -248,6 +248,39 @@ class Pattern_Status_Validation_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Autosaves reach this filter through the autosave controller, but write a revision rather than the live
+	 * pattern. Checking them would cost an Akismet round trip per autosave cycle.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\validate_against_spam
+	 */
+	public function test_autosave_is_not_spam_checked(): void {
+		$this->seed_pattern( 'publish' );
+		wp_set_current_user( self::$member );
+
+		/*
+		 * An autosave writes a revision, so the live pattern's status is unchanged either way. Watch what
+		 * `validate_against_spam()` did to the prepared post instead, by running straight after it.
+		 */
+		$prepared_status = null;
+		$spy             = function ( $prepared_post ) use ( &$prepared_status ) {
+			$prepared_status = $prepared_post->post_status ?? '';
+			return $prepared_post;
+		};
+		add_filter( 'rest_pre_insert_' . POST_TYPE, $spy, 21 );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/' . POST_TYPE . '/' . self::$pattern_id . '/autosaves' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'content' => self::$spam_content ) ) );
+		$response = rest_do_request( $request );
+
+		remove_filter( 'rest_pre_insert_' . POST_TYPE, $spy, 21 );
+
+		$this->assertFalse( $response->is_error() );
+		$this->assertNotNull( $prepared_status, 'The autosave must reach the filter for this to prove anything.' );
+		$this->assertNotSame( SPAM_STATUS, $prepared_status, 'The autosave must not be run through the spam check.' );
+	}
+
+	/**
 	 * A draft is not spam-checked, so the creator's autosaves don't each cost an Akismet round trip and a
 	 * work-in-progress draft can't be moved into the moderator-only quarantine while it's being written.
 	 *

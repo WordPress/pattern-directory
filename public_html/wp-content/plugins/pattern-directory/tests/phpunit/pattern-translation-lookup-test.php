@@ -188,6 +188,28 @@ class Pattern_Translation_Lookup_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A missing parent id drops the lookup instead of becoming a `post_parent => 0` constraint, which would
+	 * match an unrelated top-level pattern.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Translations\Pattern::find_existing_translation
+	 */
+	public function test_absent_parent_id_matches_nothing(): void {
+		$toplevel = self::factory()->post->create(
+			array(
+				'post_type'   => POST_TYPE,
+				'post_status' => 'publish',
+				'meta_input'  => array(
+					'wpop_locale'         => self::LOCALE,
+					'wpop_is_translation' => true,
+				),
+			)
+		);
+
+		$this->assertSame( 0, get_post( $toplevel )->post_parent, 'Fixture must be top-level.' );
+		$this->assertNull( Translations_Pattern::find_existing_translation( 0, self::LOCALE ) );
+	}
+
+	/**
 	 * With nothing to adopt the job gets null, which is what makes it insert a fresh translation.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Translations\Pattern::find_existing_translation

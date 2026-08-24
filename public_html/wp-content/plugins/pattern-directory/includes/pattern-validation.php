@@ -222,7 +222,7 @@ function validate_status( $prepared_post, $request ) {
 
 	$post_type      = get_post_type_object( POST_TYPE );
 	$target_status  = isset( $request['status'] ) ? $request['status'] : '';
-	$current_status = get_post_status( $prepared_post->ID ?? 0 );
+	$current_status = isset( $prepared_post->ID ) ? get_post_status( $prepared_post->ID ) : '';
 
 	// `unlisted` and spam are moderator-set; authors can't leave them. Must stay above the early returns below.
 	if (
@@ -347,6 +347,16 @@ function validate_against_spam( $prepared_post, $request ) {
 
 	// Only patterns that are, or are becoming, publicly visible are worth the check.
 	if ( 'publish' !== $target_status && 'pending' !== $target_status ) {
+		return $prepared_post;
+	}
+
+	/*
+	 * Autosaves reach this filter too, because the autosave controller builds its revision through the parent
+	 * controller's `prepare_item_for_database()`. They write a revision rather than the live pattern, and the
+	 * creator fires them continuously, so checking them costs an Akismet round trip per keystroke batch and
+	 * can attach a note to the published post for content that was never published.
+	 */
+	if ( '/autosaves' === substr( (string) $request->get_route(), -10 ) ) {
 		return $prepared_post;
 	}
 
