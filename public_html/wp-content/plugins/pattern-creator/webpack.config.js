@@ -1,6 +1,18 @@
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 
+/*
+ * Bundle these instead of externalising them: no `wp-*` handle is registered for
+ * them where the creator runs, and a script with an unregistered dependency is
+ * silently dropped. The extraction plugin bundles other editor-only packages by default.
+ */
+const BUNDLED_PACKAGES = [
+	'@wordpress/editor',
+	'@wordpress/global-styles-engine',
+	'@wordpress/media-editor',
+	'@wordpress/media-fields',
+];
+
 const config = {
 	...defaultConfig,
 	output: {
@@ -32,13 +44,7 @@ const config = {
 		),
 		new DependencyExtractionWebpackPlugin( {
 			requestToExternal( request ) {
-				if (
-					request === '@wordpress/editor' ||
-					request === '@wordpress/icons' ||
-					request === '@wordpress/interface' ||
-					request === '@wordpress/fields' ||
-					request === '@wordpress/dataviews'
-				) {
+				if ( BUNDLED_PACKAGES.includes( request ) ) {
 					return false;
 				}
 			},
