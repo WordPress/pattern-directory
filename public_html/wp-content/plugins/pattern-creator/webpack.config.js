@@ -8,16 +8,18 @@ const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extrac
  * scripts. Externalising anything else leaves the bundle declaring a dependency that
  * nothing registers, and `wp_enqueue_script()` then drops it — along with its inline
  * scripts — without raising an error. The creator simply never boots.
+ *
+ * Only packages the plugin would externalise by default need listing here; it already
+ * bundles `@wordpress/icons`, `@wordpress/interface`, `@wordpress/fields`, and
+ * `@wordpress/dataviews` on its own.
  */
 const BUNDLED_PACKAGES = [
-	// Editor-only packages, not registered on the front end where the creator runs.
+	// Editor-only package, not registered on the front end where the creator runs.
 	'@wordpress/editor',
-	'@wordpress/icons',
-	'@wordpress/interface',
-	'@wordpress/fields',
-	'@wordpress/dataviews',
-	// In the Gutenberg monorepo, but never shipped as standalone scripts. Reached
-	// transitively through the bundled `@wordpress/editor`.
+	/*
+	 * In the Gutenberg monorepo, but never shipped as standalone scripts. Reached
+	 * transitively through the bundled `@wordpress/editor`.
+	 */
 	'@wordpress/global-styles-engine',
 	'@wordpress/media-editor',
 	'@wordpress/media-fields',
