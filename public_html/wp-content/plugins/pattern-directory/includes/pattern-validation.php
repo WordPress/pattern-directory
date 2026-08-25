@@ -199,7 +199,8 @@ function validate_block_context( $prepared_post, $request ) {
 	$registry = \WP_Block_Type_Registry::get_instance();
 	$blocks   = parse_blocks( $prepared_post->post_content );
 
-	if ( ! block_context_is_valid( $blocks, array(), $registry ) ) {
+	// A pattern is inserted into post content, so its top level sits in a `core/post-content` context.
+	if ( ! block_context_is_valid( $blocks, array( 'core/post-content' ), $registry ) ) {
 		return new \WP_Error(
 			'rest_pattern_invalid_block_context',
 			__( 'Pattern content contains a block used outside the block it belongs to.', 'wporg-patterns' ),
@@ -213,8 +214,12 @@ function validate_block_context( $prepared_post, $request ) {
 /**
  * Recursively check that every block satisfies its registered `parent` and `ancestor` constraints.
  *
- * A `parent` block must sit directly inside one of its named parents; an `ancestor` block must sit
- * somewhere beneath one. Unregistered blocks are left to `validate_content()`.
+ * Both constraints are satisfied when a named block appears anywhere among the ancestors. The editor's
+ * `parent` rule is stricter (the direct parent), but it also accepts a block via a container's
+ * `allowedBlocks`, which core blocks declare in editor JavaScript the server cannot see -- a submenu's
+ * `core/navigation-link` has parent `core/navigation` yet sits inside `core/navigation-submenu`. Matching
+ * on ancestors accepts everything the editor produces while still rejecting blocks used with no valid
+ * parent in sight. Unregistered blocks are left to `validate_content()`.
  *
  * @param array                   $blocks    Parsed blocks at the current depth.
  * @param string[]                $ancestors Block names of this level's ancestors, outermost first.
@@ -234,9 +239,7 @@ function block_context_is_valid( $blocks, $ancestors, $registry ) {
 			continue;
 		}
 
-		$parent = empty( $ancestors ) ? null : end( $ancestors );
-
-		if ( ! empty( $block_type->parent ) && ! in_array( $parent, (array) $block_type->parent, true ) ) {
+		if ( ! empty( $block_type->parent ) && ! array_intersect( (array) $block_type->parent, $ancestors ) ) {
 			return false;
 		}
 
@@ -260,8 +263,8 @@ function block_context_is_valid( $blocks, $ancestors, $registry ) {
  * Reject executable URL schemes carried in block attributes.
  *
  * Block attributes are stored as JSON in the block-delimiter comment, so KSES never sanitises them as
- * URLs. A URL-bearing attribute can therefore carry an unvetted `javascript:` value; reject any attribute
- * whose value resolves to a script protocol.
+ * URLs. A URL-bearing attribute can therefore carry an unvetted `javascript:` value; reject any URL
+ * attribute whose value resolves to a script protocol.
  *
  * @param object           $prepared_post The post object about to be inserted.
  * @param \WP_REST_Request $request       The request.
@@ -314,29 +317,32 @@ function blocks_have_unsafe_attribute( $blocks ) {
  *
  * Recurses through array and object values (`style`, for example), reading the scheme from the text
  * before the first colon after decoding entities and stripping the whitespace and control characters a
- * browser ignores. Every attribute is checked, not just URL-looking ones, so a rare text value such as a
- * "JavaScript:"-prefixed label is refused too -- the safe direction. `data:` is excluded so ordinary
- * "Data:" text is not rejected.
+ * browser ignores. Only values stored under a URL-carrying key (`url`, `href`, `src`, `link` and their
+ * variants) are read as URLs; every URL attribute of the core blocks the directory allows uses such a
+ * name, and text values such as a "JavaScript:"-prefixed group label must not be refused as URLs.
  *
- * @param mixed $value A block attribute value, or a nested part of one.
+ * @param mixed $value  A block attribute value, or a nested part of one.
+ * @param bool  $is_url Whether the value sits under a URL-carrying key. List items inherit it.
  *
  * @return bool Whether the value resolves to a script protocol.
  */
-function attribute_has_unsafe_scheme( $value ) {
+function attribute_has_unsafe_scheme( $value, $is_url = false ) {
 	if ( is_array( $value ) ) {
-		foreach ( $value as $item ) {
-			if ( attribute_has_unsafe_scheme( $item ) ) {
+		foreach ( $value as $key => $item ) {
+			$item_is_url = is_string( $key ) ? (bool) preg_match( '/url|href|src|link/i', $key ) : $is_url;
+			if ( attribute_has_unsafe_scheme( $item, $item_is_url ) ) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	if ( ! is_string( $value ) || '' === $value ) {
+	if ( ! $is_url || ! is_string( $value ) || '' === $value ) {
 		return false;
 	}
 
-	$decoded = html_entity_decode( $value, ENT_QUOTES, 'UTF-8' );
+	// ENT_HTML5 so named entities like `&colon;` decode the same way a browser decodes them in an href.
+	$decoded = html_entity_decode( $value, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 	$colon   = strpos( $decoded, ':' );
 	if ( false === $colon ) {
 		return false;
