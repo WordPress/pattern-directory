@@ -7,6 +7,8 @@ use WordPressdotorg\Pattern_Translations\PatternParser as Translations_PatternPa
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content', 10, 2 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_context', 10, 2 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_attributes', 10, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_status', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_parent', 11, 2 );
@@ -170,6 +172,191 @@ function validate_content( $prepared_post, $request ) {
 	}
 
 	return $prepared_post;
+}
+
+/**
+ * Reject blocks used outside the parent or ancestor context they are registered for.
+ *
+ * Out of context, such blocks expose attributes their parent should populate.
+ *
+ * @param object           $prepared_post The post object about to be inserted.
+ * @param \WP_REST_Request $request       The request.
+ *
+ * @return object|\WP_Error The post object, or an error if a block is used out of context.
+ */
+function validate_block_context( $prepared_post, $request ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	// No content on the request means this is an update to an existing pattern's other fields.
+	if ( ! isset( $prepared_post->post_content ) ) {
+		return $prepared_post;
+	}
+
+	$registry = \WP_Block_Type_Registry::get_instance();
+	$blocks   = parse_blocks( $prepared_post->post_content );
+
+	// A pattern is inserted into post content, so its top level sits in a `core/post-content` context.
+	if ( ! block_context_is_valid( $blocks, array( 'core/post-content' ), $registry ) ) {
+		return new \WP_Error(
+			'rest_pattern_invalid_block_context',
+			__( 'Pattern content contains a block used outside the block it belongs to.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	return $prepared_post;
+}
+
+/**
+ * Recursively check that every block satisfies its registered `parent` and `ancestor` constraints.
+ *
+ * `parent` is matched against all ancestors, not just the direct parent: the editor also accepts blocks
+ * via `allowedBlocks` declared in editor JavaScript the server cannot see (e.g. a submenu's links).
+ *
+ * @param array                   $blocks    Parsed blocks at the current depth.
+ * @param string[]                $ancestors Block names of this level's ancestors, outermost first.
+ * @param \WP_Block_Type_Registry $registry  The block type registry.
+ *
+ * @return bool Whether every block in the tree is used in a valid context.
+ */
+function block_context_is_valid( $blocks, $ancestors, $registry ) {
+	foreach ( $blocks as $block ) {
+		// Freeform gaps parse to a null name; no constraint to check.
+		if ( empty( $block['blockName'] ) ) {
+			continue;
+		}
+
+		$block_type = $registry->get_registered( $block['blockName'] );
+		if ( is_null( $block_type ) ) {
+			continue;
+		}
+
+		if ( ! empty( $block_type->parent ) && ! array_intersect( (array) $block_type->parent, $ancestors ) ) {
+			return false;
+		}
+
+		if ( ! empty( $block_type->ancestor ) && ! array_intersect( (array) $block_type->ancestor, $ancestors ) ) {
+			return false;
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			$child_ancestors   = $ancestors;
+			$child_ancestors[] = $block['blockName'];
+			if ( ! block_context_is_valid( $block['innerBlocks'], $child_ancestors, $registry ) ) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Reject executable URL schemes carried in block attributes, which are JSON in the block-delimiter
+ * comment and therefore never sanitised by KSES.
+ *
+ * @param object           $prepared_post The post object about to be inserted.
+ * @param \WP_REST_Request $request       The request.
+ *
+ * @return object|\WP_Error The post object, or an error if an attribute carries a script URL.
+ */
+function validate_block_attributes( $prepared_post, $request ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	if ( ! isset( $prepared_post->post_content ) ) {
+		return $prepared_post;
+	}
+
+	if ( blocks_have_unsafe_attribute( parse_blocks( $prepared_post->post_content ) ) ) {
+		return new \WP_Error(
+			'rest_pattern_unsafe_attribute',
+			__( 'Pattern content contains a block attribute with an unsafe URL.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	return $prepared_post;
+}
+
+/**
+ * Recursively test whether any block in the tree carries an attribute with a script URL.
+ *
+ * @param array $blocks Parsed blocks at the current depth.
+ *
+ * @return bool Whether any block attribute resolves to a script protocol.
+ */
+function blocks_have_unsafe_attribute( $blocks ) {
+	foreach ( $blocks as $block ) {
+		if ( isset( $block['attrs'] ) && attribute_has_unsafe_scheme( $block['attrs'] ) ) {
+			return true;
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) && blocks_have_unsafe_attribute( $block['innerBlocks'] ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Whether a block attribute value carries a URL scheme WordPress does not allow.
+ *
+ * Reads the scheme as a browser would (entities decoded, ignored characters stripped), but only from
+ * values under a URL-carrying key, so text like a "JavaScript:"-prefixed label is not refused. The
+ * scheme is matched against `wp_allowed_protocols()`, so `javascript:`, `data:`, and any other
+ * protocol KSES itself rejects are refused, while relative and anchor values pass.
+ *
+ * @param mixed $value  A block attribute value, or a nested part of one.
+ * @param bool  $is_url Whether the value sits under a URL-carrying key. List items inherit it.
+ *
+ * @return bool Whether the value carries a disallowed URL scheme.
+ */
+function attribute_has_unsafe_scheme( $value, $is_url = false ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $key => $item ) {
+			$item_is_url = is_string( $key ) ? (bool) preg_match( '/url|href|src|link/i', $key ) : $is_url;
+			if ( attribute_has_unsafe_scheme( $item, $item_is_url ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	if ( ! $is_url || ! is_string( $value ) || '' === $value ) {
+		return false;
+	}
+
+	// Browsers decode numeric character references even without the trailing semicolon; `html_entity_decode()` never does.
+	$decoded = preg_replace_callback(
+		'/&#(?:[Xx]([0-9A-Fa-f]+)|([0-9]+));?/',
+		static function ( $matches ) {
+			$codepoint = '' !== $matches[1] ? hexdec( $matches[1] ) : (int) $matches[2];
+			return $codepoint > 0 && $codepoint < 0x80 ? chr( $codepoint ) : "\u{FFFD}";
+		},
+		$value
+	);
+
+	// ENT_HTML5 so named entities like `&colon;` decode the same way a browser decodes them in an href.
+	$decoded = html_entity_decode( $decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	$colon   = strpos( $decoded, ':' );
+	if ( false === $colon ) {
+		return false;
+	}
+
+	// A browser ignores ASCII whitespace and control characters when reading a scheme, so strip them first.
+	$scheme = strtolower( preg_replace( '/[\x00-\x20]+/', '', substr( $decoded, 0, $colon ) ) );
+
+	// A colon that follows anything but a valid scheme token belongs to a relative path or anchor, not a scheme.
+	if ( '' === $scheme || preg_match( '/[^a-z0-9.+-]/', $scheme ) ) {
+		return false;
+	}
+
+	return ! in_array( $scheme, wp_allowed_protocols(), true );
 }
 
 /**
