@@ -177,9 +177,7 @@ function validate_content( $prepared_post, $request ) {
 /**
  * Reject blocks used outside the parent or ancestor context they are registered for.
  *
- * `validate_content()` accepts any registered block wherever it sits; this adds the nesting rule the
- * editor enforces, so a block only appears where it was built to (e.g. `core/page-list-item` inside
- * `core/page-list`). Out of context such blocks expose attributes their parent should populate.
+ * Out of context, such blocks expose attributes their parent should populate.
  *
  * @param object           $prepared_post The post object about to be inserted.
  * @param \WP_REST_Request $request       The request.
@@ -214,12 +212,8 @@ function validate_block_context( $prepared_post, $request ) {
 /**
  * Recursively check that every block satisfies its registered `parent` and `ancestor` constraints.
  *
- * Both constraints are satisfied when a named block appears anywhere among the ancestors. The editor's
- * `parent` rule is stricter (the direct parent), but it also accepts a block via a container's
- * `allowedBlocks`, which core blocks declare in editor JavaScript the server cannot see -- a submenu's
- * `core/navigation-link` has parent `core/navigation` yet sits inside `core/navigation-submenu`. Matching
- * on ancestors accepts everything the editor produces while still rejecting blocks used with no valid
- * parent in sight. Unregistered blocks are left to `validate_content()`.
+ * `parent` is matched against all ancestors, not just the direct parent: the editor also accepts blocks
+ * via `allowedBlocks` declared in editor JavaScript the server cannot see (e.g. a submenu's links).
  *
  * @param array                   $blocks    Parsed blocks at the current depth.
  * @param string[]                $ancestors Block names of this level's ancestors, outermost first.
@@ -260,11 +254,8 @@ function block_context_is_valid( $blocks, $ancestors, $registry ) {
 }
 
 /**
- * Reject executable URL schemes carried in block attributes.
- *
- * Block attributes are stored as JSON in the block-delimiter comment, so KSES never sanitises them as
- * URLs. A URL-bearing attribute can therefore carry an unvetted `javascript:` value; reject any URL
- * attribute whose value resolves to a script protocol.
+ * Reject executable URL schemes carried in block attributes, which are JSON in the block-delimiter
+ * comment and therefore never sanitised by KSES.
  *
  * @param object           $prepared_post The post object about to be inserted.
  * @param \WP_REST_Request $request       The request.
@@ -315,11 +306,8 @@ function blocks_have_unsafe_attribute( $blocks ) {
 /**
  * Whether a block attribute value resolves to a script URL (`javascript:` or `vbscript:`).
  *
- * Recurses through array and object values (`style`, for example), reading the scheme from the text
- * before the first colon after decoding entities and stripping the whitespace and control characters a
- * browser ignores. Only values stored under a URL-carrying key (`url`, `href`, `src`, `link` and their
- * variants) are read as URLs; every URL attribute of the core blocks the directory allows uses such a
- * name, and text values such as a "JavaScript:"-prefixed group label must not be refused as URLs.
+ * Reads the scheme as a browser would (entities decoded, ignored characters stripped), but only from
+ * values under a URL-carrying key, so text like a "JavaScript:"-prefixed label is not refused.
  *
  * @param mixed $value  A block attribute value, or a nested part of one.
  * @param bool  $is_url Whether the value sits under a URL-carrying key. List items inherit it.
