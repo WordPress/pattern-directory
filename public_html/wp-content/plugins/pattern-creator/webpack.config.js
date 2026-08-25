@@ -1,6 +1,28 @@
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 
+/*
+ * Packages webpack has to bundle rather than leave behind as a `wp-*` script handle.
+ *
+ * WordPress only registers a handle for the packages Gutenberg builds as standalone
+ * scripts. Externalising anything else leaves the bundle declaring a dependency that
+ * nothing registers, and `wp_enqueue_script()` then drops it — along with its inline
+ * scripts — without raising an error. The creator simply never boots.
+ */
+const BUNDLED_PACKAGES = [
+	// Editor-only packages, not registered on the front end where the creator runs.
+	'@wordpress/editor',
+	'@wordpress/icons',
+	'@wordpress/interface',
+	'@wordpress/fields',
+	'@wordpress/dataviews',
+	// In the Gutenberg monorepo, but never shipped as standalone scripts. Reached
+	// transitively through the bundled `@wordpress/editor`.
+	'@wordpress/global-styles-engine',
+	'@wordpress/media-editor',
+	'@wordpress/media-fields',
+];
+
 const config = {
 	...defaultConfig,
 	output: {
@@ -32,13 +54,7 @@ const config = {
 		),
 		new DependencyExtractionWebpackPlugin( {
 			requestToExternal( request ) {
-				if (
-					request === '@wordpress/editor' ||
-					request === '@wordpress/icons' ||
-					request === '@wordpress/interface' ||
-					request === '@wordpress/fields' ||
-					request === '@wordpress/dataviews'
-				) {
+				if ( BUNDLED_PACKAGES.includes( request ) ) {
 					return false;
 				}
 			},
