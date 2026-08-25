@@ -304,15 +304,17 @@ function blocks_have_unsafe_attribute( $blocks ) {
 }
 
 /**
- * Whether a block attribute value resolves to a script URL (`javascript:` or `vbscript:`).
+ * Whether a block attribute value carries a URL scheme WordPress does not allow.
  *
  * Reads the scheme as a browser would (entities decoded, ignored characters stripped), but only from
- * values under a URL-carrying key, so text like a "JavaScript:"-prefixed label is not refused.
+ * values under a URL-carrying key, so text like a "JavaScript:"-prefixed label is not refused. The
+ * scheme is matched against `wp_allowed_protocols()`, so `javascript:`, `data:`, and any other
+ * protocol KSES itself rejects are refused, while relative and anchor values pass.
  *
  * @param mixed $value  A block attribute value, or a nested part of one.
  * @param bool  $is_url Whether the value sits under a URL-carrying key. List items inherit it.
  *
- * @return bool Whether the value resolves to a script protocol.
+ * @return bool Whether the value carries a disallowed URL scheme.
  */
 function attribute_has_unsafe_scheme( $value, $is_url = false ) {
 	if ( is_array( $value ) ) {
@@ -349,7 +351,12 @@ function attribute_has_unsafe_scheme( $value, $is_url = false ) {
 	// A browser ignores ASCII whitespace and control characters when reading a scheme, so strip them first.
 	$scheme = strtolower( preg_replace( '/[\x00-\x20]+/', '', substr( $decoded, 0, $colon ) ) );
 
-	return in_array( $scheme, array( 'javascript', 'vbscript' ), true );
+	// A colon that follows anything but a valid scheme token belongs to a relative path or anchor, not a scheme.
+	if ( '' === $scheme || preg_match( '/[^a-z0-9.+-]/', $scheme ) ) {
+		return false;
+	}
+
+	return ! in_array( $scheme, wp_allowed_protocols(), true );
 }
 
 /**

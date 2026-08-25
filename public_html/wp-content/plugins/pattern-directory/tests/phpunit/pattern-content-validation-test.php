@@ -77,6 +77,8 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 			array( "<!-- wp:navigation -->\n<!-- wp:navigation-link {\"label\":\"Home\",\"url\":\"https://example.com/\"} /-->\n\n<!-- wp:navigation-submenu {\"label\":\"About\",\"url\":\"https://example.com/about\"} -->\n<!-- wp:navigation-link {\"label\":\"Team\",\"url\":\"https://example.com/team\"} /-->\n<!-- /wp:navigation-submenu -->\n<!-- /wp:navigation -->" ),
 			array( "$three_paragraphs\n\n<!-- wp:nextpage -->\n<!--nextpage-->\n<!-- /wp:nextpage -->" ),
 			array( "<!-- wp:group {\"metadata\":{\"name\":\"JavaScript: hero section\"}} -->\n<div class=\"wp-block-group\">$three_paragraphs</div>\n<!-- /wp:group -->" ),
+			// A `mailto:` URL is an allowed protocol, and a relative path whose colon follows a non-scheme segment is not a scheme at all.
+			array( "$two_paragraphs\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"url\":\"mailto:hello@example.com\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Mail</a></div>\n<!-- /wp:button -->\n\n<!-- wp:button {\"url\":\"/2024/report:final\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Report</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons -->" ),
 			array( "<!-- wp:query {\"queryId\":1,\"query\":{\"perPage\":3,\"pages\":0,\"offset\":0,\"postType\":\"post\",\"order\":\"desc\",\"orderBy\":\"date\",\"author\":\"\",\"search\":\"\",\"exclude\":[],\"sticky\":\"\",\"inherit\":false}} -->\n<div class=\"wp-block-query\"><!-- wp:post-template -->\n<!-- wp:post-title /-->\n\n<!-- wp:post-date /-->\n\n<!-- wp:post-excerpt /-->\n<!-- /wp:post-template -->\n\n<!-- wp:query-pagination -->\n<!-- wp:query-pagination-previous /-->\n\n<!-- wp:query-pagination-numbers /-->\n\n<!-- wp:query-pagination-next /-->\n<!-- /wp:query-pagination -->\n\n<!-- wp:query-no-results -->\n<!-- wp:paragraph {\"placeholder\":\"Add a text or blocks that will display when the query returns no results.\"} -->\n<p></p>\n<!-- /wp:paragraph -->\n<!-- /wp:query-no-results --></div>\n<!-- /wp:query -->" ),
 		);
 	}
@@ -143,6 +145,8 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 			array( 'rest_pattern_unsafe_attribute', "$two_paragraphs\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"url\":\"javascript&#58alert(1)\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Go</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons -->" ),
 			// Same, hex form without a semicolon, stopping at the first non-hex character.
 			array( 'rest_pattern_unsafe_attribute', "$two_paragraphs\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"url\":\"javascript&#x3a%61lert(1)\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Go</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons -->" ),
+			// A `data:` URL, allowed by neither `wp_allowed_protocols()` nor the block editor.
+			array( 'rest_pattern_unsafe_attribute', "$two_paragraphs\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"url\":\"data:text/html,<script>alert(1)</script>\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Go</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons -->" ),
 
 			// Only 2 paragraphs.
 			array( 'rest_pattern_insufficient_blocks', $two_paragraphs ),
