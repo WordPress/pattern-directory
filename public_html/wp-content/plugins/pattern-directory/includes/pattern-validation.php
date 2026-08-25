@@ -341,8 +341,22 @@ function attribute_has_unsafe_scheme( $value, $is_url = false ) {
 		return false;
 	}
 
+	/*
+	 * Browsers decode numeric character references in an attribute even without the trailing semicolon,
+	 * which `html_entity_decode()` never does, so decode those first. Only ASCII matters for reading a
+	 * scheme; anything else (including NUL and out-of-range codepoints) becomes U+FFFD, as in a browser.
+	 */
+	$decoded = preg_replace_callback(
+		'/&#(?:[Xx]([0-9A-Fa-f]+)|([0-9]+));?/',
+		function ( $matches ) {
+			$codepoint = '' !== $matches[1] ? hexdec( $matches[1] ) : (int) $matches[2];
+			return $codepoint > 0 && $codepoint < 0x80 ? chr( $codepoint ) : "\u{FFFD}";
+		},
+		$value
+	);
+
 	// ENT_HTML5 so named entities like `&colon;` decode the same way a browser decodes them in an href.
-	$decoded = html_entity_decode( $value, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	$decoded = html_entity_decode( $decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 	$colon   = strpos( $decoded, ':' );
 	if ( false === $colon ) {
 		return false;
