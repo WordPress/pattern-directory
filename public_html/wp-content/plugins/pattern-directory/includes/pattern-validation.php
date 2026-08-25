@@ -341,14 +341,10 @@ function attribute_has_unsafe_scheme( $value, $is_url = false ) {
 		return false;
 	}
 
-	/*
-	 * Browsers decode numeric character references in an attribute even without the trailing semicolon,
-	 * which `html_entity_decode()` never does, so decode those first. Only ASCII matters for reading a
-	 * scheme; anything else (including NUL and out-of-range codepoints) becomes U+FFFD, as in a browser.
-	 */
+	// Browsers decode numeric character references even without the trailing semicolon; `html_entity_decode()` never does.
 	$decoded = preg_replace_callback(
 		'/&#(?:[Xx]([0-9A-Fa-f]+)|([0-9]+));?/',
-		function ( $matches ) {
+		static function ( $matches ) {
 			$codepoint = '' !== $matches[1] ? hexdec( $matches[1] ) : (int) $matches[2];
 			return $codepoint > 0 && $codepoint < 0x80 ? chr( $codepoint ) : "\u{FFFD}";
 		},
