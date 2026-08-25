@@ -7,6 +7,8 @@ use WordPressdotorg\Pattern_Translations\PatternParser as Translations_PatternPa
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content', 10, 2 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_context', 10, 2 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_attributes', 10, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_status', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_parent', 11, 2 );
@@ -170,6 +172,180 @@ function validate_content( $prepared_post, $request ) {
 	}
 
 	return $prepared_post;
+}
+
+/**
+ * Reject blocks used outside the parent or ancestor context they are registered for.
+ *
+ * `validate_content()` accepts any registered block wherever it sits; this adds the nesting rule the
+ * editor enforces, so a block only appears where it was built to (e.g. `core/page-list-item` inside
+ * `core/page-list`). Out of context such blocks expose attributes their parent should populate.
+ *
+ * @param object           $prepared_post The post object about to be inserted.
+ * @param \WP_REST_Request $request       The request.
+ *
+ * @return object|\WP_Error The post object, or an error if a block is used out of context.
+ */
+function validate_block_context( $prepared_post, $request ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	// No content on the request means this is an update to an existing pattern's other fields.
+	if ( ! isset( $prepared_post->post_content ) ) {
+		return $prepared_post;
+	}
+
+	$registry = \WP_Block_Type_Registry::get_instance();
+	$blocks   = parse_blocks( $prepared_post->post_content );
+
+	if ( ! block_context_is_valid( $blocks, array(), $registry ) ) {
+		return new \WP_Error(
+			'rest_pattern_invalid_block_context',
+			__( 'Pattern content contains a block used outside the block it belongs to.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	return $prepared_post;
+}
+
+/**
+ * Recursively check that every block satisfies its registered `parent` and `ancestor` constraints.
+ *
+ * A `parent` block must sit directly inside one of its named parents; an `ancestor` block must sit
+ * somewhere beneath one. Unregistered blocks are left to `validate_content()`.
+ *
+ * @param array                   $blocks    Parsed blocks at the current depth.
+ * @param string[]                $ancestors Block names of this level's ancestors, outermost first.
+ * @param \WP_Block_Type_Registry $registry  The block type registry.
+ *
+ * @return bool Whether every block in the tree is used in a valid context.
+ */
+function block_context_is_valid( $blocks, $ancestors, $registry ) {
+	foreach ( $blocks as $block ) {
+		// Freeform gaps parse to a null name; no constraint to check.
+		if ( empty( $block['blockName'] ) ) {
+			continue;
+		}
+
+		$block_type = $registry->get_registered( $block['blockName'] );
+		if ( is_null( $block_type ) ) {
+			continue;
+		}
+
+		$parent = empty( $ancestors ) ? null : end( $ancestors );
+
+		if ( ! empty( $block_type->parent ) && ! in_array( $parent, (array) $block_type->parent, true ) ) {
+			return false;
+		}
+
+		if ( ! empty( $block_type->ancestor ) && ! array_intersect( (array) $block_type->ancestor, $ancestors ) ) {
+			return false;
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			$child_ancestors   = $ancestors;
+			$child_ancestors[] = $block['blockName'];
+			if ( ! block_context_is_valid( $block['innerBlocks'], $child_ancestors, $registry ) ) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Reject executable URL schemes carried in block attributes.
+ *
+ * Block attributes are stored as JSON in the block-delimiter comment, so KSES never sanitises them as
+ * URLs. A URL-bearing attribute can therefore carry an unvetted `javascript:` value; reject any attribute
+ * whose value resolves to a script protocol.
+ *
+ * @param object           $prepared_post The post object about to be inserted.
+ * @param \WP_REST_Request $request       The request.
+ *
+ * @return object|\WP_Error The post object, or an error if an attribute carries a script URL.
+ */
+function validate_block_attributes( $prepared_post, $request ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	if ( ! isset( $prepared_post->post_content ) ) {
+		return $prepared_post;
+	}
+
+	if ( blocks_have_unsafe_attribute( parse_blocks( $prepared_post->post_content ) ) ) {
+		return new \WP_Error(
+			'rest_pattern_unsafe_attribute',
+			__( 'Pattern content contains a block attribute with an unsafe URL.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	return $prepared_post;
+}
+
+/**
+ * Recursively test whether any block in the tree carries an attribute with a script URL.
+ *
+ * @param array $blocks Parsed blocks at the current depth.
+ *
+ * @return bool Whether any block attribute resolves to a script protocol.
+ */
+function blocks_have_unsafe_attribute( $blocks ) {
+	foreach ( $blocks as $block ) {
+		if ( isset( $block['attrs'] ) && attribute_has_unsafe_scheme( $block['attrs'] ) ) {
+			return true;
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) && blocks_have_unsafe_attribute( $block['innerBlocks'] ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Whether a block attribute value resolves to a script URL (`javascript:` or `vbscript:`).
+ *
+ * Recurses through array and object values (`style`, for example), reading the scheme from the text
+ * before the first colon after decoding entities and stripping the whitespace and control characters a
+ * browser ignores. Every attribute is checked, not just URL-looking ones, so a rare text value such as a
+ * "JavaScript:"-prefixed label is refused too -- the safe direction. `data:` is excluded so ordinary
+ * "Data:" text is not rejected.
+ *
+ * @param mixed $value A block attribute value, or a nested part of one.
+ *
+ * @return bool Whether the value resolves to a script protocol.
+ */
+function attribute_has_unsafe_scheme( $value ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $item ) {
+			if ( attribute_has_unsafe_scheme( $item ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	if ( ! is_string( $value ) || '' === $value ) {
+		return false;
+	}
+
+	$decoded = html_entity_decode( $value, ENT_QUOTES, 'UTF-8' );
+	$colon   = strpos( $decoded, ':' );
+	if ( false === $colon ) {
+		return false;
+	}
+
+	// A browser ignores ASCII whitespace and control characters when reading a scheme, so strip them first.
+	$scheme = strtolower( preg_replace( '/[\x00-\x20]+/', '', substr( $decoded, 0, $colon ) ) );
+
+	return in_array( $scheme, array( 'javascript', 'vbscript' ), true );
 }
 
 /**
