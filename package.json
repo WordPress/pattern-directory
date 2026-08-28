@@ -6,7 +6,7 @@
 	"license": "GPL-2.0-or-later",
 	"private": true,
 	"dependencies": {
-		"@wordpress/env": "10.14.0",
+		"@wordpress/env": "11.14.0",
 		"@wordpress/scripts": "32.3.0",
 		"@wordpress/stylelint-config": "23.39.0"
 	},
@@ -22,7 +22,7 @@
 		"wp-env": "wp-env",
 		"lint:php": "composer run lint",
 		"format:php": "composer run format",
-		"test:php": "wp-env run tests-cli --env-cwd=/var/www/html/ ./vendor/bin/phpunit -c wp-content/tests/phpunit/phpunit.xml"
+		"test:php": "wp-env --config .wp-env.test.json run cli --env-cwd=/var/www/html/ ./vendor/bin/phpunit -c wp-content/tests/phpunit/phpunit.xml"
 	},
 	"workspaces": [
 		"public_html/wp-content/plugins/pattern-creator",

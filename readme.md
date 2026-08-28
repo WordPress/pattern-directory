@@ -3,12 +3,26 @@
 ## Prerequisites
 - Docker
 - Node/NPM
-- Composer
+- Composer (only for linting and PHPUnit — the environment itself no longer needs it)
 
 ## Setup
 1. `npm install`
 2. `npm run create`
 3. Visit site at `localhost:8888`
+
+`wp-env` fetches every dependency directly: WordPress core, the directory plugins and theme, Gutenberg, and the `wporg-mu-plugins` build (which provides the global header and footer). No Composer step is required to build the site.
+
+### Optional: locale data
+
+The GlotPress/WordPress locales live in the meta repository's `pub` mu-plugin, which has no `wp-env` source. The environment boots without it; the locale switcher and locale-aware REST endpoints simply no-op. To enable them, check out [`WordPress/wordpress.org`](https://github.com/WordPress/wordpress.org) and map `pub` in a (git-ignored) `.wp-env.override.json`:
+
+```json
+{
+	"mappings": {
+		"wp-content/mu-plugins/pub": "../wordpress.org/public_html/wp-content/mu-plugins/pub"
+	}
+}
+```
 
 ### Stopping & Starting Environment
 
