@@ -6,7 +6,8 @@ on:
         paths:
             - public_html/**
             - .github/workflows/unit-tests.yml
-            - .wp-env.test.json
+            - .github/actions/**
+            - .github/wp-tests-config.php
             - composer.json
             - composer.lock
             - package.json
@@ -16,7 +17,8 @@ on:
         paths:
             - public_html/**
             - .github/workflows/unit-tests.yml
-            - .wp-env.test.json
+            - .github/actions/**
+            - .github/wp-tests-config.php
             - composer.json
             - composer.lock
             - package.json
@@ -24,32 +26,65 @@ on:
     # Enable manually running action if necessary.
     workflow_dispatch:
 
+concurrency:
+    group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
     unit-php:
         name: PHP
 
         runs-on: ubuntu-latest
 
+        env:
+            WP_CORE_DIR: /tmp/wordpress
+            WP_TESTS_DIR: /tmp/wordpress-develop/tests/phpunit
+
         steps:
             - name: Checkout repository
-              uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-            - name: Setup
-              uses: WordPress/wporg-repo-tools/.github/actions/setup@trunk
+            - name: Setup PHP
+              uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2.37.2
               with:
-                packageManager: "npm"
-                token: ${{ secrets.GITHUB_TOKEN }}
+                  php-version: "8.4"
+                  coverage: none
+
+            - name: Install Composer dependencies
+              uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # v4.0.0
+
+            - name: Get date
+              id: date
+              run: echo "date=$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
+
+            # The test library must match the core build under test, so both come
+            # from current trunk: the nightly build as the install, and a sparse
+            # checkout of wordpress-develop for the PHPUnit library.
+            - name: Cache WordPress
+              id: wordpress-cache
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: |
+                      /tmp/wordpress
+                      /tmp/wordpress-develop
+                  key: wordpress-nightly-${{ steps.date.outputs.date }}
 
             - name: Install WordPress
+              if: steps.wordpress-cache.outputs.cache-hit != 'true'
               run: |
-                  chmod -R 767 ./ # TODO: Possibly integrate in wp-env
-                  npm run test:env -- start --update
-                  npm run test:env -- run cli wp core version
-                  npm run test:env -- run cli wp plugin list
+                  (curl -sSL https://wordpress.org/nightly-builds/wordpress-latest.zip -o /tmp/wordpress.zip && unzip -q /tmp/wordpress.zip -d /tmp) &
+                  (git clone --quiet --depth=1 --filter=blob:none --sparse https://github.com/WordPress/wordpress-develop /tmp/wordpress-develop && git -C /tmp/wordpress-develop sparse-checkout set tests/phpunit/includes tests/phpunit/data) &
+                  wait
+
+            - name: Start database
+              run: |
+                  sudo systemctl start mysql
+                  mysql -uroot -proot -h127.0.0.1 -e "CREATE DATABASE wordpress_test;"
 
             - name: Running multisite unit tests
-              run: npm run test:php
-              if: ${{ success() || failure() }}
+              env:
+                  WP_TESTS_CONFIG_FILE_PATH: ${{ github.workspace }}/.github/wp-tests-config.php
+              run: vendor/bin/phpunit -c public_html/wp-content/tests/phpunit/phpunit.xml
 
     unit-js:
         name: JS
@@ -58,13 +93,10 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-            - name: Setup
-              uses: WordPress/wporg-repo-tools/.github/actions/setup@trunk
-              with:
-                packageManager: "npm"
-                token: ${{ secrets.GITHUB_TOKEN }}
+            - name: Setup Node dependencies
+              uses: ./.github/actions/setup-node-deps
 
             - name: Run unit tests on the pattern creator
-              run: npm run test:unit --workspace=wporg-pattern-creator 
+              run: npm run test:unit --workspace=wporg-pattern-creator

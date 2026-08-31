@@ -3,8 +3,17 @@
  * PHPUnit bootstrap file
  */
 
-// Require composer dependencies.
-require_once '/var/www/html/vendor/autoload.php';
+// Require composer dependencies: wp-env maps the repo's vendor dir to /var/www/html; on a plain host checkout it lives at the repo root.
+$_autoload_candidates = array(
+	'/var/www/html/vendor/autoload.php',
+	dirname( __DIR__, 4 ) . '/vendor/autoload.php',
+);
+foreach ( $_autoload_candidates as $_autoload ) {
+	if ( file_exists( $_autoload ) ) {
+		require_once $_autoload;
+		break;
+	}
+}
 
 // If we're running in WP's build directory, ensure that WP knows that, too.
 if ( 'build' === getenv( 'LOCAL_DIR' ) ) {
@@ -32,6 +41,11 @@ if ( ! $_tests_dir ) {
 	$_tests_dir = '/tmp/wordpress-tests-lib';
 }
 
+// The test library reads the config path from a constant; bridge the env var CI sets (wp-phpunit does the same).
+if ( getenv( 'WP_TESTS_CONFIG_FILE_PATH' ) && ! defined( 'WP_TESTS_CONFIG_FILE_PATH' ) ) {
+	define( 'WP_TESTS_CONFIG_FILE_PATH', getenv( 'WP_TESTS_CONFIG_FILE_PATH' ) );
+}
+
 // Give access to tests_add_filter() function.
 require_once $_tests_dir . '/includes/functions.php';
 
@@ -39,6 +53,12 @@ require_once $_tests_dir . '/includes/functions.php';
  * Manually load the plugin being tested.
  */
 function _manually_load_plugins() {
+	// The locale stand-in loads as an mu-plugin under wp-env; on a plain host checkout load it directly (its definitions are function_exists-guarded).
+	$_locales = dirname( __DIR__, 4 ) . '/.wp-env/wporg-locales.php';
+	if ( file_exists( $_locales ) ) {
+		require_once $_locales;
+	}
+
 	require dirname( dirname( __DIR__ ) ) . '/plugins/pattern-directory/bootstrap.php';
 	require dirname( dirname( __DIR__ ) ) . '/plugins/pattern-creator/pattern-creator.php';
 	require dirname( dirname( __DIR__ ) ) . '/plugins/pattern-translations/pattern-translations.php';
