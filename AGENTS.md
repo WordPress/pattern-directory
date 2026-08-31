@@ -2,16 +2,16 @@
 
 ## What this is
 
-The codebase for **wordpress.org/patterns** — the WordPress.org Block Pattern Directory site. It is a meta-environment monorepo: WordPress core, third-party plugins, and shared WordPress.org themes/mu-plugins are pulled in via Composer, while the project's own code lives in three npm workspaces under `public_html/wp-content/`.
+The codebase for **wordpress.org/patterns** — the WordPress.org Block Pattern Directory site. It is a meta-environment monorepo: WordPress core, third-party plugins, and shared WordPress.org themes/mu-plugins are sourced directly by wp-env (`.wp-env.json`), while the project's own code lives in three npm workspaces under `public_html/wp-content/`.
 
 ## Setup & environment
 
-Requires Docker, Node/npm, and Composer.
+Requires Docker and Node/npm. Composer is only needed for linting and PHPUnit (`composer install`).
 
-- `npm run create` — full first-time bootstrap (`bin/index.sh`): runs `composer update`, `npm install`, builds all workspaces, starts wp-env, activates plugins/theme, sets permalinks, and imports seed pattern content. Site comes up at `localhost:8888`.
+- `npm run create` — full first-time bootstrap (`bin/index.sh`): runs `npm install`, builds all workspaces, and starts wp-env — which fetches every dependency and runs `bin/after-start.sh` (theme activation, permalinks, options) — then imports seed pattern content. Site comes up at `localhost:8888`.
 - `npm run wp-env start` / `npm run wp-env stop` — bring the environment up/down. **Always run from the repo root** (where `.wp-env.json` lives), or wp-env spins up a stray instance in a sub-project.
 - `npm run wp-env run cli "<wp-cli command>"` — run WP-CLI against the site, e.g. `npm run wp-env run cli "plugin list"`.
-- The local environment runs **WordPress trunk on PHP 8.1** (`.wp-env.json`); Composer's `platform.php` is pinned to 7.4 for dependency resolution, so PHP code must stay 7.4-compatible.
+- The local environment runs **WordPress trunk on PHP 8.4** (`.wp-env.json`); Composer's `platform.php` is pinned to 7.4 for dependency resolution, so PHP code must stay 7.4-compatible.
 
 ## Build, lint, test
 
@@ -21,11 +21,11 @@ These are npm-workspace commands — most run per-workspace via `--workspaces` o
 - **Watch:** `npm start --workspace=<name>` — one workspace at a time. Convenience: `npm run start:creator` etc.
 - **Lint JS/CSS:** `npm run lint:js --workspaces` and `npm run lint:css --workspaces`.
 - **Lint/format PHP:** `npm run lint:php` (= `composer run lint` = `phpcs`), `npm run format:php` (= `phpcbf`). Config in `phpcs.xml.dist` (WordPress coding standards).
-- **PHP tests:** `npm run test:php` — runs PHPUnit inside the `tests-cli` container as **multisite** (`WP_TESTS_MULTISITE=1`). Suite config: `public_html/wp-content/tests/phpunit/phpunit.xml`; tests live in `public_html/wp-content/plugins/pattern-directory/tests/phpunit/` (files suffixed `-test.php`).
+- **PHP tests:** `npm run test:php` — runs PHPUnit as **multisite** (`WP_TESTS_MULTISITE=1`) in a dedicated wp-env instance defined by `.wp-env.test.json` (port 8889, runs alongside the dev environment). Requires `composer install` (provides PHPUnit) and the test instance running: `npm run test:env start`. Suite config: `public_html/wp-content/tests/phpunit/phpunit.xml`; tests live in `public_html/wp-content/plugins/pattern-directory/tests/phpunit/` (files suffixed `-test.php`).
 - **JS tests:** `npm run test:unit --workspace=wporg-pattern-creator` (Jest via wp-scripts). The directory plugin and theme have no JS tests.
-- Run a single PHP test: `npm run wp-env run tests-cli --env-cwd=/var/www/html/ ./vendor/bin/phpunit -c wp-content/tests/phpunit/phpunit.xml --filter <TestNameOrMethod>`.
+- Run a single PHP test: `npm run test:php -- --filter <TestNameOrMethod>`.
 
-CI (`.github/workflows/`) runs linters on every PR and PHP+JS unit tests on changes under `public_html/`. The default branch is **`trunk`**.
+CI (`.github/workflows/`) runs linters on every PR and PHP+JS unit tests on changes under `public_html/` or to the environment/tooling manifests (`.wp-env.test.json`, `composer.*`, `package*.json`). The default branch is **`trunk`**.
 
 ## Workspaces & architecture
 
@@ -49,7 +49,7 @@ Three workspaces, each a standard `@wordpress/scripts` project extending the roo
 
 The directory plugin owns the pattern data model and APIs; the creator plugin is a front-end client that writes patterns through those APIs; the theme renders the public directory; the translations plugin localizes pattern content. All four share the `WordPressdotorg\Pattern_Directory\*` PHP namespaces and the `wporg-patterns` text domain.
 
-Composer pulls shared WordPress.org infrastructure (`wporg-mu-plugins`, `wporg-parent-2021` parent theme, `wporg-internal-notes`, the `wporg` meta theme/mu-plugin from meta SVN) plus Gutenberg, Stream, and the WordPress Importer. Composer's `installer-paths` place these into `public_html/wp-content/{plugins,themes,mu-plugins}/`.
+wp-env sources shared WordPress.org infrastructure (`wporg-mu-plugins`, the `wporg-parent-2021` parent theme, `wporg-internal-notes`) plus Gutenberg, Stream, and the WordPress Importer directly via `.wp-env.json` — Composer only provides dev tooling (phpcs, PHPUnit). The meta repository's `pub` mu-plugin (locale data) is optional; see the readme for the `.wp-env.override.json` mapping.
 
 ## Conventions
 

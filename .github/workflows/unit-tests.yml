@@ -1,16 +1,26 @@
 name: Unit Tests
 
-# Run on any changes in public_html
+# Run on any changes in public_html or to the files that define the test environment.
 on:
     pull_request:
         paths:
             - public_html/**
             - .github/workflows/unit-tests.yml
+            - .wp-env.test.json
+            - composer.json
+            - composer.lock
+            - package.json
+            - package-lock.json
     push:
         branches: [trunk]
         paths:
             - public_html/**
             - .github/workflows/unit-tests.yml
+            - .wp-env.test.json
+            - composer.json
+            - composer.lock
+            - package.json
+            - package-lock.json
     # Enable manually running action if necessary.
     workflow_dispatch:
 
@@ -33,9 +43,9 @@ jobs:
             - name: Install WordPress
               run: |
                   chmod -R 767 ./ # TODO: Possibly integrate in wp-env
-                  npm run wp-env start --update
-                  npm run wp-env run tests-cli wp core version
-                  npm run wp-env run tests-cli wp plugin list
+                  npm run test:env -- start --update
+                  npm run test:env -- run cli wp core version
+                  npm run test:env -- run cli wp plugin list
 
             - name: Running multisite unit tests
               run: npm run test:php

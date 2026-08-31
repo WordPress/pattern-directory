@@ -11,69 +11,8 @@
 			"php": "7.4"
 		},
 		"allow-plugins": {
-			"dealerdirect/phpcodesniffer-composer-installer": true,
-			"composer/installers": true
+			"dealerdirect/phpcodesniffer-composer-installer": true
 		}
-	},
-	"extra": {
-		"installer-paths": {
-			"public_html/wp-content/mu-plugins/{$name}/": ["type:wordpress-muplugin"],
-			"public_html/wp-content/plugins/{$name}/": ["type:wordpress-plugin"],
-			"public_html/wp-content/themes/{$name}/": ["type:wordpress-theme"]
-		}
-	},
-	"repositories": [
-		{
-			"type": "composer",
-			"url": "https://wpackagist.org/"
-		},
-		{
-			"type": "package",
-			"package": [
-				{
-					"name": "wordpress-meta/wporg",
-					"type": "wordpress-theme",
-					"version": "1",
-					"source": {
-						"type": "svn",
-						"url": "https://meta.svn.wordpress.org/sites/",
-						"reference": "trunk/wordpress.org/public_html/wp-content/themes/pub/wporg/"
-					}
-				},
-				{
-					"name": "wordpress-meta/pub",
-					"type": "wordpress-muplugin",
-					"version": "1",
-					"source": {
-						"type": "svn",
-						"url": "https://meta.svn.wordpress.org/sites/",
-						"reference": "trunk/wordpress.org/public_html/wp-content/mu-plugins/pub/"
-					}
-				}
-			]
-		},
-		{
-			"type": "vcs",
-			"url": "git@github.com:WordPress/wporg-mu-plugins.git"
-		},
-		{
-			"type": "vcs",
-			"url": "git@github.com:WordPress/wporg-parent-2021.git"
-		},
-		{
-			"type": "vcs",
-			"url": "git@github.com:WordPress/wporg-internal-notes.git"
-		}
-	],
-	"require": {
-		"composer/installers": "~1.0",
-		"wpackagist-plugin/gutenberg": "23.3.0",
-		"wpackagist-plugin/stream": "*",
-		"wpackagist-plugin/wordpress-importer": "*",
-		"wordpress-meta/wporg": "1",
-		"wordpress-meta/pub": "1",
-		"wporg/wporg-internal-notes": "dev-build",
-		"wporg/wporg-mu-plugins": "dev-build"
 	},
 	"require-dev": {
 		"dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
@@ -82,7 +21,6 @@
 		"rmccue/requests": "^1.8.1",
 		"wp-coding-standards/wpcs": "^3.4.1",
 		"wp-phpunit/wp-phpunit": "~6.0",
-		"wporg/wporg-parent-2021": "dev-build",
 		"yoast/phpunit-polyfills": "^1.1"
 	},
 	"scripts": {
