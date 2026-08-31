@@ -95,7 +95,11 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 			if ( $translated ) {
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				echo "\t{$locale} - " . ( $translated->ID ? 'Updating' : 'Creating' ) . " Translated pattern.\n";
-				create_or_update_translated_pattern( $translated );
+				$result = create_or_update_translated_pattern( $translated );
+				if ( is_wp_error( $result ) ) {
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo "\t{$locale} - ERROR: {$result->get_error_message()}\n";
+				}
 			} else {
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				echo "\t{$locale} - No Translations exist yet.\n";

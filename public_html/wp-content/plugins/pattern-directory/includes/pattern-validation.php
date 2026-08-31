@@ -111,8 +111,7 @@ function validate_content( $prepared_post, $request ) {
 		);
 	}
 
-	// The editor adds in linebreaks between blocks, but parse_blocks thinks those are invalid blocks.
-	$content = str_replace( "\n\n", '', $content );
+	// Parse the exact content that will be stored: normalising it first could hide a block from validation.
 	$blocks = parse_blocks( $content );
 	$blocks_queue = $blocks;
 	$all_blocks = array();
@@ -120,6 +119,12 @@ function validate_content( $prepared_post, $request ) {
 	// Loop over all the nested blocks to flatten the block list into 1 dimension.
 	while ( count( $blocks_queue ) > 0 ) { // phpcs:ignore -- inline count OK.
 		$block = array_shift( $blocks_queue );
+
+		// The editor's linebreaks between blocks parse as nameless whitespace-only blocks: separators, not content.
+		if ( is_null( $block['blockName'] ) && '' === trim( $block['innerHTML'] ) ) {
+			continue;
+		}
+
 		array_push( $all_blocks, $block );
 		if ( ! empty( $block['innerBlocks'] ) ) {
 			foreach ( $block['innerBlocks'] as $inner_block ) {
@@ -397,18 +402,38 @@ function validate_block_directives( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
-	$tags = new \WP_HTML_Tag_Processor( $prepared_post->post_content );
-	while ( $tags->next_tag() ) {
-		if ( $tags->get_attribute_names_with_prefix( 'data-wp-' ) ) {
-			return new \WP_Error(
-				'rest_pattern_interactivity_directive',
-				__( 'Pattern content contains interactivity directives, which are not allowed.', 'wporg-patterns' ),
-				array( 'status' => 400 )
-			);
-		}
+	if ( content_has_block_directives( $prepared_post->post_content ) ) {
+		return new \WP_Error(
+			'rest_pattern_interactivity_directive',
+			__( 'Pattern content contains interactivity directives, which are not allowed.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
 	}
 
 	return $prepared_post;
+}
+
+/**
+ * Whether any tag in the HTML carries an Interactivity API `data-wp-*` attribute.
+ *
+ * @param string $html The HTML to scan.
+ *
+ * @return bool Whether a directive is present.
+ */
+function content_has_block_directives( $html ) {
+	// Directives are rare; don't tokenize the whole document when the marker can't be present.
+	if ( false === stripos( $html, 'data-wp-' ) ) {
+		return false;
+	}
+
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	while ( $tags->next_tag() ) {
+		if ( $tags->get_attribute_names_with_prefix( 'data-wp-' ) ) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**

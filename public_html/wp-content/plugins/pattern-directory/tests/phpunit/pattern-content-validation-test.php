@@ -11,6 +11,11 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, SPAM_
  * @group content-validation
  */
 class Pattern_Content_Validation_Test extends WP_UnitTestCase {
+	/**
+	 * Two valid paragraph blocks, the base fixture the data providers and tests build on.
+	 */
+	private const TWO_PARAGRAPHS = "<!-- wp:paragraph -->\n<p>One.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Two.</p>\n<!-- /wp:paragraph -->";
+
 	protected static $pattern_id;
 	protected static $user;
 
@@ -63,7 +68,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function data_valid_content() {
-		$two_paragraphs = "<!-- wp:paragraph -->\n<p>One.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Two.</p>\n<!-- /wp:paragraph -->";
+		$two_paragraphs = self::TWO_PARAGRAPHS;
 		$three_paragraphs = "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.</p>\n<!-- /wp:paragraph -->";
 
 		return array(
@@ -107,7 +112,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function data_invalid_content() {
-		$two_paragraphs = "<!-- wp:paragraph -->\n<p>One.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Two.</p>\n<!-- /wp:paragraph -->";
+		$two_paragraphs = self::TWO_PARAGRAPHS;
 		$three_paragraphs = "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.</p>\n<!-- /wp:paragraph -->";
 
 		return array(
@@ -132,6 +137,10 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 			array( 'rest_pattern_disallowed_blocks', "$three_paragraphs\n\n<!-- wp:nextpage -->\n<!--nextpage-->\n<!-- /wp:nextpage -->" ),
 			array( 'rest_pattern_disallowed_blocks', "$three_paragraphs\n\n<!-- wp:shortcode -->[gallery]<!-- /wp:shortcode -->" ),
 			array( 'rest_pattern_disallowed_blocks', "<!-- wp:group -->\n<div class=\"wp-block-group\"><!-- wp:shortcode -->[gallery]<!-- /wp:shortcode --></div>\n<!-- /wp:group -->" ),
+			// `core/pattern` splices in another pattern by slug on render, the indirection `core/block` is blocked for.
+			array( 'rest_pattern_disallowed_blocks', "$three_paragraphs\n\n<!-- wp:pattern {\"slug\":\"core/example\"} /-->" ),
+			// A `\n\n` inside a delimiter still parses in stored content; normalising it away must not hide the block.
+			array( 'rest_pattern_disallowed_blocks', "$three_paragraphs\n\n<!-- wp:group -->\n<div class=\"wp-block-group\"><!-- wp:shortcode\n\n-->[gallery]<!-- /wp:shortcode\n\n--></div>\n<!-- /wp:group -->" ),
 
 			// Interactivity directives in a block's HTML would drive a trusted store from submitted markup.
 			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></p>\n<!-- /wp:paragraph -->" ),
@@ -177,21 +186,22 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	public function test_wporg_blocks_are_disallowed() {
 		register_block_type( 'wporg/test-block', array( 'apiVersion' => 2 ) );
 
-		wp_set_current_user( self::$user );
+		try {
+			wp_set_current_user( self::$user );
 
-		$two_paragraphs = "<!-- wp:paragraph -->\n<p>One.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Two.</p>\n<!-- /wp:paragraph -->";
-		$content        = "$two_paragraphs\n\n<!-- wp:wporg/test-block /-->";
+			$content = self::TWO_PARAGRAPHS . "\n\n<!-- wp:wporg/test-block /-->";
 
-		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
-		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( wp_json_encode( array( 'content' => $content ) ) );
+			$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
+			$request->set_header( 'content-type', 'application/json' );
+			$request->set_body( wp_json_encode( array( 'content' => $content ) ) );
 
-		$response = rest_do_request( $request );
+			$response = rest_do_request( $request );
 
-		unregister_block_type( 'wporg/test-block' );
-
-		$this->assertTrue( $response->is_error() );
-		$this->assertSame( 'rest_pattern_disallowed_blocks', $response->get_data()['code'] );
+			$this->assertTrue( $response->is_error() );
+			$this->assertSame( 'rest_pattern_disallowed_blocks', $response->get_data()['code'] );
+		} finally {
+			unregister_block_type( 'wporg/test-block' );
+		}
 	}
 
 	/**

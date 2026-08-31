@@ -613,6 +613,7 @@ const DISALLOWED_BLOCK_TYPES = array(
 	'core/more',
 	'core/nextpage',
 	'core/block', // Reusable blocks.
+	'core/pattern', // Splices in another registered pattern by slug on render.
 	'core/shortcode',
 	'core/template-part',
 );
@@ -629,7 +630,9 @@ const DISALLOWED_BLOCK_TYPES = array(
  * @return bool Whether the block is allowed in patterns.
  */
 function is_block_allowed_in_pattern( $block_type ) {
-	if ( 'wporg/' === substr( (string) $block_type, 0, 6 ) ) {
+	$block_type = (string) $block_type;
+
+	if ( str_starts_with( $block_type, 'wporg/' ) ) {
 		return false;
 	}
 

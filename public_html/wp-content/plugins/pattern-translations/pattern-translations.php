@@ -7,6 +7,8 @@
  */
 
 namespace WordPressdotorg\Pattern_Translations;
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\is_block_allowed_in_pattern;
+use function WordPressdotorg\Pattern_Directory\Pattern_Validation\content_has_block_directives;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 const GLOTPRESS_PROJECT = 'patterns/core';
@@ -28,9 +30,42 @@ if ( defined( 'WP_CLI' ) ) {
 }
 
 /**
+ * Whether translated pattern HTML stays within what the directory accepts from direct submissions.
+ *
+ * Translator-supplied strings are assembled into stored markup without passing through the REST
+ * validators, so the same block allowlist and Interactivity-directive checks have to run here.
+ *
+ * @param string $html The assembled, translated pattern HTML.
+ * @return bool Whether the HTML is safe to store as a pattern.
+ */
+function is_translated_content_allowed( $html ) {
+	$blocks = parse_blocks( $html );
+	while ( count( $blocks ) > 0 ) { // phpcs:ignore -- inline count OK.
+		$block = array_shift( $blocks );
+
+		if ( ! is_null( $block['blockName'] ) && ! is_block_allowed_in_pattern( $block['blockName'] ) ) {
+			return false;
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			$blocks = array_merge( $blocks, $block['innerBlocks'] );
+		}
+	}
+
+	return ! content_has_block_directives( $html );
+}
+
+/**
  * Creates or updates a localised pattern.
  */
 function create_or_update_translated_pattern( Pattern $pattern ) {
+	if ( ! is_translated_content_allowed( $pattern->html ) ) {
+		return new \WP_Error(
+			'pattern_translation_disallowed_content',
+			'Translated pattern content contains disallowed blocks or interactivity directives.'
+		);
+	}
+
 	$parent = false;
 	if ( $pattern->parent ) {
 		$parent = get_post( $pattern->parent->ID );
