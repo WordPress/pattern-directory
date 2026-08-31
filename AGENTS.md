@@ -21,7 +21,7 @@ These are npm-workspace commands — most run per-workspace via `--workspaces` o
 - **Watch:** `npm start --workspace=<name>` — one workspace at a time. Convenience: `npm run start:creator` etc.
 - **Lint JS/CSS:** `npm run lint:js --workspaces` and `npm run lint:css --workspaces`.
 - **Lint/format PHP:** `npm run lint:php` (= `composer run lint` = `phpcs`), `npm run format:php` (= `phpcbf`). Config in `phpcs.xml.dist` (WordPress coding standards).
-- **PHP tests:** `npm run test:php` — runs PHPUnit as **multisite** (`WP_TESTS_MULTISITE=1`) in a dedicated wp-env instance defined by `.wp-env.test.json` (port 8889, runs alongside the dev environment). Requires `composer install` (provides PHPUnit) and the test instance running: `npm run wp-env:test start`. Suite config: `public_html/wp-content/tests/phpunit/phpunit.xml`; tests live in `public_html/wp-content/plugins/pattern-directory/tests/phpunit/` (files suffixed `-test.php`).
+- **PHP tests:** `npm run test:php` — runs PHPUnit as **multisite** (`WP_TESTS_MULTISITE=1`) in a dedicated wp-env instance defined by `.wp-env.test.json` (port 8889, runs alongside the dev environment). Requires `composer install` (provides PHPUnit) and the test instance running: `npm run test:env start`. Suite config: `public_html/wp-content/tests/phpunit/phpunit.xml`; tests live in `public_html/wp-content/plugins/pattern-directory/tests/phpunit/` (files suffixed `-test.php`).
 - **JS tests:** `npm run test:unit --workspace=wporg-pattern-creator` (Jest via wp-scripts). The directory plugin and theme have no JS tests.
 - Run a single PHP test: `npm run test:php -- --filter <TestNameOrMethod>`.
 

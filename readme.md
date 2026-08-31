@@ -85,10 +85,10 @@ These checks will also be run automatically on each PR.
 
 PHPUnit is installed with `composer install`. The test suite runs in its own `wp-env` instance, defined by `.wp-env.test.json` and served at `localhost:8889`, so it can run alongside the development environment. Start the test instance once, then run the tests:
 
-	npm run wp-env:test start
+	npm run test:env start
 	npm run test:php
 
-`npm run wp-env:test` accepts all the usual `wp-env` commands (`stop`, `destroy`, `run cli ...`) and targets the test instance.
+`npm run test:env` accepts all the usual `wp-env` commands (`stop`, `destroy`, `run cli ...`) and targets the test instance.
 
 To run a single test or test class, pass PHPUnit's `--filter`:
 
