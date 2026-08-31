@@ -33,7 +33,8 @@ if ( defined( 'WP_CLI' ) ) {
  * Whether translated pattern HTML stays within what the directory accepts from direct submissions.
  *
  * Translator-supplied strings are assembled into stored markup without passing through the REST
- * validators, so the same block allowlist and Interactivity-directive checks have to run here.
+ * validators, so the block allowlist and Interactivity-directive checks (the two a translated string
+ * could realistically violate) run here. The remaining REST checks still apply to the English parent.
  *
  * @param string $html The assembled, translated pattern HTML.
  * @return bool Whether the HTML is safe to store as a pattern.
@@ -57,6 +58,10 @@ function is_translated_content_allowed( $html ) {
 
 /**
  * Creates or updates a localised pattern.
+ *
+ * @param Pattern $pattern The translated pattern to store.
+ *
+ * @return int|\WP_Error The pattern post ID, or an error if the content is refused or the write fails.
  */
 function create_or_update_translated_pattern( Pattern $pattern ) {
 	if ( ! is_translated_content_allowed( $pattern->html ) ) {
