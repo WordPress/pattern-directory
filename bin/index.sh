@@ -16,7 +16,7 @@ npm install
 npm run build --workspaces
 
 # Start the environment. wp-env fetches core, plugins, themes, and mu-plugins,
-# then runs bin/after-start.sh (plugin/theme activation, permalinks, options).
+# then runs bin/after-start.sh (theme activation, permalinks, options).
 npm run wp-env start --update
 
 # Create the table for locales.

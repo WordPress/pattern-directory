@@ -1,16 +1,26 @@
 name: Unit Tests
 
-# Run on any changes in public_html
+# Run on any changes in public_html or to the files that define the test environment.
 on:
     pull_request:
         paths:
             - public_html/**
             - .github/workflows/unit-tests.yml
+            - .wp-env.test.json
+            - composer.json
+            - composer.lock
+            - package.json
+            - package-lock.json
     push:
         branches: [trunk]
         paths:
             - public_html/**
             - .github/workflows/unit-tests.yml
+            - .wp-env.test.json
+            - composer.json
+            - composer.lock
+            - package.json
+            - package-lock.json
     # Enable manually running action if necessary.
     workflow_dispatch:
 

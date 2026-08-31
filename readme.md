@@ -73,10 +73,22 @@ The available workspaces are:
 
 ### Linting
 
-This project has eslint, stylelint, and phpcs set up for linting the code. This ensures all developers are working from the same style. To check your code before pushing it to the repo, run
+This project has eslint, stylelint, and phpcs set up for linting the code. This ensures all developers are working from the same style. phpcs comes from Composer, so run `composer install` once first. To check your code before pushing it to the repo, run
 
 	npm run lint:css --workspaces
 	npm run lint:js --workspaces
 	composer run lint
 
 These checks will also be run automatically on each PR.
+
+### PHP unit tests
+
+PHPUnit is installed with `composer install`. The test suite runs in its own `wp-env` instance, defined by `.wp-env.test.json`. It uses the same ports as the development environment, so stop that one first, then start the test instance and run the tests:
+
+	npm run wp-env stop
+	npm run wp-env -- --config .wp-env.test.json start
+	npm run test:php
+
+To run a single test or test class, pass PHPUnit's `--filter`:
+
+	npm run test:php -- --filter <TestNameOrMethod>
