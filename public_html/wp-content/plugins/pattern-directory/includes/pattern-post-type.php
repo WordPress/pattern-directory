@@ -890,6 +890,10 @@ function get_block_pattern( $post ) {
  * @return array
  */
 function set_pattern_caps( $user_caps ) {
+	if ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {
+		return $user_caps;
+	}
+
 	// Set corresponding caps for all roles.
 	$cap_args = array(
 		'capability_type' => array( 'pattern', 'patterns' ),
