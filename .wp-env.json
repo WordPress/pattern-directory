@@ -8,7 +8,7 @@
 		"JETPACK_DEV_DEBUG": true,
 		"WPORG_SANDBOXED": true
 	},
-	"core": "WordPress/WordPress#master",
+	"core": "https://wordpress.org/nightly-builds/wordpress-latest.zip",
 	"phpVersion": "8.4",
 	"testsEnvironment": false,
 	"plugins": [

@@ -6,7 +6,7 @@
 		"FS_METHOD": "direct",
 		"WP_ENVIRONMENT_TYPE": false
 	},
-	"core": "WordPress/WordPress#master",
+	"core": "https://wordpress.org/nightly-builds/wordpress-latest.zip",
 	"phpVersion": "8.4",
 	"port": 8889,
 	"testsEnvironment": false,

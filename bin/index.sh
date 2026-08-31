@@ -17,7 +17,7 @@ npm run build --workspaces
 
 # Start the environment. wp-env fetches core, plugins, themes, and mu-plugins,
 # then runs bin/after-start.sh (theme activation, permalinks, options).
-npm run wp-env start --update
+npm run wp-env -- start --update
 
 # Create the table for locales.
 npm run wp-env run cli wp db import wp-content/uploads/data/wporg_locales.sql
