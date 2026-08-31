@@ -793,12 +793,11 @@ function filter_patterns_rest_query( $args, $request ) {
 		$allowed_blocks = array_filter(
 			(array) $allowed_blocks,
 			function ( $block_name ) {
-				return is_string( $block_name ) && preg_match( '#^[a-z][a-z0-9-]*/[a-z][a-z0-9-]*$#', $block_name );
+				return is_string( $block_name ) && preg_match( '#^[a-z0-9-]+/[a-z0-9-]+$#', $block_name );
 			}
 		);
-	}
-	if ( ! empty( $allowed_blocks ) ) {
-		// Only return a pattern if all contained blocks are in the allowed blocks list.
+
+		// Only return patterns whose blocks are all allowed; an all-invalid list matches nothing, so it still narrows.
 		$args['meta_query']['allowed_blocks'] = array(
 			'key'     => 'wpop_contains_block_types',
 			'compare' => 'REGEXP',
