@@ -469,7 +469,9 @@ function update_archive_title( $block_content, $block, $instance ) {
 			$title = __( 'Search results', 'wporg-patterns' );
 		}
 
+		$allowed_tags       = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' );
 		$tag_name           = isset( $attributes['level'] ) ? 'h' . (int) $attributes['level'] : 'h1';
+		$tag_name           = in_array( $tag_name, $allowed_tags, true ) ? $tag_name : 'h1';
 		$align_class_name   = empty( $attributes['textAlign'] ) ? '' : "has-text-align-{$attributes['textAlign']}";
 
 		// Required to prevent `block_to_render` from being null in `get_block_wrapper_attributes`.
@@ -482,7 +484,7 @@ function update_archive_title( $block_content, $block, $instance ) {
 			'<%1$s %2$s>%3$s</%1$s>',
 			$tag_name,
 			$wrapper_attributes,
-			$title
+			esc_html( $title )
 		);
 	}
 	return $block_content;

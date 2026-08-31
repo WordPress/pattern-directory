@@ -186,24 +186,28 @@ function get_pattern_ids_with_pending_flags( $args = array() ) {
 	$pattern = PATTERN;
 	$flag    = POST_TYPE;
 
-	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$pattern_ids = $wpdb->get_col(
-		$wpdb->prepare(
-			"
-			SELECT DISTINCT patterns.ID
-			FROM {$wpdb->posts} patterns
-				JOIN {$wpdb->posts} flags ON patterns.ID = flags.post_parent
-					AND flags.post_type = '{$flag}'
-				    AND flags.post_status = 'pending'
-			WHERE patterns.post_type = '{$pattern}'
-			ORDER BY %s %s
-			",
-			$args['orderby'],
-			$args['order']
-		)
+	// Allowlist orderby/order; these are a column and a keyword, which can't be bound as placeholders.
+	$orderby_columns = array(
+		'date'  => 'patterns.post_date',
+		'title' => 'patterns.post_title',
+		'id'    => 'patterns.ID',
 	);
-	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$orderby = $orderby_columns[ strtolower( (string) $args['orderby'] ) ] ?? 'patterns.post_date';
+	$order   = 'asc' === strtolower( (string) $args['order'] ) ? 'ASC' : 'DESC';
+
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
+	$pattern_ids = $wpdb->get_col(
+		"
+		SELECT DISTINCT patterns.ID
+		FROM {$wpdb->posts} patterns
+			JOIN {$wpdb->posts} flags ON patterns.ID = flags.post_parent
+				AND flags.post_type = '{$flag}'
+			    AND flags.post_status = 'pending'
+		WHERE patterns.post_type = '{$pattern}'
+		ORDER BY {$orderby} {$order}
+		"
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
 
 	return $pattern_ids;
 }

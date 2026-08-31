@@ -436,7 +436,7 @@ function add_row_actions( $actions, $post ) {
 
 		$actions['publish'] = sprintf(
 			'<a href="%s" aria-label="%s">%s</a>',
-			$publish_url,
+			esc_url( $publish_url ),
 			/* translators: %s: Post title. */
 			esc_attr( sprintf( __( 'Publish &#8220;%s&#8221;', 'wporg-patterns' ), $title ) ),
 			_x( 'Publish', 'verb', 'wporg-patterns' )
@@ -454,7 +454,7 @@ function add_row_actions( $actions, $post ) {
 
 		$actions['unlist'] = sprintf(
 			'<a href="%s" aria-label="%s">%s</a>',
-			$unlist_url,
+			esc_url( $unlist_url ),
 			/* translators: %s: Post title. */
 			esc_attr( sprintf( __( 'Remove &#8220;%s&#8221; from the directory', 'wporg-patterns' ), $title ) ),
 			_x( 'Unlist', 'verb', 'wporg-patterns' )
@@ -472,7 +472,7 @@ function add_row_actions( $actions, $post ) {
 
 		$actions['spam'] = sprintf(
 			'<a href="%s" aria-label="%s">%s</a>',
-			$spam_url,
+			esc_url( $spam_url ),
 			/* translators: %s: Post title. */
 			esc_attr( sprintf( __( 'Mark &#8220;%s&#8221; as spam', 'wporg-patterns' ), $title ) ),
 			_x( 'Spam', 'verb', 'wporg-patterns' )

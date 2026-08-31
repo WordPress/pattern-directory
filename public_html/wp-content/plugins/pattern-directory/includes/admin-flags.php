@@ -171,7 +171,7 @@ function flag_list_table_row_actions( $actions, $post ) {
 
 	$actions['review'] = sprintf(
 		'<a href="%s" aria-label="%s">%s</a>',
-		esc_attr( $pattern_url ),
+		esc_url( $pattern_url ),
 		/* translators: %s: Post title. */
 		esc_attr( sprintf( __( 'Review &#8220;%s&#8221;', 'wporg-patterns' ), $pattern_title ) ),
 		__( 'Review Pattern', 'wporg-patterns' )
@@ -188,7 +188,7 @@ function flag_list_table_row_actions( $actions, $post ) {
 
 		$actions['resolve'] = sprintf(
 			'<a href="%s" aria-label="%s">%s</a>',
-			esc_attr( $resolve_url ),
+			esc_url( $resolve_url ),
 			esc_attr( __( 'Mark this flag as resolved', 'wporg-patterns' ) ),
 			__( 'Resolve', 'wporg-patterns' )
 		);
@@ -205,7 +205,7 @@ function flag_list_table_row_actions( $actions, $post ) {
 
 		$actions['unresolve'] = sprintf(
 			'<a href="%s" aria-label="%s">%s</a>',
-			esc_attr( $unresolve_url ),
+			esc_url( $unresolve_url ),
 			esc_attr( __( 'Mark this flag as pending', 'wporg-patterns' ) ),
 			__( 'Unresolve', 'wporg-patterns' )
 		);
@@ -225,7 +225,7 @@ function flag_list_table_row_actions( $actions, $post ) {
 
 		$actions['view-all'] = sprintf(
 			'<br /><a href="%s" aria-label="%s">%s</a>',
-			esc_attr( $view_all_url ),
+			esc_url( $view_all_url ),
 			/* translators: %s: Post title. */
 			esc_attr( sprintf( __( 'View all flags for &#8220;%s&#8221;', 'wporg-patterns' ), $pattern_title ) ),
 			__( 'View All Flags For This Pattern', 'wporg-patterns' )

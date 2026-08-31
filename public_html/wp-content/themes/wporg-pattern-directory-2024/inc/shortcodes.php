@@ -12,7 +12,7 @@ add_shortcode(
 	'pattern_edit_link',
 	function () {
 		$post_id = get_the_ID();
-		return site_url( "pattern/$post_id/edit/" );
+		return esc_url( site_url( "pattern/$post_id/edit/" ) );
 	}
 );
 
@@ -23,12 +23,14 @@ add_shortcode(
 	'pattern_draft_link',
 	function () {
 		$post_id = get_the_ID();
-		return add_query_arg(
-			array(
-				'action' => 'draft',
-				'_wpnonce' => wp_create_nonce( 'draft-' . $post_id ),
-			),
-			get_the_permalink()
+		return esc_url(
+			add_query_arg(
+				array(
+					'action' => 'draft',
+					'_wpnonce' => wp_create_nonce( 'draft-' . $post_id ),
+				),
+				get_the_permalink()
+			)
 		);
 	}
 );

@@ -72,7 +72,7 @@ function render( $attributes, $content, $block ) {
 				$message .= sprintf(
 					'<p>%s %s</p>',
 					__( 'WordPress.org has removed your pattern from the directory for the following reason:', 'wporg-patterns' ),
-					$reason
+					wp_kses_post( $reason )
 				);
 			}
 			$message .= '<p>' . __( 'You can update your pattern to resubmit it for approval at any time.', 'wporg-patterns' ) . '</p>';
