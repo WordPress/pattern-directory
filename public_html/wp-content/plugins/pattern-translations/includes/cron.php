@@ -95,7 +95,13 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 			if ( $translated ) {
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				echo "\t{$locale} - " . ( $translated->ID ? 'Updating' : 'Creating' ) . " Translated pattern.\n";
-				create_or_update_translated_pattern( $translated );
+				$result = create_or_update_translated_pattern( $translated );
+				if ( is_wp_error( $result ) ) {
+					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- cron output isn't reliably captured; the failure has to reach the server log.
+					error_log( "Pattern translation import failed for {$pattern->name} ({$locale}): " . $result->get_error_message() );
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo "\t{$locale} - ERROR: {$result->get_error_message()}\n";
+				}
 			} else {
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				echo "\t{$locale} - No Translations exist yet.\n";

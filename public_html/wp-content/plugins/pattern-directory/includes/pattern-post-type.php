@@ -343,6 +343,12 @@ function register_rest_fields() {
 		array(
 			'get_callback' => function ( $response_data ) {
 				$pattern = get_post( $response_data['id'] );
+
+				// Only ever expose pattern content; a mismatched type means the id resolved in the wrong context.
+				if ( ! $pattern || POST_TYPE !== $pattern->post_type ) {
+					return '';
+				}
+
 				return decode_pattern_content( $pattern->post_content );
 			},
 
@@ -596,6 +602,44 @@ function enqueue_editor_assets() {
 }
 
 /**
+ * Core block types that don't belong in shared patterns.
+ *
+ * Shared by the editor's `allowed_block_types_all` filter and the REST validator, so the two reject the
+ * same block types instead of drifting apart.
+ */
+const DISALLOWED_BLOCK_TYPES = array(
+	'core/freeform', // Classic block.
+	'core/legacy-widget',
+	'core/more',
+	'core/nextpage',
+	'core/block', // Reusable blocks.
+	'core/pattern', // Splices in another registered pattern by slug on render.
+	'core/shortcode',
+	'core/template-part',
+);
+
+/**
+ * Whether a block type may be used in a submitted pattern.
+ *
+ * `wporg/*` blocks (Global Header & Footer and the like) and the disallowed core blocks are removed by
+ * the editor's `allowed_block_types_all` filter. A registered block is not an authorised one, so the REST
+ * validator applies this same predicate to reject them on the server too.
+ *
+ * @param string $block_type The block type name.
+ *
+ * @return bool Whether the block is allowed in patterns.
+ */
+function is_block_allowed_in_pattern( $block_type ) {
+	$block_type = (string) $block_type;
+
+	if ( str_starts_with( $block_type, 'wporg/' ) ) {
+		return false;
+	}
+
+	return ! in_array( $block_type, DISALLOWED_BLOCK_TYPES, true );
+}
+
+/**
  * Restrict the set of blocks allowed in block patterns.
  *
  * @param bool|array              $allowed_block_types  Array of block type slugs, or boolean to enable/disable all.
@@ -604,32 +648,13 @@ function enqueue_editor_assets() {
  * @return bool|array A (possibly) filtered list of block types.
  */
 function remove_disallowed_blocks( $allowed_block_types, $block_editor_context ) {
-	$disallowed_block_types = array(
-		// Remove blocks that don't make sense in Block Patterns
-		'core/freeform', // Classic block
-		'core/legacy-widget',
-		'core/more',
-		'core/nextpage',
-		'core/block', // Reusable blocks
-		'core/shortcode',
-		'core/template-part',
-	);
-
 	if ( isset( $block_editor_context->post ) && POST_TYPE === $block_editor_context->post->post_type ) {
-		// This can be true if all block types are allowed, so to filter them we
-		// need to get the list of all registered blocks first.
+		// `true` means every registered block is allowed, so expand it before filtering.
 		if ( true === $allowed_block_types ) {
 			$allowed_block_types = array_keys( WP_Block_Type_Registry::get_instance()->get_all_registered() );
 		}
-		$allowed_block_types = array_diff( $allowed_block_types, $disallowed_block_types );
 
-		// Remove the "WordPress.org" blocks, like Global Header & Global Footer.
-		$allowed_block_types = array_filter(
-			$allowed_block_types,
-			function ( $block_type ) {
-				return 'wporg/' !== substr( $block_type, 0, 6 );
-			}
-		);
+		$allowed_block_types = array_filter( $allowed_block_types, __NAMESPACE__ . '\is_block_allowed_in_pattern' );
 	}
 
 	return is_array( $allowed_block_types ) ? array_values( $allowed_block_types ) : $allowed_block_types;

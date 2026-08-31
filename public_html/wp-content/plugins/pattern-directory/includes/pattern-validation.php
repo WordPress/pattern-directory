@@ -4,11 +4,13 @@ namespace WordPressdotorg\Pattern_Directory\Pattern_Validation;
 
 use WordPressdotorg\Pattern_Translations\Pattern as Translations_Pattern;
 use WordPressdotorg\Pattern_Translations\PatternParser as Translations_PatternParser;
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\is_block_allowed_in_pattern;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content', 10, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_context', 10, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_attributes', 10, 2 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_directives', 10, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_status', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_parent', 11, 2 );
@@ -109,8 +111,7 @@ function validate_content( $prepared_post, $request ) {
 		);
 	}
 
-	// The editor adds in linebreaks between blocks, but parse_blocks thinks those are invalid blocks.
-	$content = str_replace( "\n\n", '', $content );
+	// Parse the exact content that will be stored: normalising it first could hide a block from validation.
 	$blocks = parse_blocks( $content );
 	$blocks_queue = $blocks;
 	$all_blocks = array();
@@ -118,6 +119,12 @@ function validate_content( $prepared_post, $request ) {
 	// Loop over all the nested blocks to flatten the block list into 1 dimension.
 	while ( count( $blocks_queue ) > 0 ) { // phpcs:ignore -- inline count OK.
 		$block = array_shift( $blocks_queue );
+
+		// The editor's linebreaks between blocks parse as nameless whitespace-only blocks: separators, not content.
+		if ( is_null( $block['blockName'] ) && '' === trim( $block['innerHTML'] ) ) {
+			continue;
+		}
+
 		array_push( $all_blocks, $block );
 		if ( ! empty( $block['innerBlocks'] ) ) {
 			foreach ( $block['innerBlocks'] as $inner_block ) {
@@ -137,6 +144,22 @@ function validate_content( $prepared_post, $request ) {
 		return new \WP_Error(
 			'rest_pattern_invalid_blocks',
 			__( 'Pattern content contains invalid blocks. Patterns shared on the Pattern Directory can only use core blocks.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	// The editor hiding a block is a UI affordance, not a boundary; enforce the same policy server-side.
+	$disallowed_blocks = array_filter(
+		$all_blocks,
+		function ( $block ) {
+			return ! is_null( $block['blockName'] ) && ! is_block_allowed_in_pattern( $block['blockName'] );
+		}
+	);
+
+	if ( count( $disallowed_blocks ) ) {
+		return new \WP_Error(
+			'rest_pattern_disallowed_blocks',
+			__( 'Pattern content contains blocks that are not allowed. Patterns shared on the Pattern Directory can only use core blocks.', 'wporg-patterns' ),
 			array( 'status' => 400 )
 		);
 	}
@@ -357,6 +380,60 @@ function attribute_has_unsafe_scheme( $value, $is_url = false ) {
 	}
 
 	return ! in_array( $scheme, wp_allowed_protocols(), true );
+}
+
+/**
+ * Reject Interactivity API `data-wp-*` directives carried in a block's HTML.
+ *
+ * KSES preserves them and they sit in inner HTML, so neither core sanitisation nor the attribute check
+ * above catches them.
+ *
+ * @param object           $prepared_post The post object about to be inserted.
+ * @param \WP_REST_Request $request       The request.
+ *
+ * @return object|\WP_Error The post object, or an error if the content carries a directive.
+ */
+function validate_block_directives( $prepared_post, $request ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	if ( ! isset( $prepared_post->post_content ) ) {
+		return $prepared_post;
+	}
+
+	if ( content_has_block_directives( $prepared_post->post_content ) ) {
+		return new \WP_Error(
+			'rest_pattern_interactivity_directive',
+			__( 'Pattern content contains interactivity directives, which are not allowed.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	return $prepared_post;
+}
+
+/**
+ * Whether any tag in the HTML carries an Interactivity API `data-wp-*` attribute.
+ *
+ * @param string $html The HTML to scan.
+ *
+ * @return bool Whether a directive is present.
+ */
+function content_has_block_directives( $html ) {
+	// Directives are rare; don't tokenize the whole document when the marker can't be present.
+	if ( false === stripos( $html, 'data-wp-' ) ) {
+		return false;
+	}
+
+	$tags = new \WP_HTML_Tag_Processor( $html );
+	while ( $tags->next_tag() ) {
+		if ( $tags->get_attribute_names_with_prefix( 'data-wp-' ) ) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**
