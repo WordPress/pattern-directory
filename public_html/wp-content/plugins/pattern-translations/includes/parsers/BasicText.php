@@ -46,7 +46,7 @@ class BasicText implements BlockParser {
 				foreach ( $text_nodes as $text ) {
 					if ( trim( $text->nodeValue ) && isset( $replacements[ $text->nodeValue ] ) ) {
 						$regex = '#(<([^>]*)>)?' . preg_quote( $text->nodeValue, '/' ) . '(<([^>]*)>)?#is';
-						$inner_content = preg_replace( $regex, '${1}' . $replacements[ $text->nodeValue ] . '${3}', $inner_content );
+						$inner_content = preg_replace( $regex, '${1}' . addcslashes( $replacements[ $text->nodeValue ], '\\$' ) . '${3}', $inner_content );
 					}
 				}
 			}

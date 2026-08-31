@@ -814,12 +814,25 @@ function filter_patterns_rest_query( $args, $request ) {
 
 	$allowed_blocks = $request->get_param( 'allowed_blocks' );
 	if ( $allowed_blocks ) {
-		// Only return a pattern if all contained blocks are in the allowed blocks list.
-		$args['meta_query']['allowed_blocks'] = array(
-			'key'     => 'wpop_contains_block_types',
-			'compare' => 'REGEXP',
-			'value'   => '^((' . implode( '|', $allowed_blocks ) . '),?)+$',
+		// Restrict to valid block names so arbitrary regex can't be injected into the REGEXP compare below.
+		$allowed_blocks = array_filter(
+			(array) $allowed_blocks,
+			function ( $block_name ) {
+				return is_string( $block_name ) && preg_match( '#^[a-z0-9-]+/[a-z0-9-]+$#', $block_name );
+			}
 		);
+
+		if ( $allowed_blocks ) {
+			// Only return patterns whose blocks are all in the allowed list.
+			$args['meta_query']['allowed_blocks'] = array(
+				'key'     => 'wpop_contains_block_types',
+				'compare' => 'REGEXP',
+				'value'   => '^((' . implode( '|', $allowed_blocks ) . '),?)+$',
+			);
+		} else {
+			// Every requested block name was invalid; match no patterns.
+			$args['post__in'] = array( 0 );
+		}
 	}
 
 	return $args;

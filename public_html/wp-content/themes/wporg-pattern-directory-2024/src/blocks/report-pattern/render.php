@@ -77,7 +77,7 @@ $reasons = get_terms( array(
 								<label
 									for="report-reason-<?php echo esc_attr( $reason->term_id ); ?>"
 								>
-									<?php echo esc_attr( $reason->name ); ?>
+									<?php echo esc_html( $reason->name ); ?>
 								</label>
 							<div>
 						<?php endforeach; ?>
