@@ -4,6 +4,7 @@ namespace WordPressdotorg\Pattern_Directory\Pattern_Validation;
 
 use WordPressdotorg\Pattern_Translations\Pattern as Translations_Pattern;
 use WordPressdotorg\Pattern_Translations\PatternParser as Translations_PatternParser;
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\is_block_allowed_in_pattern;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content', 10, 2 );
@@ -137,6 +138,22 @@ function validate_content( $prepared_post, $request ) {
 		return new \WP_Error(
 			'rest_pattern_invalid_blocks',
 			__( 'Pattern content contains invalid blocks. Patterns shared on the Pattern Directory can only use core blocks.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	// The editor hiding a block is a UI affordance, not a boundary; enforce the same policy server-side.
+	$disallowed_blocks = array_filter(
+		$all_blocks,
+		function ( $block ) {
+			return ! is_null( $block['blockName'] ) && ! is_block_allowed_in_pattern( $block['blockName'] );
+		}
+	);
+
+	if ( count( $disallowed_blocks ) ) {
+		return new \WP_Error(
+			'rest_pattern_disallowed_blocks',
+			__( 'Pattern content contains blocks that are not allowed. Patterns shared on the Pattern Directory can only use core blocks.', 'wporg-patterns' ),
 			array( 'status' => 400 )
 		);
 	}

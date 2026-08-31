@@ -75,7 +75,6 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 			array( "<!-- wp:group {\"layout\":{\"type\":\"flex\",\"justifyContent\":\"space-between\"}} -->\n<div class=\"wp-block-group\"><!-- wp:group -->\n<div class=\"wp-block-group\"><!-- wp:heading -->\n<h2>Heading</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Paragraph</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:group -->\n\n<!-- wp:image {\"id\":null} -->\n<figure class=\"wp-block-image\"><img src=\"./pear.png\" alt=\"\"/></figure>\n<!-- /wp:image --></div>\n<!-- /wp:group -->" ),
 			array( "<!-- wp:columns -->\n<div class=\"wp-block-columns\"><!-- wp:column {\"width\":\"66.66%\"} -->\n<div class=\"wp-block-column\" style=\"flex-basis:66.66%\"><!-- wp:spacer -->\n<div style=\"height:100px\" aria-hidden=\"true\" class=\"wp-block-spacer\"></div>\n<!-- /wp:spacer --></div>\n<!-- /wp:column -->\n\n<!-- wp:column {\"width\":\"33.33%\"} -->\n<div class=\"wp-block-column\" style=\"flex-basis:33.33%\"><!-- wp:spacer {\"height\":\"51px\"} -->\n<div style=\"height:51px\" aria-hidden=\"true\" class=\"wp-block-spacer\"></div>\n<!-- /wp:spacer -->\n\n<!-- wp:paragraph -->\n<p>One</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:column --></div>\n<!-- /wp:columns -->" ),
 			array( "<!-- wp:navigation -->\n<!-- wp:navigation-link {\"label\":\"Home\",\"url\":\"https://example.com/\"} /-->\n\n<!-- wp:navigation-submenu {\"label\":\"About\",\"url\":\"https://example.com/about\"} -->\n<!-- wp:navigation-link {\"label\":\"Team\",\"url\":\"https://example.com/team\"} /-->\n<!-- /wp:navigation-submenu -->\n<!-- /wp:navigation -->" ),
-			array( "$three_paragraphs\n\n<!-- wp:nextpage -->\n<!--nextpage-->\n<!-- /wp:nextpage -->" ),
 			array( "<!-- wp:group {\"metadata\":{\"name\":\"JavaScript: hero section\"}} -->\n<div class=\"wp-block-group\">$three_paragraphs</div>\n<!-- /wp:group -->" ),
 			// A `mailto:` URL is an allowed protocol, and a relative path whose colon follows a non-scheme segment is not a scheme at all.
 			array( "$two_paragraphs\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"url\":\"mailto:hello@example.com\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Mail</a></div>\n<!-- /wp:button -->\n\n<!-- wp:button {\"url\":\"/2024/report:final\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Report</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons -->" ),
@@ -129,6 +128,11 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 			array( 'rest_pattern_invalid_blocks', "<!-- wp:plugin/fake -->\n<p>This is some content.</p>\n<!-- /wp:plugin/fake -->" ),
 			array( 'rest_pattern_invalid_blocks', "<!-- wp:group -->\n<div class=\"wp-block-group\"><!-- wp:plugin/fake -->\n<p>Fake nested block.</p>\n<!-- /wp:plugin/fake --></div>\n<!-- /wp:group -->" ),
 
+			// Registered core blocks the editor hides from the inserter must be rejected on the server too.
+			array( 'rest_pattern_disallowed_blocks', "$three_paragraphs\n\n<!-- wp:nextpage -->\n<!--nextpage-->\n<!-- /wp:nextpage -->" ),
+			array( 'rest_pattern_disallowed_blocks', "$three_paragraphs\n\n<!-- wp:shortcode -->[gallery]<!-- /wp:shortcode -->" ),
+			array( 'rest_pattern_disallowed_blocks', "<!-- wp:group -->\n<div class=\"wp-block-group\"><!-- wp:shortcode -->[gallery]<!-- /wp:shortcode --></div>\n<!-- /wp:group -->" ),
+
 			// A parent-only block (`core/page-list-item` belongs to `core/page-list`) used standalone is out
 			// of context. The second also carries a script URL, but the context check rejects it first.
 			array( 'rest_pattern_invalid_block_context', "$two_paragraphs\n\n<!-- wp:page-list-item {\"label\":\"Featured\"} /-->" ),
@@ -158,6 +162,32 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 			// 25 * 3 paragraphs + 1 group = 76 blocks.
 			array( 'rest_pattern_extra_blocks', "<!-- wp:group -->\n<div class=\"wp-block-group\">" . str_repeat( $three_paragraphs, 25 ) . "</div>\n<!-- /wp:group -->" ),
 		);
+	}
+
+	/**
+	 * A `wporg/*` block is registered globally but must never be accepted in a pattern.
+	 *
+	 * This is the entry point the reported moderator-XSS and cross-blog-disclosure chains relied on:
+	 * the editor hides `wporg/*` blocks, but the server accepted any registered block.
+	 */
+	public function test_wporg_blocks_are_disallowed() {
+		register_block_type( 'wporg/test-block', array( 'apiVersion' => 2 ) );
+
+		wp_set_current_user( self::$user );
+
+		$two_paragraphs = "<!-- wp:paragraph -->\n<p>One.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Two.</p>\n<!-- /wp:paragraph -->";
+		$content        = "$two_paragraphs\n\n<!-- wp:wporg/test-block /-->";
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'content' => $content ) ) );
+
+		$response = rest_do_request( $request );
+
+		unregister_block_type( 'wporg/test-block' );
+
+		$this->assertTrue( $response->is_error() );
+		$this->assertSame( 'rest_pattern_disallowed_blocks', $response->get_data()['code'] );
 	}
 
 	/**
