@@ -133,6 +133,10 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 			array( 'rest_pattern_disallowed_blocks', "$three_paragraphs\n\n<!-- wp:shortcode -->[gallery]<!-- /wp:shortcode -->" ),
 			array( 'rest_pattern_disallowed_blocks', "<!-- wp:group -->\n<div class=\"wp-block-group\"><!-- wp:shortcode -->[gallery]<!-- /wp:shortcode --></div>\n<!-- /wp:group -->" ),
 
+			// Interactivity directives in a block's HTML would drive a trusted store from submitted markup.
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></p>\n<!-- /wp:paragraph -->" ),
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:image -->\n<figure class=\"wp-block-image\"><img data-wp-bind--src=\"context.href\" alt=\"\"/></figure>\n<!-- /wp:image -->" ),
+
 			// A parent-only block (`core/page-list-item` belongs to `core/page-list`) used standalone is out
 			// of context. The second also carries a script URL, but the context check rejects it first.
 			array( 'rest_pattern_invalid_block_context', "$two_paragraphs\n\n<!-- wp:page-list-item {\"label\":\"Featured\"} /-->" ),

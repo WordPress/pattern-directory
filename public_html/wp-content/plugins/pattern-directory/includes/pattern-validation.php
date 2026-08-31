@@ -10,6 +10,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLIS
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content', 10, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_context', 10, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_attributes', 10, 2 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_directives', 10, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_status', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_parent', 11, 2 );
@@ -374,6 +375,40 @@ function attribute_has_unsafe_scheme( $value, $is_url = false ) {
 	}
 
 	return ! in_array( $scheme, wp_allowed_protocols(), true );
+}
+
+/**
+ * Reject Interactivity API `data-wp-*` directives carried in a block's HTML.
+ *
+ * KSES preserves them and they sit in inner HTML, so neither core sanitisation nor the attribute check
+ * above catches them.
+ *
+ * @param object           $prepared_post The post object about to be inserted.
+ * @param \WP_REST_Request $request       The request.
+ *
+ * @return object|\WP_Error The post object, or an error if the content carries a directive.
+ */
+function validate_block_directives( $prepared_post, $request ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	if ( ! isset( $prepared_post->post_content ) ) {
+		return $prepared_post;
+	}
+
+	$tags = new \WP_HTML_Tag_Processor( $prepared_post->post_content );
+	while ( $tags->next_tag() ) {
+		if ( $tags->get_attribute_names_with_prefix( 'data-wp-' ) ) {
+			return new \WP_Error(
+				'rest_pattern_interactivity_directive',
+				__( 'Pattern content contains interactivity directives, which are not allowed.', 'wporg-patterns' ),
+				array( 'status' => 400 )
+			);
+		}
+	}
+
+	return $prepared_post;
 }
 
 /**

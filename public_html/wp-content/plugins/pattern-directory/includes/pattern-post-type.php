@@ -343,6 +343,12 @@ function register_rest_fields() {
 		array(
 			'get_callback' => function ( $response_data ) {
 				$pattern = get_post( $response_data['id'] );
+
+				// Only ever expose pattern content; a mismatched type means the id resolved in the wrong context.
+				if ( ! $pattern || POST_TYPE !== $pattern->post_type ) {
+					return '';
+				}
+
 				return decode_pattern_content( $pattern->post_content );
 			},
 
