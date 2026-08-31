@@ -797,12 +797,17 @@ function filter_patterns_rest_query( $args, $request ) {
 			}
 		);
 
-		// Only return patterns whose blocks are all allowed; an all-invalid list matches nothing, so it still narrows.
-		$args['meta_query']['allowed_blocks'] = array(
-			'key'     => 'wpop_contains_block_types',
-			'compare' => 'REGEXP',
-			'value'   => '^((' . implode( '|', $allowed_blocks ) . '),?)+$',
-		);
+		if ( $allowed_blocks ) {
+			// Only return patterns whose blocks are all in the allowed list.
+			$args['meta_query']['allowed_blocks'] = array(
+				'key'     => 'wpop_contains_block_types',
+				'compare' => 'REGEXP',
+				'value'   => '^((' . implode( '|', $allowed_blocks ) . '),?)+$',
+			);
+		} else {
+			// Every requested block name was invalid; match no patterns.
+			$args['post__in'] = array( 0 );
+		}
 	}
 
 	return $args;

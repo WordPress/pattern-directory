@@ -192,8 +192,9 @@ function get_pattern_ids_with_pending_flags( $args = array() ) {
 		'title' => 'patterns.post_title',
 		'id'    => 'patterns.ID',
 	);
-	$orderby = $orderby_columns[ strtolower( (string) $args['orderby'] ) ] ?? 'patterns.post_date';
-	$order   = 'asc' === strtolower( (string) $args['order'] ) ? 'ASC' : 'DESC';
+	$orderby_key = is_string( $args['orderby'] ) ? strtolower( $args['orderby'] ) : '';
+	$orderby     = $orderby_columns[ $orderby_key ] ?? 'patterns.post_date';
+	$order       = ( is_string( $args['order'] ) && 'asc' === strtolower( $args['order'] ) ) ? 'ASC' : 'DESC';
 
 	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
 	$pattern_ids = $wpdb->get_col(
