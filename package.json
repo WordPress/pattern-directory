@@ -20,6 +20,7 @@
 		"setup:tools": "echo \"Not used.\"",
 		"create": "./bin/index.sh",
 		"wp-env": "wp-env",
+		"wp-env:test": "wp-env --config .wp-env.test.json",
 		"lint:php": "composer run lint",
 		"format:php": "composer run format",
 		"test:php": "wp-env --config .wp-env.test.json run cli --env-cwd=/var/www/html/ ./vendor/bin/phpunit -c wp-content/tests/phpunit/phpunit.xml"

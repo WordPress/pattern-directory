@@ -8,6 +8,7 @@
 	},
 	"core": "WordPress/WordPress#master",
 	"phpVersion": "8.4",
+	"port": 8889,
 	"testsEnvironment": false,
 	"plugins": [
 		"./public_html/wp-content/plugins/pattern-directory",

@@ -83,11 +83,12 @@ These checks will also be run automatically on each PR.
 
 ### PHP unit tests
 
-PHPUnit is installed with `composer install`. The test suite runs in its own `wp-env` instance, defined by `.wp-env.test.json`. It uses the same ports as the development environment, so stop that one first, then start the test instance and run the tests:
+PHPUnit is installed with `composer install`. The test suite runs in its own `wp-env` instance, defined by `.wp-env.test.json` and served at `localhost:8889`, so it can run alongside the development environment. Start the test instance once, then run the tests:
 
-	npm run wp-env stop
-	npm run wp-env -- --config .wp-env.test.json start
+	npm run wp-env:test start
 	npm run test:php
+
+`npm run wp-env:test` accepts all the usual `wp-env` commands (`stop`, `destroy`, `run cli ...`) and targets the test instance.
 
 To run a single test or test class, pass PHPUnit's `--filter`:
 

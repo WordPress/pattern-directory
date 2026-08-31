@@ -43,9 +43,9 @@ jobs:
             - name: Install WordPress
               run: |
                   chmod -R 767 ./ # TODO: Possibly integrate in wp-env
-                  npm run wp-env -- --config .wp-env.test.json start --update
-                  npm run wp-env -- --config .wp-env.test.json run cli wp core version
-                  npm run wp-env -- --config .wp-env.test.json run cli wp plugin list
+                  npm run wp-env:test -- start --update
+                  npm run wp-env:test -- run cli wp core version
+                  npm run wp-env:test -- run cli wp plugin list
 
             - name: Running multisite unit tests
               run: npm run test:php
