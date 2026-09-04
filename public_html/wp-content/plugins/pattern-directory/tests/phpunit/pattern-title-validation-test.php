@@ -137,6 +137,18 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 				'rest_pattern_invalid_title',
 				array_merge( $defaults, array( 'title' => 'Test' ) ),
 			),
+			array(
+				'rest_pattern_invalid_title',
+				array_merge( $defaults, array( 'title' => 'Quote [caption width="1" caption="x"]y[/caption]' ) ),
+			),
+			array(
+				'rest_pattern_invalid_title',
+				array_merge( $defaults, array( 'title' => 'Quote <span>markup</span>' ) ),
+			),
+			array(
+				'rest_pattern_interactivity_directive',
+				array_merge( $defaults, array( 'title' => 'Quote <span data-wp-interactive="x">y</span>' ) ),
+			),
 		);
 	}
 

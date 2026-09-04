@@ -407,7 +407,7 @@ function validate_block_directives( $prepared_post, $request ) {
 		if ( content_has_block_directives( $prepared_post->$field ) ) {
 			return new \WP_Error(
 				'rest_pattern_interactivity_directive',
-				__( 'Pattern content contains interactivity directives, which are not allowed.', 'wporg-patterns' ),
+				__( 'Patterns cannot contain interactivity directives.', 'wporg-patterns' ),
 				array( 'status' => 400 )
 			);
 		}
