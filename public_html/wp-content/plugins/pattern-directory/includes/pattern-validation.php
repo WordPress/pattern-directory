@@ -398,16 +398,19 @@ function validate_block_directives( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
-	if ( ! isset( $prepared_post->post_content ) ) {
-		return $prepared_post;
-	}
+	// Every field the directory renders, not just the one the pattern editor writes.
+	foreach ( array( 'post_content', 'post_title', 'post_excerpt' ) as $field ) {
+		if ( ! isset( $prepared_post->$field ) ) {
+			continue;
+		}
 
-	if ( content_has_block_directives( $prepared_post->post_content ) ) {
-		return new \WP_Error(
-			'rest_pattern_interactivity_directive',
-			__( 'Pattern content contains interactivity directives, which are not allowed.', 'wporg-patterns' ),
-			array( 'status' => 400 )
-		);
+		if ( content_has_block_directives( $prepared_post->$field ) ) {
+			return new \WP_Error(
+				'rest_pattern_interactivity_directive',
+				__( 'Patterns cannot contain interactivity directives.', 'wporg-patterns' ),
+				array( 'status' => 400 )
+			);
+		}
 	}
 
 	return $prepared_post;
@@ -841,6 +844,14 @@ function check_for_spam( $post ) {
  * @return boolean
  */
 function is_title_valid( $title ) {
+	if ( strip_shortcodes( $title ) !== $title || wp_strip_all_tags( $title ) !== $title ) {
+		return false;
+	}
+
+	if ( content_has_block_directives( $title ) ) {
+		return false;
+	}
+
 	// Check title against a list of disallowed words.
 	// Note the space after `test ` to avoid matching "testimonial".
 	$disallow_list = array( 'test ', 'testing', 'my pattern', 'wordpress', 'example' );
