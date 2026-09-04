@@ -155,6 +155,22 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 		}
 	}
 
+	// If there is an allowed_blocks meta_query, use it to filter the ES query.
+	if ( isset( $meta_query['allowed_blocks'] ) && ! empty( $meta_query['allowed_blocks']['value'] ) ) {
+		// Parse it out of the regex format.
+		$regex = $meta_query['allowed_blocks']['value'];
+		$regex = substr( $regex, 1, -1 ); // Strips the ^$, which are not supported in ES regex (and not needed).
+
+		$filter['bool']['must'][] = [
+			'regexp' => [
+				'meta.wpop_contains_block_types.value.raw' => [
+					'value'            => $regex,
+					'case_insensitive' => true,
+				],
+			],
+		];
+	}
+
 	$parser->add_query( $must_query, 'must' );
 	$parser->add_query( $should_query, 'should' );
 	$parser->add_filter( $filter );
