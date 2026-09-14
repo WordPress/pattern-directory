@@ -166,7 +166,7 @@ function notify_pattern_flagged( $post ) {
 	$subject = esc_html__( 'Pattern being reviewed', 'wporg-patterns' );
 
 	$message = sprintf(
-		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Pattern URL.
+		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Flag reason(s).
 		esc_html__(
 			'Hi there!
 
@@ -224,7 +224,7 @@ function notify_pattern_unlisted( $post ) {
 	$subject = esc_html__( 'Pattern unlisted', 'wporg-patterns' );
 
 	$message = sprintf(
-		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Pattern URL.
+		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Unlisting reason; 3. Guidelines URL.
 		esc_html__(
 			'Hello,
 

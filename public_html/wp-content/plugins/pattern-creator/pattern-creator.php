@@ -282,7 +282,7 @@ function fix_editor_style_import_paths( $settings ) {
 	if ( empty( $settings['styles'] ) ) {
 		return $settings;
 	}
-	// Iterate keys so updates apply directly to the original array.
+	// Iterate keys: a by-reference loop over $settings['styles'] ?? array() would modify a temporary value, losing updates.
 	foreach ( array_keys( $settings['styles'] ) as $key ) {
 		$style = $settings['styles'][ $key ];
 		if ( ! empty( $style['baseURL'] ) || empty( $style['css'] ) ) {
