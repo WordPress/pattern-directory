@@ -1,6 +1,8 @@
 <?php
 /**
  * Test Block Pattern validation.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, SPAM_STATUS };
@@ -16,11 +18,23 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 */
 	private const TWO_PARAGRAPHS = "<!-- wp:paragraph -->\n<p>One.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Two.</p>\n<!-- /wp:paragraph -->";
 
+	/**
+	 * Pattern fixture ID.
+	 *
+	 * @var int
+	 */
 	protected static $pattern_id;
+	/**
+	 * Administrator user ID.
+	 *
+	 * @var int
+	 */
 	protected static $user;
 
 	/**
 	 * Setup fixtures that are shared across all tests.
+	 *
+	 * @param WP_UnitTest_Factory $factory Factory for shared test fixtures.
 	 */
 	public static function wpSetUpBeforeClass( $factory ) {
 		self::$pattern_id = $factory->post->create(
@@ -49,13 +63,15 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 * Test valid block content.
 	 *
 	 * @dataProvider data_valid_content
+	 *
+	 * @param string $content Serialized blocks submitted to the REST API.
 	 */
 	public function test_valid_content( $content ) {
 		wp_set_current_user( self::$user );
 
 		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
 		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( json_encode( array( 'content' => $content ) ) );
+		$request->set_body( wp_json_encode( array( 'content' => $content ) ) );
 
 		$response = rest_do_request( $request );
 
@@ -91,13 +107,16 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 * Test invalid block content.
 	 *
 	 * @dataProvider data_invalid_content
+	 *
+	 * @param string $expected_error_code Expected REST error code.
+	 * @param string $content             Serialized blocks submitted to the REST API.
 	 */
 	public function test_invalid_empty_content( $expected_error_code, $content ) {
 		wp_set_current_user( self::$user );
 
 		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
 		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( json_encode( array( 'content' => $content ) ) );
+		$request->set_body( wp_json_encode( array( 'content' => $content ) ) );
 
 		$response = rest_do_request( $request );
 
@@ -238,7 +257,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . $member_pattern );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body(
-			json_encode(
+			wp_json_encode(
 				array(
 					'title'   => 'Spam Check',
 					'content' => "<!-- wp:heading -->\n<h2 id=\"spam-check\">Spam Check.</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Paragraph: PatternDirectorySpamTest</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Third block.</p>\n<!-- /wp:paragraph -->",
@@ -273,7 +292,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . $member_pattern );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body(
-			json_encode(
+			wp_json_encode(
 				array(
 					'title'   => 'Spam Check',
 					'content' => "<!-- wp:paragraph -->\n<p>Paragraph one.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph two.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph three.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph four.</p>\n<!-- /wp:paragraph -->",

@@ -1,4 +1,9 @@
 <?php
+/**
+ * Export data as CSV.
+ *
+ * @package WordCamp\Utilities
+ */
 
 namespace WordCamp\Utilities;
 
@@ -20,29 +25,37 @@ defined( 'WPINC' ) || die();
  */
 class Export_CSV {
 	/**
-	 * @var string The name of the CSV file.
+	 * The name of the CSV file.
+	 *
+	 * @var string
 	 */
 	protected $filename = '';
 
 	/**
-	 * @var array The column headers for the CSV file.
+	 * The column headers for the CSV file.
+	 *
+	 * @var array
 	 */
 	protected $header_row = array();
 
 	/**
-	 * @var array The data rows for the CSV file.
+	 * The data rows for the CSV file.
+	 *
+	 * @var array
 	 */
 	protected $data_rows = array();
 
 	/**
-	 * @var \WP_Error|null Container for errors.
+	 * Container for errors.
+	 *
+	 * @var \WP_Error|null
 	 */
 	public $error = null;
 
 	/**
 	 * Export_CSV constructor.
 	 *
-	 * @param array $options
+	 * @param array $options Export configuration.
 	 */
 	public function __construct( array $options = array() ) {
 		$this->error = new \WP_Error();
@@ -175,7 +188,7 @@ class Export_CSV {
 	/**
 	 * Wrapper method for adding multiple data rows at once.
 	 *
-	 * @param array $data
+	 * @param array $data Rows to add to the export.
 	 *
 	 * @return void
 	 */
@@ -202,7 +215,7 @@ class Export_CSV {
 	 *
 	 * Note that this method is not recursive, so should only be used for individual data rows, not an entire data set.
 	 *
-	 * @param array $fields
+	 * @param array $fields CSV field values.
 	 *
 	 * @return array
 	 */
@@ -220,7 +233,7 @@ class Export_CSV {
 		$delimiters = array( ',', ';', ':', '|', '^', "\n", "\t", ' ' );
 
 		foreach ( $fields as $index => $field ) {
-			// Escape trigger characters at the start of a new field
+			// Escape trigger characters at the start of a new field.
 			$first_cell_character = mb_substr( $field, 0, 1 );
 			$is_trigger_character = in_array( $first_cell_character, $active_content_triggers, true );
 			$is_delimiter         = in_array( $first_cell_character, $delimiters, true );
@@ -229,7 +242,7 @@ class Export_CSV {
 				$field = "'" . $field;
 			}
 
-			// Escape trigger characters that follow delimiters
+			// Escape trigger characters that follow delimiters.
 			foreach ( $delimiters as $delimiter ) {
 				foreach ( $active_content_triggers as $trigger ) {
 					$field = str_replace( $delimiter . $trigger, $delimiter . "'" . $trigger, $field );
@@ -269,7 +282,7 @@ class Export_CSV {
 			fputcsv( $csv, self::esc_csv( $row ) );
 		}
 
-		fclose( $csv );
+		fclose( $csv ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Close the php://output stream used by fputcsv().
 
 		return ob_get_clean();
 	}
@@ -339,9 +352,10 @@ class Export_CSV {
 		$full_path = trailingslashit( $location ) . $this->filename;
 		$content   = $this->generate_file_content();
 
-		$file = fopen( $full_path, 'w' );
-		fwrite( $file, $content );
-		fclose( $file );
+		// The caller supplies a local path; remote filesystem transports cannot preserve that contract.
+		$file = fopen( $full_path, 'w' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		fwrite( $file, $content ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+		fclose( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
 
 		return $full_path;
 	}

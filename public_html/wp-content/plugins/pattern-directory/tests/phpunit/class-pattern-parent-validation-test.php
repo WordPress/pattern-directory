@@ -1,6 +1,8 @@
 <?php
 /**
  * Test that a pattern's parent can only be set by a moderator.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 declare( strict_types = 1 );

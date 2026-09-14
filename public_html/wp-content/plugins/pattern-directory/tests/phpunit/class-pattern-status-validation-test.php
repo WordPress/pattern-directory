@@ -1,6 +1,8 @@
 <?php
 /**
  * Test moderation-related pattern status validation.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 declare( strict_types = 1 );

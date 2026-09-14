@@ -1,6 +1,8 @@
 <?php
 /**
  * Test that the patterns REST collection does not report on other authors' non-public patterns.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };

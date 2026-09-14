@@ -1,15 +1,30 @@
 <?php
+/**
+ * Block translation parser helpers.
+ *
+ * @package WordPressdotorg\Pattern_Translations
+ */
+
 namespace WordPressdotorg\Pattern_Translations\Parsers;
 
-class Paragraph implements BlockParser {
+require_once __DIR__ . '/BlockParser.php';
+
+/**
+ * Translate Heading block content.
+ */
+class Heading implements BlockParser {
 	use GetSetAttribute;
 
+	/**
+	 * Extract translatable block strings.
+	 *
+	 * @param array $block Parsed block.
+	 * @return array Extracted strings.
+	 */
 	public function to_strings( array $block ): array {
 		$strings = $this->get_attribute( 'placeholder', $block );
 
-		$matches = array();
-
-		if ( preg_match( '/<p[^>]*>(.+)<\/p>/is', $block['innerHTML'], $matches ) ) {
+		if ( preg_match( '/<h[1-6][^>]*>(.+)<\/h[1-6]>/is', $block['innerHTML'], $matches ) ) {
 			if ( ! empty( $matches[1] ) ) {
 				$strings[] = $matches[1];
 			}
@@ -18,7 +33,13 @@ class Paragraph implements BlockParser {
 		return $strings;
 	}
 
-	// todo: this needs a fix to properly rebuild innerContent - see ParagraphParserTest
+	/**
+	 * Replace translated strings in a block.
+	 *
+	 * @param array $block        Parsed block.
+	 * @param array $replacements Translations keyed by original string.
+	 * @return array Updated block.
+	 */
 	public function replace_strings( array $block, array $replacements ): array {
 		$this->set_attribute( 'placeholder', $block, $replacements );
 
@@ -26,7 +47,7 @@ class Paragraph implements BlockParser {
 
 		foreach ( $this->to_strings( $block ) as $original ) {
 			if ( ! empty( $original ) && isset( $replacements[ $original ] ) ) {
-				$regex = '#(<p[^>]*>)(' . preg_quote( $original, '/' ) . ')(<\/p>)#is';
+				$regex = '#(<h[1-6][^>]*>)(' . preg_quote( $original, '/' ) . ')(<\/h[1-6]>)#is';
 				$html  = preg_replace( $regex, '${1}' . addcslashes( $replacements[ $original ], '\\$' ) . '${3}', $html );
 			}
 		}

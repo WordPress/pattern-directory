@@ -1,4 +1,9 @@
 <?php
+/**
+ * Pattern Directory theme setup.
+ *
+ * @package WordPress\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Theme\Pattern_Directory_2024;
 
@@ -9,7 +14,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as 
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\PENDING_STATUS;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 
-// Block files
+// Block files.
 require_once __DIR__ . '/src/blocks/copy-button/index.php';
 require_once __DIR__ . '/src/blocks/delete-button/index.php';
 require_once __DIR__ . '/src/blocks/pattern-preview/index.php';
@@ -169,7 +174,7 @@ function do_pattern_actions() {
 /**
  * Add custom query parameters.
  *
- * @param array $query_vars
+ * @param array $query_vars Public query variable names.
  *
  * @return array
  */
@@ -245,7 +250,7 @@ function modify_patterns_query( $query ) {
 				'orderby_locale' => array(
 					'key'     => 'wpop_locale',
 					'compare' => 'IN',
-					// Order in value determines result order
+					// Order in value determines result order.
 					'value'   => array( get_locale(), 'en_US' ),
 				),
 			)
@@ -303,7 +308,7 @@ function modify_query_loop_block_query_vars( $query, $block, $page ) {
 		$query['meta_key'] = 'wporg-pattern-favorites';
 	}
 
-	// Query Loops on My Patterns & Favorites pages
+	// Query Loops on My Patterns & Favorites pages.
 	if ( is_page( array( 'my-patterns', 'favorites' ) ) ) {
 		// Get these values from the global wp_query, they're passed via the URL.
 		if ( isset( $wp_query->query['pattern-categories'] ) ) {
@@ -360,7 +365,7 @@ function modify_query_loop_block_query_vars( $query, $block, $page ) {
 		'orderby_locale' => array(
 			'key'     => 'wpop_locale',
 			'compare' => 'IN',
-			// Order in value determines result order
+			// Order in value determines result order.
 			'value'   => array( get_locale(), 'en_US' ),
 		),
 	);
@@ -513,6 +518,7 @@ function add_social_meta_tags() {
 		);
 	} elseif ( is_tax() && get_queried_object() ) {
 		$og_fields = array(
+			/* translators: %s: Taxonomy term name. */
 			'og:title'       => sprintf( __( 'Block Patterns: %s', 'wporg-patterns' ), esc_attr( single_term_title( '', false ) ) ),
 			'og:description' => __( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ),
 			'og:site_name'   => $site_title,
@@ -523,7 +529,7 @@ function add_social_meta_tags() {
 	} elseif ( is_singular( POST_TYPE ) ) {
 		$og_fields = array(
 			'og:title'       => the_title_attribute( array( 'echo' => false ) ),
-			'og:description' => strip_tags( get_post_meta( get_the_ID(), 'wpop_description', true ) ),
+			'og:description' => wp_strip_all_tags( get_post_meta( get_the_ID(), 'wpop_description', true ) ),
 			'og:site_name'   => $site_title,
 			'og:type'        => 'website',
 			'og:url'         => esc_url( get_permalink() ),
@@ -582,8 +588,8 @@ function set_document_title( $title ) {
 
 		// If results are paged and the max number of pages is known.
 		if ( is_paged() && $wp_query->max_num_pages ) {
-			// translators: 1: current page number, 2: total number of pages
 			$title['page'] = sprintf(
+				/* translators: 1: Current page number, 2: Total number of pages. */
 				__( 'Page %1$s of %2$s', 'wporg-patterns' ),
 				get_query_var( 'paged' ),
 				$wp_query->max_num_pages

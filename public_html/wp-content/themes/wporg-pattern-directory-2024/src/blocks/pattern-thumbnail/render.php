@@ -1,4 +1,9 @@
 <?php
+/**
+ * Render the pattern thumbnail pattern component.
+ *
+ * @package WordPress\Pattern_Directory
+ */
 
 use function WordPressdotorg\Theme\Pattern_Directory_2024\get_pattern_preview_url;
 
@@ -8,7 +13,7 @@ if ( ! isset( $block->context['postId'] ) ) {
 $current_post_id = $block->context['postId'];
 
 $view_url    = get_pattern_preview_url( $current_post_id );
-$has_link    = isset( $attributes['isLink'] ) && true == $attributes['isLink'];
+$has_link    = isset( $attributes['isLink'] ) && true === $attributes['isLink'];
 $is_lazyload = isset( $attributes['lazyLoad'] ) && true === $attributes['lazyLoad'];
 
 $viewport_width = get_post_meta( $current_post_id, 'wpop_viewport_width', true );
@@ -28,7 +33,7 @@ $url      = add_query_arg(
 		'vph'           => 300, // Smaller than the vast majority of patterns to avoid whitespace.
 		'screen_height' => 3600, // Max height of a screenshot.
 	),
-	'https://s0.wp.com/mshots/v1/' . urlencode( $view_url ),
+	'https://s0.wp.com/mshots/v1/' . rawurlencode( $view_url ),
 );
 
 // Initial state to pass to Interactivity API.

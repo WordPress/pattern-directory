@@ -1,6 +1,8 @@
 <?php
 /**
  * Mock dynamic blocks that use site content.
+ *
+ * @package WordPressdotorg\Pattern_Creator
  */
 
 namespace WordPressdotorg\Pattern_Creator\MockBlocks;
@@ -44,7 +46,7 @@ function render_archives( $block_content, $block, $block_instance ) {
 
 		foreach ( $dates as $date ) {
 			if ( $show_post_count ) {
-				$archives .= sprintf( '<option>%1$s (%2$s)</option>', $date, rand( 5, 25 ) );
+				$archives .= sprintf( '<option>%1$s (%2$s)</option>', $date, wp_rand( 5, 25 ) );
 			} else {
 				$archives .= sprintf( '<option>%s</option>', $date );
 			}
@@ -71,7 +73,7 @@ function render_archives( $block_content, $block, $block_instance ) {
 
 		foreach ( $dates as $date ) {
 			if ( $show_post_count ) {
-				$archives .= sprintf( '<li><a href="">%1$s</a> (%2$s)</li>', $date, rand( 5, 25 ) );
+				$archives .= sprintf( '<li><a href="">%1$s</a> (%2$s)</li>', $date, wp_rand( 5, 25 ) );
 			} else {
 				$archives .= sprintf( '<li><a href="">%s</a></li>', $date );
 			}
@@ -193,8 +195,8 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
  * Helper function to attach some filters only when necessary.
  */
 function attach_site_data_filters() {
-	add_filter( 'pre_option_blogdescription', __NAMESPACE__ . '\replace_site_info', 10, 3 );
-	add_filter( 'pre_option_blogname', __NAMESPACE__ . '\replace_site_info', 10, 3 );
+	add_filter( 'pre_option_blogdescription', __NAMESPACE__ . '\replace_site_info', 10, 2 );
+	add_filter( 'pre_option_blogname', __NAMESPACE__ . '\replace_site_info', 10, 2 );
 }
 
 /**
@@ -203,8 +205,8 @@ function attach_site_data_filters() {
  * @see attach_site_data_filters.
  */
 function remove_site_data_filters() {
-	remove_filter( 'pre_option_blogdescription', __NAMESPACE__ . '\replace_site_info', 10, 3 );
-	remove_filter( 'pre_option_blogname', __NAMESPACE__ . '\replace_site_info', 10, 3 );
+	remove_filter( 'pre_option_blogdescription', __NAMESPACE__ . '\replace_site_info' );
+	remove_filter( 'pre_option_blogname', __NAMESPACE__ . '\replace_site_info' );
 }
 
 /**
@@ -212,13 +214,11 @@ function remove_site_data_filters() {
  *
  * These placeholders should be the same as returned in `src/api-middleware/mock-site-data.js`.
  *
- * @param mixed  $value   Value to return.
- * @param string $option  Option name.
- * @param mixed  $default The fallback value to return if the option does not exist.
- *                           Default false.
+ * @param mixed  $value  Value to return.
+ * @param string $option Option name.
  * @return string
  */
-function replace_site_info( $value, $option, $default ) {
+function replace_site_info( $value, $option ) {
 	global $wp_query;
 	if ( ! isset( $wp_query->query_vars['view'] ) ) {
 		return $value;
@@ -236,10 +236,9 @@ function replace_site_info( $value, $option, $default ) {
 /**
  * Provide custom links as default for empty Navigation blocks.
  *
- * @param array[] $fallback_blocks default fallback blocks provided by the default block mechanic.
  * @return array[]
  */
-function provide_fallback_nav_items( $fallback_blocks ) {
+function provide_fallback_nav_items() {
 	return array(
 		array(
 			'blockName' => 'core/navigation-link',
@@ -289,9 +288,9 @@ function update_block_data( $parsed_block ) {
  * Replace the custom logo output with the WordPress W.
  * This serves to provide a placeholder for the Site Logo block.
  *
- * @param string $html Custom logo HTML output.
+ * @return string Placeholder logo markup.
  */
-function provide_mock_logo( $html ) {
+function provide_mock_logo() {
 	return sprintf(
 		'<span class="custom-logo-link"><img src="%s" class="custom-logo" alt="%s"></span>',
 		'https://s.w.org/images/wmark.png',

@@ -1,4 +1,9 @@
 <?php
+/**
+ * Admin settings for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Admin\Settings;
 
@@ -51,7 +56,7 @@ function admin_init() {
 		array(
 			'type'              => 'string',
 			'sanitize_callback' => function ( $value ) {
-				return in_array( $value, array( 'publish', 'pending' ) ) ? $value : 'publish';
+				return in_array( $value, array( 'publish', 'pending' ), true ) ? $value : 'publish';
 			},
 			'default'           => 'publish',
 		)

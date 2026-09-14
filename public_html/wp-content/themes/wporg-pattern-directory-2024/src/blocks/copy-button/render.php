@@ -1,4 +1,9 @@
 <?php
+/**
+ * Render the copy button pattern component.
+ *
+ * @package WordPress\Pattern_Directory
+ */
 
 $variant = $attributes['variant'] ?? 'default';
 

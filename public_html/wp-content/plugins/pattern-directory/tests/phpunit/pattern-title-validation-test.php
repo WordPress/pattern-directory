@@ -1,6 +1,8 @@
 <?php
 /**
  * Test Block Pattern validation.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
@@ -11,12 +13,29 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
  * @group title-validation
  */
 class Pattern_Title_Validation_Test extends WP_UnitTestCase {
+	/**
+	 * Pattern fixture ID.
+	 *
+	 * @var int
+	 */
 	protected static $pattern_id;
+	/**
+	 * Administrator user ID.
+	 *
+	 * @var int
+	 */
 	protected static $user;
+	/**
+	 * Valid serialized blocks for title validation.
+	 *
+	 * @var string
+	 */
 	protected static $valid_content;
 
 	/**
 	 * Setup fixtures that are shared across all tests.
+	 *
+	 * @param WP_UnitTest_Factory $factory Factory for shared test fixtures.
 	 */
 	public static function wpSetUpBeforeClass( $factory ) {
 		self::$pattern_id    = $factory->post->create(
@@ -34,13 +53,15 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 	 * Test valid pattern title.
 	 *
 	 * @dataProvider data_valid_title
+	 *
+	 * @param array $pattern Pattern fields submitted to the REST API.
 	 */
 	public function test_valid_title( $pattern ) {
 		wp_set_current_user( self::$user );
 
 		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
 		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( json_encode( $pattern ) );
+		$request->set_body( wp_json_encode( $pattern ) );
 
 		$response = rest_do_request( $request );
 		$this->assertFalse( $response->is_error() );
@@ -87,7 +108,7 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 
 		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
 		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( json_encode( array( 'content' => self::$valid_content ) ) );
+		$request->set_body( wp_json_encode( array( 'content' => self::$valid_content ) ) );
 
 		$response = rest_do_request( $request );
 		$this->assertFalse( $response->is_error() );
@@ -97,13 +118,16 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 	 * Test invalid pattern titles
 	 *
 	 * @dataProvider data_invalid_title
+	 *
+	 * @param string $expected_error_code Expected REST error code.
+	 * @param array  $pattern             Pattern fields submitted to the REST API.
 	 */
 	public function test_invalid_title( $expected_error_code, $pattern ) {
 		wp_set_current_user( self::$user );
 
 		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
 		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( json_encode( $pattern ) );
+		$request->set_body( wp_json_encode( $pattern ) );
 
 		$response = rest_do_request( $request );
 		$this->assertTrue( $response->is_error() );
@@ -168,7 +192,7 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 
 		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
 		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( json_encode( array( 'content' => self::$valid_content ) ) );
+		$request->set_body( wp_json_encode( array( 'content' => self::$valid_content ) ) );
 
 		$response = rest_do_request( $request );
 		$this->assertTrue( $response->is_error() );

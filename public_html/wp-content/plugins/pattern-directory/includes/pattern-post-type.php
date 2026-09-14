@@ -1,4 +1,9 @@
 <?php
+/**
+ * Pattern post type for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Pattern_Post_Type;
 
@@ -200,7 +205,7 @@ function register_post_type_data() {
 			'type'              => 'string',
 			'description'       => 'A list of block types this pattern supports for transforms.',
 			'single'            => false,
-			'sanitize_callback' => function ( $value, $key, $type ) {
+			'sanitize_callback' => function ( $value ) {
 				return preg_replace( '/[^a-z0-9-\/]/', '', $value );
 			},
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
@@ -474,6 +479,7 @@ function register_post_statuses() {
 		UNLISTED_STATUS,
 		array(
 			'label'                  => _x( 'Unlisted', 'post status', 'wporg-patterns' ),
+			/* translators: %s: Number of patterns. */
 			'label_count'            => _nx_noop(
 				'Unlisted <span class="count">(%s)</span>',
 				'Unlisted <span class="count">(%s)</span>',
@@ -490,6 +496,7 @@ function register_post_statuses() {
 		SPAM_STATUS,
 		array(
 			'label'                  => _x( 'Possible Spam', 'post status', 'wporg-patterns' ),
+			/* translators: %s: Number of patterns. */
 			'label_count'            => _nx_noop(
 				'Possible Spam <span class="count">(%s)</span>',
 				'Possible Spam <span class="count">(%s)</span>',
@@ -506,9 +513,9 @@ function register_post_statuses() {
 /**
  * Do things when certain status transitions happen.
  *
- * @param string   $new_status
- * @param string   $old_status
- * @param \WP_Post $post
+ * @param string   $new_status New post status.
+ * @param string   $old_status Previous post status.
+ * @param \WP_Post $post Post being processed.
  *
  * @return void
  */
@@ -554,9 +561,9 @@ function update_contains_block_types_meta( $pattern_id ) {
  * This is a callback for the `auth_{$object_type}_meta_{$meta_key}` filter, and it's used to authorize access to
  * modifying post meta keys via the REST API.
  *
- * @param bool   $allowed
- * @param string $meta_key
- * @param int    $pattern_id
+ * @param bool   $allowed Whether access is allowed.
+ * @param string $meta_key Metadata key.
+ * @param int    $pattern_id Pattern ID.
  *
  * @return bool
  */
@@ -797,7 +804,7 @@ function filter_patterns_rest_query( $args, $request ) {
 		$args['meta_query']['orderby_locale'] = array(
 			'key'     => 'wpop_locale',
 			'compare' => 'IN',
-			// Order in value determines result order
+			// Order in value determines result order.
 			'value'   => array( $locale, 'en_US' ),
 		);
 	}
@@ -908,7 +915,7 @@ function filter_orderby_locale( $orderby, $query ) {
 		$table_alias = $query->meta_query->get_clauses()['orderby_locale']['alias'];
 
 		$field_placeholders = implode( ', ', array_pad( array(), count( $values ), '%s' ) );
-		$locale_orderby     = $wpdb->prepare( "FIELD( {$table_alias}.meta_value, {$field_placeholders} ) DESC", $values ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$locale_orderby     = $wpdb->prepare( "FIELD( {$table_alias}.meta_value, {$field_placeholders} ) DESC", $values ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Placeholders are generated above; the alias comes from WP_Meta_Query.
 
 		// Order by matching the locale first, and then the queries order.
 		$orderby = "{$locale_orderby}, {$orderby}";
@@ -920,7 +927,7 @@ function filter_orderby_locale( $orderby, $query ) {
 /**
  * Get the post object of a block pattern, or false if it's not a pattern or not found.
  *
- * @param int|WP_Post $post
+ * @param int|WP_Post $post Post being processed.
  *
  * @return WP_Post|false
  */
@@ -1139,6 +1146,9 @@ function inject_placeholder_svg( $block_content, $block ) {
 
 /**
  * If this is the `view` query, use our version of the `template-canvas.php`.
+ *
+ * @param string $template Selected template path.
+ * @return string Preview template path or the original template.
  */
 function load_pattern_preview( $template ) {
 	global $wp_query;

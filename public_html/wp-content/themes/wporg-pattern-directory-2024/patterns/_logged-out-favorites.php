@@ -1,11 +1,16 @@
 <?php
-// phpcs:disable WordPress.Files.FileName -- Allow underscore for pattern partial.
 /**
+ * Render the logged out favorites pattern component.
+ *
  * Title: Logged out (favorites)
  * Slug: wporg-pattern-directory-2024/logged-out-favorites
  * Inserter: no
  *
  * This pattern is swapped out automatically when a logged out user visits `/favorites/`.
+ *
+ * @package WordPress\Pattern_Directory
+ *
+ * phpcs:disable WordPress.Files.FileName -- Allow underscore for pattern partial.
  */
 
 $login_url    = wp_login_url();

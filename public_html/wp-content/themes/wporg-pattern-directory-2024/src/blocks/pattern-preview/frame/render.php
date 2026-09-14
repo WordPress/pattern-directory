@@ -1,4 +1,9 @@
 <?php
+/**
+ * Render the frame pattern component.
+ *
+ * @package WordPress\Pattern_Directory
+ */
 
 use function WordPressdotorg\Theme\Pattern_Directory_2024\get_pattern_preview_url;
 

@@ -1,40 +1,56 @@
 <?php
 /**
+ * Openverse API integration.
+ *
+ * @package WordPressdotorg\Pattern_Creator
+ */
+
+/**
  * Class Openverse_Client
  *
  * @package WordPressdotorg\Pattern_Creator
  */
 class Openverse_Client {
 	/**
-	 * @var string The option key where the cache is saved in the database.
+	 * The option key where the cache is saved in the database.
+	 *
+	 * @var string
 	 */
 	const CACHE_KEY = 'ov-request';
 
 	/**
-	 * @var string The option key where the cache is saved in the database.
+	 * The option key where the cache is saved in the database.
+	 *
+	 * @var string
 	 */
 	const TOKEN_OPTION_KEY = 'ov-oauth-token';
 
 	/**
-	 * @var array<string, string> The set of parameters for this request.
+	 * The set of parameters for this request.
+	 *
+	 * @var array<string, string>
 	 */
 	protected $params = array();
 
 	/**
-	 * @var string The base URL for requests.
+	 * The base URL for requests.
+	 *
+	 * @var string
 	 */
 	protected $url = 'https://api.openverse.engineering';
 
 	/**
 	 * Openverse_Client constructor.
+	 *
+	 * @param array $params Request parameters.
 	 */
 	public function __construct( array $params = array() ) {
-		$defaults = array(
+		$fallbacks = array(
 			'per_page' => 30,
 			'page'     => 1,
 		);
 
-		$this->params = wp_parse_args( $params, $defaults );
+		$this->params = wp_parse_args( $params, $fallbacks );
 	}
 
 	/**
@@ -49,15 +65,15 @@ class Openverse_Client {
 	/**
 	 * Get the parameters for this request.
 	 *
-	 * @param string $key     Which parameter to return.
-	 * @param mixed  $default The default value, if not found in the set params.
+	 * @param string $key      Which parameter to return.
+	 * @param mixed  $fallback The default value, if not found in the set params.
 	 * @return array
 	 */
-	public function get_param( $key, $default = null ) {
+	public function get_param( $key, $fallback = null ) {
 		if ( isset( $this->params[ $key ] ) ) {
 			return $this->params[ $key ];
 		}
-		return $default;
+		return $fallback;
 	}
 
 	/**
@@ -105,7 +121,7 @@ class Openverse_Client {
 			);
 		}
 
-		// Lock token refresh
+		// Lock token refresh.
 		update_option( self::TOKEN_OPTION_KEY . '_refresh', time() );
 
 		$response = wp_remote_post(
@@ -227,8 +243,7 @@ class Openverse_Client {
 					return $results;
 				}
 
-				// Log the error
-				trigger_error( $results->get_error_code() . ' ' . $results->get_error_message(), E_USER_WARNING ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				trigger_error( $results->get_error_code() . ' ' . $results->get_error_message(), E_USER_WARNING ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions.error_log_trigger_error -- Preserve production upstream-error diagnostics.
 
 				// Set a short timeout to avoid hammering the API during outages.
 				set_transient( $cache_key, array(), 0.5 * MINUTE_IN_SECONDS );

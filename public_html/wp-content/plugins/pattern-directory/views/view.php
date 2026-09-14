@@ -5,6 +5,8 @@
  * Forked from core's template-canvas.php.
  *
  * @see https://github.com/WordPress/wordpress-develop/blob/6.1/src/wp-includes/template-canvas.php
+ *
+ * @package WordPressdotorg\Pattern_Directory
  */
 
 namespace WordPressdotorg\Pattern_Directory;

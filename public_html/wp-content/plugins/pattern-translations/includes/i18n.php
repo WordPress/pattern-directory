@@ -1,4 +1,10 @@
 <?php
+/**
+ * Pattern localization helpers.
+ *
+ * @package WordPressdotorg\Pattern_Translations
+ */
+
 namespace WordPressdotorg\Pattern_Translations;
 
 /**

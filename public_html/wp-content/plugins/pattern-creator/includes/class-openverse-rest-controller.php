@@ -1,5 +1,11 @@
 <?php
 /**
+ * Openverse API integration.
+ *
+ * @package WordPressdotorg\Pattern_Creator
+ */
+
+/**
  * Class Openverse_REST_Controller
  *
  * This serves as a proxy layer to authenticate and cache the Openverse API requests.
@@ -8,12 +14,16 @@
  */
 class Openverse_REST_Controller extends WP_REST_Controller {
 	/**
-	 * @var string The namespace of this controller's route.
+	 * The namespace of this controller's route.
+	 *
+	 * @var string
 	 */
 	protected $namespace = 'wporg/v1';
 
 	/**
-	 * @var string The base of this controller's route.
+	 * The base of this controller's route.
+	 *
+	 * @var string
 	 */
 	protected $rest_base = 'openverse';
 

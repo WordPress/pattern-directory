@@ -1,6 +1,8 @@
 <?php
 /**
  * Set up configuration for dynamic blocks.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 namespace WordPressdotorg\Theme\Pattern_Directory_2024\Block_Config;
@@ -18,8 +20,8 @@ add_action( 'wporg_query_filter_in_form', __NAMESPACE__ . '\inject_other_filters
 add_filter( 'wporg_favorite_button_settings', __NAMESPACE__ . '\get_favorite_settings', 10, 2 );
 add_filter( 'render_block_core/search', __NAMESPACE__ . '\inject_category_search_block' );
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
-add_filter( 'render_block_core/query-title', __NAMESPACE__ . '\update_archive_title', 10, 3 );
-add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\update_site_title', 10, 3 );
+add_filter( 'render_block_core/query-title', __NAMESPACE__ . '\update_archive_title', 10, 2 );
+add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\update_site_title' );
 add_filter( 'wporg_block_site_breadcrumbs', __NAMESPACE__ . '\update_site_breadcrumbs' );
 add_filter( 'page_template_hierarchy', __NAMESPACE__ . '\modify_page_template' );
 add_filter( 'single_template_hierarchy', __NAMESPACE__ . '\modify_single_template' );
@@ -38,8 +40,8 @@ function register_block_bindings() {
 			'uses_context'       => array( 'postId' ),
 			'get_value_callback' => function ( $args, $block ) {
 				$post_id = $block->context['postId'];
-				/* translators: %s: Post title. Only visible to screen readers. */
 				return sprintf(
+					/* translators: %s: Post title. Only visible to screen readers. */
 					__( 'Edit <span class="screen-reader-text">"%s"</span>', 'wporg-patterns' ),
 					esc_html( get_the_title( $post_id ) )
 				);
@@ -148,10 +150,9 @@ function update_query_total_label( $label, $found_posts ) {
 /**
  * Provide a list of curation options.
  *
- * @param array $options The options for this filter.
  * @return array New list of curation options.
  */
-function get_curation_options( $options ) {
+function get_curation_options() {
 	global $wp_query;
 	$current = is_string( $wp_query->get( 'curation' ) ) ? strtolower( $wp_query->get( 'curation' ) ) : '';
 
@@ -316,7 +317,7 @@ function get_favorite_settings( $settings, $post_id ) {
 /**
  * Inject the current category into the search form.
  *
- * @param string $block_content
+ * @param string $block_content Search block markup.
  *
  * @return string
  */
@@ -336,8 +337,10 @@ function inject_category_search_block( $block_content ) {
 
 /**
  * Provide a list of local navigation menus.
+ *
+ * @return array Navigation menus keyed by location.
  */
-function add_site_navigation_menus( $menus ) {
+function add_site_navigation_menus() {
 	global $wp_query, $wp;
 
 	$menu       = array();
@@ -417,7 +420,7 @@ function add_site_navigation_menus( $menus ) {
 				'label' => $term->name,
 				'url'   => get_term_link( $term ),
 			);
-			if ( in_array( $term->slug, $current_cats ) ) {
+			if ( in_array( $term->slug, $current_cats, true ) ) {
 				$cat['className'] = 'current-menu-item';
 			}
 			if ( is_page( 'favorites' ) || is_author() ) {
@@ -444,11 +447,11 @@ function add_site_navigation_menus( $menus ) {
 /**
  * Update the archive title for all filter views.
  *
- * @param string   $block_content The block content.
- * @param array    $block         The full block, including name and attributes.
- * @param WP_Block $instance      The block instance.
+ * @param string $block_content The block content.
+ * @param array  $block         The full block, including name and attributes.
+ * @return string Updated query title markup.
  */
-function update_archive_title( $block_content, $block, $instance ) {
+function update_archive_title( $block_content, $block ) {
 	global $wp_query;
 	$attributes = $block['attrs'];
 
@@ -466,6 +469,7 @@ function update_archive_title( $block_content, $block, $instance ) {
 		} else {
 			$author = isset( $wp_query->query['author_name'] ) ? get_user_by( 'slug', $wp_query->query['author_name'] ) : false;
 			if ( $author ) {
+				/* translators: %s: Author display name. */
 				$title = sprintf( __( 'Author: %s', 'wporg-patterns' ), $author->display_name );
 			} else {
 				$title = __( 'All patterns', 'wporg-patterns' );
@@ -502,7 +506,7 @@ function update_archive_title( $block_content, $block, $instance ) {
  *
  * @param string $block_content The block content.
  */
-function update_site_title( $block_content, $block, $instance ) {
+function update_site_title( $block_content ) {
 	return str_replace(
 		get_bloginfo( 'name' ),
 		__( 'Patterns', 'wporg-patterns' ),
@@ -512,6 +516,9 @@ function update_site_title( $block_content, $block, $instance ) {
 
 /**
  * Update the breadcrumbs to the current page.
+ *
+ * @param array $breadcrumbs Existing breadcrumb items.
+ * @return array Breadcrumb items for the current page.
  */
 function update_site_breadcrumbs( $breadcrumbs ) {
 	global $wp_query;
@@ -579,6 +586,7 @@ function update_site_breadcrumbs( $breadcrumbs ) {
 		if ( $author ) {
 			$breadcrumbs[] = array(
 				'url'   => get_author_posts_url( $author->ID ),
+				/* translators: %s: Author display name. */
 				'title' => sprintf( __( 'Author: %s', 'wporg-patterns' ), $author->display_name ),
 			);
 		}

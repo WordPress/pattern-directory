@@ -1,4 +1,9 @@
 <?php
+/**
+ * Stats for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Stats;
 

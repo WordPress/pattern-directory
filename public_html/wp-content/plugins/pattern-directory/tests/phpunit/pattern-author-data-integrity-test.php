@@ -1,6 +1,8 @@
 <?php
 /**
  * Test the handling of data an ordinary account supplies about its own pattern.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS };

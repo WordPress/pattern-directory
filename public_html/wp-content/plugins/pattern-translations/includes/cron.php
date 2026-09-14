@@ -1,4 +1,10 @@
 <?php
+/**
+ * Scheduled pattern translation jobs.
+ *
+ * @package WordPressdotorg\Pattern_Translations
+ */
+
 namespace WordPressdotorg\Pattern_Translations\Cron;
 
 use WordPressdotorg\Pattern_Translations\{ Pattern, PatternMakepot };
@@ -65,7 +71,7 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 		}
 	}
 
-	// See https://github.com/WordPress/gutenberg/issues/59300
+	// See https://github.com/WordPress/gutenberg/issues/59300.
 	remove_action( 'registered_post_type', 'gutenberg_block_core_navigation_link_register_post_type_variation' );
 	remove_action( 'registered_taxonomy', 'gutenberg_block_core_navigation_link_register_taxonomy_variation' );
 
@@ -106,9 +112,12 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 			} else {
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				echo "\t{$locale} - No Translations exist yet.\n";
-				// TODO: Note: There may exist a translated pattern using old strings.
-				// Considering this as an edge-case that is unlikely and we don't
-				// need to handle. Serving old Translated template is better in this case.
+
+				/*
+				 * TODO: Note: There may exist a translated pattern using old strings.
+				 * Considering this as an edge-case that is unlikely and we don't
+				 * need to handle. Serving old Translated template is better in this case.
+				 */
 			}
 		}
 

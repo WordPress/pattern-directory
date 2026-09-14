@@ -1,6 +1,8 @@
 <?php
 /**
  * Shortcodes for the Pattern Directory theme.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 namespace WordPressdotorg\Theme\Pattern_Directory_2024;

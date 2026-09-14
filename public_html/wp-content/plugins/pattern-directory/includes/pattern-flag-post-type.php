@@ -1,4 +1,9 @@
 <?php
+/**
+ * Pattern flag post type for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type;
 
@@ -102,6 +107,7 @@ function register_post_type_data() {
 		RESOLVED_STATUS,
 		array(
 			'label'       => __( 'Resolved', 'wporg-patterns' ),
+			/* translators: %s: Number of flags. */
 			'label_count' => _n_noop(
 				'Resolved <span class="count">(%s)</span>',
 				'Resolved <span class="count">(%s)</span>',
@@ -126,9 +132,9 @@ function get_default_reason_description() {
  *
  * Unlike `pending`, the review status prevents authors from republishing the pattern.
  *
- * @param int     $post_ID
- * @param WP_Post $post
- * @param bool    $update
+ * @param int     $post_ID Post ID.
+ * @param WP_Post $post Post being processed.
+ * @param bool    $update Whether this updates an existing post.
  */
 function check_flag_threshold( $post_ID, $post, $update ) {
 	if ( $update || POST_TYPE !== get_post_type( $post ) ) {

@@ -1,4 +1,9 @@
 <?php
+/**
+ * Admin stats for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Admin\Stats;
 
@@ -97,8 +102,8 @@ function get_snapshot_meta_data() {
  * @return array
  */
 function get_export_form_inputs() {
-	$date_filter = function ( $string ) {
-		$success = preg_match( '|([0-9]{4}\-[0-9]{2}\-[0-9]{2})|', $string, $match );
+	$date_filter = function ( $date_input ) {
+		$success = preg_match( '|([0-9]{4}\-[0-9]{2}\-[0-9]{2})|', $date_input, $match );
 
 		if ( $success ) {
 			return $match[1];

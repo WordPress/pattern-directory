@@ -3,6 +3,8 @@
  * Title: Single pattern
  * Slug: wporg-pattern-directory-2024/single-pattern
  * Inserter: no
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only notice flag set by our own redirect; nothing is written here.

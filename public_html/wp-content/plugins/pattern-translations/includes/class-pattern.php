@@ -1,19 +1,73 @@
 <?php
+/**
+ * Pattern data and translation helpers.
+ *
+ * @package WordPressdotorg\Pattern_Translations
+ */
+
 namespace WordPressdotorg\Pattern_Translations;
 
 use GlotPress_Translate_Bridge;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
+/**
+ * Pattern content and translation metadata.
+ */
 class Pattern {
-	public $ID          = null;
-	public $title       = '';
-	public $name        = '';
+	/**
+	 * Pattern post ID.
+	 *
+	 * @var int|null
+	 */
+	public $ID = null;
+	/**
+	 * Pattern title.
+	 *
+	 * @var string
+	 */
+	public $title = '';
+	/**
+	 * Pattern slug.
+	 *
+	 * @var string
+	 */
+	public $name = '';
+	/**
+	 * Pattern description.
+	 *
+	 * @var string
+	 */
 	public $description = '';
-	public $html        = '';
-	public $source_url  = '';
-	public $keywords    = '';
+	/**
+	 * Serialized pattern content.
+	 *
+	 * @var string
+	 */
+	public $html = '';
+	/**
+	 * Original pattern permalink.
+	 *
+	 * @var string|false
+	 */
+	public $source_url = '';
+	/**
+	 * Comma-separated pattern keywords.
+	 *
+	 * @var string
+	 */
+	public $keywords = '';
 
+	/**
+	 * Pattern locale.
+	 *
+	 * @var string
+	 */
 	public $locale = 'en_US';
+	/**
+	 * Original untranslated pattern.
+	 *
+	 * @var Pattern|false
+	 */
 	public $parent = false;
 
 	/**
@@ -146,8 +200,7 @@ class Pattern {
 	public static function get_patterns( array $args = array() ): array {
 		$defaults = array(
 			'post_type'      => POST_TYPE,
-			// Note: This must be set for cli context, in isolated test context this is defaulted to 'publish'
-			// Prevents unexpected patterns in translations
+			// Explicit status prevents non-public patterns from entering CLI exports.
 			'post_status'    => 'publish',
 			'posts_per_page' => -1,
 			'orderby'        => array(

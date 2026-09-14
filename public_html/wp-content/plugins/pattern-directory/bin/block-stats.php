@@ -1,11 +1,14 @@
 <?php
-// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
-
 /**
  * Check block type stats
  *
  * To run in a sandbox, use php directly, ex:
  * php ./bin/block-stats.php
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ *
+ * phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI output is plain text.
+ * phpcs:disable WordPress.WP.AlternativeFunctions -- Native functions are needed for CLI bootstrap and streams.
  */
 
 namespace WordPressdotorg\Pattern_Directory;
@@ -13,7 +16,7 @@ namespace WordPressdotorg\Pattern_Directory;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE };
 
 // This script should only be called in a CLI environment.
-if ( 'cli' != php_sapi_name() ) {
+if ( 'cli' !== php_sapi_name() ) {
 	die();
 }
 
@@ -30,7 +33,7 @@ if ( empty( $opts['abspath'] ) && false !== strpos( __DIR__, 'wp-content' ) ) {
 $opts['post_status'] = isset( $opts['post_status'] ) ? explode( ',', $opts['post_status'] ) : array( 'publish' );
 $opts['verbose']     = isset( $opts['verbose'] );
 
-// Bootstrap WordPress
+// Bootstrap WordPress.
 $_SERVER['HTTP_HOST']   = parse_url( $opts['url'], PHP_URL_HOST );
 $_SERVER['REQUEST_URI'] = parse_url( $opts['url'], PHP_URL_PATH );
 

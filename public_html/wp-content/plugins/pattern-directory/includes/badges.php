@@ -1,6 +1,8 @@
 <?php
 /**
  * Profile badge assignments for pattern authors.
+ *
+ * @package WordPressdotorg\Pattern_Directory
  */
 
 namespace WordPressdotorg\Pattern_Directory\Badges;
@@ -17,6 +19,10 @@ add_action( 'set_user_role', __NAMESPACE__ . '\set_user_role', 10, 2 );
 
 /**
  * Watch for pattern status changes, and assign (or remove) the Pattern Author badge as appropriate.
+ *
+ * @param string   $new_status New post status.
+ * @param string   $old_status Previous post status.
+ * @param \WP_Post $post       Post being transitioned.
  */
 function status_transitions( $new_status, $old_status, $post ) {
 	$post = get_post( $post );
@@ -52,6 +58,8 @@ function status_transitions( $new_status, $old_status, $post ) {
 
 /**
  * Remove the 'Patterns Team' badge from a user when they're removed from the Patterns site.
+ *
+ * @param int $user_id User ID.
  */
 function remove_user_from_blog( $user_id ) {
 	if ( function_exists( 'WordPressdotorg\Profiles\remove_badge' ) ) {
@@ -64,6 +72,9 @@ function remove_user_from_blog( $user_id ) {
  *
  * The badge is added for all roles except for Contributor and Subscriber.
  * The badge is removed when the role is set to Contributor or Subscriber.
+ *
+ * @param int    $user_id User ID.
+ * @param string $role    New role slug.
  */
 function set_user_role( $user_id, $role ) {
 	if ( ! function_exists( 'WordPressdotorg\Profiles\assign_badge' ) ) {

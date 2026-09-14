@@ -1,4 +1,9 @@
 <?php
+/**
+ * Favorite for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Favorite;
 
@@ -82,7 +87,7 @@ function get_favorites( $user = 0 ) {
 	if ( ! $user->exists() ) {
 		return array();
 	}
-	$favorites = get_user_meta( $user->ID, META_KEY ) ?: array();
+	$favorites = get_user_meta( $user->ID, META_KEY, false ) ?: array();
 
 	return array_map( 'absint', $favorites );
 }

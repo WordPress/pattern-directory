@@ -1,4 +1,9 @@
 <?php
+/**
+ * Render the delete button pattern component.
+ *
+ * @package WordPress\Pattern_Directory
+ */
 
 $current_post_id = $block->context['postId'];
 if ( ! $current_post_id ) {
@@ -39,6 +44,7 @@ $encoded_state = wp_json_encode( $init_state );
 		<?php
 		// Escape the title, not the template: a pattern title is author-supplied and KSES keeps its markup.
 		printf(
+			/* translators: %s: Pattern title, only visible to screen readers. */
 			wp_kses_post( __( 'Delete <span class="screen-reader-text">"%s"</span>', 'wporg-patterns' ) ),
 			esc_html( get_the_title( $current_post_id ) )
 		);

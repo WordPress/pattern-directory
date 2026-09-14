@@ -1,4 +1,9 @@
 <?php
+/**
+ * Search for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Search;
 
@@ -19,7 +24,7 @@ add_action( 'failed_jetpack_search_query', __NAMESPACE__ . '\log_failed_queries'
 /**
  * Tell Jetpack to sync pattern meta, so it can be indexed by ElasticSearch.
  *
- * @param array $post_meta_safelist
+ * @param array $post_meta_safelist Metadata keys allowed in the search index.
  *
  * @return array
  */
@@ -40,8 +45,8 @@ function sync_pattern_meta( $post_meta_safelist ) {
  * XHR requests to fetch patterns). We don't want to restrict wp-admin list tables, since that could make it
  * difficult to find variations, etc.
  *
- * @param bool     $handle_query
- * @param WP_Query $query
+ * @param bool     $handle_query Whether Jetpack should handle the query.
+ * @param WP_Query $query Query being filtered.
  *
  * @return bool
  */
@@ -148,7 +153,7 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 			$taxonomy = $term['taxonomy'];
 
 			// `wporg-pattern-flag-reason` is private.
-			if ( ! in_array( $taxonomy, array( 'wporg-pattern-category', 'wporg-pattern-keyword' ) ) ) {
+			if ( ! in_array( $taxonomy, array( 'wporg-pattern-category', 'wporg-pattern-keyword' ), true ) ) {
 				continue;
 			}
 
@@ -179,14 +184,14 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 /**
  * Log when Jetpack does not run the query.
  *
- * @param string $reason
- * @param array  $data
+ * @param string $reason Reason the search was aborted.
+ * @param array  $data Data to process.
  */
 function log_aborted_queries( $reason, $data ) {
 	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
 		wp_send_json_error( array( 'jetpack_search_abort - ' . $reason, $data ) );
 	} else {
-		trigger_error( 'jetpack_search_abort - ' . $reason . ' - ' . wp_json_encode( $data ), E_USER_WARNING ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		trigger_error( 'jetpack_search_abort - ' . $reason . ' - ' . wp_json_encode( $data ), E_USER_WARNING ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped, WordPress.PHP.DevelopmentFunctions.error_log_trigger_error -- Forward search failures to the configured PHP error handler.
 	}
 }
 
@@ -196,12 +201,12 @@ function log_aborted_queries( $reason, $data ) {
  * This filter doesn't currently work, but should in the future.
  * See https://github.com/Automattic/jetpack/issues/18888
  *
- * @param array $data
+ * @param array $data Data to process.
  */
 function log_failed_queries( $data ) {
 	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {
 		wp_send_json_error( array( 'failed_jetpack_search_query', $data ) );
 	} else {
-		trigger_error( 'failed_jetpack_search_query - ' . wp_json_encode( $data ), E_USER_WARNING );
+		trigger_error( 'failed_jetpack_search_query - ' . wp_json_encode( $data ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error -- Forward search failures to the configured PHP error handler.
 	}
 }

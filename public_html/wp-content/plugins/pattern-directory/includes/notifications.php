@@ -1,4 +1,9 @@
 <?php
+/**
+ * Notifications for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Notifications;
 
@@ -45,7 +50,7 @@ function trigger_notifications( $post_id, $post, $update, $post_before ) {
 		return;
 	}
 
-	if ( 'publish' === $new_status && in_array( $old_status, array( 'pending', SPAM_STATUS, UNLISTED_STATUS ) ) ) {
+	if ( 'publish' === $new_status && in_array( $old_status, array( 'pending', SPAM_STATUS, UNLISTED_STATUS ), true ) ) {
 		notify_pattern_approved( $post );
 	} elseif ( SPAM_STATUS === $new_status ) {
 		notify_pattern_flagged( $post );
@@ -57,7 +62,7 @@ function trigger_notifications( $post_id, $post, $update, $post_before ) {
 /**
  * Notify when a pattern has been approved.
  *
- * @param \WP_Post $post
+ * @param \WP_Post $post Post being processed.
  *
  * @return void
  */
@@ -80,7 +85,7 @@ function notify_pattern_approved( $post ) {
 	$subject = esc_html__( 'Pattern published', 'wporg-patterns' );
 
 	$message = sprintf(
-		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Pattern URL;
+		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Pattern URL.
 		esc_html__(
 			'Hello!
 
@@ -105,7 +110,7 @@ Thank you for submitting your pattern, %1$s. It is now live in the Block Pattern
  *
  * Sent on the review status transition for both spam detection and user reports.
  *
- * @param \WP_Post $post
+ * @param \WP_Post $post Post being processed.
  */
 function notify_pattern_flagged( $post ) {
 	$author = get_user_by( 'id', $post->post_author );
@@ -161,7 +166,7 @@ function notify_pattern_flagged( $post ) {
 	$subject = esc_html__( 'Pattern being reviewed', 'wporg-patterns' );
 
 	$message = sprintf(
-		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Pattern URL;
+		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Pattern URL.
 		esc_html__(
 			'Hi there!
 
@@ -186,7 +191,7 @@ Your pattern has been unpublished from the Block Pattern Directory at this time,
 /**
  * Notify when a pattern has been unlisted.
  *
- * @param \WP_Post $post
+ * @param \WP_Post $post Post being processed.
  *
  * @return void
  */
@@ -219,7 +224,7 @@ function notify_pattern_unlisted( $post ) {
 	$subject = esc_html__( 'Pattern unlisted', 'wporg-patterns' );
 
 	$message = sprintf(
-		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Pattern URL;
+		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Pattern URL.
 		esc_html__(
 			'Hello,
 
@@ -247,9 +252,9 @@ If you would like to resubmit your pattern, please make sure it follows the guid
 /**
  * Wrapper for wp_mail.
  *
- * @param string $to
- * @param string $subject
- * @param string $message
+ * @param string $to Recipient email address.
+ * @param string $subject Email subject.
+ * @param string $message Email body.
  *
  * @return void
  */

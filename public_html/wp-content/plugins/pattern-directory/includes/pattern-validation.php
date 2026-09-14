@@ -1,4 +1,9 @@
 <?php
+/**
+ * Pattern validation for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Pattern_Validation;
 
@@ -51,7 +56,7 @@ function is_not_empty_block( $block ) {
 	// exceptions that should go through the rest of the checks.
 	if (
 		$block_type->is_dynamic() &&
-		! in_array( $block['blockName'], array( 'core/image' ) )
+		! in_array( $block['blockName'], array( 'core/image' ), true )
 	) {
 		return true;
 	}
@@ -66,14 +71,14 @@ function is_not_empty_block( $block ) {
 
 	// Exceptions - these contain no content and maybe no attributes.
 	$allowed_empty = array( 'core/separator', 'core/spacer' );
-	if ( in_array( $block['blockName'], $allowed_empty ) ) {
+	if ( in_array( $block['blockName'], $allowed_empty, true ) ) {
 		return true;
 	}
 
 	// Check if the attributes are different from the default attributes.
 	$block_attrs   = $block_type->prepare_attributes_for_render( $block['attrs'] );
 	$default_attrs = $block_type->prepare_attributes_for_render( array() );
-	if ( $block_attrs != $default_attrs ) {
+	if ( $block_attrs != $default_attrs ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual -- Attribute order and equivalent numeric values do not constitute edits.
 		return true;
 	}
 
@@ -95,8 +100,12 @@ function is_not_empty_block( $block ) {
 
 /**
  * Validate the pattern content.
+ *
+ * @param object|\WP_Error $prepared_post Prepared post or a preceding validation error.
+ * @param \WP_REST_Request $request       Request being validated.
+ * @return object|\WP_Error Validated post or a validation error.
  */
-function validate_content( $prepared_post, $request ) {
+function validate_content( $prepared_post, $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Preserve the REST pre-insert filter signature.
 	if ( is_wp_error( $prepared_post ) ) {
 		return $prepared_post;
 	}
@@ -171,7 +180,7 @@ function validate_content( $prepared_post, $request ) {
 		);
 	}
 
-	// Next, filter out any empty blocks
+	// Next, filter out any empty blocks.
 	$real_blocks = array_filter( $all_blocks, __NAMESPACE__ . '\is_not_empty_block' );
 
 	// Check that we have at least one non-empty block.
@@ -214,7 +223,7 @@ function validate_content( $prepared_post, $request ) {
  *
  * @return object|\WP_Error The post object, or an error if a block is used out of context.
  */
-function validate_block_context( $prepared_post, $request ) {
+function validate_block_context( $prepared_post, $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Preserve the REST pre-insert filter signature.
 	if ( is_wp_error( $prepared_post ) ) {
 		return $prepared_post;
 	}
@@ -292,7 +301,7 @@ function block_context_is_valid( $blocks, $ancestors, $registry ) {
  *
  * @return object|\WP_Error The post object, or an error if an attribute carries a script URL.
  */
-function validate_block_attributes( $prepared_post, $request ) {
+function validate_block_attributes( $prepared_post, $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Preserve the REST pre-insert filter signature.
 	if ( is_wp_error( $prepared_post ) ) {
 		return $prepared_post;
 	}
@@ -400,7 +409,7 @@ function attribute_has_unsafe_scheme( $value, $is_url = false ) {
  *
  * @return object|\WP_Error The post object, or an error if the content carries a directive.
  */
-function validate_block_directives( $prepared_post, $request ) {
+function validate_block_directives( $prepared_post, $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Preserve the REST pre-insert filter signature.
 	if ( is_wp_error( $prepared_post ) ) {
 		return $prepared_post;
 	}
@@ -503,6 +512,10 @@ function content_has_block_directives( $html ) {
 
 /**
  * Validate the pattern title.
+ *
+ * @param object|\WP_Error $prepared_post Prepared post or a preceding validation error.
+ * @param \WP_REST_Request $request       Request being validated.
+ * @return object|\WP_Error Validated post or a validation error.
  */
 function validate_title( $prepared_post, $request ) {
 	if ( is_wp_error( $prepared_post ) ) {
@@ -545,6 +558,10 @@ function validate_title( $prepared_post, $request ) {
  * Restrict author submissions to drafts, pending review, or the configured default status.
  * Only moderators can change moderation statuses or republish patterns at the report threshold,
  * including legacy removals left in `pending`.
+ *
+ * @param object|\WP_Error $prepared_post Prepared post or a preceding validation error.
+ * @param \WP_REST_Request $request       Request being validated.
+ * @return object|\WP_Error Validated post or a validation error.
  */
 function validate_status( $prepared_post, $request ) {
 	if ( is_wp_error( $prepared_post ) ) {
@@ -602,6 +619,7 @@ function validate_status( $prepared_post, $request ) {
 		return new \WP_Error(
 			'rest_pattern_invalid_status',
 			sprintf(
+				/* translators: %s: Allowed post statuses. */
 				__( 'Invalid post status. Status must be %s.', 'wporg-patterns' ),
 				$default_status
 			),
@@ -710,6 +728,10 @@ function validate_flag_reason( $prepared_post, $request ) {
 
 /**
  * Validate the pattern doesn't appear to be spam.
+ *
+ * @param object|\WP_Error $prepared_post Prepared post or a preceding validation error.
+ * @param \WP_REST_Request $request       Request being validated.
+ * @return object|\WP_Error Validated post or a validation error.
  */
 function validate_against_spam( $prepared_post, $request ) {
 	if ( is_wp_error( $prepared_post ) ) {
@@ -852,7 +874,7 @@ function note_spam_status( $new_status, $old_status, $post ) {
 /**
  * Helper function to check for spam.
  *
- * @param array $post
+ * @param array $post Post being processed.
  * @return array {
  *    @type boolean $is_spam
  *    @type string  $spam_reason
@@ -892,7 +914,7 @@ function check_for_spam( $post ) {
 
 	// Treat Paragraph-only submissions as likely spam.
 	if ( ! $is_spam ) {
-		// Only fetches the top-level of blocks, we're only
+		// Only top-level paragraph blocks trigger this heuristic.
 		$block_names_in_use = array_filter(
 			array_unique(
 				wp_list_pluck(
@@ -918,8 +940,7 @@ function check_for_spam( $post ) {
 		$akismet_payload = array(
 			'comment_post_ID'      => 0,
 			'comment_type'         => 'pattern_submission',
-			// Disabled as logged in users get bonus points I think, which we don't want.
-			// 'user_ID'           => get_current_user_id(),
+			// Omit user_ID so Akismet does not give logged-in authors preferential treatment.
 			'comment_author'       => $author->display_name ?: $author->user_login,
 			'comment_author_email' => $author->user_email,
 			'comment_author_url'   => '',
@@ -955,7 +976,7 @@ function check_for_spam( $post ) {
 /**
  * Helper function to check for a valid pattern title.
  *
- * @param string $title
+ * @param string $title Pattern title.
  * @return boolean
  */
 function is_title_valid( $title ) {

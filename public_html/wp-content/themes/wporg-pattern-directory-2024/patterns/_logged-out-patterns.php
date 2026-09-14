@@ -1,11 +1,16 @@
 <?php
-// phpcs:disable WordPress.Files.FileName -- Allow underscore for pattern partial.
 /**
+ * Render the logged out patterns pattern component.
+ *
  * Title: Logged out (my patterns)
  * Slug: wporg-pattern-directory-2024/logged-out-patterns
  * Inserter: no
  *
  * This pattern is swapped out automatically when a logged out user visits `/my-patterns/`.
+ *
+ * @package WordPress\Pattern_Directory
+ *
+ * phpcs:disable WordPress.Files.FileName -- Allow underscore for pattern partial.
  */
 
 $login_url    = wp_login_url();

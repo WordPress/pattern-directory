@@ -1,6 +1,8 @@
 <?php
 /**
  * Test the Patterns list table admin helpers.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 use function WordPressdotorg\Pattern_Directory\Admin\Patterns\display_post_states;
@@ -46,6 +48,8 @@ class Pattern_Admin_Post_States_Test extends WP_UnitTestCase {
 
 	/**
 	 * Set up shared fixtures.
+	 *
+	 * @param WP_UnitTest_Factory $factory Factory for shared test fixtures.
 	 */
 	public static function wpSetUpBeforeClass( $factory ) {
 		self::$unlisted_pattern_id  = $factory->post->create(

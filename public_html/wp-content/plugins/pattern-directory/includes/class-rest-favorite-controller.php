@@ -1,4 +1,9 @@
 <?php
+/**
+ * REST favorite endpoints for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Favorites_API;
 
@@ -23,7 +28,7 @@ function init() {
 
 	$args = array(
 		'id' => array(
-			'validate_callback' => function ( $param, $request, $key ) {
+			'validate_callback' => function ( $param ) {
 				return is_numeric( $param );
 			},
 		),
@@ -74,7 +79,7 @@ function permissions_check() {
  * @param WP_REST_Request $request Full data about the request.
  * @return WP_Error|WP_REST_Response
  */
-function get_items( $request ) {
+function get_items( $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Preserve the REST endpoint callback signature.
 	$favorites = get_favorites();
 	return new WP_REST_Response( $favorites, 200 );
 }

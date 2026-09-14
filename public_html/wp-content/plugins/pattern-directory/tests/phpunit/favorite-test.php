@@ -1,6 +1,8 @@
 <?php
 /**
  * Test Block Pattern validation.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 use function WordPressdotorg\Pattern_Directory\Favorite\{add_favorite, get_favorites, remove_favorite};
@@ -11,14 +13,41 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
  * Test pattern validation.
  */
 class Pattern_Favorite_Test extends WP_UnitTestCase {
+	/**
+	 * Pattern fixture ID.
+	 *
+	 * @var int
+	 */
 	protected static $pattern_id;
+	/**
+	 * ID of the pattern initially favorited by the administrator.
+	 *
+	 * @var int
+	 */
 	protected static $faved_pattern_id;
+	/**
+	 * Page fixture ID.
+	 *
+	 * @var int
+	 */
 	protected static $page_id;
+	/**
+	 * Administrator user ID.
+	 *
+	 * @var int
+	 */
 	protected static $user_admin;
+	/**
+	 * Subscriber user ID.
+	 *
+	 * @var int
+	 */
 	protected static $user_subscriber;
 
 	/**
 	 * Setup fixtures that are shared across all tests.
+	 *
+	 * @param WP_UnitTest_Factory $factory Factory for shared test fixtures.
 	 */
 	public static function wpSetUpBeforeClass( $factory ) {
 		self::$pattern_id       = $factory->post->create(

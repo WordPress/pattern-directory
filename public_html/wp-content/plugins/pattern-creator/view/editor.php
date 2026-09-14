@@ -1,6 +1,8 @@
 <?php
 /**
  * Pattern Creator template.
+ *
+ * @package WordPressdotorg\Pattern_Creator
  */
 
 namespace WordPressdotorg\Pattern_Creator;

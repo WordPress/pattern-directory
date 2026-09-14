@@ -8,6 +8,8 @@
  * Text Domain: wporg-patterns
  * License: GPL v2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
+ *
+ * @package WordPressdotorg\Pattern_Creator
  */
 
 namespace WordPressdotorg\Pattern_Creator;
@@ -200,6 +202,9 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\pattern_creator_init', 20 );
 
 /**
  * Bypass WordPress template system to load only our editor app.
+ *
+ * @param string $template Original template path.
+ * @return string Editor template path when the creator is active.
  */
 function inject_editor_template( $template ) {
 	if ( should_load_creator() ) {
@@ -277,9 +282,7 @@ function fix_editor_style_import_paths( $settings ) {
 	if ( empty( $settings['styles'] ) ) {
 		return $settings;
 	}
-	// Use index-based iteration so modifications apply to the original array,
-	// not a copy. foreach...&$ref is unsafe when the iterable is an expression
-	// (e.g. $arr ?? []) because the ?? operator returns a value, not a reference.
+	// Iterate keys so updates apply directly to the original array.
 	foreach ( array_keys( $settings['styles'] ) as $key ) {
 		$style = $settings['styles'][ $key ];
 		if ( ! empty( $style['baseURL'] ) || empty( $style['css'] ) ) {
@@ -293,13 +296,13 @@ function fix_editor_style_import_paths( $settings ) {
 			continue;
 		}
 		$parts = explode( '/', preg_replace( '/[?#].*$/', '', $m[1] ) );
-		if ( count( $parts ) < 6 ) { // scheme + '' + host + ≥1 path segment + sibling + file
+		if ( count( $parts ) < 6 ) { // Scheme, host, and at least one path segment before sibling/file.
 			continue;
 		}
-		array_splice( $parts, -2 ); // drop sibling-dir/filename, keep parent
+		array_splice( $parts, -2 ); // Drop sibling-dir/filename, keep parent.
 		$base = implode( '/', $parts ) . '/';
 		if ( 0 !== strpos( $m[1], $base ) ) {
-			continue; // inferred base isn't a prefix of the matched url() — depth assumption wrong
+			continue; // The inferred depth must match the URL prefix.
 		}
 		$settings['styles'][ $key ]['css']     = preg_replace_callback(
 			'/@import\s+["\']\.\/([^"\']+)["\']/',
@@ -333,10 +336,7 @@ add_filter( 'block_editor_settings_all', __NAMESPACE__ . '\fix_editor_style_impo
  * @return string[]
  */
 function allow_reading_global_styles( $caps, $cap, $user_id, $args ) {
-	// $cap is the original meta cap (e.g. 'read_post'); $caps are the derived
-	// primitive caps WordPress resolved it to. We check $cap directly so we
-	// intercept regardless of which primitive cap wp_global_styles maps read_post
-	// to — it varies by WordPress version and post-type registration.
+	// Check the meta capability because its primitive mapping can vary.
 	if (
 		'read_post' !== $cap ||
 		! defined( 'REST_REQUEST' ) || ! REST_REQUEST ||
@@ -355,7 +355,7 @@ function allow_reading_global_styles( $caps, $cap, $user_id, $args ) {
 	}
 	$post = get_post( (int) $args[0] );
 	if ( $post && 'wp_global_styles' === $post->post_type && 'publish' === $post->post_status ) {
-		return array( 'read' ); // all logged-in users have 'read'
+		return array( 'read' );
 	}
 	return $caps;
 }
@@ -403,14 +403,12 @@ add_filter( 'user_has_cap', __NAMESPACE__ . '\disallow_uploads' );
  * Set up any custom endpoints.
  */
 function rest_api_init() {
-	require_once __DIR__ . '/includes/openverse-client.php';
-	require_once __DIR__ . '/includes/openverse-rest-controller.php';
+	require_once __DIR__ . '/includes/class-openverse-client.php';
+	require_once __DIR__ . '/includes/class-openverse-rest-controller.php';
 	$controller = new \Openverse_REST_Controller();
 	$controller->register_routes();
 
-	// Allow the post type labels through the `types` endpoint when viewing.
-	// This passes the value back to unauthenticated users, which prevents JS
-	// errors when the post-date block tries to use them.
+	// Public labels prevent errors when the post-date block reads them.
 	register_rest_field(
 		'type', // The object-type for the `types` endpoint.
 		'labels',
@@ -443,6 +441,10 @@ function set_theme_twentytwentythree() {
  * Temporarily restore gutenberg_initialize_editor() for compat with Gutenberg 16.5.0
  *
  * @see https://github.com/WordPress/pattern-directory/issues/601
+ *
+ * @param string $editor_name          Editor identifier.
+ * @param string $editor_script_handle Editor script handle suffix.
+ * @param array  $settings             Editor initialization settings.
  */
 function gutenberg_initialize_editor( $editor_name, $editor_script_handle, $settings ) {
 

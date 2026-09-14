@@ -1,6 +1,8 @@
 <?php
 /**
  * Test that a moderator's decision on a pattern survives what its author can do to it.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };

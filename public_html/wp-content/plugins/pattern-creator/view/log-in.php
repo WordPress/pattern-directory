@@ -1,6 +1,8 @@
 <?php
 /**
  * Content shown when user is not logged in.
+ *
+ * @package WordPressdotorg\Pattern_Creator
  */
 
 namespace WordPressdotorg\Pattern_Creator;
@@ -46,6 +48,7 @@ $current_page_url = add_query_arg( $current_page_query_args, home_url() );
 		<p>
 			<?php
 			printf(
+				/* translators: %s: URL of the pattern guidelines. */
 				wp_kses_post( __( 'Or <a href="%s">review the guidelines</a>.', 'wporg-patterns' ) ),
 				esc_url( home_url( '/about/' ) )
 			);
