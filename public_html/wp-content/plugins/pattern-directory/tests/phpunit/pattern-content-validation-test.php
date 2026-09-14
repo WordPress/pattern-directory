@@ -175,6 +175,11 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 			// An unclosed one stops the tokenizer reporting at all, and nesting hides the wrapper from itself.
 			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.<script><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></p>\n<!-- /wp:paragraph -->" ),
 			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.<style><style><style><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></style></p>\n<!-- /wp:paragraph -->" ),
+
+			// `<svg>` is foreign content rather than a raw-text element, so the nested `<script>` hides the anchor too.
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:html -->\n<svg><script><a href=\"#\" data-wp-interactive=\"core/query\" data-wp-context='{\"url\":\"javascript:alert(1)\"}' data-wp-bind--href=\"context.url\">x</a></svg>\n<!-- /wp:html -->" ),
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:html -->\n<svg><script><a href=\"#\" data-wp-interactive=\"core/query\" data-wp-bind--href=\"context.url\">x</a></script></svg>\n<!-- /wp:html -->" ),
+
 			// A block delimiter is a comment, so the directive in its attribute JSON is not a tag either.
 			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:categories {\"displayAsDropdown\":true,\"showLabel\":true,\"label\":\"<span data-wp-interactive=\\u0022wporg/patterns\\u0022 data-wp-init=\\u0022actions.go\\u0022>x</span>\"} /-->" ),
 			// The same attribute with its angle brackets JSON-escaped, so the stored delimiter holds no markup.
