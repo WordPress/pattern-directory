@@ -12,7 +12,6 @@ defined( 'WPINC' ) || die();
  * Actions and filters.
  */
 add_action( 'wp_after_insert_post', __NAMESPACE__ . '\trigger_notifications', 20, 4 );
-add_action( 'wporg_unlist_pattern', __NAMESPACE__ . '\notify_pattern_flagged' );
 
 /**
  * Fire off relevant notification when a post is finished updating.
@@ -30,8 +29,9 @@ function trigger_notifications( $post_id, $post, $update, $post_before ) {
 		return;
 	}
 
-	// Skip notifications on translated patterns.
-	if ( 'en_US' !== get_post_meta( $post_id, 'wpop_locale', true ) ) {
+	// A missing locale identifies an English original.
+	$locale = get_post_meta( $post_id, 'wpop_locale', true );
+	if ( $locale && 'en_US' !== $locale ) {
 		return;
 	}
 
@@ -100,12 +100,9 @@ Thank you for submitting your pattern, %1$s. It is now live in the Block Pattern
 /**
  * Notify when a pattern has been unpublished for review.
  *
- * This is called either when the status transitions into "spam", or when a post
- * crosses the flag threshold.
+ * Sent on the review status transition for both spam detection and user reports.
  *
  * @param \WP_Post $post
- *
- * @return void
  */
 function notify_pattern_flagged( $post ) {
 	$author = get_user_by( 'id', $post->post_author );
@@ -124,32 +121,34 @@ function notify_pattern_flagged( $post ) {
 
 	$reason = '';
 
-	if ( SPAM_STATUS === $post->post_status ) {
-		$spam_term = get_term_by( 'slug', '4-spam', REASON );
-		$reason = wp_strip_all_tags( $spam_term->description );
-	} else {
-		$flags = get_posts( array(
-			'post_type' => FLAG,
+	// Reports carry their own reasons; the spam term covers the removals that leave no flags behind.
+	$flags = get_posts(
+		array(
+			'post_type'   => FLAG,
 			'post_parent' => $post->ID,
 			'post_status' => PENDING_STATUS,
-		) );
-		if ( ! empty( $flags ) ) {
-			$reasons = array();
-			foreach ( $flags as $flag ) {
-				$terms = get_the_terms( $flag, REASON );
-				if ( is_array( $terms ) ) {
-					$reasons = array_merge( $reasons, $terms );
-				}
+		)
+	);
+
+	if ( ! empty( $flags ) ) {
+		$reasons = array();
+		foreach ( $flags as $flag ) {
+			$terms = get_the_terms( $flag, REASON );
+			if ( is_array( $terms ) ) {
+				$reasons = array_merge( $reasons, $terms );
 			}
-			$reasons = array_map(
-				function ( \WP_Term $reason ) {
-					return wp_strip_all_tags( $reason->description );
-				},
-				$reasons
-			);
-			$reasons = array_unique( $reasons );
-			$reason = trim( implode( "\n", $reasons ) );
 		}
+		$reasons = array_map(
+			function ( \WP_Term $reason ) {
+				return wp_strip_all_tags( $reason->description );
+			},
+			$reasons
+		);
+		$reasons = array_unique( $reasons );
+		$reason  = trim( implode( "\n", $reasons ) );
+	} elseif ( SPAM_STATUS === $post->post_status ) {
+		$spam_term = get_term_by( 'slug', '4-spam', REASON );
+		$reason    = $spam_term ? wp_strip_all_tags( $spam_term->description ) : '';
 	}
 
 	if ( ! $reason ) {

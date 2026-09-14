@@ -344,7 +344,7 @@ class Theme_Pattern_Actions_Test extends WP_UnitTestCase {
 			unset( $_POST['report-reason'] );
 		}
 
-		$this->assertSame( 'pending', get_post_status( $pattern_id ) );
+		$this->assertSame( SPAM_STATUS, get_post_status( $pattern_id ) );
 		$this->assertCount( 1, $messages );
 		$this->assertStringContainsString( 'The submitted report reason.', $messages[0] );
 	}

@@ -2,8 +2,8 @@
 
 namespace WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type;
 
-use WP_Post, WP_Query;
-use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTERN;
+use WP_Post;
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE as PATTERN, SPAM_STATUS };
 
 defined( 'WPINC' ) || die();
 
@@ -17,6 +17,7 @@ const RESOLVED_STATUS = 'resolved';
  */
 add_action( 'init', __NAMESPACE__ . '\register_post_type_data' );
 add_action( 'wp_after_insert_post', __NAMESPACE__ . '\check_flag_threshold', 10, 3 );
+add_action( 'transition_post_status', __NAMESPACE__ . '\resolve_flags_on_approval', 10, 3 );
 
 /**
  * Register entities for block pattern flags.
@@ -121,13 +122,13 @@ function get_default_reason_description() {
 }
 
 /**
- * Automatically unpublish a pattern if it receives a certain number of flags.
+ * Hold a pattern for moderator review when it reaches the report threshold.
+ *
+ * Unlike `pending`, the review status prevents authors from republishing the pattern.
  *
  * @param int     $post_ID
  * @param WP_Post $post
  * @param bool    $update
- *
- * @return void
  */
 function check_flag_threshold( $post_ID, $post, $update ) {
 	if ( $update || POST_TYPE !== get_post_type( $post ) ) {
@@ -139,27 +140,120 @@ function check_flag_threshold( $post_ID, $post, $update ) {
 		return;
 	}
 
-	$flag_check = new WP_Query( array(
-		'post_type'   => POST_TYPE,
-		'post_parent' => $pattern->ID,
-		'post_status' => PENDING_STATUS,
-	) );
+	// Nothing to take down, or a moderator's decision that outranks the report count.
+	if ( ! in_array( $pattern->post_status, array( 'publish', 'pending' ), true ) ) {
+		return;
+	}
 
-	$threshold = absint( get_option( 'wporg-pattern-flag_threshold', 5 ) );
-
-	if ( $flag_check->found_posts >= $threshold ) {
-		wp_update_post( array(
-			'ID'          => $pattern->ID,
-			'post_status' => PENDING_STATUS,
-		) );
+	if ( has_reached_flag_threshold( $pattern->ID ) ) {
+		wp_update_post(
+			array(
+				'ID'          => $pattern->ID,
+				'post_status' => SPAM_STATUS,
+			)
+		);
 
 		/**
-		 * Fires after a pattern is automatically unlisted.
+		 * Fires after a pattern is automatically unpublished for review.
 		 *
-		 * @param WP_Post $pattern The just-unlisted pattern.
+		 * @param WP_Post $pattern The just-unpublished pattern.
 		 */
 		do_action( 'wporg_unlist_pattern', $pattern );
 	}
+}
+
+/**
+ * Resolve reports when a moderator republishes a pattern that reached the threshold.
+ *
+ * This resets the removal count. Reports below the threshold remain pending for separate review.
+ *
+ * @param string  $new_status The status the pattern moved to.
+ * @param string  $old_status The status it moved from.
+ * @param WP_Post $post       The pattern.
+ */
+function resolve_flags_on_approval( $new_status, $old_status, $post ) {
+	if ( PATTERN !== get_post_type( $post ) || 'publish' !== $new_status || $new_status === $old_status ) {
+		return;
+	}
+
+	// An author publishing their own pattern answers nothing, so their reports stay pending.
+	if ( ! current_user_can( get_post_type_object( PATTERN )->cap->edit_others_posts ) ) {
+		return;
+	}
+
+	if ( ! has_reached_flag_threshold( $post->ID ) ) {
+		return;
+	}
+
+	$flags = get_posts(
+		array(
+			'post_type'   => POST_TYPE,
+			'post_parent' => $post->ID,
+			'post_status' => PENDING_STATUS,
+			'numberposts' => -1,
+			'fields'      => 'ids',
+		)
+	);
+
+	foreach ( $flags as $flag_id ) {
+		wp_update_post(
+			array(
+				'ID'          => $flag_id,
+				'post_status' => RESOLVED_STATUS,
+			)
+		);
+	}
+}
+
+/**
+ * Check whether a pattern has reached the report threshold.
+ *
+ * @param int $pattern_id The reported pattern.
+ *
+ * @return bool True if the pattern's unresolved reports have reached the threshold.
+ */
+function has_reached_flag_threshold( $pattern_id ) {
+	return count_pending_flag_reporters( $pattern_id ) >= get_flag_threshold();
+}
+
+/**
+ * Get the report threshold, falling back to five for out-of-range values.
+ *
+ * @return int The report threshold.
+ */
+function get_flag_threshold() {
+	$threshold = absint( get_option( 'wporg-pattern-flag_threshold', 5 ) );
+
+	return ( $threshold >= 1 && $threshold <= 100 ) ? $threshold : 5;
+}
+
+/**
+ * Count distinct reporters with unresolved flags against a pattern.
+ *
+ * Concurrent requests can create duplicate flags, so each reporter counts only once.
+ *
+ * @param int $pattern_id The flagged pattern.
+ *
+ * @return int The number of users holding an unresolved flag against the pattern.
+ */
+function count_pending_flag_reporters( $pattern_id ) {
+	global $wpdb;
+
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- counting distinct authors, which WP_Query can't express.
+	return (int) $wpdb->get_var(
+		$wpdb->prepare(
+			"
+			SELECT COUNT( DISTINCT post_author )
+			FROM {$wpdb->posts}
+			WHERE post_type = %s
+				AND post_parent = %d
+				AND post_status = %s
+			",
+			POST_TYPE,
+			$pattern_id,
+			PENDING_STATUS
+		)
+	);
 }
 
 /**

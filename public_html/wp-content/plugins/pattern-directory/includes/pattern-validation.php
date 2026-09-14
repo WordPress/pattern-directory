@@ -6,6 +6,7 @@ use WordPressdotorg\Pattern_Translations\Pattern as Translations_Pattern;
 use WordPressdotorg\Pattern_Translations\PatternParser as Translations_PatternParser;
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\is_block_allowed_in_pattern;
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\get_moderated_status;
+use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\has_reached_flag_threshold;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 
@@ -538,10 +539,9 @@ function validate_title( $prepared_post, $request ) {
 /**
  * Validate the pattern status.
  *
- * Ensures patterns created via the API are either drafts, or use the chosen status set in
- * /wp-admin/options-general.php?page=wporg-pattern-creator. The `unlisted` and spam statuses
- * are moderator-only, both as a target and as a source, so an author can neither self-unlist
- * nor undo a moderator's removal.
+ * Restrict author submissions to drafts, pending review, or the configured default status.
+ * Only moderators can change moderation statuses or republish patterns at the report threshold,
+ * including legacy removals left in `pending`.
  */
 function validate_status( $prepared_post, $request ) {
 	if ( is_wp_error( $prepared_post ) ) {
@@ -581,6 +581,14 @@ function validate_status( $prepared_post, $request ) {
 	// Skip validation if the user is a moderator.
 	if ( current_user_can( $post_type->cap->edit_others_posts ) ) {
 		return $prepared_post;
+	}
+
+	if ( 'publish' === $target_status && isset( $prepared_post->ID ) && has_reached_flag_threshold( $prepared_post->ID ) ) {
+		return new \WP_Error(
+			'rest_pattern_under_review',
+			__( 'This pattern has been reported, so only a directory moderator can publish it again.', 'wporg-patterns' ),
+			array( 'status' => 403 )
+		);
 	}
 
 	$default_status = get_option( 'wporg-pattern-default_status', 'publish' );
