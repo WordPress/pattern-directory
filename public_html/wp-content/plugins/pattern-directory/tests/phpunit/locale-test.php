@@ -1,6 +1,8 @@
 <?php
 /**
  * Test locale negotiation in the Pattern Translations plugin.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 use function WordPressdotorg\Pattern_Translations\locale;

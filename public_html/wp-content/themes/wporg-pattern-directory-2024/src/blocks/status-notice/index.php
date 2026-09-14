@@ -39,14 +39,14 @@ function render( $attributes, $content, $block ) {
 		return '';
 	}
 
-	$type = 'info';
+	$type   = 'info';
 	$status = get_post_status( $post_id );
 
 	$message = '';
 	switch ( $status ) {
 		case 'pending-review': // Potential spam.
 		case 'pending':
-			$type = 'alert';
+			$type     = 'alert';
 			$message .= '<p>';
 			$message .= '<strong>' . __( 'Review pending.', 'wporg-patterns' ) . '</strong> ';
 			$message .= __( 'This pattern is only visible to you. Once approved it will be published to everyone.', 'wporg-patterns' );
@@ -62,8 +62,8 @@ function render( $attributes, $content, $block ) {
 			$message .= '<p>' . __( 'Patterns can be saved as a draft which can be submitted for approval at any time. This allows you to save your design and come back to it later to submit.', 'wporg-patterns' ) . '</p>';
 			break;
 		case 'unlisted':
-			$type = 'warning';
-			$reason = get_pattern_unlisted_reason( $post_id );
+			$type     = 'warning';
+			$reason   = get_pattern_unlisted_reason( $post_id );
 			$message .= '<p>';
 			$message .= '<strong>' . __( 'Pattern declined.', 'wporg-patterns' ) . '</strong> ';
 			$message .= __( 'WordPress.org has chosen not to include this pattern in the directory.', 'wporg-patterns' );
@@ -78,7 +78,7 @@ function render( $attributes, $content, $block ) {
 			$message .= '<p>' . __( 'You can update your pattern to resubmit it for approval at any time.', 'wporg-patterns' ) . '</p>';
 			break;
 		case 'publish':
-			$type = 'tip';
+			$type     = 'tip';
 			$message .= '<p>';
 			$message .= '<strong>' . __( 'Pattern published!', 'wporg-patterns' ) . '</strong> ';
 			$message .= __( 'Your new design is now available to everyone.', 'wporg-patterns' );

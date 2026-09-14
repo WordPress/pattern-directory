@@ -1,4 +1,9 @@
 <?php
+/**
+ * Admin settings for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Admin\Settings;
 
@@ -13,7 +18,7 @@ add_action( 'admin_init', __NAMESPACE__ . '\admin_init' );
 /**
  * Constants.
  */
-const PAGE_SLUG = 'wporg-pattern-directory';
+const PAGE_SLUG    = 'wporg-pattern-directory';
 const SECTION_NAME = 'wporg-pattern-settings';
 
 /**
@@ -49,11 +54,11 @@ function admin_init() {
 		SECTION_NAME,
 		'wporg-pattern-default_status',
 		array(
-			'type' => 'string',
+			'type'              => 'string',
 			'sanitize_callback' => function ( $value ) {
-				return in_array( $value, array( 'publish', 'pending' ) ) ? $value : 'publish';
+				return in_array( $value, array( 'publish', 'pending' ), true ) ? $value : 'publish';
 			},
-			'default' => 'publish',
+			'default'           => 'publish',
 		)
 	);
 	add_settings_field(
@@ -72,7 +77,7 @@ function admin_init() {
 		SECTION_NAME,
 		'wporg-pattern-flag_threshold',
 		array(
-			'type' => 'integer',
+			'type'              => 'integer',
 			'sanitize_callback' => function ( $value ) {
 				$value = absint( $value );
 
@@ -82,7 +87,7 @@ function admin_init() {
 
 				return $value;
 			},
-			'default' => 5,
+			'default'           => 5,
 		)
 	);
 	add_settings_field(
@@ -104,15 +109,14 @@ function admin_init() {
  */
 function render_status_field() {
 	$current = get_option( 'wporg-pattern-default_status' );
-	$statii = array(
-		'publish' => esc_html__( 'Published', 'wporg-patterns' ),
-		'pending' => esc_html__( 'Pending', 'wporg-patterns' ),
+	$statii  = array(
+		'publish' => __( 'Published', 'wporg-patterns' ),
+		'pending' => __( 'Pending', 'wporg-patterns' ),
 	);
 
 	echo '<select name="wporg-pattern-default_status" id="wporg-pattern-default_status" aria-describedby="wporg-pattern-default_status-help">';
 	foreach ( $statii as $value => $label ) {
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		printf( '<option value="%s" %s>%s</option>', $value, selected( $value, $current ), $label );
+		printf( '<option value="%s" %s>%s</option>', esc_attr( $value ), selected( $value, $current, false ), esc_html( $label ) );
 	}
 	echo '</select>';
 	printf( '<p id="wporg-pattern-default_status-help">%s</p>', esc_html__( 'Use this setting to control whether new patterns need moderation before showing up (pending) or not (published).', 'wporg-patterns' ) );

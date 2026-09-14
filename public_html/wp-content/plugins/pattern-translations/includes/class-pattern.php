@@ -1,19 +1,73 @@
 <?php
+/**
+ * Pattern data and translation helpers.
+ *
+ * @package WordPressdotorg\Pattern_Translations
+ */
+
 namespace WordPressdotorg\Pattern_Translations;
 
 use GlotPress_Translate_Bridge;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
+/**
+ * Pattern content and translation metadata.
+ */
 class Pattern {
+	/**
+	 * Pattern post ID.
+	 *
+	 * @var int|null
+	 */
 	public $ID = null;
+	/**
+	 * Pattern title.
+	 *
+	 * @var string
+	 */
 	public $title = '';
+	/**
+	 * Pattern slug.
+	 *
+	 * @var string
+	 */
 	public $name = '';
+	/**
+	 * Pattern description.
+	 *
+	 * @var string
+	 */
 	public $description = '';
+	/**
+	 * Serialized pattern content.
+	 *
+	 * @var string
+	 */
 	public $html = '';
+	/**
+	 * Original pattern permalink.
+	 *
+	 * @var string|false
+	 */
 	public $source_url = '';
+	/**
+	 * Comma-separated pattern keywords.
+	 *
+	 * @var string
+	 */
 	public $keywords = '';
 
+	/**
+	 * Pattern locale.
+	 *
+	 * @var string
+	 */
 	public $locale = 'en_US';
+	/**
+	 * Original untranslated pattern.
+	 *
+	 * @var Pattern|false
+	 */
 	public $parent = false;
 
 	/**
@@ -66,7 +120,7 @@ class Pattern {
 		$translated         = $parser->replace_strings_with_kses( $translations );
 		$translated->locale = $locale;
 		// Reset the ID.
-		$translated->ID     = 0;
+		$translated->ID = 0;
 
 		$existing = self::find_existing_translation( (int) $parent->ID, $locale );
 		if ( $existing ) {
@@ -95,22 +149,24 @@ class Pattern {
 			return null;
 		}
 
-		$children = get_posts( array(
-			'post_parent' => $parent_id,
-			'post_type'   => POST_TYPE,
-			'post_status' => 'any',
-			'meta_query'  => array(
-				'relation' => 'AND',
-				array(
-					'key'   => 'wpop_locale',
-					'value' => $locale,
+		$children = get_posts(
+			array(
+				'post_parent' => $parent_id,
+				'post_type'   => POST_TYPE,
+				'post_status' => 'any',
+				'meta_query'  => array(
+					'relation' => 'AND',
+					array(
+						'key'   => 'wpop_locale',
+						'value' => $locale,
+					),
+					array(
+						'key'   => 'wpop_is_translation',
+						'value' => 1,
+					),
 				),
-				array(
-					'key'   => 'wpop_is_translation',
-					'value' => 1,
-				),
-			),
-		) );
+			)
+		);
 
 		return $children ? array_shift( $children ) : null;
 	}
@@ -144,15 +200,14 @@ class Pattern {
 	public static function get_patterns( array $args = array() ): array {
 		$defaults = array(
 			'post_type'      => POST_TYPE,
-			// Note: This must be set for cli context, in isolated test context this is defaulted to 'publish'
-			// Prevents unexpected patterns in translations
+			// Explicit status prevents non-public patterns from entering CLI exports.
 			'post_status'    => 'publish',
 			'posts_per_page' => -1,
 			'orderby'        => array(
 				'post_date' => 'DESC',
 			),
 			// Only select en_US patterns.
-			'meta_query' => array(
+			'meta_query'     => array(
 				array(
 					'key'   => 'wpop_locale',
 					'value' => 'en_US',

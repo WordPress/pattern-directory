@@ -8,26 +8,55 @@
  * and encoding and decoding tags.
  *
  * @phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
+ *
+ * @package WordPressdotorg\Pattern_Translations
  */
 
 namespace WordPressdotorg\Pattern_Translations\Parsers;
 
-// A block transform is specific to a certain block type and contains
-// the know-how of how to both extract and replace strings
+/**
+ * Extract and replace strings for a specific block type.
+ */
 interface BlockParser {
+	/**
+	 * Extract translatable block strings.
+	 *
+	 * @param array $block Parsed block.
+	 * @return array Extracted strings.
+	 */
 	public function to_strings( array $block ): array;
+
+	/**
+	 * Replace translated strings in a block.
+	 *
+	 * @param array $block        Parsed block.
+	 * @param array $replacements Translations keyed by original string.
+	 * @return array Updated block.
+	 */
 	public function replace_strings( array $block, array $replacements ): array;
 }
 
-// DomDocument::loadHTML with LIBXML_HTML_NOIMPLIED causes dom doc settings to format / strip whitespace from our html
-// Add/remove html tags to avoid the need for noimplied html
+/**
+ * Preserve whitespace by wrapping fragments before DOM parsing.
+ */
 trait DomUtils {
-	// phpcs:disable WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
-	private function addHtml( string $html ): string {
+	/**
+	 * Wrap an HTML fragment in a document.
+	 *
+	 * @param string $html HTML fragment.
+	 * @return string Wrapped HTML.
+	 */
+	private function add_html( string $html ): string {
 		return "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head><body>$html</body></html>";
 	}
 
-	private function removeHtml( string $html ): string {
+	/**
+	 * Remove the document wrapper.
+	 *
+	 * @param string $html Wrapped HTML.
+	 * @return string HTML fragment.
+	 */
+	private function remove_html( string $html ): string {
 		return preg_replace(
 			array(
 				'/^\s*<html><head><meta http-equiv="Content-Type" content="text\/html; charset=utf-8"><\/head><body>/sm',
@@ -39,18 +68,33 @@ trait DomUtils {
 		);
 	}
 
+	/**
+	 * Parse a fragment while preserving surrounding whitespace.
+	 *
+	 * @param string $html HTML fragment.
+	 * @return \DOMDocument Parsed document.
+	 */
 	private function get_dom( string $html ): \DOMDocument {
 		$previous = libxml_use_internal_errors( true );
 		$dom      = new \DomDocument();
-		$dom->loadHTML( $this->addHtml( $html ), LIBXML_HTML_NODEFDTD | LIBXML_COMPACT );
+		$dom->loadHTML( $this->add_html( $html ), LIBXML_HTML_NODEFDTD | LIBXML_COMPACT );
 		libxml_clear_errors();
 		libxml_use_internal_errors( $previous );
 		return $dom;
 	}
-	// phpcs:enable WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
 }
 
+/**
+ * Read and replace translatable block attributes.
+ */
 trait GetSetAttribute {
+	/**
+	 * Extract a translatable attribute.
+	 *
+	 * @param string $attribute_name Attribute name.
+	 * @param array  $block          Parsed block.
+	 * @return array Attribute strings.
+	 */
 	private function get_attribute( string $attribute_name, array $block ): array {
 		if ( isset( $block['attrs'][ $attribute_name ] ) && is_string( $block['attrs'][ $attribute_name ] ) ) {
 			return array( $block['attrs'][ $attribute_name ] );
@@ -58,6 +102,14 @@ trait GetSetAttribute {
 		return array();
 	}
 
+	/**
+	 * Replace a translatable attribute.
+	 *
+	 * @param string $attribute_name Attribute name.
+	 * @param array  $block          Parsed block.
+	 * @param array  $replacements   Translations keyed by original string.
+	 * @return void
+	 */
 	private function set_attribute( string $attribute_name, array &$block, array $replacements ) {
 		if ( isset( $block['attrs'][ $attribute_name ] ) && is_string( $block['attrs'][ $attribute_name ] ) ) {
 			if ( isset( $replacements[ $block['attrs'][ $attribute_name ] ] ) ) {
@@ -67,28 +119,48 @@ trait GetSetAttribute {
 	}
 }
 
+/**
+ * Encode inline tags while translating text nodes.
+ */
 trait SwapTags {
+	/**
+	 * Inline tags preserved during translation.
+	 *
+	 * @var string[]
+	 */
 	private $safe_tags = array(
 		'strong',
 		'em',
 	);
 
+	/**
+	 * Encode inline tags before DOM parsing.
+	 *
+	 * @param string $raw_html Original HTML.
+	 * @return string Encoded HTML.
+	 */
 	private function encode_tags( string $raw_html ): string {
 		foreach ( $this->safe_tags as $tag ) {
 			$raw_html = preg_replace(
 				'#(<' . $tag . '([^>]*)>)(.*)(</' . $tag . '>)#',
-				'{' . $tag . '$2' . '}$3' . '{/' . $tag . '}', // phpcs:ignore Generic.Strings.UnnecessaryStringConcat.Found
+				'{' . $tag . '$2}$3{/' . $tag . '}',
 				$raw_html
 			);
 		}
 		return $raw_html;
 	}
 
+	/**
+	 * Restore encoded inline tags.
+	 *
+	 * @param string $encoded_html Encoded HTML.
+	 * @return string Decoded HTML.
+	 */
 	private function decode_tags( string $encoded_html ): string {
 		foreach ( $this->safe_tags as $tag ) {
 			$encoded_html = preg_replace(
 				'#({' . $tag . '([^}]*)})(.*)({/' . $tag . '})#',
-				'<' . $tag . '$2' . '>$3' . '</' . $tag . '>', // phpcs:ignore Generic.Strings.UnnecessaryStringConcat.Found
+				'<' . $tag . '$2>$3</' . $tag . '>',
 				$encoded_html
 			);
 		}
@@ -96,13 +168,26 @@ trait SwapTags {
 	}
 }
 
+/**
+ * Locate translatable text and attributes.
+ */
 trait TextNodesXPath {
+	/**
+	 * Selectors for translatable text and attributes.
+	 *
+	 * @var string[]
+	 */
 	private $xpaths = array(
 		'//text()',   // Visible Text nodes.
 		'//img/@alt', // Image alt="" text.
 		'//*/@title', // title="" text.
 	);
 
+	/**
+	 * Build the translatable text XPath query.
+	 *
+	 * @return string XPath query.
+	 */
 	protected function text_nodes_xpath_query() {
 		return implode( ' | ', $this->xpaths );
 	}

@@ -1,6 +1,8 @@
 <?php
 /**
  * Test the theme's front-end pattern actions.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 declare( strict_types = 1 );

@@ -1,12 +1,12 @@
 <?xml version="1.0" ?>
-<ruleset name="WordCamp.org Coding Standards">
-	<description>Apply customized version of WordPress Coding Standards to WordCamp.org projects.</description>
+<ruleset name="Pattern Directory Coding Standards">
+	<description>Apply customized version of WordPress Coding Standards to the WordPress.org Pattern Directory.</description>
 
 	<!--
 		Setup instructions:
 
 		1) Install PHPCS & all required code standards using `composer install`
-		2) Run `composer run lint`. You can use the `-a` flag to run it interactively.
+		2) Run `composer run lint`.
 
 		See these links for useful information:
 			- https://github.com/squizlabs/PHP_CodeSniffer/wiki/Annotated-ruleset.xml
@@ -20,7 +20,7 @@
 	<exclude-pattern>*/build/*</exclude-pattern>
 
 	<!-- Show sniff codes in all reports -->
-	<arg value="psn" />
+	<arg value="ps" />
 	<arg name="colors" />
 
 	<!-- Scan theme & plugins -->
@@ -31,106 +31,28 @@
 
 	<arg name="extensions" value="php" />
 
-	<!--
-	 ... Keep this block ABOVE the `WordPress` rule. `WordPress` includes `WordPress-Docs` itself, and whichever
-	 ... reference registers a sniff first is the one whose `<exclude-pattern>` sticks. Declared afterwards, the
-	 ... parser-file exemption below is silently ignored and the block pattern parsers pick up ~36 docblock errors.
-	 -->
-	<rule ref="WordPress-Docs">
-		<!-- If files/variables are given descriptive names like they should be, then an explicit description is usually unnecessary, so leave this as a judgement call. -->
-		<exclude name="Squiz.Commenting.FunctionComment.MissingParamComment" />
-		<exclude name="Squiz.Commenting.FileComment.Missing" />
-		<exclude name="Squiz.Commenting.ClassComment.Missing" />
-		<exclude name="Squiz.Commenting.FunctionComment.MissingParamTag" />
-		<exclude name="Generic.Commenting.DocComment.MissingShort" />
-		<exclude name="Squiz.Commenting.VariableComment.Missing" />
-		<exclude name="Squiz.Commenting.VariableComment.MissingVar" />
+	<!-- WordPress.org runs recent versions of WordPress. -->
+	<config name="minimum_wp_version" value="7.1" />
 
-		<!-- I don't see how these are useful. -->
-		<exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
+	<!-- Keep compatibility with the project's PHP 7.4 minimum. -->
+	<config name="testVersion" value="7.4-" />
+	<rule ref="PHPCompatibilityWP" />
 
-		<!-- We really only use basic exceptions, so this is kind of overkill and tedious. -->
-		<exclude name="Squiz.Commenting.FunctionComment.EmptyThrows" />
+	<rule ref="WordPress">
+		<exclude name="WordPress.DB.DirectDatabaseQuery" />
+		<exclude name="WordPress.DB.SlowDBQuery" />
 
-		<!-- Whitespace makes things more readable. -->
-		<exclude name="Squiz.Commenting.FileComment.SpacingAfterOpen" />
-
-		<!-- There are some valid cases of this, like in identifying a closing tag from another file; e.g., in `themes/campsite-2017/footer.php`. -->
-		<exclude name="Squiz.Commenting.InlineComment.SpacingAfter" />
-
-		<!-- It's not wrong for WordPress plugin file headers. -->
-		<exclude name="Squiz.Commenting.FileComment.WrongStyle" />
-
-		<!-- Class comments are generally not useful, so they're left out, but then PHPCS confuses the plugin headers for a class comment -->
-		<exclude name="Squiz.Commenting.ClassComment.WrongStyle" />
-		<exclude name="Squiz.Commenting.ClassComment.SpacingAfter" />
-
-		<!-- WordPress have translators comment which requires no space after `//` -->
-		<exclude name="Squiz.Commenting.InlineComment.NoSpaceBefore" />
-
-		<!-- Ignore punctuation at the end of comments. -->
-		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar" />
-
-		<!-- Ignore docs issues in block pattern parser files. -->
-		<exclude-pattern>*/pattern-translations/includes/*.php$</exclude-pattern>
+		<!-- Short ternary syntax is allowed on WordPress.org. -->
+		<exclude name="Universal.Operators.DisallowShortTernary" />
 	</rule>
 
-	<!--
-	 ... Reference the full `WordPress` standard rather than composing Core/Docs/Extra by hand. Only the meta
-	 ... standard carries the `namespace="WordPressCS\WordPress"` attribute that auto-includes every WordPressCS
-	 ... sniff; the sub-rulesets ref sniffs individually, which left WordPress.Security.ValidatedSanitizedInput
-	 ... out of the run entirely.
-	 -->
-	<rule ref="WordPress">
-		<!-- I don't see anything wrong with this :) -->
-		<exclude name="Squiz.PHP.EmbeddedPhp.ContentAfterOpen" />
-		<exclude name="Squiz.PHP.EmbeddedPhp.ContentBeforeEnd" />
-
-		<!-- I've never heard a compelling argument for this, and it clutters the directory listing with irrelevant noise. -->
-		<exclude name="WordPress.Files.FileName.InvalidClassFileName" />
-
-		<!-- It's often obvious what the placeholder is, so whether or not to include a comment is a judgement call. -->
-		<exclude name="WordPress.WP.I18n.MissingTranslatorsComment" />
-
-		<!-- I know it's a language construct, but it just looks better using the function call syntax. -->
-		<exclude name="PEAR.Files.IncludingFile.BracketsNotRequired" />
-
-		<!-- This requires passing a whitelist of prefixes in order to work, which is not practical for a large and varied codebase. It's also fixes a problem that we're unlikely to cause. -->
-		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound" />
-		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound" />
-		<exclude name="WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound" />
-
-		<!-- There are cases where having multiple items on a single line is appropriate. e.g., a list of 100 currency codes. -->
-		<exclude name="WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine" />
-		<exclude name="PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket" />
-		<exclude name="PEAR.Functions.FunctionCallSignature.CloseBracketLine" />
-		<exclude name="PEAR.Functions.FunctionCallSignature.MultipleArguments" />
-
-		<!--
-		 ... In multidimensional arrays, items in the child arrays should be aligned, but the parent arrays should
-		 ... not be aligned, since they are not on neighboring lines.
-		 ...
-		 ... @todo This isn't working, see `WordCamp\Blocks\Sessions\get_attributes_schema()`.
-		 ... @see https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards/issues/1565
-		 -->
-		<rule ref="WordPress.Arrays.MultipleStatementAlignment">
-			<properties>
-				<!-- Don't align multi-line items if ALL items in the array are multi-line. -->
-				<property name="alignMultilineItems" value="!=100"/>
-				<!-- Array assignment operator should always be on the same line as the array key. -->
-				<property name="ignoreNewlines" value="false"/>
-			</properties>
-		</rule>
-
-		<!-- trigger_error() isn't only development function. In development environments it conveniently displays an error, but in
-		     (properly configured) production environment, it logs the error instead. -->
-		<exclude name="WordPress.PHP.DevelopmentFunctions.error_log_trigger_error" />
-
-		<!-- print_r() is perfectly accepted in some circumstances, like WP_CLI commands. -->
-		<exclude name="WordPress.PHP.DevelopmentFunctions.error_log_print_r" />
-
-		<!-- I think it's better to have all the `use` statements come right after the namespace line. -->
-		<exclude name="PSR2.Namespaces.NamespaceDeclaration.BlankLineAfter" />
+	<!-- Registered by the wporg-pattern post type. -->
+	<rule ref="WordPress.WP.Capabilities">
+		<properties>
+			<property name="custom_capabilities" type="array">
+				<element value="edit_pattern" />
+			</property>
+		</properties>
 	</rule>
 
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
@@ -147,13 +69,7 @@
 		</properties>
 	</rule>
 
-	<!--
-	 ... `<arg value="psn"/>` above reports errors only, so a security sniff that emits warnings is invisible
-	 ... in CI. Promote the whole category to errors rather than dropping the `n`, which would also surface
-	 ... ~380 array-alignment warnings that have nothing to do with security.
-	 ...
-	 ... Must stay after the `WordPress` rule above to take effect.
-	 -->
+	<!-- Keep security diagnostics as errors. -->
 	<rule ref="WordPress.Security">
 		<type>error</type>
 	</rule>
@@ -166,9 +82,5 @@
 				<element value="wporg-patterns" />
 			</property>
 		</properties>
-	</rule>
-	<!-- Short ternaries are used deliberately throughout; expanding them is a style call for maintainers. -->
-	<rule ref="Universal.Operators.DisallowShortTernary">
-		<severity>0</severity>
 	</rule>
 </ruleset>

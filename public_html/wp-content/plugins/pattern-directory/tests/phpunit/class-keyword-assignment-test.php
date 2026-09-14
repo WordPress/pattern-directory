@@ -1,6 +1,8 @@
 <?php
 /**
  * Test access control on assigning the internal pattern-keyword taxonomy.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 declare( strict_types = 1 );

@@ -1,9 +1,24 @@
 <?php
+/**
+ * Block translation parser helpers.
+ *
+ * @package WordPressdotorg\Pattern_Translations
+ */
+
 namespace WordPressdotorg\Pattern_Translations\Parsers;
 
+/**
+ * Translate Paragraph block content.
+ */
 class Paragraph implements BlockParser {
 	use GetSetAttribute;
 
+	/**
+	 * Extract translatable block strings.
+	 *
+	 * @param array $block Parsed block.
+	 * @return array Extracted strings.
+	 */
 	public function to_strings( array $block ): array {
 		$strings = $this->get_attribute( 'placeholder', $block );
 
@@ -18,7 +33,15 @@ class Paragraph implements BlockParser {
 		return $strings;
 	}
 
-	// todo: this needs a fix to properly rebuild innerContent - see ParagraphParserTest
+	/**
+	 * Replace translated strings in a block.
+	 *
+	 * @todo This needs a fix to properly rebuild innerContent - see ParagraphParserTest.
+	 *
+	 * @param array $block        Parsed block.
+	 * @param array $replacements Translations keyed by original string.
+	 * @return array Updated block.
+	 */
 	public function replace_strings( array $block, array $replacements ): array {
 		$this->set_attribute( 'placeholder', $block, $replacements );
 

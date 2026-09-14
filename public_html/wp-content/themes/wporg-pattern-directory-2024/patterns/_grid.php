@@ -1,9 +1,14 @@
 <?php
-// phpcs:disable WordPress.Files.FileName -- Allow underscore for pattern partial.
 /**
+ * Render the grid pattern component.
+ *
  * Title: Pattern Grid
  * Slug: wporg-pattern-directory-2024/grid
  * Inserter: no
+ *
+ * @package WordPress\Pattern_Directory
+ *
+ * phpcs:disable WordPress.Files.FileName -- Allow underscore for pattern partial.
  */
 
 ?>
@@ -67,11 +72,13 @@
 
 		<!-- wp:paragraph {"align":"center"} -->
 		<p class="has-text-align-center">
-			<?php printf(
+			<?php
+			printf(
 				/* translators: %s is url of the homepage. */
 				wp_kses_post( __( 'View <a href="%s">all patterns</a> or try a different search. ', 'wporg-patterns' ) ),
 				esc_url( home_url( '/' ) )
-			); ?>
+			);
+			?>
 		</p>
 		<!-- /wp:paragraph -->
 	<!-- /wp:query-no-results -->

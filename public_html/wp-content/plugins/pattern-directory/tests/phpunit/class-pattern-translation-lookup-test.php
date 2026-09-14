@@ -1,6 +1,8 @@
 <?php
 /**
  * Test that the translation job only adopts patterns it created itself.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 declare( strict_types = 1 );

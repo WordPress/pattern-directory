@@ -1,4 +1,9 @@
 <?php
+/**
+ * Render the controls pattern component.
+ *
+ * @package WordPress\Pattern_Directory
+ */
 
 use function WordPressdotorg\Theme\Pattern_Directory_2024\get_pattern_preview_url;
 
@@ -9,11 +14,11 @@ if ( ! isset( $block->context['postId'] ) ) {
 $view_url = get_pattern_preview_url( $block->context['postId'] );
 
 // Initial state to pass to Interactivity API.
-$init_state = array(
-	'url' => $view_url,
-	'previewWidth' => 1200,
+$init_state    = array(
+	'url'           => $view_url,
+	'previewWidth'  => 1200,
 	'previewHeight' => 200,
-	'isControlled' => true,
+	'isControlled'  => true,
 );
 $encoded_state = wp_json_encode( $init_state );
 
@@ -28,7 +33,7 @@ $html_id = wp_unique_id( 'pattern-preview-help-' );
 
 ?>
 <div
-	<?php echo get_block_wrapper_attributes(); // phpcs:ignore ?>
+	<?php echo get_block_wrapper_attributes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 	data-wp-interactive="wporg/patterns/preview"
 	data-wp-context="<?php echo esc_attr( $encoded_state ); ?>"
 	data-wp-class--is-mobile-view="state.isWidthNarrow"

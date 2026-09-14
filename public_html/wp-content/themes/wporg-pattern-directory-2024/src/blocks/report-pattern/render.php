@@ -1,4 +1,9 @@
 <?php
+/**
+ * Render the report pattern pattern component.
+ *
+ * @package WordPress\Pattern_Directory
+ */
 
 use function WordPressdotorg\Theme\Pattern_Directory_2024\user_has_flagged_pattern;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
@@ -23,20 +28,22 @@ if ( ! current_user_can( 'read' ) ) {
 if ( user_has_flagged_pattern() ) {
 	printf(
 		'<div %s>%s</div>',
-		get_block_wrapper_attributes(), // phpcs:ignore
+		get_block_wrapper_attributes(), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		esc_html__( 'You&#8217;ve reported this pattern.', 'wporg-patterns' )
 	);
 	return;
 }
 
-$reasons = get_terms( array(
-	'taxonomy' => FLAG_REASON,
-	'hide_empty' => false,
-	'orderby' => 'slug',
-) );
+$reasons = get_terms(
+	array(
+		'taxonomy'   => FLAG_REASON,
+		'hide_empty' => false,
+		'orderby'    => 'slug',
+	)
+);
 
 ?>
-<div <?php echo get_block_wrapper_attributes(); // phpcs:ignore ?>>
+<div <?php echo get_block_wrapper_attributes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 	<div class="wp-block-button is-small is-style-text">
 		<button
 			class="wp-block-button__link wp-element-button"

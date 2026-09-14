@@ -1,6 +1,8 @@
 <?php
 /**
  * Logging for pattern status changes.
+ *
+ * @package WordPressdotorg\Pattern_Directory
  */
 
 namespace WordPressdotorg\Pattern_Directory\Logging;
@@ -30,9 +32,9 @@ function logging_enabled() {
 /**
  * Add a log entry to a pattern when a flag's status changes.
  *
- * @param string   $new_status
- * @param string   $old_status
- * @param \WP_Post $post
+ * @param string   $new_status New post status.
+ * @param string   $old_status Previous post status.
+ * @param \WP_Post $post       Post being processed.
  *
  * @return void
  */
@@ -55,8 +57,8 @@ function flag_status_change( $new_status, $old_status, $post ) {
 		return;
 	}
 
-	$new = get_post_status_object( $new_status );
-	$user = get_user_by( 'id', $post->post_author );
+	$new         = get_post_status_object( $new_status );
+	$user        = get_user_by( 'id', $post->post_author );
 	$user_handle = sprintf(
 		'@%s',
 		$user->user_login
@@ -67,27 +69,27 @@ function flag_status_change( $new_status, $old_status, $post ) {
 		return;
 	} elseif ( 'new' === $old_status && PENDING_STATUS === $new_status ) {
 		$msg = sprintf(
-			// translators: User name;
+			// translators: User name.
 			__( 'New flag submitted by %s', 'wporg-patterns' ),
 			esc_html( $user_handle ),
 		);
 	} elseif ( PENDING_STATUS === $new_status ) {
 		$msg = sprintf(
-			// translators: 1. User name; 2. Post status;
+			// translators: 1. User name; 2. Post status.
 			__( 'Flag submitted by %1$s set to %2$s', 'wporg-patterns' ),
 			esc_html( $user_handle ),
 			esc_html( $new->label )
 		);
 	} elseif ( RESOLVED_STATUS === $new_status ) {
 		$msg = sprintf(
-			// translators: 1. User name; 2. Post status;
+			// translators: 1. User name; 2. Post status.
 			__( 'Flag submitted by %1$s marked as %2$s', 'wporg-patterns' ),
 			esc_html( $user_handle ),
 			esc_html( $new->label )
 		);
 	} elseif ( 'trash' === $new_status ) {
 		$msg = sprintf(
-			// translators: User name;
+			// translators: User name.
 			__( 'Flag submitted by %s moved to trash.', 'wporg-patterns' ),
 			esc_html( $user_handle )
 		);

@@ -1,4 +1,9 @@
 <?php
+/**
+ * Admin stats for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Admin\Stats;
 
@@ -60,10 +65,12 @@ function render_subpage() {
  * @return array
  */
 function get_snapshot_meta_data() {
-	$earliest_snapshot     = get_snapshots( array(
-		'order'       => 'asc',
-		'numberposts' => 1,
-	) );
+	$earliest_snapshot     = get_snapshots(
+		array(
+			'order'       => 'asc',
+			'numberposts' => 1,
+		)
+	);
 	$latest_snapshot_query = get_snapshots(
 		array(
 			'order'       => 'desc',
@@ -95,8 +102,8 @@ function get_snapshot_meta_data() {
  * @return array
  */
 function get_export_form_inputs() {
-	$date_filter = function ( $string ) {
-		$success = preg_match( '|([0-9]{4}\-[0-9]{2}\-[0-9]{2})|', $string, $match );
+	$date_filter = function ( $date_input ) {
+		$success = preg_match( '|([0-9]{4}\-[0-9]{2}\-[0-9]{2})|', $date_input, $match );
 
 		if ( $success ) {
 			return $match[1];
@@ -166,16 +173,20 @@ function handle_csv_export() {
 		$csv->emit_file();
 	}
 
-	$csv->set_filename( array(
-		'patterns-snapshots',
-		$start_date->format( 'Ymd' ),
-		$end_date->format( 'Ymd' ),
-	) );
+	$csv->set_filename(
+		array(
+			'patterns-snapshots',
+			$start_date->format( 'Ymd' ),
+			$end_date->format( 'Ymd' ),
+		)
+	);
 
-	$csv->set_column_headers( array_merge(
-		array( 'Date' ),
-		array_keys( $schema['properties'] )
-	) );
+	$csv->set_column_headers(
+		array_merge(
+			array( 'Date' ),
+			array_keys( $schema['properties'] )
+		)
+	);
 
 	if ( $start_date < $earliest ) {
 		$csv->error->add(
@@ -208,9 +219,9 @@ function handle_csv_export() {
 	}
 
 	$query_args = array(
-		'order' => 'asc',
+		'order'          => 'asc',
 		'posts_per_page' => -1,
-		'date_query' => array(
+		'date_query'     => array(
 			array(
 				'after'     => $start_date->format( 'Y-m-d' ),
 				'before'    => $end_date->format( 'Y-m-d' ),

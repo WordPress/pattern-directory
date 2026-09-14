@@ -1,4 +1,9 @@
 <?php
+/**
+ * Pattern post type for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Pattern_Post_Type;
 
@@ -85,8 +90,8 @@ function register_post_type_data() {
 			'rewrite'           => array(
 				'slug' => 'categories',
 			),
-			'query_var' => 'pattern-categories',
-			'capabilities' => array(
+			'query_var'         => 'pattern-categories',
+			'capabilities'      => array(
 				'assign_terms' => 'edit_patterns',
 				'edit_terms'   => 'edit_patterns',
 			),
@@ -106,12 +111,12 @@ function register_post_type_data() {
 				'slug' => 'pattern-keywords',
 			),
 			// Keywords are moderator-only (the `core` term feeds Core's pattern distribution), unlike categories.
-			'capabilities' => array(
+			'capabilities'      => array(
 				'assign_terms' => 'edit_others_patterns',
 				'edit_terms'   => 'edit_others_patterns',
 			),
 
-			'labels' => array(
+			'labels'            => array(
 				'name'                       => _x( 'Keywords (Internal)', 'taxonomy general name', 'wporg-patterns' ),
 				'singular_name'              => _x( 'Keyword', 'taxonomy singular name', 'wporg-patterns' ),
 				'search_items'               => __( 'Search Keywords', 'wporg-patterns' ),
@@ -200,7 +205,7 @@ function register_post_type_data() {
 			'type'              => 'string',
 			'description'       => 'A list of block types this pattern supports for transforms.',
 			'single'            => false,
-			'sanitize_callback' => function ( $value, $key, $type ) {
+			'sanitize_callback' => function ( $value ) {
 				return preg_replace( '/[^a-z0-9-\/]/', '', $value );
 			},
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
@@ -249,7 +254,7 @@ function register_post_type_data() {
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
 			'show_in_rest'      => array(
 				'schema' => array(
-					'type'     => 'string',
+					'type' => 'string',
 				),
 			),
 		)
@@ -267,7 +272,7 @@ function register_post_type_data() {
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
 			'show_in_rest'      => array(
 				'schema' => array(
-					'type'     => 'string',
+					'type' => 'string',
 				),
 			),
 		)
@@ -303,7 +308,7 @@ function register_rest_fields() {
 				return $slugs;
 			},
 
-			'schema' => array(
+			'schema'       => array(
 				'type'  => 'array',
 				'items' => array(
 					'type' => 'string',
@@ -323,7 +328,7 @@ function register_rest_fields() {
 				return array_map( 'sanitize_title', $slugs );
 			},
 
-			'schema' => array(
+			'schema'       => array(
 				'type'  => 'array',
 				'items' => array(
 					'type' => 'string',
@@ -354,8 +359,8 @@ function register_rest_fields() {
 				return decode_pattern_content( $pattern->post_content );
 			},
 
-			'schema' => array(
-				'type'  => 'string',
+			'schema'       => array(
+				'type' => 'string',
 			),
 		)
 	);
@@ -371,7 +376,7 @@ function register_rest_fields() {
 				return get_favorite_count( get_the_ID() );
 			},
 
-			'schema' => array(
+			'schema'       => array(
 				'type'    => 'integer',
 				'default' => 0,
 			),
@@ -393,17 +398,17 @@ function register_rest_fields() {
 				);
 			},
 
-			'schema' => array(
-				'type'  => 'object',
+			'schema'       => array(
+				'type'       => 'object',
 				'properties' => array(
-					'name' => array(
-						'type'  => 'string',
+					'name'   => array(
+						'type' => 'string',
 					),
-					'url' => array(
-						'type'  => 'string',
+					'url'    => array(
+						'type' => 'string',
 					),
 					'avatar' => array(
-						'type'  => 'string',
+						'type' => 'string',
 					),
 				),
 			),
@@ -434,29 +439,29 @@ function register_rest_fields() {
 				if ( count( $reasons ) > 0 ) {
 					$reason = array_shift( $reasons );
 					return array(
-						'term_id' => absint( $reason->term_id ),
-						'name' => esc_attr( $reason->name ),
-						'slug' => esc_attr( $reason->slug ),
+						'term_id'     => absint( $reason->term_id ),
+						'name'        => esc_attr( $reason->name ),
+						'slug'        => esc_attr( $reason->slug ),
 						'description' => wp_kses_post( $reason->description ),
 					);
 				}
 
 				return array();
 			},
-			'schema' => array(
-				'type'  => 'object',
+			'schema'       => array(
+				'type'       => 'object',
 				'properties' => array(
-					'term_id' => array(
-						'type'  => 'number',
+					'term_id'     => array(
+						'type' => 'number',
 					),
-					'name' => array(
-						'type'  => 'string',
+					'name'        => array(
+						'type' => 'string',
 					),
-					'slug' => array(
-						'type'  => 'string',
+					'slug'        => array(
+						'type' => 'string',
 					),
 					'description' => array(
-						'type'  => 'string',
+						'type' => 'string',
 					),
 				),
 			),
@@ -474,6 +479,7 @@ function register_post_statuses() {
 		UNLISTED_STATUS,
 		array(
 			'label'                  => _x( 'Unlisted', 'post status', 'wporg-patterns' ),
+			/* translators: %s: Number of patterns. */
 			'label_count'            => _nx_noop(
 				'Unlisted <span class="count">(%s)</span>',
 				'Unlisted <span class="count">(%s)</span>',
@@ -490,6 +496,7 @@ function register_post_statuses() {
 		SPAM_STATUS,
 		array(
 			'label'                  => _x( 'Possible Spam', 'post status', 'wporg-patterns' ),
+			/* translators: %s: Number of patterns. */
 			'label_count'            => _nx_noop(
 				'Possible Spam <span class="count">(%s)</span>',
 				'Possible Spam <span class="count">(%s)</span>',
@@ -506,9 +513,9 @@ function register_post_statuses() {
 /**
  * Do things when certain status transitions happen.
  *
- * @param string   $new_status
- * @param string   $old_status
- * @param \WP_Post $post
+ * @param string   $new_status New post status.
+ * @param string   $old_status Previous post status.
+ * @param \WP_Post $post       Post being processed.
  *
  * @return void
  */
@@ -554,9 +561,9 @@ function update_contains_block_types_meta( $pattern_id ) {
  * This is a callback for the `auth_{$object_type}_meta_{$meta_key}` filter, and it's used to authorize access to
  * modifying post meta keys via the REST API.
  *
- * @param bool   $allowed
- * @param string $meta_key
- * @param int    $pattern_id
+ * @param bool   $allowed    Whether access is allowed.
+ * @param string $meta_key   Metadata key.
+ * @param int    $pattern_id Pattern ID.
  *
  * @return bool
  */
@@ -797,7 +804,7 @@ function filter_patterns_rest_query( $args, $request ) {
 		$args['meta_query']['orderby_locale'] = array(
 			'key'     => 'wpop_locale',
 			'compare' => 'IN',
-			// Order in value determines result order
+			// Order in value determines result order.
 			'value'   => array( $locale, 'en_US' ),
 		);
 	}
@@ -823,7 +830,7 @@ function filter_patterns_rest_query( $args, $request ) {
 				'terms'    => 'core',
 				'operator' => 'IN',
 			);
-		} else if ( 'community' === $request['curation'] ) {
+		} elseif ( 'community' === $request['curation'] ) {
 			// Patterns without the core keyword.
 			$args['tax_query']['core_keyword'] = array(
 				'taxonomy' => 'wporg-pattern-keyword',
@@ -836,7 +843,7 @@ function filter_patterns_rest_query( $args, $request ) {
 
 	$orderby = $request->get_param( 'orderby' );
 	if ( 'favorite_count' === $orderby ) {
-		$args['orderby'] = 'meta_value_num';
+		$args['orderby']  = 'meta_value_num';
 		$args['meta_key'] = 'wporg-pattern-favorites';
 	}
 
@@ -848,7 +855,7 @@ function filter_patterns_rest_query( $args, $request ) {
 		// $version is the full WP version, for example `6.0.2` or `6.2-alpha-54642-src`.
 		// Parse out just the major version section, `6.0` or `6.2`, respectively,
 		// so that the math comparison works.
-		$major_version = $matches[0];
+		$major_version                 = $matches[0];
 		$args['meta_query']['version'] = array(
 			// Fetch patterns with no version info, or only those with a lower
 			// or equal version.
@@ -908,7 +915,7 @@ function filter_orderby_locale( $orderby, $query ) {
 		$table_alias = $query->meta_query->get_clauses()['orderby_locale']['alias'];
 
 		$field_placeholders = implode( ', ', array_pad( array(), count( $values ), '%s' ) );
-		$locale_orderby     = $wpdb->prepare( "FIELD( {$table_alias}.meta_value, {$field_placeholders} ) DESC", $values ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$locale_orderby     = $wpdb->prepare( "FIELD( {$table_alias}.meta_value, {$field_placeholders} ) DESC", $values ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Placeholders are generated above; the alias comes from WP_Meta_Query.
 
 		// Order by matching the locale first, and then the queries order.
 		$orderby = "{$locale_orderby}, {$orderby}";
@@ -920,7 +927,7 @@ function filter_orderby_locale( $orderby, $query ) {
 /**
  * Get the post object of a block pattern, or false if it's not a pattern or not found.
  *
- * @param int|WP_Post $post
+ * @param int|WP_Post $post Post being processed.
  *
  * @return WP_Post|false
  */
@@ -954,7 +961,7 @@ function set_pattern_caps( $user_caps ) {
 		'capabilities'    => array(),
 		'map_meta_cap'    => true,
 	);
-	$cap_map = (array) get_post_type_capabilities( (object) $cap_args );
+	$cap_map  = (array) get_post_type_capabilities( (object) $cap_args );
 
 	// Users should have the same permissions for patterns as posts, for example,
 	// if they have `edit_posts`, they should be granted `edit_patterns`, and so on.
@@ -966,12 +973,12 @@ function set_pattern_caps( $user_caps ) {
 
 	// Set caps to allow for front end pattern creation.
 	if ( is_user_logged_in() && ! is_admin() ) {
-		$user_caps['read']                       = true;
-		$user_caps['publish_patterns']           = true;
-		$user_caps['edit_patterns']              = true;
-		$user_caps['edit_published_patterns']    = true;
-		$user_caps['delete_patterns']            = true;
-		$user_caps['delete_published_patterns']  = true;
+		$user_caps['read']                      = true;
+		$user_caps['publish_patterns']          = true;
+		$user_caps['edit_patterns']             = true;
+		$user_caps['edit_published_patterns']   = true;
+		$user_caps['delete_patterns']           = true;
+		$user_caps['delete_published_patterns'] = true;
 		// Note that `edit_others_patterns` & `delete_others_patterns` are separate capabilities.
 	}
 
@@ -1057,26 +1064,36 @@ function setup_preview_theme() {
 	if ( preg_match( '#/view/$#', $request_uri ) || preg_match( '#[?&]view=[1|true]#', $request_uri ) ) {
 		add_filter( 'show_admin_bar', '__return_false', 2000 );
 
-		add_filter( 'template', function () {
-			if ( 'local' === wp_get_environment_type() ) {
-				return 'twentytwentythree';
-			} else {
-				return 'core/twentytwentythree';
+		add_filter(
+			'template',
+			function () {
+				if ( 'local' === wp_get_environment_type() ) {
+					return 'twentytwentythree';
+				} else {
+					return 'core/twentytwentythree';
+				}
 			}
-		} );
+		);
 
-		add_filter( 'stylesheet', function () {
-			if ( 'local' === wp_get_environment_type() ) {
-				return 'twentytwentythree';
-			} else {
-				return 'core/twentytwentythree';
+		add_filter(
+			'stylesheet',
+			function () {
+				if ( 'local' === wp_get_environment_type() ) {
+					return 'twentytwentythree';
+				} else {
+					return 'core/twentytwentythree';
+				}
 			}
-		} );
+		);
 
-		add_filter( 'wp_enqueue_scripts', function () {
-			wp_deregister_style( 'wp4-styles' );
-			wp_deregister_style( 'wporg-global-header-footer' );
-		}, 201 );
+		add_filter(
+			'wp_enqueue_scripts',
+			function () {
+				wp_deregister_style( 'wp4-styles' );
+				wp_deregister_style( 'wporg-global-header-footer' );
+			},
+			201
+		);
 
 		add_filter( 'render_block_core/gallery', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
 		add_filter( 'render_block_core/image', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
@@ -1094,7 +1111,7 @@ function setup_preview_theme() {
  * @return string The updated block content.
  */
 function inject_placeholder_svg( $block_content, $block ) {
-	$svg = '<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" preserveAspectRatio="none">';
+	$svg  = '<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" preserveAspectRatio="none">';
 	$svg .= '<rect width="60" height="60" fill="currentColor" fill-opacity="0.1" />';
 	$svg .= '<path vector-effect="non-scaling-stroke" d="M60 60 0 0" stroke="currentColor" stroke-width="1" stroke-opacity="0.25" />';
 	$svg .= '</svg>';
@@ -1102,7 +1119,7 @@ function inject_placeholder_svg( $block_content, $block ) {
 	// Image block, find img without `src` or with wmark.png (logo), replace with svg.
 	if ( preg_match( '/<img([^>]*)\/?>/', $block_content, $match ) ) {
 		if ( ! str_contains( $match[1], 'src=' ) || str_contains( $match[1], 'wmark.png' ) ) {
-			$new_content = str_replace( '<svg ', '<svg ' . $match[1], $svg );
+			$new_content   = str_replace( '<svg ', '<svg ' . $match[1], $svg );
 			$block_content = str_replace( $match[0], $new_content, $block_content );
 			return $block_content;
 		}
@@ -1112,15 +1129,15 @@ function inject_placeholder_svg( $block_content, $block ) {
 	if ( 'core/media-text' === $block['blockName'] || 'core/video' === $block['blockName'] ) {
 		// Find empty `<figure …></figure>`, inject svg into figure.
 		if ( preg_match( '/(<figure[^>]*>)(<\/figure>)/', $block_content, $match ) ) {
-			$new_content = $match[1] . $svg . $match[2];
+			$new_content   = $match[1] . $svg . $match[2];
 			$block_content = str_replace( $match[0], $new_content, $block_content );
 		}
 	}
 
 	// Gallery, find empty `<figure …></figure>`, inject 3 fake image blocks into figure.
 	if ( 'core/gallery' === $block['blockName'] && preg_match( '/(<figure[^>]*>)(<\/figure>)/', $block_content, $match ) ) {
-		$image = '<figure class="wp-block-image">' . $svg . '</figure>';
-		$new_content = $match[1] . str_repeat( $image, 3 ) . $match[2];
+		$image         = '<figure class="wp-block-image">' . $svg . '</figure>';
+		$new_content   = $match[1] . str_repeat( $image, 3 ) . $match[2];
 		$block_content = str_replace( $match[0], $new_content, $block_content );
 	}
 
@@ -1129,6 +1146,9 @@ function inject_placeholder_svg( $block_content, $block ) {
 
 /**
  * If this is the `view` query, use our version of the `template-canvas.php`.
+ *
+ * @param string $template Selected template path.
+ * @return string Preview template path or the original template.
  */
 function load_pattern_preview( $template ) {
 	global $wp_query;

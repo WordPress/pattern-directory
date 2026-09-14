@@ -1,6 +1,8 @@
 <?php
 /**
  * Test the guard on assembled translated pattern content.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 declare( strict_types = 1 );

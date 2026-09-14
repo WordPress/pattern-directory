@@ -1,4 +1,9 @@
 <?php
+/**
+ * REST flags controller for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory;
 
@@ -160,12 +165,14 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 		}
 
 		// Check if the user has already submitted a flag for the pattern.
-		$flag_check = new WP_Query( array(
-			'post_type'   => $this->post_type,
-			'post_parent' => $parent->ID,
-			'post_status' => 'pending',
-			'author'      => get_current_user_id(),
-		) );
+		$flag_check = new WP_Query(
+			array(
+				'post_type'   => $this->post_type,
+				'post_parent' => $parent->ID,
+				'post_status' => 'pending',
+				'author'      => get_current_user_id(),
+			)
+		);
 		if ( $flag_check->found_posts > 0 ) {
 			return new WP_Error(
 				'rest_already_flagged',
@@ -265,25 +272,25 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 	/**
 	 * Get the parent post, if the ID is valid.
 	 *
-	 * @param int $parent Supplied ID.
+	 * @param int $parent_post Supplied ID.
 	 *
 	 * @return WP_Post|WP_Error Post object if ID is valid, WP_Error otherwise.
 	 */
-	protected function get_parent( $parent ) {
+	protected function get_parent( $parent_post ) {
 		$error = new WP_Error(
 			'rest_post_invalid_parent',
 			__( 'Invalid post parent ID.', 'wporg-patterns' ),
 			array( 'status' => 404 )
 		);
-		if ( (int) $parent <= 0 ) {
+		if ( (int) $parent_post <= 0 ) {
 			return $error;
 		}
 
-		$parent = get_post( (int) $parent );
-		if ( empty( $parent ) || empty( $parent->ID ) || $this->parent_post_type !== $parent->post_type ) {
+		$parent_post = get_post( (int) $parent_post );
+		if ( empty( $parent_post ) || empty( $parent_post->ID ) || $this->parent_post_type !== $parent_post->post_type ) {
 			return $error;
 		}
 
-		return $parent;
+		return $parent_post;
 	}
 }

@@ -1,13 +1,42 @@
 <?php
+/**
+ * Admin stats for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Admin\Stats;
 
-/** @var array $schema */
-/** @var array $current_data */
-/** @var array $snapshot_info */
-/** @var object $next_snapshot */
-/** @var array $inputs */
-/** @var string $export_label */
+/**
+ * Statistics schema.
+ *
+ * @var array $schema
+ */
+/**
+ * Statistics to display.
+ *
+ * @var array $current_data
+ */
+/**
+ * Latest snapshot information.
+ *
+ * @var array $snapshot_info
+ */
+/**
+ * Next scheduled snapshot.
+ *
+ * @var object $next_snapshot
+ */
+/**
+ * Export form inputs.
+ *
+ * @var array $inputs
+ */
+/**
+ * Export action label.
+ *
+ * @var string $export_label
+ */
 ?>
 <style>
 	.number {

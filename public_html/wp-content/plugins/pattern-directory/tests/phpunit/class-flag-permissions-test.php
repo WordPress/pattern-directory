@@ -1,6 +1,8 @@
 <?php
 /**
  * Test access control on the pattern-flag REST routes.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 declare( strict_types = 1 );

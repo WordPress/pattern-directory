@@ -1,6 +1,8 @@
 <?php
 /**
  * Mock dynamic blocks that use site content.
+ *
+ * @package WordPressdotorg\Pattern_Creator
  */
 
 namespace WordPressdotorg\Pattern_Creator\MockBlocks;
@@ -25,26 +27,26 @@ add_filter( 'get_custom_logo', __NAMESPACE__ . '\provide_mock_logo' );
  */
 function render_archives( $block_content, $block, $block_instance ) {
 	$show_post_count = ! empty( $block_instance->attributes['showPostCounts'] );
-	$show_dropdown = ! empty( $block_instance->attributes['displayAsDropdown'] );
-	$dropdown_id = esc_attr( uniqid( 'wp-block-archives-' ) );
-	$class = '';
+	$show_dropdown   = ! empty( $block_instance->attributes['displayAsDropdown'] );
+	$dropdown_id     = esc_attr( uniqid( 'wp-block-archives-' ) );
+	$class           = '';
 
-	$dates = array();
+	$dates   = array();
 	$current = strtotime( '12 months ago' );
-	$last = time();
+	$last    = time();
 	while ( $current <= $last ) {
 		$dates[] = wp_date( 'F Y', $current );
 		$current = strtotime( 'next month', $current );
 	}
 
 	if ( $show_dropdown ) {
-		$title       = __( 'Archives', 'wporg-patterns' );
-		$label = __( 'Select Month', 'wporg-patterns' );
+		$title    = __( 'Archives', 'wporg-patterns' );
+		$label    = __( 'Select Month', 'wporg-patterns' );
 		$archives = '';
 
 		foreach ( $dates as $date ) {
 			if ( $show_post_count ) {
-				$archives .= sprintf( '<option>%1$s (%2$s)</option>', $date, rand( 5, 25 ) );
+				$archives .= sprintf( '<option>%1$s (%2$s)</option>', $date, wp_rand( 5, 25 ) );
 			} else {
 				$archives .= sprintf( '<option>%s</option>', $date );
 			}
@@ -52,13 +54,13 @@ function render_archives( $block_content, $block, $block_instance ) {
 
 		$block_content = '<label for="' . $dropdown_id . '">' . $title . '</label><select id="' . $dropdown_id . '" name="archive-dropdown"><option value="">' . $label . '</option>' . $archives . '</select>';
 
-		$class .= ' wp-block-archives-dropdown';
+		$class     .= ' wp-block-archives-dropdown';
 		$classnames = esc_attr( $class );
 
 		// Required to prevent `block_to_render` from being null in `get_block_wrapper_attributes`.
-		$parent = WP_Block_Supports::$block_to_render;
+		$parent                             = WP_Block_Supports::$block_to_render;
 		WP_Block_Supports::$block_to_render = $block;
-		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => $classnames ) );
+		$wrapper_attributes                 = get_block_wrapper_attributes( array( 'class' => $classnames ) );
 		WP_Block_Supports::$block_to_render = $parent;
 
 		return sprintf(
@@ -71,14 +73,14 @@ function render_archives( $block_content, $block, $block_instance ) {
 
 		foreach ( $dates as $date ) {
 			if ( $show_post_count ) {
-				$archives .= sprintf( '<li><a href="">%1$s</a> (%2$s)</li>', $date, rand( 5, 25 ) );
+				$archives .= sprintf( '<li><a href="">%1$s</a> (%2$s)</li>', $date, wp_rand( 5, 25 ) );
 			} else {
 				$archives .= sprintf( '<li><a href="">%s</a></li>', $date );
 			}
 		}
 
-		$class .= ' wp-block-archives-list';
-		$classnames = esc_attr( $class );
+		$class             .= ' wp-block-archives-list';
+		$classnames         = esc_attr( $class );
 		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => $classnames ) );
 
 		return sprintf(
@@ -98,7 +100,7 @@ function render_archives( $block_content, $block, $block_instance ) {
  * @return string
  */
 function render_latest_comments( $block_content, $block, $block_instance ) {
-	$attributes = $block_instance->attributes;
+	$attributes        = $block_instance->attributes;
 	$list_items_markup = '';
 
 	if ( isset( $attributes['displayExcerpt'] ) ) {
@@ -110,22 +112,22 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
 	/* Note: This is not translated (for now) because the post content is also not translated. */
 	$comments = array(
 		array(
-			'author' => 'Noah',
+			'author'     => 'Noah',
 			'post_title' => 'Jupiter',
-			'date' => strtotime( '5 days ago' ),
-			'content' => 'Since its orbital revolution occupies nearly twelve years, Jupiter comes back into opposition with the Sun every 399 days.',
+			'date'       => strtotime( '5 days ago' ),
+			'content'    => 'Since its orbital revolution occupies nearly twelve years, Jupiter comes back into opposition with the Sun every 399 days.',
 		),
 		array(
-			'author' => 'Sabrina',
+			'author'     => 'Sabrina',
 			'post_title' => 'Jupiter',
-			'date' => strtotime( '1 week ago' ),
-			'content' => 'Most conspicuous upon this globe are the larger or smaller bands or markings (gray and white, sometimes tinted yellow, or of a maroon or chocolate hue) by which its surface is streaked, particularly in the vicinity of the equator.',
+			'date'       => strtotime( '1 week ago' ),
+			'content'    => 'Most conspicuous upon this globe are the larger or smaller bands or markings (gray and white, sometimes tinted yellow, or of a maroon or chocolate hue) by which its surface is streaked, particularly in the vicinity of the equator.',
 		),
 		array(
-			'author' => 'Yvonne',
+			'author'     => 'Yvonne',
 			'post_title' => 'The November Meteors',
-			'date' => strtotime( '2 weeks ago' ),
-			'content' => 'One or two unknown planets, some wandering comets, and swarms of meteors, doubtless traverse those unknown spaces, but all invisible to us.',
+			'date'       => strtotime( '2 weeks ago' ),
+			'content'    => 'One or two unknown planets, some wandering comets, and swarms of meteors, doubtless traverse those unknown spaces, but all invisible to us.',
 		),
 	);
 
@@ -140,7 +142,7 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
 		$list_items_markup .= '<footer class="wp-block-latest-comments__comment-meta">';
 
 		$author_markup = '<span class="wp-block-latest-comments__comment-author">' . $comment['author'] . '</span>';
-		$post_title = '<a class="wp-block-latest-comments__comment-link" href="#">' . $comment['post_title'] . '</a>';
+		$post_title    = '<a class="wp-block-latest-comments__comment-link" href="#">' . $comment['post_title'] . '</a>';
 
 		$list_items_markup .= sprintf(
 			/* translators: 1: author name, 2: post title related to this comment */
@@ -177,9 +179,9 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
 	}
 
 	// Required to prevent `block_to_render` from being null in `get_block_wrapper_attributes`.
-	$parent = WP_Block_Supports::$block_to_render;
+	$parent                             = WP_Block_Supports::$block_to_render;
 	WP_Block_Supports::$block_to_render = $block;
-	$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => implode( ' ', $classnames ) ) );
+	$wrapper_attributes                 = get_block_wrapper_attributes( array( 'class' => implode( ' ', $classnames ) ) );
 	WP_Block_Supports::$block_to_render = $parent;
 
 	return sprintf(
@@ -193,8 +195,8 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
  * Helper function to attach some filters only when necessary.
  */
 function attach_site_data_filters() {
-	add_filter( 'pre_option_blogdescription', __NAMESPACE__ . '\replace_site_info', 10, 3 );
-	add_filter( 'pre_option_blogname', __NAMESPACE__ . '\replace_site_info', 10, 3 );
+	add_filter( 'pre_option_blogdescription', __NAMESPACE__ . '\replace_site_info', 10, 2 );
+	add_filter( 'pre_option_blogname', __NAMESPACE__ . '\replace_site_info', 10, 2 );
 }
 
 /**
@@ -203,8 +205,8 @@ function attach_site_data_filters() {
  * @see attach_site_data_filters.
  */
 function remove_site_data_filters() {
-	remove_filter( 'pre_option_blogdescription', __NAMESPACE__ . '\replace_site_info', 10, 3 );
-	remove_filter( 'pre_option_blogname', __NAMESPACE__ . '\replace_site_info', 10, 3 );
+	remove_filter( 'pre_option_blogdescription', __NAMESPACE__ . '\replace_site_info' );
+	remove_filter( 'pre_option_blogname', __NAMESPACE__ . '\replace_site_info' );
 }
 
 /**
@@ -212,13 +214,11 @@ function remove_site_data_filters() {
  *
  * These placeholders should be the same as returned in `src/api-middleware/mock-site-data.js`.
  *
- * @param mixed  $value   Value to return.
- * @param string $option  Option name.
- * @param mixed  $default The fallback value to return if the option does not exist.
- *                           Default false.
+ * @param mixed  $value  Value to return.
+ * @param string $option Option name.
  * @return string
  */
-function replace_site_info( $value, $option, $default ) {
+function replace_site_info( $value, $option ) {
 	global $wp_query;
 	if ( ! isset( $wp_query->query_vars['view'] ) ) {
 		return $value;
@@ -236,35 +236,34 @@ function replace_site_info( $value, $option, $default ) {
 /**
  * Provide custom links as default for empty Navigation blocks.
  *
- * @param array[] $fallback_blocks default fallback blocks provided by the default block mechanic.
  * @return array[]
  */
-function provide_fallback_nav_items( $fallback_blocks ) {
+function provide_fallback_nav_items() {
 	return array(
 		array(
 			'blockName' => 'core/navigation-link',
-			'attrs' => array(
-				'label' => 'Home',
-				'url' => '#',
-				'kind' => 'custom',
+			'attrs'     => array(
+				'label'          => 'Home',
+				'url'            => '#',
+				'kind'           => 'custom',
 				'isTopLevelLink' => true,
 			),
 		),
 		array(
 			'blockName' => 'core/navigation-link',
-			'attrs' => array(
-				'label' => 'About',
-				'url' => '#',
-				'kind' => 'custom',
+			'attrs'     => array(
+				'label'          => 'About',
+				'url'            => '#',
+				'kind'           => 'custom',
 				'isTopLevelLink' => true,
 			),
 		),
 		array(
 			'blockName' => 'core/navigation-link',
-			'attrs' => array(
-				'label' => 'Contact',
-				'url' => '#',
-				'kind' => 'custom',
+			'attrs'     => array(
+				'label'          => 'Contact',
+				'url'            => '#',
+				'kind'           => 'custom',
 				'isTopLevelLink' => true,
 			),
 		),
@@ -289,9 +288,9 @@ function update_block_data( $parsed_block ) {
  * Replace the custom logo output with the WordPress W.
  * This serves to provide a placeholder for the Site Logo block.
  *
- * @param string $html Custom logo HTML output.
+ * @return string Placeholder logo markup.
  */
-function provide_mock_logo( $html ) {
+function provide_mock_logo() {
 	return sprintf(
 		'<span class="custom-logo-link"><img src="%s" class="custom-logo" alt="%s"></span>',
 		'https://s.w.org/images/wmark.png',

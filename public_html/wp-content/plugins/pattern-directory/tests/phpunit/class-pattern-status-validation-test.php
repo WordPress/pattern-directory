@@ -1,6 +1,8 @@
 <?php
 /**
  * Test moderation-related pattern status validation.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 declare( strict_types = 1 );
@@ -135,7 +137,7 @@ class Pattern_Status_Validation_Test extends WP_UnitTestCase {
 		$count = 0;
 		$spy   = function ( $new_status, $old_status, $post ) use ( &$count ) {
 			if ( POST_TYPE === $post->post_type && SPAM_STATUS === $new_status && $new_status !== $old_status ) {
-				$count++;
+				++$count;
 			}
 		};
 
@@ -379,8 +381,8 @@ class Pattern_Status_Validation_Test extends WP_UnitTestCase {
 
 		wp_set_current_user( self::$member );
 
-		$flagged     = null;
-		$spy         = function ( $prepared_post ) use ( &$flagged ) {
+		$flagged = null;
+		$spy     = function ( $prepared_post ) use ( &$flagged ) {
 			$flagged = $prepared_post->post_status ?? '';
 			return $prepared_post;
 		};

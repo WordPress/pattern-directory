@@ -1,4 +1,9 @@
 <?php
+/**
+ * Render the copy button pattern component.
+ *
+ * @package WordPress\Pattern_Directory
+ */
 
 $variant = $attributes['variant'] ?? 'default';
 
@@ -7,7 +12,7 @@ if ( ! $current_post_id ) {
 	return '';
 }
 
-$label = 'small' === $variant ? __( 'Copy', 'wporg-patterns' ) : __( 'Copy pattern', 'wporg-patterns' );
+$label         = 'small' === $variant ? __( 'Copy', 'wporg-patterns' ) : __( 'Copy pattern', 'wporg-patterns' );
 $label_success = 'small' === $variant ? __( 'Copied', 'wporg-patterns' ) : __( 'Copied!', 'wporg-patterns' );
 
 $classes = array( 'is-small' );
@@ -18,7 +23,7 @@ if ( 'small' === $variant ) {
 
 $current_post = get_post( $current_post_id );
 ?>
-<div <?php echo get_block_wrapper_attributes( [ 'class' => implode( ' ', $classes ) ] ); // phpcs:ignore ?>>
+<div <?php echo get_block_wrapper_attributes( array( 'class' => implode( ' ', $classes ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 	<button
 		class="wp-block-button__link wp-element-button"
 		disabled="disabled"

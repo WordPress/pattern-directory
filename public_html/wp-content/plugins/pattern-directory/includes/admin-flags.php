@@ -1,4 +1,9 @@
 <?php
+/**
+ * Admin flags for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Admin\Flags;
 
@@ -32,7 +37,7 @@ add_filter( 'submenu_file', __NAMESPACE__ . '\flag_reason_submenu_highlight', 10
  * The posts list table doesn't have a way to filter the query that determines which posts appear in the list table.
  * Instead, you have to modify the list of public query vars way down in the WP class. :/
  *
- * @param array $query_vars
+ * @param array $query_vars Query variables.
  *
  * @return array
  */
@@ -53,7 +58,7 @@ function flag_list_table_query_vars( $query_vars ) {
 /**
  * Modify the flags list table columns and their order.
  *
- * @param array $columns
+ * @param array $columns List table columns.
  *
  * @return array
  */
@@ -85,8 +90,8 @@ function flag_list_table_columns( $columns ) {
 /**
  * Render the contents of custom list table columns.
  *
- * @param string $column_name
- * @param int    $post_id
+ * @param string $column_name Column to render.
+ * @param int    $post_id     Post ID.
  *
  * @return void
  */
@@ -122,14 +127,14 @@ function flag_list_table_render_custom_columns( $column_name, $post_id ) {
 /**
  * Modify the post states for the flags list table.
  *
- * @param array   $post_states
- * @param WP_Post $post
+ * @param array   $post_states Post state labels.
+ * @param WP_Post $post        Post being processed.
  *
  * @return array
  */
 function flag_list_table_post_states( $post_states, $post ) {
 	if ( FLAG === get_post_type( $post ) && RESOLVED_STATUS === get_post_status( $post ) ) {
-		$status_obj = get_post_status_object( RESOLVED_STATUS );
+		$status_obj                     = get_post_status_object( RESOLVED_STATUS );
 		$post_states[ RESOLVED_STATUS ] = $status_obj->label;
 	}
 
@@ -139,8 +144,8 @@ function flag_list_table_post_states( $post_states, $post ) {
 /**
  * Set up row actions for pattern flags list table.
  *
- * @param array   $actions
- * @param WP_Post $post
+ * @param array   $actions Available actions.
+ * @param WP_Post $post    Post being processed.
  *
  * @return array
  */
@@ -238,7 +243,7 @@ function flag_list_table_row_actions( $actions, $post ) {
 /**
  * Define bulk actions for the flag list table.
  *
- * @param array $actions
+ * @param array $actions Available actions.
  *
  * @return array
  */
@@ -256,9 +261,9 @@ function flag_list_table_bulk_actions( $actions ) {
 /**
  * Execute bulk actions for the flag list table.
  *
- * @param string $sendback
- * @param string $doaction
- * @param array  $post_ids
+ * @param string $sendback Redirect URL.
+ * @param string $doaction Selected bulk action.
+ * @param array  $post_ids Selected post IDs.
  *
  * @return mixed|string
  */
@@ -292,7 +297,7 @@ function flag_list_table_handle_bulk_actions( $sendback, $doaction, $post_ids ) 
 /**
  * Rearrange the flag list table views.
  *
- * @param array $views
+ * @param array $views List table views.
  *
  * @return array
  */
@@ -322,7 +327,7 @@ function flag_list_table_views( $views ) {
 		);
 
 		$post_type_obj = get_post_type_object( FLAG );
-		$return = array(
+		$return        = array(
 			'return' => sprintf(
 				'<a href="%s">%s</a>',
 				esc_url( add_query_arg( 'post_type', FLAG, admin_url( 'edit.php' ) ) ),
@@ -330,10 +335,11 @@ function flag_list_table_views( $views ) {
 			),
 		);
 
-		$parent_title      = _draft_or_post_title( $parent_id );
-		$subtitle = array(
+		$parent_title = _draft_or_post_title( $parent_id );
+		$subtitle     = array(
 			'filtered' => sprintf(
 				'<strong>%s</strong>',
+				/* translators: %s: Pattern title. */
 				sprintf( __( 'Viewing flags for &#8220;%s&#8221;', 'wporg-patterns' ), $parent_title )
 			),
 		);
@@ -346,7 +352,7 @@ function flag_list_table_views( $views ) {
 		$resolved = array( $views['resolved'] );
 		unset( $views['resolved'] );
 
-		$split        = 1 + array_search( ( isset( $views['pending'] ) ? 'pending' : 'all' ), array_keys( $views ), true );
+		$split = 1 + array_search( ( isset( $views['pending'] ) ? 'pending' : 'all' ), array_keys( $views ), true );
 		$views = array_merge( array_slice( $views, 0, $split ), $resolved, array_slice( $views, $split ) );
 	}
 
@@ -356,8 +362,8 @@ function flag_list_table_views( $views ) {
 /**
  * Update post counts when viewing only flags for a specific pattern.
  *
- * @param object $counts
- * @param string $post_type
+ * @param object $counts    Post counts by status.
+ * @param string $post_type Post type slug.
  *
  * @return object
  */
@@ -399,8 +405,8 @@ function flag_list_table_count_flags_for_pattern( $counts, $post_type ) {
 /**
  * Set untrashed flag posts to pending status instead of draft.
  *
- * @param string $new_status
- * @param int    $post_id
+ * @param string $new_status New post status.
+ * @param int    $post_id    Post ID.
  *
  * @return string
  */
@@ -415,7 +421,8 @@ function flag_untrash_status( $new_status, $post_id ) {
 /**
  * Make sure the Reasons submenu item is highlighted when editing terms.
  *
- * @param string $submenu_file
+ * @param string $submenu_file Current submenu file.
+ * @param string $parent_file  Current parent menu file.
  *
  * @return string
  */

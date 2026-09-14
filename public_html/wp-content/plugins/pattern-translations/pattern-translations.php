@@ -4,30 +4,39 @@
  * Description: Imports Pattern translations into GlotPress and provides translated patterns.
  * Plugin URI:  https://wordpress.org/patterns/
  * Text Domain: wporg-plugins
+ *
+ * @package WordPressdotorg\Pattern_Translations
  */
 
 namespace WordPressdotorg\Pattern_Translations;
+
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\is_block_allowed_in_pattern;
 use function WordPressdotorg\Pattern_Directory\Pattern_Validation\content_has_block_directives;
 use function WordPressdotorg\Pattern_Directory\Pattern_Validation\blocks_have_directive_attribute;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
+/**
+ * GlotPress project containing pattern strings.
+ */
 const GLOTPRESS_PROJECT = 'patterns/core';
 
+/**
+ * Taxonomies and their translation contexts.
+ */
 const TRANSLATED_TAXONOMIES = array(
-	// Taxonomy => Translation Context, see pattern-directory/bin/i18n.php
+	// Taxonomy => Translation Context, see pattern-directory/bin/i18n.php.
 	'wporg-pattern-category'    => 'Categories term name',
 	'wporg-pattern-flag-reason' => 'Flag Reasons term name',
 );
 
-require __DIR__ . '/includes/pattern.php';
-require __DIR__ . '/includes/parser.php';
+require __DIR__ . '/includes/class-pattern.php';
+require __DIR__ . '/includes/class-patternparser.php';
 require __DIR__ . '/includes/i18n.php';
-require __DIR__ . '/includes/makepot.php';
+require __DIR__ . '/includes/class-patternmakepot.php';
 require __DIR__ . '/includes/cron.php';
 
 if ( defined( 'WP_CLI' ) ) {
-	require __DIR__ . '/includes/cli-commands.php';
+	require __DIR__ . '/includes/class-wp-cli-patterns.php';
 }
 
 /**
@@ -42,7 +51,7 @@ if ( defined( 'WP_CLI' ) ) {
  */
 function is_translated_content_allowed( $html ) {
 	$blocks = parse_blocks( $html );
-	while ( count( $blocks ) > 0 ) { // phpcs:ignore -- inline count OK.
+	while ( $blocks ) {
 		$block = array_shift( $blocks );
 
 		if ( ! is_null( $block['blockName'] ) && ! is_block_allowed_in_pattern( $block['blockName'] ) ) {
@@ -127,14 +136,14 @@ function translate_term( $term ) {
 		is_admin() ||
 		// Not get_user_locale(), as we respect the displayed site locale.
 		'en_US' === get_locale() ||
-		// Only certain translated taxonomies
+		// Only certain translated taxonomies.
 		! isset( TRANSLATED_TAXONOMIES[ $term->taxonomy ] )
 	) {
 		return $term;
 	}
 
 	$i18n_context = TRANSLATED_TAXONOMIES[ $term->taxonomy ];
-	$term->name   = esc_html( translate_with_gettext_context( html_entity_decode( $term->name ), $i18n_context, 'wporg-patterns' ) ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.NonSingularStringLiteralContext
+	$term->name   = esc_html( translate_with_gettext_context( html_entity_decode( $term->name ), $i18n_context, 'wporg-patterns' ) ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.NonSingularStringLiteralContext, WordPress.WP.I18n.LowLevelTranslationFunction -- Stored taxonomy names require dynamic translation text and contexts.
 
 	return $term;
 }
@@ -151,7 +160,7 @@ function translate_page_title( $title, $post_id = null ) {
 	$post = get_post( $post_id );
 
 	if ( $post && 'page' === $post->post_type ) {
-		$title = translate_with_gettext_context( $post->post_title, 'Page title', 'wporg-patterns' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+		$title = translate_with_gettext_context( $post->post_title, 'Page title', 'wporg-patterns' ); // phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction -- Stored page titles require dynamic translation text.
 	}
 
 	return $title;
@@ -164,6 +173,9 @@ add_filter( 'single_post_title', __NAMESPACE__ . '\translate_page_title', 1, 2 )
  *
  * For api.wordpress.org requests, the `locale` GET parameter is respected if set. Defaults to en_US otherwise.
  * For REST API requests, the `_locale=user` GET parameter is ignored for authenticated requests, causing the rest to default to the Site locale.
+ *
+ * @param string $locale Current locale.
+ * @return string Negotiated locale.
  */
 function locale( $locale ) {
 	// phpcs:disable WordPress.Security.NonceVerification.Recommended -- locale negotiation on GET; nothing is persisted, and the only write is to $_GET itself for the current request.
@@ -182,8 +194,10 @@ function locale( $locale ) {
 		return $safe_locale;
 	}
 
-	// Respect the site locale otherwise for rest api queries.
-	// This is used to prevent `?_locale=user` returning non-translated details on localised sites.
+	/*
+	 * Respect the site locale otherwise for rest api queries.
+	 * This is used to prevent `?_locale=user` returning non-translated details on localised sites.
+	 */
 	if (
 		wp_is_json_request() &&
 		isset( $_GET['_locale'] ) &&

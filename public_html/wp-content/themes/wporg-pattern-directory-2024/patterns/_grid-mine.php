@@ -1,9 +1,14 @@
 <?php
-// phpcs:disable WordPress.Files.FileName -- Allow underscore for pattern partial.
 /**
+ * Render the grid mine pattern component.
+ *
  * Title: Pattern Grid (Mine)
  * Slug: wporg-pattern-directory-2024/grid-mine
  * Inserter: no
+ *
+ * @package WordPress\Pattern_Directory
+ *
+ * phpcs:disable WordPress.Files.FileName -- Allow underscore for pattern partial.
  */
 
 ?>

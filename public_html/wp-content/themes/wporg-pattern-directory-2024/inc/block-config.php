@@ -1,6 +1,8 @@
 <?php
 /**
  * Set up configuration for dynamic blocks.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 namespace WordPressdotorg\Theme\Pattern_Directory_2024\Block_Config;
@@ -18,8 +20,8 @@ add_action( 'wporg_query_filter_in_form', __NAMESPACE__ . '\inject_other_filters
 add_filter( 'wporg_favorite_button_settings', __NAMESPACE__ . '\get_favorite_settings', 10, 2 );
 add_filter( 'render_block_core/search', __NAMESPACE__ . '\inject_category_search_block' );
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
-add_filter( 'render_block_core/query-title', __NAMESPACE__ . '\update_archive_title', 10, 3 );
-add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\update_site_title', 10, 3 );
+add_filter( 'render_block_core/query-title', __NAMESPACE__ . '\update_archive_title', 10, 2 );
+add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\update_site_title' );
 add_filter( 'wporg_block_site_breadcrumbs', __NAMESPACE__ . '\update_site_breadcrumbs' );
 add_filter( 'page_template_hierarchy', __NAMESPACE__ . '\modify_page_template' );
 add_filter( 'single_template_hierarchy', __NAMESPACE__ . '\modify_single_template' );
@@ -34,12 +36,12 @@ function register_block_bindings() {
 	register_block_bindings_source(
 		'wporg-pattern/edit-label',
 		array(
-			'label' => __( 'Edit label', 'wporg-patterns' ),
-			'uses_context' => array( 'postId' ),
+			'label'              => __( 'Edit label', 'wporg-patterns' ),
+			'uses_context'       => array( 'postId' ),
 			'get_value_callback' => function ( $args, $block ) {
 				$post_id = $block->context['postId'];
-				/* translators: %s: Post title. Only visible to screen readers. */
 				return sprintf(
+					/* translators: %s: Post title. Only visible to screen readers. */
 					__( 'Edit <span class="screen-reader-text">"%s"</span>', 'wporg-patterns' ),
 					esc_html( get_the_title( $post_id ) )
 				);
@@ -50,8 +52,8 @@ function register_block_bindings() {
 	register_block_bindings_source(
 		'wporg-pattern/edit-url',
 		array(
-			'label' => __( 'Edit link', 'wporg-patterns' ),
-			'uses_context' => array( 'postId' ),
+			'label'              => __( 'Edit link', 'wporg-patterns' ),
+			'uses_context'       => array( 'postId' ),
 			'get_value_callback' => function ( $args, $block ) {
 				$post_id = $block->context['postId'];
 				return site_url( "pattern/$post_id/edit/" );
@@ -80,7 +82,7 @@ function get_applied_filter_list( $include_extras = true ) {
 		}
 		$values = (array) $wp_query->query[ $query_var ];
 		foreach ( $values as $value ) {
-			$key = ( 'cat' === $query_var ) ? 'id' : 'slug';
+			$key  = ( 'cat' === $query_var ) ? 'id' : 'slug';
 			$term = get_term_by( $key, $value, $taxonomy );
 			if ( $term ) {
 				$terms[] = $term;
@@ -135,7 +137,7 @@ function update_query_total_label( $label, $found_posts ) {
 		if ( 'core' === $current ) {
 			/* translators: %s: the result count. */
 			return _n( '%s curated pattern', '%s curated patterns', $found_posts, 'wporg-patterns' );
-		} else if ( 'community' === $current ) {
+		} elseif ( 'community' === $current ) {
 			/* translators: %s: the result count. */
 			return _n( '%s community pattern', '%s community patterns', $found_posts, 'wporg-patterns' );
 		}
@@ -148,10 +150,9 @@ function update_query_total_label( $label, $found_posts ) {
 /**
  * Provide a list of curation options.
  *
- * @param array $options The options for this filter.
  * @return array New list of curation options.
  */
-function get_curation_options( $options ) {
+function get_curation_options() {
 	global $wp_query;
 	$current = is_string( $wp_query->get( 'curation' ) ) ? strtolower( $wp_query->get( 'curation' ) ) : '';
 
@@ -169,14 +170,14 @@ function get_curation_options( $options ) {
 	}
 
 	return array(
-		'label' => $label,
-		'title' => __( 'Filter', 'wporg-patterns' ),
-		'key' => 'curation',
-		'action' => get_filter_action_url(),
-		'options' => array(
-			'all' => _x( 'All', 'filter option label', 'wporg-patterns' ),
+		'label'    => $label,
+		'title'    => __( 'Filter', 'wporg-patterns' ),
+		'key'      => 'curation',
+		'action'   => get_filter_action_url(),
+		'options'  => array(
+			'all'       => _x( 'All', 'filter option label', 'wporg-patterns' ),
 			'community' => _x( 'Community', 'filter option label', 'wporg-patterns' ),
-			'core' => _x( 'Curated', 'filter option label', 'wporg-patterns' ),
+			'core'      => _x( 'Curated', 'filter option label', 'wporg-patterns' ),
 		),
 		'selected' => array( $current ),
 	);
@@ -191,8 +192,8 @@ function get_curation_options( $options ) {
 function get_sort_options( $options ) {
 	global $wp_query;
 	$orderby = strtolower( $wp_query->get( 'orderby', 'date' ) );
-	$order = strtolower( $wp_query->get( 'order', 'desc' ) );
-	$sort = $orderby . '_' . $order;
+	$order   = strtolower( $wp_query->get( 'order', 'desc' ) );
+	$sort    = $orderby . '_' . $order;
 
 	// Popular is a special case since it's not a true "order" value.
 	if ( 'meta_value_num' === $orderby && 'wporg-pattern-favorites' === $wp_query->get( 'meta_key' ) ) {
@@ -214,7 +215,7 @@ function get_sort_options( $options ) {
 
 	$options = array(
 		'date_desc' => __( 'Newest', 'wporg-patterns' ),
-		'date_asc' => __( 'Oldest', 'wporg-patterns' ),
+		'date_asc'  => __( 'Oldest', 'wporg-patterns' ),
 	);
 
 	// These pages don't support sorting by favorite count.
@@ -228,11 +229,11 @@ function get_sort_options( $options ) {
 	}
 
 	return array(
-		'label' => $label,
-		'title' => __( 'Sort', 'wporg-patterns' ),
-		'key' => 'orderby',
-		'action' => get_filter_action_url(),
-		'options' => $options,
+		'label'    => $label,
+		'title'    => __( 'Sort', 'wporg-patterns' ),
+		'key'      => 'orderby',
+		'action'   => get_filter_action_url(),
+		'options'  => $options,
 		'selected' => array( $sort ),
 	);
 }
@@ -284,9 +285,9 @@ function get_favorite_settings( $settings, $post_id ) {
 	}
 
 	return array(
-		'count' => get_favorite_count( $post_id ),
-		'is_favorite' => is_favorite( $post_id ),
-		'add_callback' => function ( $_post_id ) {
+		'count'           => get_favorite_count( $post_id ),
+		'is_favorite'     => is_favorite( $post_id ),
+		'add_callback'    => function ( $_post_id ) {
 			$success = add_favorite( $_post_id );
 			if ( $success ) {
 				return get_favorite_count( $_post_id );
@@ -316,14 +317,14 @@ function get_favorite_settings( $settings, $post_id ) {
 /**
  * Inject the current category into the search form.
  *
- * @param string $block_content
+ * @param string $block_content Search block markup.
  *
  * @return string
  */
 function inject_category_search_block( $block_content ) {
 	global $wp_query;
 	$category_inputs = '';
-	$query_var = 'pattern-categories';
+	$query_var       = 'pattern-categories';
 	if ( isset( $wp_query->query[ $query_var ] ) ) {
 		$values = (array) $wp_query->query[ $query_var ];
 		foreach ( $values as $value ) {
@@ -336,57 +337,59 @@ function inject_category_search_block( $block_content ) {
 
 /**
  * Provide a list of local navigation menus.
+ *
+ * @return array Navigation menus keyed by location.
  */
-function add_site_navigation_menus( $menus ) {
+function add_site_navigation_menus() {
 	global $wp_query, $wp;
 
-	$menu = array();
+	$menu       = array();
 	$categories = array();
-	$statuses = array();
+	$statuses   = array();
 
 	$menu[] = array(
 		'label' => __( 'New pattern', 'wporg-patterns' ),
-		'url' => '/new-pattern/',
+		'url'   => '/new-pattern/',
 	);
 	$menu[] = array(
-		'label' => __( 'My favorites', 'wporg-patterns' ),
-		'url' => '/favorites/',
+		'label'     => __( 'My favorites', 'wporg-patterns' ),
+		'url'       => '/favorites/',
 		'className' => 'has-separator',
 	);
 	if ( is_user_logged_in() ) {
 		$menu[] = array(
 			'label' => __( 'My patterns', 'wporg-patterns' ),
-			'url' => '/my-patterns/',
+			'url'   => '/my-patterns/',
 		);
 	} else {
 		global $wp;
 		$redirect_url = home_url( $wp->request );
-		$menu[] = array(
+		$menu[]       = array(
 			'label' => __( 'Log in', 'wporg-patterns' ),
-			'url' => wp_login_url( $redirect_url ),
+			'url'   => wp_login_url( $redirect_url ),
 		);
 	}
 
 	$current_status = isset( $wp_query->query['status'] ) ? $wp_query->query['status'] : false;
-	$statuses = array(
+	$statuses       = array(
 		array(
-			'label' => __( 'All', 'wporg-patterns' ),
-			'url' => get_permalink(),
+			'label'     => __( 'All', 'wporg-patterns' ),
+			'url'       => get_permalink(),
 			'className' => ! $current_status ? 'current-menu-item' : '',
 		),
 		array(
-			'label' => __( 'Draft', 'wporg-patterns' ),
-			'url' => add_query_arg( 'status', 'draft', get_permalink() ),
+			'label'     => __( 'Draft', 'wporg-patterns' ),
+			'url'       => add_query_arg( 'status', 'draft', get_permalink() ),
 			'className' => 'draft' === $current_status ? 'current-menu-item' : '',
 		),
 		array(
-			'label' => __( 'Pending Review', 'wporg-patterns' ),
-			'url' => add_query_arg( 'status', 'pending', get_permalink() ),
+			'label'     => __( 'Pending Review', 'wporg-patterns' ),
+			'url'       => add_query_arg( 'status', 'pending', get_permalink() ),
 			'className' => 'pending' === $current_status ? 'current-menu-item' : '',
 		),
 		array(
-			'label' => __( 'Published', 'wporg-patterns' ),
-			'url' => add_query_arg( 'status', 'publish', get_permalink() ),
+			'label'     => __( 'Published', 'wporg-patterns' ),
+			'url'       => add_query_arg( 'status', 'publish', get_permalink() ),
 			'className' => 'publish' === $current_status ? 'current-menu-item' : '',
 		),
 	);
@@ -395,12 +398,19 @@ function add_site_navigation_menus( $menus ) {
 	$terms = get_terms(
 		array(
 			'taxonomy' => 'wporg-pattern-category',
-			'slug' => array(
+			'slug'     => array(
 				// `query` is "Posts".
-				'featured', 'query', 'text', 'gallery', 'call-to-action',
-				'banner', 'header', 'footer', 'wireframe',
+				'featured',
+				'query',
+				'text',
+				'gallery',
+				'call-to-action',
+				'banner',
+				'header',
+				'footer',
+				'wireframe',
 			),
-			'orderby' => 'slug__in',
+			'orderby'  => 'slug__in',
 		)
 	);
 	if ( ! is_wp_error( $terms ) ) {
@@ -408,9 +418,9 @@ function add_site_navigation_menus( $menus ) {
 		foreach ( $terms as $term ) {
 			$cat = array(
 				'label' => $term->name,
-				'url' => get_term_link( $term ),
+				'url'   => get_term_link( $term ),
 			);
-			if ( in_array( $term->slug, $current_cats ) ) {
+			if ( in_array( $term->slug, $current_cats, true ) ) {
 				$cat['className'] = 'current-menu-item';
 			}
 			if ( is_page( 'favorites' ) || is_author() ) {
@@ -420,28 +430,28 @@ function add_site_navigation_menus( $menus ) {
 			$categories[] = $cat;
 		}
 		$all_link = array(
-			'label' => __( 'All', 'wporg-patterns' ),
-			'url' => is_page( 'favorites' ) || is_author() ? home_url( $wp->request ) : home_url( '/' ),
+			'label'     => __( 'All', 'wporg-patterns' ),
+			'url'       => is_page( 'favorites' ) || is_author() ? home_url( $wp->request ) : home_url( '/' ),
 			'className' => empty( $current_cats ) ? 'current-menu-item' : '',
 		);
 		array_unshift( $categories, $all_link );
 	}
 
 	return array(
-		'main' => $menu,
+		'main'       => $menu,
 		'categories' => $categories,
-		'statuses' => $statuses,
+		'statuses'   => $statuses,
 	);
 }
 
 /**
  * Update the archive title for all filter views.
  *
- * @param string   $block_content The block content.
- * @param array    $block         The full block, including name and attributes.
- * @param WP_Block $instance      The block instance.
+ * @param string $block_content The block content.
+ * @param array  $block         The full block, including name and attributes.
+ * @return string Updated query title markup.
  */
-function update_archive_title( $block_content, $block, $instance ) {
+function update_archive_title( $block_content, $block ) {
 	global $wp_query;
 	$attributes = $block['attrs'];
 
@@ -459,6 +469,7 @@ function update_archive_title( $block_content, $block, $instance ) {
 		} else {
 			$author = isset( $wp_query->query['author_name'] ) ? get_user_by( 'slug', $wp_query->query['author_name'] ) : false;
 			if ( $author ) {
+				/* translators: %s: Author display name. */
 				$title = sprintf( __( 'Author: %s', 'wporg-patterns' ), $author->display_name );
 			} else {
 				$title = __( 'All patterns', 'wporg-patterns' );
@@ -469,15 +480,15 @@ function update_archive_title( $block_content, $block, $instance ) {
 			$title = __( 'Search results', 'wporg-patterns' );
 		}
 
-		$allowed_tags       = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' );
-		$tag_name           = isset( $attributes['level'] ) ? 'h' . (int) $attributes['level'] : 'h1';
-		$tag_name           = in_array( $tag_name, $allowed_tags, true ) ? $tag_name : 'h1';
-		$align_class_name   = empty( $attributes['textAlign'] ) ? '' : "has-text-align-{$attributes['textAlign']}";
+		$allowed_tags     = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' );
+		$tag_name         = isset( $attributes['level'] ) ? 'h' . (int) $attributes['level'] : 'h1';
+		$tag_name         = in_array( $tag_name, $allowed_tags, true ) ? $tag_name : 'h1';
+		$align_class_name = empty( $attributes['textAlign'] ) ? '' : "has-text-align-{$attributes['textAlign']}";
 
 		// Required to prevent `block_to_render` from being null in `get_block_wrapper_attributes`.
-		$parent = WP_Block_Supports::$block_to_render;
+		$parent                             = WP_Block_Supports::$block_to_render;
 		WP_Block_Supports::$block_to_render = $block;
-		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => $align_class_name ) );
+		$wrapper_attributes                 = get_block_wrapper_attributes( array( 'class' => $align_class_name ) );
 		WP_Block_Supports::$block_to_render = $parent;
 
 		return sprintf(
@@ -495,7 +506,7 @@ function update_archive_title( $block_content, $block, $instance ) {
  *
  * @param string $block_content The block content.
  */
-function update_site_title( $block_content, $block, $instance ) {
+function update_site_title( $block_content ) {
 	return str_replace(
 		get_bloginfo( 'name' ),
 		__( 'Patterns', 'wporg-patterns' ),
@@ -505,6 +516,9 @@ function update_site_title( $block_content, $block, $instance ) {
 
 /**
  * Update the breadcrumbs to the current page.
+ *
+ * @param array $breadcrumbs Existing breadcrumb items.
+ * @return array Breadcrumb items for the current page.
  */
 function update_site_breadcrumbs( $breadcrumbs ) {
 	global $wp_query;
@@ -516,20 +530,20 @@ function update_site_breadcrumbs( $breadcrumbs ) {
 
 	if ( is_page() || is_single() ) {
 		$breadcrumbs[] = array(
-			'url' => $term_names || isset( $wp_query->query['status'] ) ? get_permalink() : false,
+			'url'   => $term_names || isset( $wp_query->query['status'] ) ? get_permalink() : false,
 			'title' => get_the_title(),
 		);
 		if ( $term_names ) {
-			$term_names = wp_list_pluck( $term_names, 'name' );
+			$term_names    = wp_list_pluck( $term_names, 'name' );
 			$breadcrumbs[] = array(
-				'url' => false,
+				'url'   => false,
 				'title' => implode( ', ', $term_names ),
 			);
 		}
 		// For the "My patterns" page, add status.
 		if ( isset( $wp_query->query['status'] ) ) {
 			$breadcrumbs[] = array(
-				'url' => false,
+				'url'   => false,
 				'title' => get_post_status_object( $wp_query->query['status'] )->label,
 			);
 		}
@@ -538,22 +552,22 @@ function update_site_breadcrumbs( $breadcrumbs ) {
 
 	if ( is_search() ) {
 		$breadcrumbs[] = array(
-			'url' => home_url( '/' ),
+			'url'   => home_url( '/' ),
 			'title' => __( 'All patterns', 'wporg-patterns' ),
 		);
 
 		// If there is a cateogry, show it.
 		if ( $term_names ) {
-			$url = get_term_link( $term_names[0] );
-			$term_names = wp_list_pluck( $term_names, 'name' );
+			$url           = get_term_link( $term_names[0] );
+			$term_names    = wp_list_pluck( $term_names, 'name' );
 			$breadcrumbs[] = array(
-				'url' => $url,
+				'url'   => $url,
 				'title' => implode( ', ', $term_names ),
 			);
 		}
 
 		$breadcrumbs[] = array(
-			'url' => false,
+			'url'   => false,
 			'title' => __( 'Search results', 'wporg-patterns' ),
 		);
 		return $breadcrumbs;
@@ -565,21 +579,22 @@ function update_site_breadcrumbs( $breadcrumbs ) {
 		$author = isset( $wp_query->query['author_name'] ) ? get_user_by( 'slug', $wp_query->query['author_name'] ) : false;
 
 		$breadcrumbs[] = array(
-			'url' => home_url( '/' ),
+			'url'   => home_url( '/' ),
 			'title' => __( 'All patterns', 'wporg-patterns' ),
 		);
 
 		if ( $author ) {
 			$breadcrumbs[] = array(
-				'url' => get_author_posts_url( $author->ID ),
+				'url'   => get_author_posts_url( $author->ID ),
+				/* translators: %s: Author display name. */
 				'title' => sprintf( __( 'Author: %s', 'wporg-patterns' ), $author->display_name ),
 			);
 		}
 
 		if ( $term_names ) {
-			$term_names = wp_list_pluck( $term_names, 'name' );
+			$term_names    = wp_list_pluck( $term_names, 'name' );
 			$breadcrumbs[] = array(
-				'url' => false,
+				'url'   => false,
 				'title' => implode( ', ', $term_names ),
 			);
 		}
@@ -600,7 +615,7 @@ function modify_page_template( $templates ) {
 	if ( ! get_current_user_id() ) {
 		if ( is_page( 'favorites' ) ) {
 			array_unshift( $templates, 'page-favorites-anon.html' );
-		} else if ( is_page( 'my-patterns' ) ) {
+		} elseif ( is_page( 'my-patterns' ) ) {
 			array_unshift( $templates, 'page-my-patterns-anon.html' );
 		}
 	}

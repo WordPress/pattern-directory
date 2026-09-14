@@ -1,5 +1,13 @@
 <?php
+/**
+ * Scheduled pattern translation jobs.
+ *
+ * @package WordPressdotorg\Pattern_Translations
+ */
+
 namespace WordPressdotorg\Pattern_Translations\Cron;
+
+use WP_CLI;
 use WordPressdotorg\Pattern_Translations\{ Pattern, PatternMakepot };
 use function WordPressdotorg\Pattern_Translations\create_or_update_translated_pattern;
 use function WordPressdotorg\Locales\get_locales;
@@ -29,7 +37,10 @@ add_action( 'admin_init', __NAMESPACE__ . '\register_cron_tasks' );
 function pattern_import_to_glotpress() {
 	$patterns = Pattern::get_patterns();
 	$makepot  = new PatternMakepot( $patterns );
-	echo $makepot->import( true ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	$result   = $makepot->import( true );
+	if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		WP_CLI::log( $result );
+	}
 }
 add_action( 'pattern_import_to_glotpress', __NAMESPACE__ . '\pattern_import_to_glotpress' );
 
@@ -52,19 +63,21 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 			$timestamp = time();
 			$chunks    = array_chunk( $pattern_ids, CHUNK_SIZE );
 			// Spread out the sub-tasks over the entire twicedaily period.
-			$delay     = floor( ( 12 * HOUR_IN_SECONDS ) / count( $chunks ) );
+			$delay = floor( ( 12 * HOUR_IN_SECONDS ) / count( $chunks ) );
 			foreach ( $chunks as $chunk ) {
 				wp_schedule_single_event( $timestamp, current_action(), array( $chunk ) );
 
 				$timestamp += $delay;
 			}
 
-			printf( "Queued %d cron jobs of %d Patterns each.\n", count( $pattern_ids ) / CHUNK_SIZE, CHUNK_SIZE ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			if ( defined( 'WP_CLI' ) && WP_CLI ) {
+				WP_CLI::log( sprintf( 'Queued %d cron jobs of %d Patterns each.', count( $pattern_ids ) / CHUNK_SIZE, CHUNK_SIZE ) );
+			}
 			return;
 		}
 	}
 
-	// See https://github.com/WordPress/gutenberg/issues/59300
+	// See https://github.com/WordPress/gutenberg/issues/59300.
 	remove_action( 'registered_post_type', 'gutenberg_block_core_navigation_link_register_post_type_variation' );
 	remove_action( 'registered_taxonomy', 'gutenberg_block_core_navigation_link_register_taxonomy_variation' );
 
@@ -79,35 +92,43 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 
 	$locales = get_locales();
 
-	printf( "Processing %d Patterns in %d locales.\n", count( $pattern_ids ), count( $locales ) );
+	if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		WP_CLI::log( sprintf( 'Processing %d Patterns in %d locales.', count( $pattern_ids ), count( $locales ) ) );
+	}
 
 	foreach ( $pattern_ids as $i => $pattern_id ) {
 		$pattern = Pattern::from_post( get_post( $pattern_id ) );
 
-		echo "{$i}. Processing {$pattern->name} / '{$pattern->title}'..\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			WP_CLI::log( "{$i}. Processing {$pattern->name} / '{$pattern->title}'.." );
+		}
 		foreach ( $locales as $gp_locale ) {
-			$locale     = $gp_locale->wp_locale;
+			$locale = $gp_locale->wp_locale;
 			if ( ! $locale || 'en_US' === $locale ) {
 				continue;
 			}
 
 			$translated = $pattern->to_locale( $locale );
 			if ( $translated ) {
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				echo "\t{$locale} - " . ( $translated->ID ? 'Updating' : 'Creating' ) . " Translated pattern.\n";
+				if ( defined( 'WP_CLI' ) && WP_CLI ) {
+					WP_CLI::log( "\t{$locale} - " . ( $translated->ID ? 'Updating' : 'Creating' ) . ' Translated pattern.' );
+				}
 				$result = create_or_update_translated_pattern( $translated );
 				if ( is_wp_error( $result ) ) {
 					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- cron output isn't reliably captured; the failure has to reach the server log.
 					error_log( "Pattern translation import failed for {$pattern->name} ({$locale}): " . $result->get_error_message() );
-					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					echo "\t{$locale} - ERROR: {$result->get_error_message()}\n";
+					if ( defined( 'WP_CLI' ) && WP_CLI ) {
+						WP_CLI::log( "\t{$locale} - ERROR: {$result->get_error_message()}" );
+					}
 				}
-			} else {
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				echo "\t{$locale} - No Translations exist yet.\n";
-				// TODO: Note: There may exist a translated pattern using old strings.
-				// Considering this as an edge-case that is unlikely and we don't
-				// need to handle. Serving old Translated template is better in this case.
+			} elseif ( defined( 'WP_CLI' ) && WP_CLI ) {
+				WP_CLI::log( "\t{$locale} - No Translations exist yet." );
+
+				/*
+				 * TODO: Note: There may exist a translated pattern using old strings.
+				 * Considering this as an edge-case that is unlikely and we don't
+				 * need to handle. Serving old Translated template is better in this case.
+				 */
 			}
 		}
 

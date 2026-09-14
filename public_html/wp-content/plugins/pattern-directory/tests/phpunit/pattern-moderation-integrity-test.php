@@ -1,6 +1,8 @@
 <?php
 /**
  * Test that a moderator's decision on a pattern survives what its author can do to it.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
@@ -44,17 +46,21 @@ class Pattern_Moderation_Integrity_Test extends WP_UnitTestCase {
 	 * @return int The pattern ID.
 	 */
 	protected function create_moderated_pattern( $status ) {
-		$pattern_id = self::factory()->post->create( array(
-			'post_type'   => POST_TYPE,
-			'post_author' => self::$author,
-			'post_status' => 'publish',
-			'post_title'  => 'Taken down',
-		) );
+		$pattern_id = self::factory()->post->create(
+			array(
+				'post_type'   => POST_TYPE,
+				'post_author' => self::$author,
+				'post_status' => 'publish',
+				'post_title'  => 'Taken down',
+			)
+		);
 
-		wp_update_post( array(
-			'ID'          => $pattern_id,
-			'post_status' => $status,
-		) );
+		wp_update_post(
+			array(
+				'ID'          => $pattern_id,
+				'post_status' => $status,
+			)
+		);
 		wp_set_object_terms( $pattern_id, 'spam', FLAG_REASON );
 
 		return $pattern_id;
@@ -132,10 +138,12 @@ class Pattern_Moderation_Integrity_Test extends WP_UnitTestCase {
 	public function test_relisting_clears_the_unlisted_reason() {
 		$pattern_id = $this->create_moderated_pattern( UNLISTED_STATUS );
 
-		wp_update_post( array(
-			'ID'          => $pattern_id,
-			'post_status' => 'publish',
-		) );
+		wp_update_post(
+			array(
+				'ID'          => $pattern_id,
+				'post_status' => 'publish',
+			)
+		);
 
 		$this->assertCount( 0, wp_get_object_terms( $pattern_id, FLAG_REASON ) );
 	}
@@ -148,10 +156,12 @@ class Pattern_Moderation_Integrity_Test extends WP_UnitTestCase {
 
 		wp_trash_post( $pattern_id );
 		wp_untrash_post( $pattern_id );
-		wp_update_post( array(
-			'ID'          => $pattern_id,
-			'post_status' => 'publish',
-		) );
+		wp_update_post(
+			array(
+				'ID'          => $pattern_id,
+				'post_status' => 'publish',
+			)
+		);
 		wp_set_current_user( 0 );
 
 		$response = rest_do_request( new WP_REST_Request( 'GET', '/wp/v2/wporg-pattern/' . $pattern_id ) );
@@ -167,10 +177,12 @@ class Pattern_Moderation_Integrity_Test extends WP_UnitTestCase {
 		$pattern_id = $this->create_moderated_pattern( UNLISTED_STATUS );
 
 		wp_trash_post( $pattern_id );
-		wp_update_post( array(
-			'ID'          => $pattern_id,
-			'post_status' => UNLISTED_STATUS,
-		) );
+		wp_update_post(
+			array(
+				'ID'          => $pattern_id,
+				'post_status' => UNLISTED_STATUS,
+			)
+		);
 
 		$this->assertCount( 1, wp_get_object_terms( $pattern_id, FLAG_REASON ) );
 	}
@@ -200,11 +212,13 @@ class Pattern_Moderation_Integrity_Test extends WP_UnitTestCase {
 	 * An ordinary pattern is still the author's to delete.
 	 */
 	public function test_author_can_still_trash_their_own_published_pattern() {
-		$pattern_id = self::factory()->post->create( array(
-			'post_type'   => POST_TYPE,
-			'post_author' => self::$author,
-			'post_status' => 'publish',
-		) );
+		$pattern_id = self::factory()->post->create(
+			array(
+				'post_type'   => POST_TYPE,
+				'post_author' => self::$author,
+				'post_status' => 'publish',
+			)
+		);
 
 		$response = $this->request_as( self::$author, 'DELETE', '/wp/v2/wporg-pattern/' . $pattern_id );
 

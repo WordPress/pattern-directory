@@ -1,4 +1,9 @@
 <?php
+/**
+ * REST favorite endpoints for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Favorites_API;
 
@@ -15,15 +20,15 @@ function init() {
 		'wporg/v1',
 		'pattern-favorites',
 		array(
-			'methods' => WP_REST_Server::READABLE,
-			'callback' => __NAMESPACE__ . '\get_items',
+			'methods'             => WP_REST_Server::READABLE,
+			'callback'            => __NAMESPACE__ . '\get_items',
 			'permission_callback' => __NAMESPACE__ . '\permissions_check',
 		)
 	);
 
 	$args = array(
 		'id' => array(
-			'validate_callback' => function ( $param, $request, $key ) {
+			'validate_callback' => function ( $param ) {
 				return is_numeric( $param );
 			},
 		),
@@ -32,9 +37,9 @@ function init() {
 		'wporg/v1',
 		'pattern-favorites',
 		array(
-			'methods' => WP_REST_Server::CREATABLE,
-			'callback' => __NAMESPACE__ . '\create_item',
-			'args' => $args,
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => __NAMESPACE__ . '\create_item',
+			'args'                => $args,
 			'permission_callback' => __NAMESPACE__ . '\permissions_check',
 		)
 	);
@@ -42,9 +47,9 @@ function init() {
 		'wporg/v1',
 		'pattern-favorites',
 		array(
-			'methods' => WP_REST_Server::DELETABLE,
-			'callback' => __NAMESPACE__ . '\delete_item',
-			'args' => $args,
+			'methods'             => WP_REST_Server::DELETABLE,
+			'callback'            => __NAMESPACE__ . '\delete_item',
+			'args'                => $args,
 			'permission_callback' => __NAMESPACE__ . '\permissions_check',
 		)
 	);
@@ -71,10 +76,9 @@ function permissions_check() {
 /**
  * Get the list of favorites for the current user.
  *
- * @param WP_REST_Request $request Full data about the request.
  * @return WP_Error|WP_REST_Response
  */
-function get_items( $request ) {
+function get_items() {
 	$favorites = get_favorites();
 	return new WP_REST_Response( $favorites, 200 );
 }
@@ -87,7 +91,7 @@ function get_items( $request ) {
  */
 function create_item( $request ) {
 	$pattern_id = $request['id'];
-	$success = add_favorite( $pattern_id );
+	$success    = add_favorite( $pattern_id );
 
 	if ( $success ) {
 		$count = get_favorite_count( $pattern_id );
@@ -109,7 +113,7 @@ function create_item( $request ) {
  */
 function delete_item( $request ) {
 	$pattern_id = $request['id'];
-	$success = remove_favorite( $pattern_id );
+	$success    = remove_favorite( $pattern_id );
 
 	if ( $success ) {
 		$count = get_favorite_count( $pattern_id );

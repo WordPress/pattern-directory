@@ -1,6 +1,8 @@
 <?php
 /**
  * Shortcodes for the Pattern Directory theme.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 namespace WordPressdotorg\Theme\Pattern_Directory_2024;
@@ -26,7 +28,7 @@ add_shortcode(
 		return esc_url(
 			add_query_arg(
 				array(
-					'action' => 'draft',
+					'action'   => 'draft',
 					'_wpnonce' => wp_create_nonce( 'draft-' . $post_id ),
 				),
 				get_the_permalink()

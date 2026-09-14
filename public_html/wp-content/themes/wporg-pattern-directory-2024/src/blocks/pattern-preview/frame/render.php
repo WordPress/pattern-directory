@@ -1,4 +1,9 @@
 <?php
+/**
+ * Render the frame pattern component.
+ *
+ * @package WordPress\Pattern_Directory
+ */
 
 use function WordPressdotorg\Theme\Pattern_Directory_2024\get_pattern_preview_url;
 
@@ -6,7 +11,7 @@ if ( ! isset( $block->context['postId'] ) ) {
 	return '';
 }
 
-$view_url = get_pattern_preview_url( $block->context['postId'] );
+$view_url       = get_pattern_preview_url( $block->context['postId'] );
 $viewport_width = get_post_meta( $block->context['postId'], 'wpop_viewport_width', true );
 
 if ( ! $viewport_width ) {
@@ -14,17 +19,17 @@ if ( ! $viewport_width ) {
 }
 
 // Initial state to pass to Interactivity API.
-$init_state = array(
-	'url' => $view_url,
-	'previewWidth' => $viewport_width,
+$init_state    = array(
+	'url'           => $view_url,
+	'previewWidth'  => $viewport_width,
 	'previewHeight' => 200,
-	'isControlled' => false,
+	'isControlled'  => false,
 );
 $encoded_state = wp_json_encode( $init_state );
 
 ?>
 <div
-	<?php echo get_block_wrapper_attributes(); // phpcs:ignore ?>
+	<?php echo get_block_wrapper_attributes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 	data-wp-interactive="wporg/patterns/preview"
 	data-wp-context="<?php echo esc_attr( $encoded_state ); ?>"
 	data-wp-style--height="state.previewHeightCSS"

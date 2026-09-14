@@ -1,4 +1,9 @@
 <?php
+/**
+ * Pattern flag post type for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type;
 
@@ -102,6 +107,7 @@ function register_post_type_data() {
 		RESOLVED_STATUS,
 		array(
 			'label'       => __( 'Resolved', 'wporg-patterns' ),
+			/* translators: %s: Number of flags. */
 			'label_count' => _n_noop(
 				'Resolved <span class="count">(%s)</span>',
 				'Resolved <span class="count">(%s)</span>',
@@ -126,9 +132,9 @@ function get_default_reason_description() {
  *
  * Unlike `pending`, the review status prevents authors from republishing the pattern.
  *
- * @param int     $post_ID
- * @param WP_Post $post
- * @param bool    $update
+ * @param int     $post_ID Post ID.
+ * @param WP_Post $post    Post being processed.
+ * @param bool    $update  Whether this updates an existing post.
  */
 function check_flag_threshold( $post_ID, $post, $update ) {
 	if ( $update || POST_TYPE !== get_post_type( $post ) ) {
@@ -239,7 +245,6 @@ function get_flag_threshold() {
 function count_pending_flag_reporters( $pattern_id ) {
 	global $wpdb;
 
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery -- counting distinct authors, which WP_Query can't express.
 	return (int) $wpdb->get_var(
 		$wpdb->prepare(
 			"
@@ -286,11 +291,11 @@ function get_pattern_ids_with_pending_flags( $args = array() ) {
 		'title' => 'patterns.post_title',
 		'id'    => 'patterns.ID',
 	);
-	$orderby_key = is_string( $args['orderby'] ) ? strtolower( $args['orderby'] ) : '';
-	$orderby     = $orderby_columns[ $orderby_key ] ?? 'patterns.post_date';
-	$order       = ( is_string( $args['order'] ) && 'asc' === strtolower( $args['order'] ) ) ? 'ASC' : 'DESC';
+	$orderby_key     = is_string( $args['orderby'] ) ? strtolower( $args['orderby'] ) : '';
+	$orderby         = $orderby_columns[ $orderby_key ] ?? 'patterns.post_date';
+	$order           = ( is_string( $args['order'] ) && 'asc' === strtolower( $args['order'] ) ) ? 'ASC' : 'DESC';
 
-	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	$pattern_ids = $wpdb->get_col(
 		"
 		SELECT DISTINCT patterns.ID
@@ -302,7 +307,7 @@ function get_pattern_ids_with_pending_flags( $args = array() ) {
 		ORDER BY {$orderby} {$order}
 		"
 	);
-	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 	return $pattern_ids;
 }

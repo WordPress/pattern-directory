@@ -1,4 +1,9 @@
 <?php
+/**
+ * Render the delete button pattern component.
+ *
+ * @package WordPress\Pattern_Directory
+ */
 
 $current_post_id = $block->context['postId'];
 if ( ! $current_post_id ) {
@@ -14,16 +19,16 @@ if ( ! current_user_can( 'delete_post', $current_post_id ) ) {
 wp_enqueue_script( 'wp-api-fetch' );
 
 // Initial state to pass to Interactivity API.
-$init_state = array(
-	'postId' => $current_post_id,
-	'message' => __( 'Are you sure you want to delete this pattern?', 'wporg-patterns' ),
+$init_state    = array(
+	'postId'      => $current_post_id,
+	'message'     => __( 'Are you sure you want to delete this pattern?', 'wporg-patterns' ),
 	'redirectUrl' => home_url( '/my-patterns/' ),
 );
 $encoded_state = wp_json_encode( $init_state );
 
 ?>
 <div
-	<?php echo get_block_wrapper_attributes( [ 'class' => 'is-small is-style-toggle' ] ); // phpcs:ignore ?>
+	<?php echo get_block_wrapper_attributes( array( 'class' => 'is-small is-style-toggle' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 	data-wp-interactive="wporg/patterns/delete-button"
 	data-wp-context="<?php echo esc_attr( $encoded_state ); ?>"
 >
@@ -39,6 +44,7 @@ $encoded_state = wp_json_encode( $init_state );
 		<?php
 		// Escape the title, not the template: a pattern title is author-supplied and KSES keeps its markup.
 		printf(
+			/* translators: %s: Pattern title, only visible to screen readers. */
 			wp_kses_post( __( 'Delete <span class="screen-reader-text">"%s"</span>', 'wporg-patterns' ) ),
 			esc_html( get_the_title( $current_post_id ) )
 		);
