@@ -672,19 +672,29 @@ function validate_flag_reason( $prepared_post, $request ) {
 	$taxonomy = get_taxonomy( FLAG_REASON );
 	$base     = ( $taxonomy && ! empty( $taxonomy->rest_base ) ) ? $taxonomy->rest_base : FLAG_REASON;
 
-	if ( ! isset( $request[ $base ] ) ) {
+	if ( ! isset( $request[ $base ] ) || current_user_can( get_post_type_object( POST_TYPE )->cap->edit_others_posts ) ) {
 		return $prepared_post;
 	}
 
-	if ( ! current_user_can( get_post_type_object( POST_TYPE )->cap->edit_others_posts ) ) {
-		return new \WP_Error(
-			'rest_pattern_cannot_set_flag_reason',
-			__( 'Only a directory moderator can change why a pattern was removed.', 'wporg-patterns' ),
-			array( 'status' => 403 )
-		);
+	$stored = isset( $prepared_post->ID )
+		? wp_get_object_terms( $prepared_post->ID, FLAG_REASON, array( 'fields' => 'ids' ) )
+		: array();
+
+	$stored    = is_wp_error( $stored ) ? array() : wp_parse_id_list( $stored );
+	$submitted = wp_parse_id_list( $request[ $base ] );
+	sort( $stored );
+	sort( $submitted );
+
+	// Re-sending the stored terms isn't a write. Clearing them is, which is what has to be refused.
+	if ( $submitted === $stored ) {
+		return $prepared_post;
 	}
 
-	return $prepared_post;
+	return new \WP_Error(
+		'rest_pattern_cannot_set_flag_reason',
+		__( 'Only a directory moderator can change why a pattern was removed.', 'wporg-patterns' ),
+		array( 'status' => 403 )
+	);
 }
 
 /**

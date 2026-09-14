@@ -49,6 +49,17 @@ class Pattern_Collection_Scope_Test extends WP_UnitTestCase {
 				'post_status' => $status,
 				'post_title'  => "zqx{$status} secret",
 			) );
+
+			/*
+			 * The caller owns one of each too. Without these a wrongly applied restriction reads the
+			 * same as a correctly empty result, which is how the author-filter handling slipped through.
+			 */
+			$factory->post->create( array(
+				'post_type'   => POST_TYPE,
+				'post_author' => self::$attacker,
+				'post_status' => $status,
+				'post_title'  => "own{$status} pattern",
+			) );
 		}
 	}
 
@@ -87,8 +98,9 @@ class Pattern_Collection_Scope_Test extends WP_UnitTestCase {
 	public function test_total_excludes_other_authors_non_public_patterns( $status ) {
 		$result = $this->collection_as( self::$attacker, array( 'status' => $status ) );
 
-		$this->assertSame( 0, $result['total'] );
-		$this->assertSame( 0, $result['returned'] );
+		// The caller's own, never the other author's.
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 1, $result['returned'] );
 	}
 
 	/**
@@ -133,7 +145,7 @@ class Pattern_Collection_Scope_Test extends WP_UnitTestCase {
 	public function test_moderator_still_sees_everything( $status ) {
 		$result = $this->collection_as( self::$moderator, array( 'status' => $status ) );
 
-		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 2, $result['total'] );
 	}
 
 	/**
@@ -171,10 +183,59 @@ class Pattern_Collection_Scope_Test extends WP_UnitTestCase {
 	 */
 	public function test_author_param_does_not_override_the_scoping( $status ) {
 		$result = $this->collection_as( self::$attacker, array(
-			'status' => $status, 'author' => self::$victim,
+			'status' => $status, 'author' => array( self::$victim ),
 		) );
 
 		$this->assertSame( 0, $result['total'] );
+		$this->assertSame( 0, $result['returned'] );
+	}
+
+	/**
+	 * Excluding the caller has an empty answer, not the caller's own patterns.
+	 *
+	 * @dataProvider data_non_public_statuses
+	 *
+	 * @param string $status A status the directory keeps out of public view.
+	 */
+	public function test_excluding_the_caller_returns_nothing( $status ) {
+		$result = $this->collection_as( self::$attacker, array(
+			'status' => $status, 'author_exclude' => array( self::$attacker ),
+		) );
+
+		$this->assertSame( 0, $result['total'] );
+		$this->assertSame( 0, $result['returned'] );
+	}
+
+	/**
+	 * Asking for the caller's own patterns still returns them.
+	 *
+	 * @dataProvider data_non_public_statuses
+	 *
+	 * @param string $status A status the directory keeps out of public view.
+	 */
+	public function test_asking_for_own_patterns_still_returns_them( $status ) {
+		$result = $this->collection_as( self::$attacker, array(
+			'status' => $status, 'author' => array( self::$attacker ),
+		) );
+
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 1, $result['returned'] );
+	}
+
+	/**
+	 * Excluding a different author leaves the caller's own patterns in place.
+	 *
+	 * @dataProvider data_non_public_statuses
+	 *
+	 * @param string $status A status the directory keeps out of public view.
+	 */
+	public function test_excluding_another_author_keeps_own_patterns( $status ) {
+		$result = $this->collection_as( self::$attacker, array(
+			'status' => $status, 'author_exclude' => array( self::$victim ),
+		) );
+
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 1, $result['returned'] );
 	}
 
 	/**
@@ -183,7 +244,9 @@ class Pattern_Collection_Scope_Test extends WP_UnitTestCase {
 	public function test_edit_context_is_scoped_to_the_caller() {
 		$result = $this->collection_as( self::$attacker, array( 'context' => 'edit' ) );
 
-		$this->assertSame( 0, $result['total'] );
+		// Their own published pattern, not the other author's.
+		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 1, $result['returned'] );
 	}
 
 	/**
@@ -192,8 +255,8 @@ class Pattern_Collection_Scope_Test extends WP_UnitTestCase {
 	public function test_public_listing_is_unaffected() {
 		$result = $this->collection_as( 0, array() );
 
-		$this->assertSame( 1, $result['total'] );
-		$this->assertSame( 1, $result['returned'] );
+		$this->assertSame( 2, $result['total'] );
+		$this->assertSame( 2, $result['returned'] );
 	}
 
 	/**

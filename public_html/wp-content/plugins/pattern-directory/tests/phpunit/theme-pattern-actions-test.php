@@ -10,7 +10,7 @@ namespace WordPressdotorg\Pattern_Directory\Tests;
 use WP_UnitTestCase;
 use WP_UnitTest_Factory;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
-use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\{ POST_TYPE as FLAG_POST_TYPE, TAX_TYPE as FLAG_REASON };
 
 /**
  * `do_pattern_actions()` drafts a pattern through `wp_update_post()` rather than the REST API, so
@@ -260,6 +260,47 @@ class Theme_Pattern_Actions_Test extends WP_UnitTestCase {
 			'moderator unlisted' => array( UNLISTED_STATUS, true, true ),
 			'moderator spam'     => array( SPAM_STATUS, true, true ),
 		);
+	}
+
+	/**
+	 * A report submitted through the public form must carry its reason.
+	 *
+	 * `wp_insert_post()` drops `tax_input` for a reporter who cannot `assign_terms`, which left every
+	 * flag raised from the front end with no reason for moderators to act on.
+	 */
+	public function test_report_records_its_reason_on_the_flag(): void {
+		$pattern_id = $this->create_pattern( 'publish' );
+		$reason     = self::factory()->term->create(
+			array(
+				'taxonomy' => FLAG_REASON,
+				'name'     => 'Against the guidelines',
+			)
+		);
+
+		wp_set_current_user( self::$member );
+		$this->go_to( get_permalink( $pattern_id ) );
+
+		$_REQUEST['action']      = 'report';
+		$_REQUEST['_wpnonce']    = wp_create_nonce( 'report-' . $pattern_id );
+		$_POST['report-reason']  = $reason;
+		$_POST['report-details'] = 'Why this pattern was reported.';
+
+		try {
+			\WordPressdotorg\Theme\Pattern_Directory_2024\do_pattern_actions();
+		} finally {
+			unset( $_POST['report-reason'], $_POST['report-details'] );
+		}
+
+		$flags = get_posts(
+			array(
+				'post_type'   => FLAG_POST_TYPE,
+				'post_parent' => $pattern_id,
+				'post_status' => 'any',
+			)
+		);
+
+		$this->assertCount( 1, $flags );
+		$this->assertSame( array( $reason ), wp_get_object_terms( $flags[0]->ID, FLAG_REASON, array( 'fields' => 'ids' ) ) );
 	}
 
 	/**

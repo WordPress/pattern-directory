@@ -34,30 +34,59 @@ class Pattern_Author_Data_Integrity_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A reporter with no role must end up with the reason recorded on their flag.
+	 * Re-sending the field unchanged is not a write, so an ordinary edit must not be refused.
 	 *
-	 * `wp_insert_post()` drops `tax_input` for a user who cannot `assign_terms`, which left moderators a
-	 * queue of reasonless reports.
+	 * The taxonomy is `show_in_rest`, so it comes back on every pattern response and a client that
+	 * round-trips a record will send it straight back.
 	 */
-	public function test_reporter_ends_up_with_a_reason_on_their_flag() {
-		$reason     = self::factory()->term->create( array(
-			'taxonomy' => FLAG_REASON, 'name' => 'Spam',
-		) );
+	public function test_round_trip_without_a_reason_is_allowed() {
 		$pattern_id = self::factory()->post->create( array(
-			'post_type' => POST_TYPE, 'post_status' => 'publish',
+			'post_type'   => POST_TYPE,
+			'post_author' => self::$author,
+			'post_status' => 'publish',
 		) );
 
 		wp_set_current_user( self::$author );
 
-		$flag_id = wp_insert_post( array(
-			'post_type'    => FLAG_POST_TYPE,
-			'post_parent'  => $pattern_id,
-			'post_excerpt' => 'Reason goes here.',
-			'post_status'  => PENDING_STATUS,
-		) );
-		wp_set_object_terms( $flag_id, array( $reason ), FLAG_REASON );
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . $pattern_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array(
+			'excerpt'  => 'An edit that changes no terms.',
+			FLAG_REASON => array(),
+		) ) );
+		$response = rest_do_request( $request );
 
-		$this->assertCount( 1, wp_get_object_terms( $flag_id, FLAG_REASON ) );
+		$this->assertFalse( $response->is_error(), 'An unchanged flag-reason field was treated as a write.' );
+	}
+
+	/**
+	 * Core refuses an unchanged *non-empty* reason before this plugin is consulted.
+	 *
+	 * `check_assign_terms_permission()` runs in the permission check and walks the submitted term ids,
+	 * so a round trip of a pattern that already carries a reason still fails for a non-moderator. The
+	 * no-op allowance above only covers the empty case; this records the boundary.
+	 */
+	public function test_round_trip_with_an_existing_reason_is_still_refused_by_core() {
+		$reason     = self::factory()->term->create( array(
+			'taxonomy' => FLAG_REASON, 'name' => 'Guidelines',
+		) );
+		$pattern_id = self::factory()->post->create( array(
+			'post_type'   => POST_TYPE,
+			'post_author' => self::$author,
+			'post_status' => UNLISTED_STATUS,
+		) );
+		wp_set_object_terms( $pattern_id, array( $reason ), FLAG_REASON );
+
+		wp_set_current_user( self::$author );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . $pattern_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( FLAG_REASON => array( $reason ) ) ) );
+		$response = rest_do_request( $request );
+
+		$this->assertTrue( $response->is_error() );
+		$this->assertSame( 'rest_cannot_assign_term', $response->get_data()['code'] );
+		$this->assertCount( 1, wp_get_object_terms( $pattern_id, FLAG_REASON ) );
 	}
 
 	/**

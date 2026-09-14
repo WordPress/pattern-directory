@@ -526,7 +526,7 @@ function status_transitions( $new_status, $old_status, $post ) {
 /**
  * Given a post ID, parse out the block types and update the `wpop_contains_block_types` meta field.
  *
- * @param int $pattern_id Pattern ID.
+ * @param int|\WP_Post $pattern_id Pattern ID, or the pattern itself.
  */
 function update_contains_block_types_meta( $pattern_id ) {
 	// `rest_after_insert_*` passes a post object where `post_updated` passes an ID.
@@ -755,9 +755,26 @@ function restrict_collection_to_own_patterns( $args, $request ) {
 		return $args;
 	}
 
-	// Every author var, not just `author`: core maps the request's `author` to `author__in`.
-	$args['author']         = get_current_user_id();
-	$args['author__in']     = array( get_current_user_id() );
+	$user_id  = get_current_user_id();
+	$wanted   = wp_parse_id_list( $args['author__in'] ?? array() );
+	$excluded = wp_parse_id_list( $args['author__not_in'] ?? array() );
+
+	// A bare `author`, which `author_name` also resolves to, is a list where a negative id excludes.
+	foreach ( wp_parse_list( $args['author'] ?? array() ) as $author ) {
+		$author = (int) $author;
+		if ( $author > 0 ) {
+			$wanted[] = $author;
+		} elseif ( $author < 0 ) {
+			$excluded[] = absint( $author );
+		}
+	}
+
+	if ( in_array( $user_id, $excluded, true ) || ( $wanted && ! in_array( $user_id, $wanted, true ) ) ) {
+		$args['post__in'] = array( 0 );
+	}
+
+	$args['author']         = $user_id;
+	$args['author__in']     = array( $user_id );
 	$args['author__not_in'] = array();
 	unset( $args['author_name'] );
 
