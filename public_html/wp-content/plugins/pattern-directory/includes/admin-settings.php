@@ -137,7 +137,7 @@ function render_threshold_field() {
 	<?php
 	printf(
 		'<p id="wporg-pattern-flag_threshold-help">%s</p>',
-		esc_html__( 'Use this setting to change the number of times a pattern can be reported before it is automatically unpublished (set to pending) while awaiting review.', 'wporg-patterns' )
+		esc_html__( 'Use this setting to change the number of people who can report a pattern before it is automatically unpublished and held for moderator review.', 'wporg-patterns' )
 	);
 }
 
