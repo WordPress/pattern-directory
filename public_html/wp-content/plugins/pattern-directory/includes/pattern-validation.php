@@ -539,11 +539,9 @@ function validate_title( $prepared_post, $request ) {
 /**
  * Validate the pattern status.
  *
- * Ensures patterns created via the API are either drafts, or use the chosen status set in
- * /wp-admin/options-general.php?page=wporg-pattern-creator. The `unlisted` and spam statuses
- * are moderator-only, both as a target and as a source, so an author can neither self-unlist
- * nor undo a moderator's removal. Nor can they publish over a removal the report threshold made,
- * which is a status change for patterns the threshold left in `pending`.
+ * Restrict author submissions to drafts, pending review, or the configured default status.
+ * Only moderators can change moderation statuses or republish patterns at the report threshold,
+ * including legacy removals left in `pending`.
  */
 function validate_status( $prepared_post, $request ) {
 	if ( is_wp_error( $prepared_post ) ) {

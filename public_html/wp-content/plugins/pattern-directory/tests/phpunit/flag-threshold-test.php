@@ -14,8 +14,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLIS
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\{ POST_TYPE as FLAG_POST_TYPE, TAX_TYPE as FLAG_REASON };
 
 /**
- * Reports taking a pattern down is a moderation decision, so it has to hold until a moderator has acted on
- * it, and it has to take more than one account to reach.
+ * Test report thresholds, moderator approval, and author permissions.
  *
  * @group pattern-flags
  */
@@ -99,7 +98,7 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * File a report against a pattern, the way both the theme and the REST controller do.
+	 * Create a pending report against a pattern.
 	 *
 	 * @param int $pattern_id The reported pattern.
 	 * @param int $reporter   The reporting user.
@@ -145,8 +144,7 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Put a pattern into the state the threshold used to leave its removals in: ordinary `pending`, with
-	 * enough unresolved reports against it.
+	 * Create a legacy removal: a pending pattern with reports at the threshold.
 	 *
 	 * @return int The pattern ID.
 	 */
@@ -167,7 +165,7 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Enough reports take the pattern out of the directory and into the moderators' queue.
+	 * Reaching the threshold moves a pattern into moderator review.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\check_flag_threshold
 	 */
@@ -183,7 +181,7 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The author cannot put an automatically removed pattern straight back into the directory.
+	 * Authors cannot republish a reported pattern.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\validate_status
 	 */
@@ -202,7 +200,7 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The threshold counts reporters, not reports, so the duplicate rows a racing account can file are inert.
+	 * Duplicate reports from one account count once.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\count_pending_flag_reporters
 	 */
@@ -219,7 +217,7 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Resolved reports are spent, so they can't be counted again by a later one.
+	 * Resolved reports do not count towards the threshold.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\count_pending_flag_reporters
 	 */
@@ -238,8 +236,7 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A report arriving after a moderator has removed the pattern must not move it back into the queue,
-	 * where the author would be told it is merely awaiting review.
+	 * New reports do not reopen an unlisted pattern.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\check_flag_threshold
 	 */
@@ -253,7 +250,7 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The author is told once, with the reasons they were reported for.
+	 * Removal sends one notification containing the report reasons.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Notifications\notify_pattern_flagged
 	 */
@@ -297,8 +294,7 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A pattern the threshold removed before the removal used a moderator-only status is still off limits:
-	 * its status alone no longer says it was reported, but the reports against it do.
+	 * Authors cannot republish legacy removals left in pending status.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\validate_status
 	 */
@@ -315,7 +311,7 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Nor by way of a draft, which an author can take a `pending` pattern to.
+	 * Moving a legacy removal to draft does not allow the author to republish it.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\validate_status
 	 */
@@ -335,7 +331,7 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A moderator can put it back, which is the whole point of holding it.
+	 * Moderators can republish legacy removals.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\validate_status
 	 */
@@ -350,7 +346,7 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Reports below the threshold are not a removal, so they must not hold an author's pattern back.
+	 * Reports below the threshold do not block author publication.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\validate_status
 	 */
@@ -367,8 +363,7 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Once a moderator has published a reported pattern, its author can still edit it: the editor sends the
-	 * current status with every save, and that isn't a request to publish anything.
+	 * Saving a published pattern with its current status does not trigger the report check.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Validation\validate_status
 	 */
@@ -387,8 +382,7 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A moderator publishing a reported pattern answers the reports, so the author has their pattern back:
-	 * they can take it to draft and publish it again the way they always could.
+	 * After moderator approval, authors can draft and republish their pattern.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\resolve_flags_on_approval
 	 */
@@ -412,8 +406,7 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Approval is what resolves them, so a fresh report starts the count over rather than re-removing the
-	 * pattern on the strength of reports a moderator has already answered.
+	 * Moderator approval resolves existing reports and resets the removal count.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\resolve_flags_on_approval
 	 */
@@ -441,7 +434,7 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * An author publishing their own pattern answers nothing, so the report waits for a moderator.
+	 * Author publication does not resolve reports.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\resolve_flags_on_approval
 	 */
@@ -464,8 +457,7 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Reports that never removed anything are not answered by an approval, which a moderator can reach
-	 * without having seen them.
+	 * Moderator approval leaves reports below the threshold pending.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\resolve_flags_on_approval
 	 */

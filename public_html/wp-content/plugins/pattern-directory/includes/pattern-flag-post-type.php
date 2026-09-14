@@ -122,16 +122,13 @@ function get_default_reason_description() {
 }
 
 /**
- * Automatically unpublish a pattern if it receives a certain number of flags.
+ * Hold a pattern for moderator review when it reaches the report threshold.
  *
- * The pattern lands in the moderators' review queue rather than in plain `pending`, which is a status its
- * author owns: a removal filed there is the author's to undo before anyone has looked at the reports.
+ * Unlike `pending`, the review status prevents authors from republishing the pattern.
  *
  * @param int     $post_ID
  * @param WP_Post $post
  * @param bool    $update
- *
- * @return void
  */
 function check_flag_threshold( $post_ID, $post, $update ) {
 	if ( $update || POST_TYPE !== get_post_type( $post ) ) {
@@ -164,18 +161,13 @@ function check_flag_threshold( $post_ID, $post, $update ) {
 }
 
 /**
- * Resolve the reports behind a removal when a moderator publishes the pattern again.
+ * Resolve reports when a moderator republishes a pattern that reached the threshold.
  *
- * Publishing is the moderator's answer to the reports that took the pattern down. Left pending they would
- * go on counting -- towards the next automatic removal, and towards the threshold `validate_status()` reads
- * to keep the author from undoing one -- so approval would hold the author out for good. Reports that never
- * reached the threshold removed nothing, so they are left for a moderator to answer on their own terms.
+ * This resets the removal count. Reports below the threshold remain pending for separate review.
  *
  * @param string  $new_status The status the pattern moved to.
  * @param string  $old_status The status it moved from.
  * @param WP_Post $post       The pattern.
- *
- * @return void
  */
 function resolve_flags_on_approval( $new_status, $old_status, $post ) {
 	if ( PATTERN !== get_post_type( $post ) || 'publish' !== $new_status || $new_status === $old_status ) {
@@ -208,11 +200,7 @@ function resolve_flags_on_approval( $new_status, $old_status, $post ) {
 }
 
 /**
- * Whether a pattern has been reported by enough people to be taken out of the directory.
- *
- * `check_flag_threshold()` only runs as a report comes in, so patterns removed by the threshold before it
- * used a moderator-only status are still sitting in `pending`. Their author owns that status, which is why
- * `validate_status()` asks this as well as reading the status.
+ * Check whether a pattern has reached the report threshold.
  *
  * @param int $pattern_id The reported pattern.
  *
@@ -223,12 +211,9 @@ function has_reached_flag_threshold( $pattern_id ) {
 }
 
 /**
- * The number of reporters it takes to unpublish a pattern.
+ * Get the report threshold, falling back to five for out-of-range values.
  *
- * The setting is sanitized on its way in, but a value written around that -- or left over from an earlier
- * one -- would otherwise read as a threshold of zero, which every pattern meets.
- *
- * @return int The configured threshold, or the default if what's stored isn't a usable one.
+ * @return int The report threshold.
  */
 function get_flag_threshold() {
 	$threshold = absint( get_option( 'wporg-pattern-flag_threshold', 5 ) );
@@ -237,11 +222,9 @@ function get_flag_threshold() {
 }
 
 /**
- * Count the distinct reporters behind a pattern's unresolved flags.
+ * Count distinct reporters with unresolved flags against a pattern.
  *
- * The check for an existing report and the insert that follows it are separate queries, so two requests
- * racing on one account can both get past it. Counting reporters rather than rows keeps a single account
- * from moving a pattern any closer to the threshold than one report.
+ * Concurrent requests can create duplicate flags, so each reporter counts only once.
  *
  * @param int $pattern_id The flagged pattern.
  *

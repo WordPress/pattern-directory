@@ -99,12 +99,9 @@ Thank you for submitting your pattern, %1$s. It is now live in the Block Pattern
 /**
  * Notify when a pattern has been unpublished for review.
  *
- * Both routes into the review queue -- the spam heuristic and the report threshold -- move the pattern
- * into the same status, so the transition is the one place this has to be sent from.
+ * Sent on the review status transition for both spam detection and user reports.
  *
  * @param \WP_Post $post
- *
- * @return void
  */
 function notify_pattern_flagged( $post ) {
 	$author = get_user_by( 'id', $post->post_author );
