@@ -1,5 +1,6 @@
 <?php
 namespace WordPressdotorg\Pattern_Translations\Cron;
+
 use WordPressdotorg\Pattern_Translations\{ Pattern, PatternMakepot };
 use function WordPressdotorg\Pattern_Translations\create_or_update_translated_pattern;
 use function WordPressdotorg\Locales\get_locales;
@@ -52,7 +53,7 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 			$timestamp = time();
 			$chunks    = array_chunk( $pattern_ids, CHUNK_SIZE );
 			// Spread out the sub-tasks over the entire twicedaily period.
-			$delay     = floor( ( 12 * HOUR_IN_SECONDS ) / count( $chunks ) );
+			$delay = floor( ( 12 * HOUR_IN_SECONDS ) / count( $chunks ) );
 			foreach ( $chunks as $chunk ) {
 				wp_schedule_single_event( $timestamp, current_action(), array( $chunk ) );
 
@@ -86,7 +87,7 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 
 		echo "{$i}. Processing {$pattern->name} / '{$pattern->title}'..\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		foreach ( $locales as $gp_locale ) {
-			$locale     = $gp_locale->wp_locale;
+			$locale = $gp_locale->wp_locale;
 			if ( ! $locale || 'en_US' === $locale ) {
 				continue;
 			}

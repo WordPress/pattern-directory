@@ -25,21 +25,21 @@ add_filter( 'get_custom_logo', __NAMESPACE__ . '\provide_mock_logo' );
  */
 function render_archives( $block_content, $block, $block_instance ) {
 	$show_post_count = ! empty( $block_instance->attributes['showPostCounts'] );
-	$show_dropdown = ! empty( $block_instance->attributes['displayAsDropdown'] );
-	$dropdown_id = esc_attr( uniqid( 'wp-block-archives-' ) );
-	$class = '';
+	$show_dropdown   = ! empty( $block_instance->attributes['displayAsDropdown'] );
+	$dropdown_id     = esc_attr( uniqid( 'wp-block-archives-' ) );
+	$class           = '';
 
-	$dates = array();
+	$dates   = array();
 	$current = strtotime( '12 months ago' );
-	$last = time();
+	$last    = time();
 	while ( $current <= $last ) {
 		$dates[] = wp_date( 'F Y', $current );
 		$current = strtotime( 'next month', $current );
 	}
 
 	if ( $show_dropdown ) {
-		$title       = __( 'Archives', 'wporg-patterns' );
-		$label = __( 'Select Month', 'wporg-patterns' );
+		$title    = __( 'Archives', 'wporg-patterns' );
+		$label    = __( 'Select Month', 'wporg-patterns' );
 		$archives = '';
 
 		foreach ( $dates as $date ) {
@@ -52,13 +52,13 @@ function render_archives( $block_content, $block, $block_instance ) {
 
 		$block_content = '<label for="' . $dropdown_id . '">' . $title . '</label><select id="' . $dropdown_id . '" name="archive-dropdown"><option value="">' . $label . '</option>' . $archives . '</select>';
 
-		$class .= ' wp-block-archives-dropdown';
+		$class     .= ' wp-block-archives-dropdown';
 		$classnames = esc_attr( $class );
 
 		// Required to prevent `block_to_render` from being null in `get_block_wrapper_attributes`.
-		$parent = WP_Block_Supports::$block_to_render;
+		$parent                             = WP_Block_Supports::$block_to_render;
 		WP_Block_Supports::$block_to_render = $block;
-		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => $classnames ) );
+		$wrapper_attributes                 = get_block_wrapper_attributes( array( 'class' => $classnames ) );
 		WP_Block_Supports::$block_to_render = $parent;
 
 		return sprintf(
@@ -77,8 +77,8 @@ function render_archives( $block_content, $block, $block_instance ) {
 			}
 		}
 
-		$class .= ' wp-block-archives-list';
-		$classnames = esc_attr( $class );
+		$class             .= ' wp-block-archives-list';
+		$classnames         = esc_attr( $class );
 		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => $classnames ) );
 
 		return sprintf(
@@ -98,7 +98,7 @@ function render_archives( $block_content, $block, $block_instance ) {
  * @return string
  */
 function render_latest_comments( $block_content, $block, $block_instance ) {
-	$attributes = $block_instance->attributes;
+	$attributes        = $block_instance->attributes;
 	$list_items_markup = '';
 
 	if ( isset( $attributes['displayExcerpt'] ) ) {
@@ -110,22 +110,22 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
 	/* Note: This is not translated (for now) because the post content is also not translated. */
 	$comments = array(
 		array(
-			'author' => 'Noah',
+			'author'     => 'Noah',
 			'post_title' => 'Jupiter',
-			'date' => strtotime( '5 days ago' ),
-			'content' => 'Since its orbital revolution occupies nearly twelve years, Jupiter comes back into opposition with the Sun every 399 days.',
+			'date'       => strtotime( '5 days ago' ),
+			'content'    => 'Since its orbital revolution occupies nearly twelve years, Jupiter comes back into opposition with the Sun every 399 days.',
 		),
 		array(
-			'author' => 'Sabrina',
+			'author'     => 'Sabrina',
 			'post_title' => 'Jupiter',
-			'date' => strtotime( '1 week ago' ),
-			'content' => 'Most conspicuous upon this globe are the larger or smaller bands or markings (gray and white, sometimes tinted yellow, or of a maroon or chocolate hue) by which its surface is streaked, particularly in the vicinity of the equator.',
+			'date'       => strtotime( '1 week ago' ),
+			'content'    => 'Most conspicuous upon this globe are the larger or smaller bands or markings (gray and white, sometimes tinted yellow, or of a maroon or chocolate hue) by which its surface is streaked, particularly in the vicinity of the equator.',
 		),
 		array(
-			'author' => 'Yvonne',
+			'author'     => 'Yvonne',
 			'post_title' => 'The November Meteors',
-			'date' => strtotime( '2 weeks ago' ),
-			'content' => 'One or two unknown planets, some wandering comets, and swarms of meteors, doubtless traverse those unknown spaces, but all invisible to us.',
+			'date'       => strtotime( '2 weeks ago' ),
+			'content'    => 'One or two unknown planets, some wandering comets, and swarms of meteors, doubtless traverse those unknown spaces, but all invisible to us.',
 		),
 	);
 
@@ -140,7 +140,7 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
 		$list_items_markup .= '<footer class="wp-block-latest-comments__comment-meta">';
 
 		$author_markup = '<span class="wp-block-latest-comments__comment-author">' . $comment['author'] . '</span>';
-		$post_title = '<a class="wp-block-latest-comments__comment-link" href="#">' . $comment['post_title'] . '</a>';
+		$post_title    = '<a class="wp-block-latest-comments__comment-link" href="#">' . $comment['post_title'] . '</a>';
 
 		$list_items_markup .= sprintf(
 			/* translators: 1: author name, 2: post title related to this comment */
@@ -177,9 +177,9 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
 	}
 
 	// Required to prevent `block_to_render` from being null in `get_block_wrapper_attributes`.
-	$parent = WP_Block_Supports::$block_to_render;
+	$parent                             = WP_Block_Supports::$block_to_render;
 	WP_Block_Supports::$block_to_render = $block;
-	$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => implode( ' ', $classnames ) ) );
+	$wrapper_attributes                 = get_block_wrapper_attributes( array( 'class' => implode( ' ', $classnames ) ) );
 	WP_Block_Supports::$block_to_render = $parent;
 
 	return sprintf(
@@ -243,28 +243,28 @@ function provide_fallback_nav_items( $fallback_blocks ) {
 	return array(
 		array(
 			'blockName' => 'core/navigation-link',
-			'attrs' => array(
-				'label' => 'Home',
-				'url' => '#',
-				'kind' => 'custom',
+			'attrs'     => array(
+				'label'          => 'Home',
+				'url'            => '#',
+				'kind'           => 'custom',
 				'isTopLevelLink' => true,
 			),
 		),
 		array(
 			'blockName' => 'core/navigation-link',
-			'attrs' => array(
-				'label' => 'About',
-				'url' => '#',
-				'kind' => 'custom',
+			'attrs'     => array(
+				'label'          => 'About',
+				'url'            => '#',
+				'kind'           => 'custom',
 				'isTopLevelLink' => true,
 			),
 		),
 		array(
 			'blockName' => 'core/navigation-link',
-			'attrs' => array(
-				'label' => 'Contact',
-				'url' => '#',
-				'kind' => 'custom',
+			'attrs'     => array(
+				'label'          => 'Contact',
+				'url'            => '#',
+				'kind'           => 'custom',
 				'isTopLevelLink' => true,
 			),
 		),

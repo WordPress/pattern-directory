@@ -17,8 +17,8 @@ use function WordPressdotorg\MU_Plugins\Global_Header_Footer\{ is_rosetta_site, 
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 const AUTOSAVE_INTERVAL = 30;
-const IS_EDIT_VAR = 'edit-pattern';
-const PATTERN_ID_VAR = 'pattern-id';
+const IS_EDIT_VAR       = 'edit-pattern';
+const PATTERN_ID_VAR    = 'pattern-id';
 
 require_once __DIR__ . '/includes/mock-blocks.php';
 
@@ -34,7 +34,7 @@ require_once __DIR__ . '/includes/mock-blocks.php';
 function should_load_creator() {
 	global $wp_query;
 	$is_editor = $wp_query->is_singular( POST_TYPE ) && false !== $wp_query->get( IS_EDIT_VAR, false );
-	$is_new = is_page( 'new-pattern' );
+	$is_new    = is_page( 'new-pattern' );
 	return $is_editor || $is_new;
 }
 
@@ -85,7 +85,7 @@ function pattern_creator_init() {
 	wp_deregister_style( 'wporg-parent-2021-style' );
 	wp_deregister_style( 'global-styles' );
 
-	$dir = __DIR__;
+	$dir               = __DIR__;
 	$script_asset_path = "$dir/build/index.asset.php";
 	if ( ! file_exists( $script_asset_path ) ) {
 		throw new \Error( 'You need to run `npm run start:creator` or `npm run build:creator` for the Pattern Creator.' );
@@ -105,10 +105,14 @@ function pattern_creator_init() {
 		'wp-pattern-creator',
 		sprintf(
 			"var wporgLocale = JSON.parse( decodeURIComponent( '%s' ) );",
-			rawurlencode( wp_json_encode( array(
-				'id' => get_locale(),
-				'displayName' => is_rosetta_site() ? get_rosetta_name() : '',
-			) ) ),
+			rawurlencode(
+				wp_json_encode(
+					array(
+						'id'          => get_locale(),
+						'displayName' => is_rosetta_site() ? get_rosetta_name() : '',
+					)
+				)
+			),
 		),
 		'before'
 	);
@@ -117,9 +121,13 @@ function pattern_creator_init() {
 		'wp-pattern-creator',
 		sprintf(
 			'var wporgBlockPattern = JSON.parse( decodeURIComponent( \'%s\' ) );',
-			rawurlencode( wp_json_encode( array(
-				'siteUrl' => esc_url( home_url() ),
-			) ) )
+			rawurlencode(
+				wp_json_encode(
+					array(
+						'siteUrl' => esc_url( home_url() ),
+					)
+				)
+			)
 		),
 		'before'
 	);
@@ -293,12 +301,12 @@ function fix_editor_style_import_paths( $settings ) {
 		if ( 0 !== strpos( $m[1], $base ) ) {
 			continue; // inferred base isn't a prefix of the matched url() — depth assumption wrong
 		}
-		$settings['styles'][ $key ]['css']       = preg_replace_callback(
+		$settings['styles'][ $key ]['css']     = preg_replace_callback(
 			'/@import\s+["\']\.\/([^"\']+)["\']/',
 			fn( $x ) => '@import "' . $base . $x[1] . '"',
 			$style['css']
 		);
-		$settings['styles'][ $key ]['baseURL']   = $base;
+		$settings['styles'][ $key ]['baseURL'] = $base;
 	}
 	return $settings;
 }

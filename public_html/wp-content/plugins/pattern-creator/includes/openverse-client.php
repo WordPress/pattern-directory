@@ -31,7 +31,7 @@ class Openverse_Client {
 	public function __construct( array $params = array() ) {
 		$defaults = array(
 			'per_page' => 30,
-			'page' => 1,
+			'page'     => 1,
 		);
 
 		$this->params = wp_parse_args( $params, $defaults );
@@ -85,7 +85,7 @@ class Openverse_Client {
 	 * @return string|WP_Error A valid token or WP_Error if there was an error.
 	 */
 	public function get_oauth_token() {
-		$token = get_option( self::TOKEN_OPTION_KEY, array() );
+		$token      = get_option( self::TOKEN_OPTION_KEY, array() );
 		$token_life = $this->is_valid_token( $token );
 		if ( $token_life >= 5 * MINUTE_IN_SECONDS ) {
 			return $token['access_token'];
@@ -108,13 +108,16 @@ class Openverse_Client {
 		// Lock token refresh
 		update_option( self::TOKEN_OPTION_KEY . '_refresh', time() );
 
-		$response = wp_remote_post( $this->url . '/v1/auth_tokens/token/', array(
-			'body' => array(
-				'client_id' => PATTERN_OV_OAUTH_ID,
-				'client_secret' => PATTERN_OV_OAUTH_SECRET,
-				'grant_type' => 'client_credentials',
-			),
-		) );
+		$response = wp_remote_post(
+			$this->url . '/v1/auth_tokens/token/',
+			array(
+				'body' => array(
+					'client_id'     => PATTERN_OV_OAUTH_ID,
+					'client_secret' => PATTERN_OV_OAUTH_SECRET,
+					'grant_type'    => 'client_credentials',
+				),
+			)
+		);
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
@@ -156,14 +159,14 @@ class Openverse_Client {
 			return $auth_token;
 		}
 
-		$url = add_query_arg(
+		$url      = add_query_arg(
 			array(
-				'format' => 'json',
-				'license' => 'cc0',
+				'format'    => 'json',
+				'license'   => 'cc0',
 				// All sources except: flickr, deviantart, thingiverse, svgsilh, stocksnap, sketchfab.
-				'source' => 'wordpress,woc_tech,waltersartmuseum,thorvaldsensmuseum,statensmuseum,spacex,smithsonian_zoo_and_conservation,smithsonian_postal_museum,smithsonian_portrait_gallery,smithsonian_national_museum_of_natural_history,smithsonian_libraries,smithsonian_institution_archives,smithsonian_hirshhorn_museum,smithsonian_gardens,smithsonian_freer_gallery_of_art,smithsonian_cooper_hewitt_museum,smithsonian_anacostia_museum,smithsonian_american_indian_museum,smithsonian_american_history_museum,smithsonian_american_art_museum,smithsonian_air_and_space_museum,smithsonian_african_art_museum,smithsonian_african_american_history_museum,sciencemuseum,rijksmuseum,phylopic,nypl,nasa,museumsvictoria,met,mccordmuseum,iha,geographorguk,floraon,eol,digitaltmuseum,clevelandmuseum,brooklynmuseum,bio_diversity,behance,animaldiversity,WoRMS,CAPL,500px,rawpixel',
-				'q' => $this->get_param( 'search' ),
-				'page' => $this->get_param( 'page' ),
+				'source'    => 'wordpress,woc_tech,waltersartmuseum,thorvaldsensmuseum,statensmuseum,spacex,smithsonian_zoo_and_conservation,smithsonian_postal_museum,smithsonian_portrait_gallery,smithsonian_national_museum_of_natural_history,smithsonian_libraries,smithsonian_institution_archives,smithsonian_hirshhorn_museum,smithsonian_gardens,smithsonian_freer_gallery_of_art,smithsonian_cooper_hewitt_museum,smithsonian_anacostia_museum,smithsonian_american_indian_museum,smithsonian_american_history_museum,smithsonian_american_art_museum,smithsonian_air_and_space_museum,smithsonian_african_art_museum,smithsonian_african_american_history_museum,sciencemuseum,rijksmuseum,phylopic,nypl,nasa,museumsvictoria,met,mccordmuseum,iha,geographorguk,floraon,eol,digitaltmuseum,clevelandmuseum,brooklynmuseum,bio_diversity,behance,animaldiversity,WoRMS,CAPL,500px,rawpixel',
+				'q'         => $this->get_param( 'search' ),
+				'page'      => $this->get_param( 'page' ),
 				'page_size' => $this->get_param( 'per_page' ),
 			),
 			$this->url . '/v1/images',
@@ -213,7 +216,7 @@ class Openverse_Client {
 		}
 
 		$cache_key = self::CACHE_KEY . md5( wp_json_encode( $this->get_params() ) );
-		$ttl = HOUR_IN_SECONDS;
+		$ttl       = HOUR_IN_SECONDS;
 
 		$results = get_transient( $cache_key );
 		if ( false === $results ) {

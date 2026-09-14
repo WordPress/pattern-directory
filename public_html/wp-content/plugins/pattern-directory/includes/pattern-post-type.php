@@ -85,8 +85,8 @@ function register_post_type_data() {
 			'rewrite'           => array(
 				'slug' => 'categories',
 			),
-			'query_var' => 'pattern-categories',
-			'capabilities' => array(
+			'query_var'         => 'pattern-categories',
+			'capabilities'      => array(
 				'assign_terms' => 'edit_patterns',
 				'edit_terms'   => 'edit_patterns',
 			),
@@ -106,12 +106,12 @@ function register_post_type_data() {
 				'slug' => 'pattern-keywords',
 			),
 			// Keywords are moderator-only (the `core` term feeds Core's pattern distribution), unlike categories.
-			'capabilities' => array(
+			'capabilities'      => array(
 				'assign_terms' => 'edit_others_patterns',
 				'edit_terms'   => 'edit_others_patterns',
 			),
 
-			'labels' => array(
+			'labels'            => array(
 				'name'                       => _x( 'Keywords (Internal)', 'taxonomy general name', 'wporg-patterns' ),
 				'singular_name'              => _x( 'Keyword', 'taxonomy singular name', 'wporg-patterns' ),
 				'search_items'               => __( 'Search Keywords', 'wporg-patterns' ),
@@ -249,7 +249,7 @@ function register_post_type_data() {
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
 			'show_in_rest'      => array(
 				'schema' => array(
-					'type'     => 'string',
+					'type' => 'string',
 				),
 			),
 		)
@@ -267,7 +267,7 @@ function register_post_type_data() {
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
 			'show_in_rest'      => array(
 				'schema' => array(
-					'type'     => 'string',
+					'type' => 'string',
 				),
 			),
 		)
@@ -303,7 +303,7 @@ function register_rest_fields() {
 				return $slugs;
 			},
 
-			'schema' => array(
+			'schema'       => array(
 				'type'  => 'array',
 				'items' => array(
 					'type' => 'string',
@@ -323,7 +323,7 @@ function register_rest_fields() {
 				return array_map( 'sanitize_title', $slugs );
 			},
 
-			'schema' => array(
+			'schema'       => array(
 				'type'  => 'array',
 				'items' => array(
 					'type' => 'string',
@@ -354,8 +354,8 @@ function register_rest_fields() {
 				return decode_pattern_content( $pattern->post_content );
 			},
 
-			'schema' => array(
-				'type'  => 'string',
+			'schema'       => array(
+				'type' => 'string',
 			),
 		)
 	);
@@ -371,7 +371,7 @@ function register_rest_fields() {
 				return get_favorite_count( get_the_ID() );
 			},
 
-			'schema' => array(
+			'schema'       => array(
 				'type'    => 'integer',
 				'default' => 0,
 			),
@@ -393,17 +393,17 @@ function register_rest_fields() {
 				);
 			},
 
-			'schema' => array(
-				'type'  => 'object',
+			'schema'       => array(
+				'type'       => 'object',
 				'properties' => array(
-					'name' => array(
-						'type'  => 'string',
+					'name'   => array(
+						'type' => 'string',
 					),
-					'url' => array(
-						'type'  => 'string',
+					'url'    => array(
+						'type' => 'string',
 					),
 					'avatar' => array(
-						'type'  => 'string',
+						'type' => 'string',
 					),
 				),
 			),
@@ -434,29 +434,29 @@ function register_rest_fields() {
 				if ( count( $reasons ) > 0 ) {
 					$reason = array_shift( $reasons );
 					return array(
-						'term_id' => absint( $reason->term_id ),
-						'name' => esc_attr( $reason->name ),
-						'slug' => esc_attr( $reason->slug ),
+						'term_id'     => absint( $reason->term_id ),
+						'name'        => esc_attr( $reason->name ),
+						'slug'        => esc_attr( $reason->slug ),
 						'description' => wp_kses_post( $reason->description ),
 					);
 				}
 
 				return array();
 			},
-			'schema' => array(
-				'type'  => 'object',
+			'schema'       => array(
+				'type'       => 'object',
 				'properties' => array(
-					'term_id' => array(
-						'type'  => 'number',
+					'term_id'     => array(
+						'type' => 'number',
 					),
-					'name' => array(
-						'type'  => 'string',
+					'name'        => array(
+						'type' => 'string',
 					),
-					'slug' => array(
-						'type'  => 'string',
+					'slug'        => array(
+						'type' => 'string',
 					),
 					'description' => array(
-						'type'  => 'string',
+						'type' => 'string',
 					),
 				),
 			),
@@ -823,7 +823,7 @@ function filter_patterns_rest_query( $args, $request ) {
 				'terms'    => 'core',
 				'operator' => 'IN',
 			);
-		} else if ( 'community' === $request['curation'] ) {
+		} elseif ( 'community' === $request['curation'] ) {
 			// Patterns without the core keyword.
 			$args['tax_query']['core_keyword'] = array(
 				'taxonomy' => 'wporg-pattern-keyword',
@@ -836,7 +836,7 @@ function filter_patterns_rest_query( $args, $request ) {
 
 	$orderby = $request->get_param( 'orderby' );
 	if ( 'favorite_count' === $orderby ) {
-		$args['orderby'] = 'meta_value_num';
+		$args['orderby']  = 'meta_value_num';
 		$args['meta_key'] = 'wporg-pattern-favorites';
 	}
 
@@ -848,7 +848,7 @@ function filter_patterns_rest_query( $args, $request ) {
 		// $version is the full WP version, for example `6.0.2` or `6.2-alpha-54642-src`.
 		// Parse out just the major version section, `6.0` or `6.2`, respectively,
 		// so that the math comparison works.
-		$major_version = $matches[0];
+		$major_version                 = $matches[0];
 		$args['meta_query']['version'] = array(
 			// Fetch patterns with no version info, or only those with a lower
 			// or equal version.
@@ -954,7 +954,7 @@ function set_pattern_caps( $user_caps ) {
 		'capabilities'    => array(),
 		'map_meta_cap'    => true,
 	);
-	$cap_map = (array) get_post_type_capabilities( (object) $cap_args );
+	$cap_map  = (array) get_post_type_capabilities( (object) $cap_args );
 
 	// Users should have the same permissions for patterns as posts, for example,
 	// if they have `edit_posts`, they should be granted `edit_patterns`, and so on.
@@ -966,12 +966,12 @@ function set_pattern_caps( $user_caps ) {
 
 	// Set caps to allow for front end pattern creation.
 	if ( is_user_logged_in() && ! is_admin() ) {
-		$user_caps['read']                       = true;
-		$user_caps['publish_patterns']           = true;
-		$user_caps['edit_patterns']              = true;
-		$user_caps['edit_published_patterns']    = true;
-		$user_caps['delete_patterns']            = true;
-		$user_caps['delete_published_patterns']  = true;
+		$user_caps['read']                      = true;
+		$user_caps['publish_patterns']          = true;
+		$user_caps['edit_patterns']             = true;
+		$user_caps['edit_published_patterns']   = true;
+		$user_caps['delete_patterns']           = true;
+		$user_caps['delete_published_patterns'] = true;
 		// Note that `edit_others_patterns` & `delete_others_patterns` are separate capabilities.
 	}
 
@@ -1057,26 +1057,36 @@ function setup_preview_theme() {
 	if ( preg_match( '#/view/$#', $request_uri ) || preg_match( '#[?&]view=[1|true]#', $request_uri ) ) {
 		add_filter( 'show_admin_bar', '__return_false', 2000 );
 
-		add_filter( 'template', function () {
-			if ( 'local' === wp_get_environment_type() ) {
-				return 'twentytwentythree';
-			} else {
-				return 'core/twentytwentythree';
+		add_filter(
+			'template',
+			function () {
+				if ( 'local' === wp_get_environment_type() ) {
+					return 'twentytwentythree';
+				} else {
+					return 'core/twentytwentythree';
+				}
 			}
-		} );
+		);
 
-		add_filter( 'stylesheet', function () {
-			if ( 'local' === wp_get_environment_type() ) {
-				return 'twentytwentythree';
-			} else {
-				return 'core/twentytwentythree';
+		add_filter(
+			'stylesheet',
+			function () {
+				if ( 'local' === wp_get_environment_type() ) {
+					return 'twentytwentythree';
+				} else {
+					return 'core/twentytwentythree';
+				}
 			}
-		} );
+		);
 
-		add_filter( 'wp_enqueue_scripts', function () {
-			wp_deregister_style( 'wp4-styles' );
-			wp_deregister_style( 'wporg-global-header-footer' );
-		}, 201 );
+		add_filter(
+			'wp_enqueue_scripts',
+			function () {
+				wp_deregister_style( 'wp4-styles' );
+				wp_deregister_style( 'wporg-global-header-footer' );
+			},
+			201
+		);
 
 		add_filter( 'render_block_core/gallery', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
 		add_filter( 'render_block_core/image', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
@@ -1094,7 +1104,7 @@ function setup_preview_theme() {
  * @return string The updated block content.
  */
 function inject_placeholder_svg( $block_content, $block ) {
-	$svg = '<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" preserveAspectRatio="none">';
+	$svg  = '<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" preserveAspectRatio="none">';
 	$svg .= '<rect width="60" height="60" fill="currentColor" fill-opacity="0.1" />';
 	$svg .= '<path vector-effect="non-scaling-stroke" d="M60 60 0 0" stroke="currentColor" stroke-width="1" stroke-opacity="0.25" />';
 	$svg .= '</svg>';
@@ -1102,7 +1112,7 @@ function inject_placeholder_svg( $block_content, $block ) {
 	// Image block, find img without `src` or with wmark.png (logo), replace with svg.
 	if ( preg_match( '/<img([^>]*)\/?>/', $block_content, $match ) ) {
 		if ( ! str_contains( $match[1], 'src=' ) || str_contains( $match[1], 'wmark.png' ) ) {
-			$new_content = str_replace( '<svg ', '<svg ' . $match[1], $svg );
+			$new_content   = str_replace( '<svg ', '<svg ' . $match[1], $svg );
 			$block_content = str_replace( $match[0], $new_content, $block_content );
 			return $block_content;
 		}
@@ -1112,15 +1122,15 @@ function inject_placeholder_svg( $block_content, $block ) {
 	if ( 'core/media-text' === $block['blockName'] || 'core/video' === $block['blockName'] ) {
 		// Find empty `<figure …></figure>`, inject svg into figure.
 		if ( preg_match( '/(<figure[^>]*>)(<\/figure>)/', $block_content, $match ) ) {
-			$new_content = $match[1] . $svg . $match[2];
+			$new_content   = $match[1] . $svg . $match[2];
 			$block_content = str_replace( $match[0], $new_content, $block_content );
 		}
 	}
 
 	// Gallery, find empty `<figure …></figure>`, inject 3 fake image blocks into figure.
 	if ( 'core/gallery' === $block['blockName'] && preg_match( '/(<figure[^>]*>)(<\/figure>)/', $block_content, $match ) ) {
-		$image = '<figure class="wp-block-image">' . $svg . '</figure>';
-		$new_content = $match[1] . str_repeat( $image, 3 ) . $match[2];
+		$image         = '<figure class="wp-block-image">' . $svg . '</figure>';
+		$new_content   = $match[1] . str_repeat( $image, 3 ) . $match[2];
 		$block_content = str_replace( $match[0], $new_content, $block_content );
 	}
 

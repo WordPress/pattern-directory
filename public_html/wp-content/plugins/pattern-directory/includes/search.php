@@ -103,24 +103,27 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 
 	// Requests for a specific locale will still include `en_US` as a fallback.
 	if ( count( $locales ) > 1 ) {
-		$primary_locale = array_reduce( $locales, function ( $carry, $item ) {
-			// This assumes there will only be 2 items in $locale.
-			if ( 'en_US' !== $item ) {
-				$carry = $item;
-			}
+		$primary_locale = array_reduce(
+			$locales,
+			function ( $carry, $item ) {
+				// This assumes there will only be 2 items in $locale.
+				if ( 'en_US' !== $item ) {
+					$carry = $item;
+				}
 
-			return $carry;
-		} );
+				return $carry;
+			}
+		);
 
 		// Boost the primary locale over the `en_US` fallback.
 		$should_query[] = array(
 			'boosting' => array(
-				'positive' => array(
+				'positive'       => array(
 					'term' => array(
 						'meta.wpop_locale.value.raw' => $primary_locale,
 					),
 				),
-				'negative' => array(
+				'negative'       => array(
 					'term' => array(
 						'meta.wpop_locale.value.raw' => 'en_US',
 					),

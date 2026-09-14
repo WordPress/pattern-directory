@@ -37,26 +37,26 @@ $_SERVER['REQUEST_URI'] = parse_url( $opts['url'], PHP_URL_PATH );
 require rtrim( $opts['abspath'], '/' ) . '/wp-load.php';
 
 $args = array(
-	'post_type' => POST_TYPE,
-	'post_status' => $opts['post_status'],
+	'post_type'      => POST_TYPE,
+	'post_status'    => $opts['post_status'],
 	'posts_per_page' => -1,
-	'post_parent' => 0,
-	'orderby' => 'date',
-	'order' => 'DESC',
+	'post_parent'    => 0,
+	'orderby'        => 'date',
+	'order'          => 'DESC',
 );
 
 $query = new \WP_Query( $args );
 
-$type_counts = array();
+$type_counts  = array();
 $total_counts = array();
-$lt3_count = 0;
-$gt75_count = 0;
+$lt3_count    = 0;
+$gt75_count   = 0;
 while ( $query->have_posts() ) {
 	$query->the_post();
 	$pattern = get_post();
 
-	$all_blocks = array();
-	$blocks = parse_blocks( $pattern->post_content );
+	$all_blocks   = array();
+	$blocks       = parse_blocks( $pattern->post_content );
 	$blocks_queue = $blocks;
 
 	while ( count( $blocks_queue ) > 0 ) { // phpcs:ignore -- inline count OK.
@@ -73,7 +73,7 @@ while ( $query->have_posts() ) {
 	$block_total_count = count( $all_blocks );
 
 	if ( $block_types_count < 3 ) {
-		$lt3_count++;
+		++$lt3_count;
 		if ( $opts['verbose'] ) {
 			if ( 1 === $block_types_count ) {
 				echo "Pattern has only 1 block type, $block_total_count block(s).\n";
@@ -85,14 +85,14 @@ while ( $query->have_posts() ) {
 	}
 
 	if ( $block_total_count > 75 ) {
-		$gt75_count++;
+		++$gt75_count;
 		if ( $opts['verbose'] ) {
 			echo "Pattern has over 75 blocks.\n";
 			echo '  ' . get_permalink() . "\n";
 		}
 	}
 
-	$type_counts[] = $block_types_count;
+	$type_counts[]  = $block_types_count;
 	$total_counts[] = $block_total_count;
 }
 
@@ -102,8 +102,8 @@ echo "$lt3_count patterns have <3 blocks.\n";
 echo "$gt75_count patterns have >75 blocks.\n";
 
 $type_average = array_sum( $type_counts ) / count( $type_counts );
-$type_min = min( $type_counts );
-$type_max = max( $type_counts );
+$type_min     = min( $type_counts );
+$type_max     = max( $type_counts );
 printf(
 	"There are %.1f block types per pattern on average, %d min, and %d max.\n",
 	$type_average,
@@ -112,8 +112,8 @@ printf(
 );
 
 $total_average = array_sum( $total_counts ) / count( $total_counts );
-$total_min = min( $total_counts );
-$total_max = max( $total_counts );
+$total_min     = min( $total_counts );
+$total_max     = max( $total_counts );
 printf(
 	"There are %.1f blocks per pattern on average, %d min, and %d max.\n",
 	$total_average,

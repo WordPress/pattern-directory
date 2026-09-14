@@ -35,7 +35,7 @@ class BasicText implements BlockParser {
 
 		foreach ( $block['innerContent'] as &$inner_content ) {
 			if ( is_string( $inner_content ) ) {
-				$dom = $this->get_dom( $inner_content );
+				$dom   = $this->get_dom( $inner_content );
 				$xpath = new \DOMXPath( $dom );
 
 				$text_nodes = $xpath->query( $xpath_query );
@@ -45,7 +45,7 @@ class BasicText implements BlockParser {
 				// unclosed HTML tags, and saveHTML adds extra closed tags.
 				foreach ( $text_nodes as $text ) {
 					if ( trim( $text->nodeValue ) && isset( $replacements[ $text->nodeValue ] ) ) {
-						$regex = '#(<([^>]*)>)?' . preg_quote( $text->nodeValue, '/' ) . '(<([^>]*)>)?#is';
+						$regex         = '#(<([^>]*)>)?' . preg_quote( $text->nodeValue, '/' ) . '(<([^>]*)>)?#is';
 						$inner_content = preg_replace( $regex, '${1}' . addcslashes( $replacements[ $text->nodeValue ], '\\$' ) . '${3}', $inner_content );
 					}
 				}

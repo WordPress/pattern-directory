@@ -21,21 +21,21 @@ class Pattern_Favorite_Test extends WP_UnitTestCase {
 	 * Setup fixtures that are shared across all tests.
 	 */
 	public static function wpSetUpBeforeClass( $factory ) {
-		self::$pattern_id = $factory->post->create(
+		self::$pattern_id       = $factory->post->create(
 			array( 'post_type' => POST_TYPE )
 		);
 		self::$faved_pattern_id = $factory->post->create(
 			array( 'post_type' => POST_TYPE )
 		);
-		self::$page_id = $factory->post->create(
+		self::$page_id          = $factory->post->create(
 			array( 'post_type' => 'page' )
 		);
-		self::$user_admin = $factory->user->create(
+		self::$user_admin       = $factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
 		);
-		self::$user_subscriber = $factory->user->create(
+		self::$user_subscriber  = $factory->user->create(
 			array(
 				'role' => 'subscriber',
 			)

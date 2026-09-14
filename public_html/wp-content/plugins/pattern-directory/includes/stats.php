@@ -57,82 +57,82 @@ function get_meta_field_schema() {
 	return array(
 		'type'       => 'object',
 		'properties' => array(
-			'count-patterns'                 => array(
+			'count-patterns'                      => array(
 				'description' => __( 'The total number of pattern posts.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'single'      => true,
 			),
-			'count-patterns_publish'         => array(
+			'count-patterns_publish'              => array(
 				'description' => __( 'The total number of published patterns.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'single'      => true,
 			),
-			'count-patterns_publish-originals'         => array(
+			'count-patterns_publish-originals'    => array(
 				'description' => __( 'The total number of published original patterns (not translations or remixes).', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'single'      => true,
 			),
-			'count-patterns_publish-translations'         => array(
+			'count-patterns_publish-translations' => array(
 				'description' => __( 'The total number of published pattern translations.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'single'      => true,
 			),
-			'count-patterns_possible-spam'  => array(
+			'count-patterns_possible-spam'        => array(
 				'description' => __( 'The total number of possibly spam patterns.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'single'      => true,
 			),
-			'count-patterns_unlisted'        => array(
+			'count-patterns_unlisted'             => array(
 				'description' => __( 'The total number of unlisted patterns.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'single'      => true,
 			),
-			'count-patterns_unlisted-spam'   => array(
+			'count-patterns_unlisted-spam'        => array(
 				'description' => __( 'The total number of patterns unlisted due to spam.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'single'      => true,
 			),
-			'count-patterns_favorited'       => array(
+			'count-patterns_favorited'            => array(
 				'description' => __( 'The total number of patterns with at least one favorite.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'single'      => true,
 			),
-			'count-patterns_flagged-pending' => array(
+			'count-patterns_flagged-pending'      => array(
 				'description' => __( 'The total number of patterns with a pending flag.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'single'      => true,
 			),
-			'count-favorites'                => array(
+			'count-favorites'                     => array(
 				'description' => __( 'The total number of favorites.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'single'      => true,
 			),
-			'count-flags'                    => array(
+			'count-flags'                         => array(
 				'description' => __( 'The total number of flags.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'single'      => true,
 			),
-			'count-flags_pending'            => array(
+			'count-flags_pending'                 => array(
 				'description' => __( 'The total number of pending flags.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'single'      => true,
 			),
-			'count-flags_resolved'           => array(
+			'count-flags_resolved'                => array(
 				'description' => __( 'The total number of resolved flags.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'single'      => true,
 			),
-			'count-users_with-favorite'      => array(
+			'count-users_with-favorite'           => array(
 				'description' => __( 'The total number of users with at least one favorited pattern.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'single'      => true,
 			),
-			'elapsed-time'                   => array(
+			'elapsed-time'                        => array(
 				'description' => __( 'Number of milliseconds to generate the snapshot.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'single'      => true,
 			),
-			'version'                        => array(
+			'version'                             => array(
 				'description' => __( 'The version of the snapshot data schema.', 'wporg-patterns' ),
 				'type'        => 'integer',
 				'single'      => true,
@@ -275,10 +275,10 @@ function callback_count_patterns_publish_originals() {
  */
 function callback_count_patterns_publish_translations() {
 	$args = array(
-		'post_type'           => PATTERN_POST_TYPE,
-		'post_status'         => 'publish',
-		'numberposts'         => 1,
-		'meta_query'          => array(
+		'post_type'   => PATTERN_POST_TYPE,
+		'post_status' => 'publish',
+		'numberposts' => 1,
+		'meta_query'  => array(
 			array(
 				'key'   => 'wpop_is_translation',
 				'value' => 1,
@@ -322,7 +322,7 @@ function callback_count_patterns_unlisted_spam() {
 	$args = array(
 		'post_type'   => PATTERN_POST_TYPE,
 		'post_status' => UNLISTED_STATUS,
-		'tax_query'  => array(
+		'tax_query'   => array(
 			array(
 				'taxonomy' => FLAG_REASON,
 				'field'    => 'slug',
@@ -382,14 +382,16 @@ function callback_count_favorites() {
 
 	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$count = $wpdb->get_var( $wpdb->prepare(
-		"
+	$count = $wpdb->get_var(
+		$wpdb->prepare(
+			"
 		SELECT COUNT(*)
 		FROM {$wpdb->usermeta}
 		WHERE meta_key=%s
 		",
-		FAVORITE_META_KEY,
-	) );
+			FAVORITE_META_KEY,
+		)
+	);
 	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 	return absint( $count );
@@ -438,14 +440,16 @@ function callback_count_users_with_favorite() {
 
 	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
-	$user_ids = $wpdb->get_col( $wpdb->prepare(
-		"
+	$user_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"
 		SELECT DISTINCT user_id
 		FROM {$wpdb->usermeta}
 		WHERE meta_key=%s
 		",
-		FAVORITE_META_KEY,
-	) );
+			FAVORITE_META_KEY,
+		)
+	);
 	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 	return count( $user_ids );

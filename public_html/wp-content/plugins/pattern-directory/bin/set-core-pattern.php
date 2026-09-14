@@ -57,10 +57,12 @@ if ( $pattern ) {
 	$pattern_id = $pattern->ID;
 
 	// Update author
-	$result = wp_update_post( array(
-		'ID'          => $pattern_id,
-		'post_author' => $wporg_user_id,
-	) );
+	$result = wp_update_post(
+		array(
+			'ID'          => $pattern_id,
+			'post_author' => $wporg_user_id,
+		)
+	);
 	if ( is_wp_error( $result ) ) {
 		echo "Error updating author:\n";
 		echo $result->get_error_message() . "\n";

@@ -4,12 +4,16 @@
  */
 
 namespace WordPressdotorg\Pattern_Creator;
+
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
-add_filter( 'body_class', function ( $classes ) {
-	$classes[] = 'admin-color-modern';
-	return $classes;
-} );
+add_filter(
+	'body_class',
+	function ( $classes ) {
+		$classes[] = 'admin-color-modern';
+		return $classes;
+	}
+);
 
 $is_logged_in = is_user_logged_in();
 $can_edit     = current_user_can( 'edit_pattern', get_query_var( PATTERN_ID_VAR ) );

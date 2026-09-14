@@ -13,7 +13,7 @@ add_action( 'admin_init', __NAMESPACE__ . '\admin_init' );
 /**
  * Constants.
  */
-const PAGE_SLUG = 'wporg-pattern-directory';
+const PAGE_SLUG    = 'wporg-pattern-directory';
 const SECTION_NAME = 'wporg-pattern-settings';
 
 /**
@@ -49,11 +49,11 @@ function admin_init() {
 		SECTION_NAME,
 		'wporg-pattern-default_status',
 		array(
-			'type' => 'string',
+			'type'              => 'string',
 			'sanitize_callback' => function ( $value ) {
 				return in_array( $value, array( 'publish', 'pending' ) ) ? $value : 'publish';
 			},
-			'default' => 'publish',
+			'default'           => 'publish',
 		)
 	);
 	add_settings_field(
@@ -72,7 +72,7 @@ function admin_init() {
 		SECTION_NAME,
 		'wporg-pattern-flag_threshold',
 		array(
-			'type' => 'integer',
+			'type'              => 'integer',
 			'sanitize_callback' => function ( $value ) {
 				$value = absint( $value );
 
@@ -82,7 +82,7 @@ function admin_init() {
 
 				return $value;
 			},
-			'default' => 5,
+			'default'           => 5,
 		)
 	);
 	add_settings_field(
@@ -104,7 +104,7 @@ function admin_init() {
  */
 function render_status_field() {
 	$current = get_option( 'wporg-pattern-default_status' );
-	$statii = array(
+	$statii  = array(
 		'publish' => esc_html__( 'Published', 'wporg-patterns' ),
 		'pending' => esc_html__( 'Pending', 'wporg-patterns' ),
 	);

@@ -65,11 +65,11 @@ $args = array(
 if ( isset( $opts['post'] ) ) {
 	$args = array(
 		'post_type' => POST_TYPE,
-		'p' => absint( $opts['post'] ),
+		'p'         => absint( $opts['post'] ),
 	);
 }
 
-$query = new \WP_Query( $args );
+$query        = new \WP_Query( $args );
 $meta_updated = 0;
 
 while ( $query->have_posts() ) {
@@ -89,11 +89,11 @@ while ( $query->have_posts() ) {
 	if ( $opts['apply'] ) {
 		$result = update_post_meta( $pattern_id, 'wpop_contains_block_types', $used_blocks );
 		if ( $result ) {
-			$meta_updated++;
-		} else if ( $opts['verbose'] ) {
+			++$meta_updated;
+		} elseif ( $opts['verbose'] ) {
 			echo "Error updating {$pattern_id}.\n"; // phpcs:ignore
 		}
-	} else if ( $opts['verbose'] ) {
+	} elseif ( $opts['verbose'] ) {
 		echo "Will update {$pattern_id} with '{$used_blocks}'.\n"; // phpcs:ignore
 	}
 }

@@ -59,12 +59,14 @@ function pattern_list_table_render_custom_columns( $column_name, $post_id ) {
 
 	switch ( $column_name ) {
 		case 'flags':
-			$flags = new WP_Query( array(
-				'post_type'   => FLAG,
-				'post_status' => array( 'pending' ),
-				'post_parent' => $current_pattern->ID,
-				'numberposts' => 1,
-			) );
+			$flags = new WP_Query(
+				array(
+					'post_type'   => FLAG,
+					'post_status' => array( 'pending' ),
+					'post_parent' => $current_pattern->ID,
+					'numberposts' => 1,
+				)
+			);
 
 			if ( $flags->found_posts > 0 ) {
 				$url = add_query_arg(
@@ -84,12 +86,14 @@ function pattern_list_table_render_custom_columns( $column_name, $post_id ) {
 					esc_attr( $url ),
 					esc_html( number_format_i18n( $flags->found_posts ) ),
 					sprintf(
-						esc_html( _n(
-							'%s pending flag',
-							'%s pending flags',
-							$flags->found_posts,
-							'wporg-patterns'
-						) ),
+						esc_html(
+							_n(
+								'%s pending flag',
+								'%s pending flags',
+								$flags->found_posts,
+								'wporg-patterns'
+							)
+						),
 						esc_html( number_format_i18n( $flags->found_posts ) )
 					)
 				);
@@ -167,12 +171,14 @@ function pattern_list_table_render_custom_columns( $column_name, $post_id ) {
 					'<a href="%1$s" class="language-context-link">%2$s</a>',
 					esc_url( $view_url ),
 					sprintf(
-						esc_html( _n(
-							'%s translation',
-							'%s translations',
-							$translations->found_posts,
-							'wporg-patterns'
-						) ),
+						esc_html(
+							_n(
+								'%s translation',
+								'%s translations',
+								$translations->found_posts,
+								'wporg-patterns'
+							)
+						),
 						esc_html( number_format_i18n( $translations->found_posts ) )
 					)
 				);
@@ -301,7 +307,7 @@ function pattern_list_table_views( $views ) {
 		$extra_attributes = ' class="current" aria-current="page"';
 	}
 
-	$args = array(
+	$args  = array(
 		'post_type'   => PATTERN,
 		'post_status' => array( 'draft', 'pending', 'publish' ),
 		'post_parent' => 0,
@@ -364,7 +370,7 @@ function handle_pattern_list_table_views( WP_Query $query ) {
 		}
 
 		if ( $wants_translations ) {
-			$meta_query = $query->get( 'meta_query', array() );
+			$meta_query   = $query->get( 'meta_query', array() );
 			$meta_query[] = array(
 				'key'   => 'wpop_is_translation',
 				'value' => 1,
@@ -423,7 +429,7 @@ function add_row_actions( $actions, $post ) {
 	$actions       = array_intersect_key( $actions, array_fill_keys( array( 'edit', 'view' ), true ) );
 
 	$edit_url = add_query_arg( 'post_type', PATTERN, 'edit.php' );
-	$title = _draft_or_post_title();
+	$title    = _draft_or_post_title();
 
 	if ( PENDING_STATUS === $post->post_status || SPAM_STATUS === $post->post_status ) {
 		$publish_url = add_query_arg(

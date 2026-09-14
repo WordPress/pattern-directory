@@ -12,12 +12,12 @@ $notice_type   = 'warning';
 
 if ( 'report-failed' === $action_status ) {
 	$notice = __( 'Your pattern report could not be saved. Please try again.', 'wporg-patterns' );
-} else if ( 'logged-out' === $action_status ) {
+} elseif ( 'logged-out' === $action_status ) {
 	$notice = __( 'You must be logged in to report a pattern.', 'wporg-patterns' );
-} else if ( 'reported' === $action_status ) {
+} elseif ( 'reported' === $action_status ) {
 	$notice_type = 'info';
-	$notice = __( 'Your report has been submitted.', 'wporg-patterns' );
-} else if ( 'already-reported' === $action_status ) {
+	$notice      = __( 'Your report has been submitted.', 'wporg-patterns' );
+} elseif ( 'already-reported' === $action_status ) {
 	$notice = __( 'You have already reported this pattern.', 'wporg-patterns' );
 }
 

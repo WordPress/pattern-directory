@@ -1,6 +1,7 @@
 <?php
 
 namespace WordPressdotorg\Pattern_Directory\Favorite;
+
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\get_block_pattern;
 
 // Used for both the post meta (count of favorites) and user meta (list of pattern IDs).
@@ -113,14 +114,16 @@ function get_raw_favorite_count( $post = 0 ) {
 	if ( ! $post ) {
 		return false;
 	}
-	$count = $wpdb->get_var( $wpdb->prepare(
-		"SELECT COUNT(*)
+	$count = $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(*)
 			FROM {$wpdb->usermeta}
 			WHERE meta_key=%s
 			AND meta_value=%d",
-		META_KEY,
-		$post->ID
-	) );
+			META_KEY,
+			$post->ID
+		)
+	);
 
 	return absint( $count );
 }

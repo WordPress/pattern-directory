@@ -19,7 +19,10 @@ function translate_patterns( array $patterns ): array {
  * @return array The translated pattern objects.
  */
 function translate_patterns_to( array $patterns, string $locale ): array {
-	return array_map( function ( $pattern ) use ( $locale ) {
-		return $pattern->to_locale( $locale ) ?: $pattern;
-	}, $patterns );
+	return array_map(
+		function ( $pattern ) use ( $locale ) {
+			return $pattern->to_locale( $locale ) ?: $pattern;
+		},
+		$patterns
+	);
 }

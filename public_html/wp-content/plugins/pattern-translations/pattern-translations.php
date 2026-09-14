@@ -7,6 +7,7 @@
  */
 
 namespace WordPressdotorg\Pattern_Translations;
+
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\is_block_allowed_in_pattern;
 use function WordPressdotorg\Pattern_Directory\Pattern_Validation\content_has_block_directives;
 use function WordPressdotorg\Pattern_Directory\Pattern_Validation\blocks_have_directive_attribute;

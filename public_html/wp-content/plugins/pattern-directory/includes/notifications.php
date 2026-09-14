@@ -71,7 +71,7 @@ function notify_pattern_approved( $post ) {
 	$locale = get_user_locale( $author );
 
 	$pattern_title = get_the_title( $post );
-	$pattern_url = get_permalink( $post );
+	$pattern_url   = get_permalink( $post );
 
 	if ( $locale ) {
 		switch_to_locale( $locale );
@@ -81,11 +81,14 @@ function notify_pattern_approved( $post ) {
 
 	$message = sprintf(
 		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Pattern URL;
-		esc_html__( 'Hello!
+		esc_html__(
+			'Hello!
 
 Thank you for submitting your pattern, %1$s. It is now live in the Block Pattern Directory!
 
-%2$s', 'wporg-patterns' ),
+%2$s',
+			'wporg-patterns'
+		),
 		esc_html( $pattern_title ),
 		esc_url_raw( $pattern_url )
 	);
@@ -159,13 +162,16 @@ function notify_pattern_flagged( $post ) {
 
 	$message = sprintf(
 		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Pattern URL;
-		esc_html__( 'Hi there!
+		esc_html__(
+			'Hi there!
 
 Thanks for submitting your pattern. Unfortunately, your pattern, %1$s, has been flagged for review due to the following reason(s):
 
 %2$s
 
-Your pattern has been unpublished from the Block Pattern Directory at this time, and will receive further review. If the pattern meets the guidelines, we will re-publish it to the Block Pattern Directory. Thanks for your patience with us volunteer reviewers!', 'wporg-patterns' ),
+Your pattern has been unpublished from the Block Pattern Directory at this time, and will receive further review. If the pattern meets the guidelines, we will re-publish it to the Block Pattern Directory. Thanks for your patience with us volunteer reviewers!',
+			'wporg-patterns'
+		),
 		esc_html( $pattern_title ),
 		esc_html( $reason )
 	);
@@ -200,10 +206,10 @@ function notify_pattern_unlisted( $post ) {
 	}
 
 	$reasons = get_the_terms( $post, REASON );
-	$reason = '';
+	$reason  = '';
 	if ( ! empty( $reasons ) ) {
 		$reason_term = reset( $reasons );
-		$reason = wp_strip_all_tags( $reason_term->description );
+		$reason      = wp_strip_all_tags( $reason_term->description );
 	}
 
 	if ( ! $reason ) {
@@ -214,7 +220,8 @@ function notify_pattern_unlisted( $post ) {
 
 	$message = sprintf(
 		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Pattern URL;
-		esc_html__( 'Hello,
+		esc_html__(
+			'Hello,
 
 Your pattern, %1$s, has been unlisted from the Block Pattern Directory due to the following reason:
 
@@ -222,7 +229,9 @@ Your pattern, %1$s, has been unlisted from the Block Pattern Directory due to th
 
 If you would like to resubmit your pattern, please make sure it follows the guidelines:
 
-%3$s', 'wporg-patterns' ),
+%3$s',
+			'wporg-patterns'
+		),
 		esc_html( $pattern_title ),
 		esc_html( $reason ),
 		'https://wordpress.org/patterns/about/'

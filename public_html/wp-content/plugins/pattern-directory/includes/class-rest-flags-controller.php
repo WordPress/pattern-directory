@@ -160,12 +160,14 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 		}
 
 		// Check if the user has already submitted a flag for the pattern.
-		$flag_check = new WP_Query( array(
-			'post_type'   => $this->post_type,
-			'post_parent' => $parent->ID,
-			'post_status' => 'pending',
-			'author'      => get_current_user_id(),
-		) );
+		$flag_check = new WP_Query(
+			array(
+				'post_type'   => $this->post_type,
+				'post_parent' => $parent->ID,
+				'post_status' => 'pending',
+				'author'      => get_current_user_id(),
+			)
+		);
 		if ( $flag_check->found_posts > 0 ) {
 			return new WP_Error(
 				'rest_already_flagged',

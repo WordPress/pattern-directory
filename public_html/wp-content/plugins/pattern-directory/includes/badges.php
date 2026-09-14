@@ -33,14 +33,16 @@ function status_transitions( $new_status, $old_status, $post ) {
 		assign_badge( 'pattern-author', $post->post_author );
 	} elseif ( 'publish' === $old_status && 'publish' !== $new_status ) {
 		// If the user has no published patterns, remove the badge.
-		$other_posts = get_posts( array(
-			'post_type'   => PATTERN_POST_TYPE,
-			'post_status' => 'publish',
-			'author'      => $post->post_author,
-			'exclude'     => $post->ID,
-			'numberposts' => 1,
-			'fields'      => 'ids',
-		) );
+		$other_posts = get_posts(
+			array(
+				'post_type'   => PATTERN_POST_TYPE,
+				'post_status' => 'publish',
+				'author'      => $post->post_author,
+				'exclude'     => $post->ID,
+				'numberposts' => 1,
+				'fields'      => 'ids',
+			)
+		);
 
 		if ( ! $other_posts ) {
 			remove_badge( 'pattern-author', $post->post_author );

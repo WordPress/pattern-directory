@@ -129,7 +129,7 @@ function flag_list_table_render_custom_columns( $column_name, $post_id ) {
  */
 function flag_list_table_post_states( $post_states, $post ) {
 	if ( FLAG === get_post_type( $post ) && RESOLVED_STATUS === get_post_status( $post ) ) {
-		$status_obj = get_post_status_object( RESOLVED_STATUS );
+		$status_obj                     = get_post_status_object( RESOLVED_STATUS );
 		$post_states[ RESOLVED_STATUS ] = $status_obj->label;
 	}
 
@@ -322,7 +322,7 @@ function flag_list_table_views( $views ) {
 		);
 
 		$post_type_obj = get_post_type_object( FLAG );
-		$return = array(
+		$return        = array(
 			'return' => sprintf(
 				'<a href="%s">%s</a>',
 				esc_url( add_query_arg( 'post_type', FLAG, admin_url( 'edit.php' ) ) ),
@@ -330,8 +330,8 @@ function flag_list_table_views( $views ) {
 			),
 		);
 
-		$parent_title      = _draft_or_post_title( $parent_id );
-		$subtitle = array(
+		$parent_title = _draft_or_post_title( $parent_id );
+		$subtitle     = array(
 			'filtered' => sprintf(
 				'<strong>%s</strong>',
 				sprintf( __( 'Viewing flags for &#8220;%s&#8221;', 'wporg-patterns' ), $parent_title )
@@ -346,7 +346,7 @@ function flag_list_table_views( $views ) {
 		$resolved = array( $views['resolved'] );
 		unset( $views['resolved'] );
 
-		$split        = 1 + array_search( ( isset( $views['pending'] ) ? 'pending' : 'all' ), array_keys( $views ), true );
+		$split = 1 + array_search( ( isset( $views['pending'] ) ? 'pending' : 'all' ), array_keys( $views ), true );
 		$views = array_merge( array_slice( $views, 0, $split ), $resolved, array_slice( $views, $split ) );
 	}
 

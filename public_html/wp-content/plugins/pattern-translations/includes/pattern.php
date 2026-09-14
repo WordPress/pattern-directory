@@ -5,13 +5,13 @@ use GlotPress_Translate_Bridge;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 class Pattern {
-	public $ID = null;
-	public $title = '';
-	public $name = '';
+	public $ID          = null;
+	public $title       = '';
+	public $name        = '';
 	public $description = '';
-	public $html = '';
-	public $source_url = '';
-	public $keywords = '';
+	public $html        = '';
+	public $source_url  = '';
+	public $keywords    = '';
 
 	public $locale = 'en_US';
 	public $parent = false;
@@ -66,7 +66,7 @@ class Pattern {
 		$translated         = $parser->replace_strings_with_kses( $translations );
 		$translated->locale = $locale;
 		// Reset the ID.
-		$translated->ID     = 0;
+		$translated->ID = 0;
 
 		$existing = self::find_existing_translation( (int) $parent->ID, $locale );
 		if ( $existing ) {
@@ -95,22 +95,24 @@ class Pattern {
 			return null;
 		}
 
-		$children = get_posts( array(
-			'post_parent' => $parent_id,
-			'post_type'   => POST_TYPE,
-			'post_status' => 'any',
-			'meta_query'  => array(
-				'relation' => 'AND',
-				array(
-					'key'   => 'wpop_locale',
-					'value' => $locale,
+		$children = get_posts(
+			array(
+				'post_parent' => $parent_id,
+				'post_type'   => POST_TYPE,
+				'post_status' => 'any',
+				'meta_query'  => array(
+					'relation' => 'AND',
+					array(
+						'key'   => 'wpop_locale',
+						'value' => $locale,
+					),
+					array(
+						'key'   => 'wpop_is_translation',
+						'value' => 1,
+					),
 				),
-				array(
-					'key'   => 'wpop_is_translation',
-					'value' => 1,
-				),
-			),
-		) );
+			)
+		);
 
 		return $children ? array_shift( $children ) : null;
 	}
@@ -152,7 +154,7 @@ class Pattern {
 				'post_date' => 'DESC',
 			),
 			// Only select en_US patterns.
-			'meta_query' => array(
+			'meta_query'     => array(
 				array(
 					'key'   => 'wpop_locale',
 					'value' => 'en_US',

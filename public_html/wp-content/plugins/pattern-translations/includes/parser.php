@@ -57,7 +57,7 @@ class PatternParser {
 
 	public function block_parser_replace_strings( array &$block, array $replacements ): array {
 		$parser = $this->parsers[ $block['blockName'] ] ?? $this->fallback;
-		$block = $parser->replace_strings( $block, $replacements );
+		$block  = $parser->replace_strings( $block, $replacements );
 
 		foreach ( $block['innerBlocks'] as &$inner_block ) {
 			$inner_block = $this->block_parser_replace_strings( $inner_block, $replacements );
@@ -81,7 +81,7 @@ class PatternParser {
 
 		if ( ! empty( $this->pattern->keywords ) ) {
 			$keywords = explode( ', ', $this->pattern->keywords );
-			$strings = array_merge( $strings, $keywords );
+			$strings  = array_merge( $strings, $keywords );
 		}
 
 		foreach ( $blocks as $block ) {
@@ -101,8 +101,8 @@ class PatternParser {
 	}
 
 	public function replace_strings( array $replacements ): Pattern {
-		$translated = clone $this->pattern;
-		$translated->title = $replacements[ $translated->title ] ?? $translated->title;
+		$translated              = clone $this->pattern;
+		$translated->title       = $replacements[ $translated->title ] ?? $translated->title;
 		$translated->description = $replacements[ $translated->description ] ?? $translated->description;
 
 		$translated_keywords = array();

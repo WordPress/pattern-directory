@@ -7,8 +7,8 @@ if ( ! isset( $block->context['postId'] ) ) {
 }
 $current_post_id = $block->context['postId'];
 
-$view_url = get_pattern_preview_url( $current_post_id );
-$has_link = isset( $attributes['isLink'] ) && true == $attributes['isLink'];
+$view_url    = get_pattern_preview_url( $current_post_id );
+$has_link    = isset( $attributes['isLink'] ) && true == $attributes['isLink'];
 $is_lazyload = isset( $attributes['lazyLoad'] ) && true === $attributes['lazyLoad'];
 
 $viewport_width = get_post_meta( $current_post_id, 'wpop_viewport_width', true );
@@ -20,25 +20,25 @@ if ( ! $viewport_width ) {
 $cache_key = '20240223'; // To break out of cached image.
 
 $view_url = add_query_arg( 'v', $cache_key, $view_url );
-$url = add_query_arg(
+$url      = add_query_arg(
 	array(
-		'scale' => 2,
-		'w' => 800,
-		'vpw' => $viewport_width,
-		'vph' => 300, // Smaller than the vast majority of patterns to avoid whitespace.
+		'scale'         => 2,
+		'w'             => 800,
+		'vpw'           => $viewport_width,
+		'vph'           => 300, // Smaller than the vast majority of patterns to avoid whitespace.
 		'screen_height' => 3600, // Max height of a screenshot.
 	),
 	'https://s0.wp.com/mshots/v1/' . urlencode( $view_url ),
 );
 
 // Initial state to pass to Interactivity API.
-$init_state = array(
+$init_state    = array(
 	'base64Image' => '',
-	'src' => sanitize_url( $url ),
-	'alt' => wp_strip_all_tags( get_the_title( $current_post_id ) ),
-	'attempts' => 0,
+	'src'         => sanitize_url( $url ),
+	'alt'         => wp_strip_all_tags( get_the_title( $current_post_id ) ),
+	'attempts'    => 0,
 	'shouldRetry' => true,
-	'hasError' => false,
+	'hasError'    => false,
 );
 $encoded_state = wp_json_encode( $init_state );
 

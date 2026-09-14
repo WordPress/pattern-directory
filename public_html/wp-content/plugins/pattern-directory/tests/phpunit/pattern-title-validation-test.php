@@ -19,10 +19,10 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 	 * Setup fixtures that are shared across all tests.
 	 */
 	public static function wpSetUpBeforeClass( $factory ) {
-		self::$pattern_id = $factory->post->create(
+		self::$pattern_id    = $factory->post->create(
 			array( 'post_type' => POST_TYPE )
 		);
-		self::$user = $factory->user->create(
+		self::$user          = $factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
@@ -53,7 +53,7 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 	 */
 	public function data_valid_title() {
 		$defaults = array(
-			'status' => 'publish',
+			'status'  => 'publish',
 			'content' => self::$valid_content,
 		);
 		return array(
@@ -65,8 +65,8 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 			),
 			array(
 				array(
-					'title' => '',
-					'status' => 'draft',
+					'title'   => '',
+					'status'  => 'draft',
 					'content' => self::$valid_content,
 				),
 			),
@@ -78,10 +78,12 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 	 */
 	public function test_valid_title_already_set() {
 		wp_set_current_user( self::$user );
-		wp_update_post( array(
-			'ID' => self::$pattern_id,
-			'post_title' => 'Stylized Quote and Citation',
-		) );
+		wp_update_post(
+			array(
+				'ID'         => self::$pattern_id,
+				'post_title' => 'Stylized Quote and Citation',
+			)
+		);
 
 		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
 		$request->set_header( 'content-type', 'application/json' );
@@ -117,7 +119,7 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 	 */
 	public function data_invalid_title() {
 		$defaults = array(
-			'status' => 'publish',
+			'status'  => 'publish',
 			'content' => self::$valid_content,
 		);
 		return array(
@@ -157,10 +159,12 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 	 */
 	public function test_invalid_empty_existing_title() {
 		wp_set_current_user( self::$user );
-		wp_update_post( array(
-			'ID' => self::$pattern_id,
-			'post_title' => '',
-		) );
+		wp_update_post(
+			array(
+				'ID'         => self::$pattern_id,
+				'post_title' => '',
+			)
+		);
 
 		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
 		$request->set_header( 'content-type', 'application/json' );

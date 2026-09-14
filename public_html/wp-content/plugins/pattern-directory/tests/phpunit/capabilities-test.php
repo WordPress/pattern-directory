@@ -25,14 +25,23 @@ class Capabilities_Test extends WP_UnitTestCase {
 	 * For the purposes of these tests, admins and editors have the same capabilities.
 	 */
 	protected $admin_editor_caps = array(
-		'delete_others_patterns', 'delete_patterns', 'delete_private_patterns', 'delete_published_patterns',
-		'edit_others_patterns', 'edit_patterns', 'edit_private_patterns', 'edit_published_patterns',
-		'publish_patterns', 'read_private_patterns',
+		'delete_others_patterns',
+		'delete_patterns',
+		'delete_private_patterns',
+		'delete_published_patterns',
+		'edit_others_patterns',
+		'edit_patterns',
+		'edit_private_patterns',
+		'edit_published_patterns',
+		'publish_patterns',
+		'read_private_patterns',
 	);
 
 	protected $author_caps = array(
-		'delete_patterns', 'delete_published_patterns',
-		'edit_patterns', 'edit_published_patterns',
+		'delete_patterns',
+		'delete_published_patterns',
+		'edit_patterns',
+		'edit_published_patterns',
 		'publish_patterns',
 	);
 
@@ -55,17 +64,17 @@ class Capabilities_Test extends WP_UnitTestCase {
 	 * Set up shared fixtures.
 	 */
 	public static function wpSetUpBeforeClass( $factory ) {
-		self::$user_admin = $factory->user->create(
+		self::$user_admin       = $factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
 		);
-		self::$user_editor = $factory->user->create(
+		self::$user_editor      = $factory->user->create(
 			array(
 				'role' => 'editor',
 			)
 		);
-		self::$user_author = $factory->user->create(
+		self::$user_author      = $factory->user->create(
 			array(
 				'role' => 'author',
 			)
@@ -75,7 +84,7 @@ class Capabilities_Test extends WP_UnitTestCase {
 				'role' => 'contributor',
 			)
 		);
-		self::$user_subscriber = $factory->user->create(
+		self::$user_subscriber  = $factory->user->create(
 			array(
 				'role' => 'subscriber',
 			)
@@ -102,7 +111,7 @@ class Capabilities_Test extends WP_UnitTestCase {
 				'post_author' => self::$user_not_on_site,
 			)
 		);
-		self::$post_id = $factory->post->create();
+		self::$post_id      = $factory->post->create();
 	}
 
 	/**
@@ -243,7 +252,7 @@ class Capabilities_Test extends WP_UnitTestCase {
 	public function test_pattern_caps_contributor() {
 		wp_set_current_user( self::$user_contributor );
 
-		$caps = $this->merge_caps( $this->contributor_caps, $this->admin_editor_caps );
+		$caps           = $this->merge_caps( $this->contributor_caps, $this->admin_editor_caps );
 		$front_end_caps = array_merge( $caps, $this->granted_caps );
 
 		// Test front end caps.
@@ -272,7 +281,7 @@ class Capabilities_Test extends WP_UnitTestCase {
 	public function test_pattern_caps_subscriber() {
 		wp_set_current_user( self::$user_subscriber );
 
-		$caps = $this->merge_caps( $this->subscriber_caps, $this->admin_editor_caps );
+		$caps           = $this->merge_caps( $this->subscriber_caps, $this->admin_editor_caps );
 		$front_end_caps = array_merge( $caps, $this->granted_caps );
 
 		// Test front end caps.
@@ -327,7 +336,7 @@ class Capabilities_Test extends WP_UnitTestCase {
 	public function test_pattern_caps_user_not_on_site() {
 		wp_set_current_user( self::$user_not_on_site );
 
-		$caps = $this->merge_caps( array(), $this->admin_editor_caps );
+		$caps           = $this->merge_caps( array(), $this->admin_editor_caps );
 		$front_end_caps = array_merge( $caps, $this->granted_caps );
 
 		// Test front end caps.

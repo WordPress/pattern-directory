@@ -55,8 +55,8 @@ function flag_status_change( $new_status, $old_status, $post ) {
 		return;
 	}
 
-	$new = get_post_status_object( $new_status );
-	$user = get_user_by( 'id', $post->post_author );
+	$new         = get_post_status_object( $new_status );
+	$user        = get_user_by( 'id', $post->post_author );
 	$user_handle = sprintf(
 		'@%s',
 		$user->user_login

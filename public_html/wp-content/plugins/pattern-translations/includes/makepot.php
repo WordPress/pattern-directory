@@ -42,9 +42,9 @@ class PatternMakepot {
 				if ( ! isset( $entries[ $string ] ) ) {
 					$entries[ $string ] = new \Translation_Entry(
 						array(
-							'singular' => $string,
+							'singular'           => $string,
 							'extracted_comments' => "Found in the '{$pattern->title}' pattern.",
-							'references' => array(),
+							'references'         => array(),
 						)
 					);
 				}
@@ -146,11 +146,11 @@ class PatternMakepot {
 				$po->add_entry(
 					new \Translation_Entry(
 						array(
-							'context' => $original->context,
-							'singular' => $original->singular,
-							'plural' => $original->plural,
+							'context'            => $original->context,
+							'singular'           => $original->singular,
+							'plural'             => $original->plural,
 							'extracted_comments' => $original->comment,
-							'references' => $original_references, // Only include references not covered by our import
+							'references'         => $original_references, // Only include references not covered by our import
 						)
 					)
 				);
@@ -178,9 +178,12 @@ class PatternMakepot {
 
 		// Load any GlotPress plugins as needed.
 		$plugins = get_option( 'active_plugins', array() );
-		array_walk( $plugins, function ( $plugin ) {
-			include_once trailingslashit( WP_PLUGIN_DIR ) . $plugin;
-		} );
+		array_walk(
+			$plugins,
+			function ( $plugin ) {
+				include_once trailingslashit( WP_PLUGIN_DIR ) . $plugin;
+			}
+		);
 
 		// Run the GlotPress init routines.
 		if ( ! did_action( 'gp_init' ) ) {

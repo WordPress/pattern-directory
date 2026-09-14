@@ -43,23 +43,27 @@ class Pattern_Collection_Scope_Test extends WP_UnitTestCase {
 		self::$moderator = $factory->user->create( array( 'role' => 'editor' ) );
 
 		foreach ( array( 'publish', 'draft', UNLISTED_STATUS, SPAM_STATUS ) as $status ) {
-			$factory->post->create( array(
-				'post_type'   => POST_TYPE,
-				'post_author' => self::$victim,
-				'post_status' => $status,
-				'post_title'  => "zqx{$status} secret",
-			) );
+			$factory->post->create(
+				array(
+					'post_type'   => POST_TYPE,
+					'post_author' => self::$victim,
+					'post_status' => $status,
+					'post_title'  => "zqx{$status} secret",
+				)
+			);
 
 			/*
 			 * The caller owns one of each too. Without these a wrongly applied restriction reads the
 			 * same as a correctly empty result, which is how the author-filter handling slipped through.
 			 */
-			$factory->post->create( array(
-				'post_type'   => POST_TYPE,
-				'post_author' => self::$attacker,
-				'post_status' => $status,
-				'post_title'  => "own{$status} pattern",
-			) );
+			$factory->post->create(
+				array(
+					'post_type'   => POST_TYPE,
+					'post_author' => self::$attacker,
+					'post_status' => $status,
+					'post_title'  => "own{$status} pattern",
+				)
+			);
 		}
 	}
 
@@ -111,12 +115,20 @@ class Pattern_Collection_Scope_Test extends WP_UnitTestCase {
 	 * @param string $status A status the directory keeps out of public view.
 	 */
 	public function test_search_is_not_an_oracle_over_other_authors( $status ) {
-		$hit  = $this->collection_as( self::$attacker, array(
-			'status' => $status, 'search' => "zqx{$status}",
-		) );
-		$miss = $this->collection_as( self::$attacker, array(
-			'status' => $status, 'search' => 'zqxnothingmatches',
-		) );
+		$hit  = $this->collection_as(
+			self::$attacker,
+			array(
+				'status' => $status,
+				'search' => "zqx{$status}",
+			)
+		);
+		$miss = $this->collection_as(
+			self::$attacker,
+			array(
+				'status' => $status,
+				'search' => 'zqxnothingmatches',
+			)
+		);
 
 		$this->assertSame( $miss['total'], $hit['total'], 'A matching search was distinguishable from a non-matching one.' );
 	}
@@ -160,15 +172,29 @@ class Pattern_Collection_Scope_Test extends WP_UnitTestCase {
 	public function test_author_name_does_not_override_the_scoping( $status ) {
 		$slug = get_userdata( self::$victim )->user_nicename;
 
-		$plain  = $this->collection_as( self::$attacker, array(
-			'status' => $status, 'author_name' => $slug,
-		) );
-		$hit    = $this->collection_as( self::$attacker, array(
-			'status' => $status, 'author_name' => $slug, 'search' => "zqx{$status}",
-		) );
-		$miss   = $this->collection_as( self::$attacker, array(
-			'status' => $status, 'author_name' => $slug, 'search' => 'zqxnothingmatches',
-		) );
+		$plain = $this->collection_as(
+			self::$attacker,
+			array(
+				'status'      => $status,
+				'author_name' => $slug,
+			)
+		);
+		$hit   = $this->collection_as(
+			self::$attacker,
+			array(
+				'status'      => $status,
+				'author_name' => $slug,
+				'search'      => "zqx{$status}",
+			)
+		);
+		$miss  = $this->collection_as(
+			self::$attacker,
+			array(
+				'status'      => $status,
+				'author_name' => $slug,
+				'search'      => 'zqxnothingmatches',
+			)
+		);
 
 		$this->assertSame( 0, $plain['total'] );
 		$this->assertSame( $miss['total'], $hit['total'], 'A matching search was distinguishable through `author_name`.' );
@@ -182,9 +208,13 @@ class Pattern_Collection_Scope_Test extends WP_UnitTestCase {
 	 * @param string $status A status the directory keeps out of public view.
 	 */
 	public function test_author_param_does_not_override_the_scoping( $status ) {
-		$result = $this->collection_as( self::$attacker, array(
-			'status' => $status, 'author' => array( self::$victim ),
-		) );
+		$result = $this->collection_as(
+			self::$attacker,
+			array(
+				'status' => $status,
+				'author' => array( self::$victim ),
+			)
+		);
 
 		$this->assertSame( 0, $result['total'] );
 		$this->assertSame( 0, $result['returned'] );
@@ -198,9 +228,13 @@ class Pattern_Collection_Scope_Test extends WP_UnitTestCase {
 	 * @param string $status A status the directory keeps out of public view.
 	 */
 	public function test_excluding_the_caller_returns_nothing( $status ) {
-		$result = $this->collection_as( self::$attacker, array(
-			'status' => $status, 'author_exclude' => array( self::$attacker ),
-		) );
+		$result = $this->collection_as(
+			self::$attacker,
+			array(
+				'status'         => $status,
+				'author_exclude' => array( self::$attacker ),
+			)
+		);
 
 		$this->assertSame( 0, $result['total'] );
 		$this->assertSame( 0, $result['returned'] );
@@ -214,9 +248,13 @@ class Pattern_Collection_Scope_Test extends WP_UnitTestCase {
 	 * @param string $status A status the directory keeps out of public view.
 	 */
 	public function test_asking_for_own_patterns_still_returns_them( $status ) {
-		$result = $this->collection_as( self::$attacker, array(
-			'status' => $status, 'author' => array( self::$attacker ),
-		) );
+		$result = $this->collection_as(
+			self::$attacker,
+			array(
+				'status' => $status,
+				'author' => array( self::$attacker ),
+			)
+		);
 
 		$this->assertSame( 1, $result['total'] );
 		$this->assertSame( 1, $result['returned'] );
@@ -230,9 +268,13 @@ class Pattern_Collection_Scope_Test extends WP_UnitTestCase {
 	 * @param string $status A status the directory keeps out of public view.
 	 */
 	public function test_excluding_another_author_keeps_own_patterns( $status ) {
-		$result = $this->collection_as( self::$attacker, array(
-			'status' => $status, 'author_exclude' => array( self::$victim ),
-		) );
+		$result = $this->collection_as(
+			self::$attacker,
+			array(
+				'status'         => $status,
+				'author_exclude' => array( self::$victim ),
+			)
+		);
 
 		$this->assertSame( 1, $result['total'] );
 		$this->assertSame( 1, $result['returned'] );

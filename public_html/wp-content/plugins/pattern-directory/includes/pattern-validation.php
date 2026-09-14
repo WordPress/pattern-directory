@@ -44,7 +44,7 @@ function strip_basic_html( $html ) {
  * @return bool Whether the block has been edited.
  */
 function is_not_empty_block( $block ) {
-	$registry = \WP_Block_Type_Registry::get_instance();
+	$registry   = \WP_Block_Type_Registry::get_instance();
 	$block_type = $registry->get_registered( $block['blockName'] );
 
 	// Most dynamic blocks don't need custom content, but there are some
@@ -71,7 +71,7 @@ function is_not_empty_block( $block ) {
 	}
 
 	// Check if the attributes are different from the default attributes.
-	$block_attrs = $block_type->prepare_attributes_for_render( $block['attrs'] );
+	$block_attrs   = $block_type->prepare_attributes_for_render( $block['attrs'] );
 	$default_attrs = $block_type->prepare_attributes_for_render( array() );
 	if ( $block_attrs != $default_attrs ) {
 		return true;
@@ -116,9 +116,9 @@ function validate_content( $prepared_post, $request ) {
 	}
 
 	// Parse the exact content that will be stored: normalising it first could hide a block from validation.
-	$blocks = parse_blocks( $content );
+	$blocks       = parse_blocks( $content );
 	$blocks_queue = $blocks;
-	$all_blocks = array();
+	$all_blocks   = array();
 
 	// Loop over all the nested blocks to flatten the block list into 1 dimension.
 	while ( count( $blocks_queue ) > 0 ) { // phpcs:ignore -- inline count OK.
@@ -138,11 +138,14 @@ function validate_content( $prepared_post, $request ) {
 	}
 
 	// Check that each block in the list has a blockName and is registered.
-	$registry = \WP_Block_Type_Registry::get_instance();
-	$invalid_blocks = array_filter( $all_blocks, function ( $block ) use ( $registry ) {
-		$block_type = $registry->get_registered( $block['blockName'] );
-		return is_null( $block['blockName'] ) || is_null( $block_type );
-	} );
+	$registry       = \WP_Block_Type_Registry::get_instance();
+	$invalid_blocks = array_filter(
+		$all_blocks,
+		function ( $block ) use ( $registry ) {
+			$block_type = $registry->get_registered( $block['blockName'] );
+			return is_null( $block['blockName'] ) || is_null( $block_type );
+		}
+	);
 
 	if ( count( $invalid_blocks ) ) {
 		return new \WP_Error(
@@ -548,8 +551,8 @@ function validate_status( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
-	$post_type      = get_post_type_object( POST_TYPE );
-	$target_status  = isset( $request['status'] ) ? $request['status'] : '';
+	$post_type     = get_post_type_object( POST_TYPE );
+	$target_status = isset( $request['status'] ) ? $request['status'] : '';
 
 	// Read through the trash: a trashed pattern still carries the status the moderator set.
 	$current_status = isset( $prepared_post->ID ) ? get_moderated_status( $prepared_post->ID ) : '';

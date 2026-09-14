@@ -26,7 +26,7 @@ add_shortcode(
 		return esc_url(
 			add_query_arg(
 				array(
-					'action' => 'draft',
+					'action'   => 'draft',
 					'_wpnonce' => wp_create_nonce( 'draft-' . $post_id ),
 				),
 				get_the_permalink()

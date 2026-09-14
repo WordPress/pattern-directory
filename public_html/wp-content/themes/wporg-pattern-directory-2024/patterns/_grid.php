@@ -67,11 +67,13 @@
 
 		<!-- wp:paragraph {"align":"center"} -->
 		<p class="has-text-align-center">
-			<?php printf(
+			<?php
+			printf(
 				/* translators: %s is url of the homepage. */
 				wp_kses_post( __( 'View <a href="%s">all patterns</a> or try a different search. ', 'wporg-patterns' ) ),
 				esc_url( home_url( '/' ) )
-			); ?>
+			);
+			?>
 		</p>
 		<!-- /wp:paragraph -->
 	<!-- /wp:query-no-results -->

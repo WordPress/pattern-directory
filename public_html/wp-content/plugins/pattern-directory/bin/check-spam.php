@@ -41,26 +41,26 @@ if ( ! $opts['apply'] ) {
 }
 
 $args = array(
-	'post_type' => POST_TYPE,
-	'post_status' => $opts['post_status'],
+	'post_type'      => POST_TYPE,
+	'post_status'    => $opts['post_status'],
 	'posts_per_page' => $opts['per_page'] ?: -1,
-	'post_parent' => 0,
-	'orderby' => 'date',
-	'order' => 'DESC',
+	'post_parent'    => 0,
+	'orderby'        => 'date',
+	'order'          => 'DESC',
 );
 if ( isset( $opts['post'] ) ) {
 	$args = array(
 		'post_type' => POST_TYPE,
-		'p' => absint( $opts['post'] ),
+		'p'         => absint( $opts['post'] ),
 	);
 }
 
 $query = new \WP_Query( $args );
 
 $count_checked = 0;
-$count_spam = 0;
+$count_spam    = 0;
 while ( $query->have_posts() ) {
-	$count_checked++;
+	++$count_checked;
 	$query->the_post();
 	$pattern = get_post();
 
@@ -77,7 +77,7 @@ while ( $query->have_posts() ) {
 	);
 
 	if ( $is_spam ) {
-		$count_spam++;
+		++$count_spam;
 
 		if ( $opts['verbose'] ) {
 			echo "{$pattern->ID}: Spam found: $spam_reason\n"; // phpcs:ignore
@@ -86,7 +86,7 @@ while ( $query->have_posts() ) {
 		if ( $opts['apply'] ) {
 			wp_update_post(
 				array(
-					'ID' => $pattern->ID,
+					'ID'          => $pattern->ID,
 					'post_status' => SPAM_STATUS,
 				)
 			);

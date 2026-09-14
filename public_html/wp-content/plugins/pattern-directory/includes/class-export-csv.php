@@ -1,6 +1,7 @@
 <?php
 
 namespace WordCamp\Utilities;
+
 defined( 'WPINC' ) || die();
 
 /**
@@ -46,11 +47,14 @@ class Export_CSV {
 	public function __construct( array $options = array() ) {
 		$this->error = new \WP_Error();
 
-		$options = wp_parse_args( $options, array(
-			'filename' => array(),
-			'headers'  => array(),
-			'data'     => array(),
-		) );
+		$options = wp_parse_args(
+			$options,
+			array(
+				'filename' => array(),
+				'headers'  => array(),
+				'data'     => array(),
+			)
+		);
 
 		if ( ! empty( $options['filename'] ) ) {
 			$this->set_filename( $options['filename'] );
@@ -88,14 +92,17 @@ class Export_CSV {
 			$name_segments = (array) $name_segments;
 		}
 
-		$name_segments = array_map( function ( $segment ) {
-			$segment = strtolower( $segment );
-			$segment = str_replace( '_', '-', $segment );
-			$segment = sanitize_file_name( $segment );
-			$segment = str_replace( '.csv', '', $segment );
+		$name_segments = array_map(
+			function ( $segment ) {
+				$segment = strtolower( $segment );
+				$segment = str_replace( '_', '-', $segment );
+				$segment = sanitize_file_name( $segment );
+				$segment = str_replace( '.csv', '', $segment );
 
-			return $segment;
-		}, $name_segments );
+				return $segment;
+			},
+			$name_segments
+		);
 
 		if ( ! empty( $name_segments ) ) {
 			$this->filename = implode( '_', $name_segments ) . '.csv';

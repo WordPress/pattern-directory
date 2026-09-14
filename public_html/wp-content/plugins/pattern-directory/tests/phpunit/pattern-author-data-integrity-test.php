@@ -40,20 +40,26 @@ class Pattern_Author_Data_Integrity_Test extends WP_UnitTestCase {
 	 * round-trips a record will send it straight back.
 	 */
 	public function test_round_trip_without_a_reason_is_allowed() {
-		$pattern_id = self::factory()->post->create( array(
-			'post_type'   => POST_TYPE,
-			'post_author' => self::$author,
-			'post_status' => 'publish',
-		) );
+		$pattern_id = self::factory()->post->create(
+			array(
+				'post_type'   => POST_TYPE,
+				'post_author' => self::$author,
+				'post_status' => 'publish',
+			)
+		);
 
 		wp_set_current_user( self::$author );
 
 		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . $pattern_id );
 		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( wp_json_encode( array(
-			'excerpt'  => 'An edit that changes no terms.',
-			FLAG_REASON => array(),
-		) ) );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'excerpt'   => 'An edit that changes no terms.',
+					FLAG_REASON => array(),
+				)
+			)
+		);
 		$response = rest_do_request( $request );
 
 		$this->assertFalse( $response->is_error(), 'An unchanged flag-reason field was treated as a write.' );
@@ -67,14 +73,19 @@ class Pattern_Author_Data_Integrity_Test extends WP_UnitTestCase {
 	 * no-op allowance above only covers the empty case; this records the boundary.
 	 */
 	public function test_round_trip_with_an_existing_reason_is_still_refused_by_core() {
-		$reason     = self::factory()->term->create( array(
-			'taxonomy' => FLAG_REASON, 'name' => 'Guidelines',
-		) );
-		$pattern_id = self::factory()->post->create( array(
-			'post_type'   => POST_TYPE,
-			'post_author' => self::$author,
-			'post_status' => UNLISTED_STATUS,
-		) );
+		$reason     = self::factory()->term->create(
+			array(
+				'taxonomy' => FLAG_REASON,
+				'name'     => 'Guidelines',
+			)
+		);
+		$pattern_id = self::factory()->post->create(
+			array(
+				'post_type'   => POST_TYPE,
+				'post_author' => self::$author,
+				'post_status' => UNLISTED_STATUS,
+			)
+		);
 		wp_set_object_terms( $pattern_id, array( $reason ), FLAG_REASON );
 
 		wp_set_current_user( self::$author );
@@ -94,14 +105,19 @@ class Pattern_Author_Data_Integrity_Test extends WP_UnitTestCase {
 	 * clear it from their own pattern over REST.
 	 */
 	public function test_author_cannot_strip_the_reason_from_their_own_unlisted_pattern() {
-		$reason     = self::factory()->term->create( array(
-			'taxonomy' => FLAG_REASON, 'name' => 'Guidelines',
-		) );
-		$pattern_id = self::factory()->post->create( array(
-			'post_type'   => POST_TYPE,
-			'post_author' => self::$author,
-			'post_status' => UNLISTED_STATUS,
-		) );
+		$reason     = self::factory()->term->create(
+			array(
+				'taxonomy' => FLAG_REASON,
+				'name'     => 'Guidelines',
+			)
+		);
+		$pattern_id = self::factory()->post->create(
+			array(
+				'post_type'   => POST_TYPE,
+				'post_author' => self::$author,
+				'post_status' => UNLISTED_STATUS,
+			)
+		);
 		wp_set_object_terms( $pattern_id, array( $reason ), FLAG_REASON );
 
 		wp_set_current_user( self::$author );
@@ -125,12 +141,16 @@ class Pattern_Author_Data_Integrity_Test extends WP_UnitTestCase {
 
 		$create = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern' );
 		$create->set_header( 'content-type', 'application/json' );
-		$create->set_body( wp_json_encode( array(
-			'title'   => 'Recompute hero',
-			'content' => self::THREE_BLOCKS,
-			'status'  => 'publish',
-			'meta'    => array( 'wpop_description' => 'A description.' ),
-		) ) );
+		$create->set_body(
+			wp_json_encode(
+				array(
+					'title'   => 'Recompute hero',
+					'content' => self::THREE_BLOCKS,
+					'status'  => 'publish',
+					'meta'    => array( 'wpop_description' => 'A description.' ),
+				)
+			)
+		);
 		$response = rest_do_request( $create );
 		$this->assertFalse( $response->is_error() );
 
@@ -138,10 +158,14 @@ class Pattern_Author_Data_Integrity_Test extends WP_UnitTestCase {
 
 		$update = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . $pattern_id );
 		$update->set_header( 'content-type', 'application/json' );
-		$update->set_body( wp_json_encode( array(
-			'content' => self::THREE_BLOCKS,
-			'meta'    => array( 'wpop_contains_block_types' => 'core/paragraph' ),
-		) ) );
+		$update->set_body(
+			wp_json_encode(
+				array(
+					'content' => self::THREE_BLOCKS,
+					'meta'    => array( 'wpop_contains_block_types' => 'core/paragraph' ),
+				)
+			)
+		);
 		rest_do_request( $update );
 
 		$this->assertSame( 'core/heading,core/paragraph,core/separator', get_post_meta( $pattern_id, 'wpop_contains_block_types', true ) );

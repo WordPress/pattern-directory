@@ -60,10 +60,12 @@ function render_subpage() {
  * @return array
  */
 function get_snapshot_meta_data() {
-	$earliest_snapshot     = get_snapshots( array(
-		'order'       => 'asc',
-		'numberposts' => 1,
-	) );
+	$earliest_snapshot     = get_snapshots(
+		array(
+			'order'       => 'asc',
+			'numberposts' => 1,
+		)
+	);
 	$latest_snapshot_query = get_snapshots(
 		array(
 			'order'       => 'desc',
@@ -166,16 +168,20 @@ function handle_csv_export() {
 		$csv->emit_file();
 	}
 
-	$csv->set_filename( array(
-		'patterns-snapshots',
-		$start_date->format( 'Ymd' ),
-		$end_date->format( 'Ymd' ),
-	) );
+	$csv->set_filename(
+		array(
+			'patterns-snapshots',
+			$start_date->format( 'Ymd' ),
+			$end_date->format( 'Ymd' ),
+		)
+	);
 
-	$csv->set_column_headers( array_merge(
-		array( 'Date' ),
-		array_keys( $schema['properties'] )
-	) );
+	$csv->set_column_headers(
+		array_merge(
+			array( 'Date' ),
+			array_keys( $schema['properties'] )
+		)
+	);
 
 	if ( $start_date < $earliest ) {
 		$csv->error->add(
@@ -208,9 +214,9 @@ function handle_csv_export() {
 	}
 
 	$query_args = array(
-		'order' => 'asc',
+		'order'          => 'asc',
 		'posts_per_page' => -1,
-		'date_query' => array(
+		'date_query'     => array(
 			array(
 				'after'     => $start_date->format( 'Y-m-d' ),
 				'before'    => $end_date->format( 'Y-m-d' ),

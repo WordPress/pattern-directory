@@ -43,7 +43,7 @@ class Openverse_REST_Controller extends WP_REST_Controller {
 	 */
 	public function get_items( $request ) {
 		$ov_client = new Openverse_Client( $request->get_params() );
-		$results = $ov_client->search();
+		$results   = $ov_client->search();
 
 		if ( is_wp_error( $results ) ) {
 			return $results;
@@ -52,7 +52,7 @@ class Openverse_REST_Controller extends WP_REST_Controller {
 		$data = array();
 		foreach ( $results->results as $item ) {
 			$itemdata = $this->prepare_item_for_response( $item, $request );
-			$data[] = $this->prepare_response_for_collection( $itemdata );
+			$data[]   = $this->prepare_response_for_collection( $itemdata );
 		}
 
 		$response = rest_ensure_response( $data );
@@ -81,9 +81,9 @@ class Openverse_REST_Controller extends WP_REST_Controller {
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		return array(
-			'id' => sanitize_text_field( $item->id ),
-			'title' => sanitize_text_field( $item->title ),
-			'url' => esc_url_raw( $item->url ),
+			'id'        => sanitize_text_field( $item->id ),
+			'title'     => sanitize_text_field( $item->title ),
+			'url'       => esc_url_raw( $item->url ),
 			'thumbnail' => esc_url_raw( $item->thumbnail ),
 		);
 	}
