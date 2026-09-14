@@ -54,7 +54,7 @@ if ( $has_link ) {
 
 ?>
 <div
-	<?php echo get_block_wrapper_attributes( array( 'class' => $classname ) ); // phpcs:ignore ?>
+	<?php echo get_block_wrapper_attributes( array( 'class' => $classname ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 	data-wp-interactive="wporg/patterns/thumbnail"
 	data-wp-context="<?php echo esc_attr( $encoded_state ); ?>"
 	data-wp-init="callbacks.init"

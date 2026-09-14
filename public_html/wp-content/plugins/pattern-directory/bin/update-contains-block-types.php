@@ -10,6 +10,7 @@
  *
  * @package WordPressdotorg\Pattern_Directory
  *
+ * phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI output is plain text.
  * phpcs:disable WordPress.WP.AlternativeFunctions -- Native functions are needed for CLI bootstrap and streams.
  */
 
@@ -95,12 +96,12 @@ while ( $query->have_posts() ) {
 		if ( $result ) {
 			++$meta_updated;
 		} elseif ( $opts['verbose'] ) {
-			echo "Error updating {$pattern_id}.\n"; // phpcs:ignore
+			echo "Error updating {$pattern_id}.\n";
 		}
 	} elseif ( $opts['verbose'] ) {
-		echo "Will update {$pattern_id} with '{$used_blocks}'.\n"; // phpcs:ignore
+		echo "Will update {$pattern_id} with '{$used_blocks}'.\n";
 	}
 }
 
-echo "Updated {$meta_updated} patterns.\n"; // phpcs:ignore
-echo "Done.\n\n"; // phpcs:ignore
+echo "Updated {$meta_updated} patterns.\n";
+echo "Done.\n\n";

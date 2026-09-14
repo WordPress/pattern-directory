@@ -40,14 +40,13 @@ interface BlockParser {
  * Preserve whitespace by wrapping fragments before DOM parsing.
  */
 trait DomUtils {
-	// phpcs:disable WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
 	/**
 	 * Wrap an HTML fragment in a document.
 	 *
 	 * @param string $html HTML fragment.
 	 * @return string Wrapped HTML.
 	 */
-	private function addHtml( string $html ): string {
+	private function add_html( string $html ): string {
 		return "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head><body>$html</body></html>";
 	}
 
@@ -57,7 +56,7 @@ trait DomUtils {
 	 * @param string $html Wrapped HTML.
 	 * @return string HTML fragment.
 	 */
-	private function removeHtml( string $html ): string {
+	private function remove_html( string $html ): string {
 		return preg_replace(
 			array(
 				'/^\s*<html><head><meta http-equiv="Content-Type" content="text\/html; charset=utf-8"><\/head><body>/sm',
@@ -78,12 +77,11 @@ trait DomUtils {
 	private function get_dom( string $html ): \DOMDocument {
 		$previous = libxml_use_internal_errors( true );
 		$dom      = new \DomDocument();
-		$dom->loadHTML( $this->addHtml( $html ), LIBXML_HTML_NODEFDTD | LIBXML_COMPACT );
+		$dom->loadHTML( $this->add_html( $html ), LIBXML_HTML_NODEFDTD | LIBXML_COMPACT );
 		libxml_clear_errors();
 		libxml_use_internal_errors( $previous );
 		return $dom;
 	}
-	// phpcs:enable WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
 }
 
 /**
@@ -145,7 +143,7 @@ trait SwapTags {
 		foreach ( $this->safe_tags as $tag ) {
 			$raw_html = preg_replace(
 				'#(<' . $tag . '([^>]*)>)(.*)(</' . $tag . '>)#',
-				'{' . $tag . '$2' . '}$3' . '{/' . $tag . '}', // phpcs:ignore Generic.Strings.UnnecessaryStringConcat.Found
+				'{' . $tag . '$2}$3{/' . $tag . '}',
 				$raw_html
 			);
 		}
@@ -162,7 +160,7 @@ trait SwapTags {
 		foreach ( $this->safe_tags as $tag ) {
 			$encoded_html = preg_replace(
 				'#({' . $tag . '([^}]*)})(.*)({/' . $tag . '})#',
-				'<' . $tag . '$2' . '>$3' . '</' . $tag . '>', // phpcs:ignore Generic.Strings.UnnecessaryStringConcat.Found
+				'<' . $tag . '$2>$3</' . $tag . '>',
 				$encoded_html
 			);
 		}

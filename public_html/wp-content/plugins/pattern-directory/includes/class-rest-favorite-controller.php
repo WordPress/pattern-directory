@@ -76,10 +76,9 @@ function permissions_check() {
 /**
  * Get the list of favorites for the current user.
  *
- * @param WP_REST_Request $request Full data about the request.
  * @return WP_Error|WP_REST_Response
  */
-function get_items( $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Preserve the REST endpoint callback signature.
+function get_items() {
 	$favorites = get_favorites();
 	return new WP_REST_Response( $favorites, 200 );
 }

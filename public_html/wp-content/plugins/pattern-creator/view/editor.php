@@ -44,7 +44,7 @@ if ( ( is_editing_pattern() && $can_edit ) || ( ! is_editing_pattern() && $is_lo
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 
-	<?php echo $template_html; // phpcs:ignore ?>
+	<?php echo $template_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 
 	<?php wp_footer(); ?>
 </body>

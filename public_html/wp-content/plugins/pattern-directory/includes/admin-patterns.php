@@ -55,7 +55,7 @@ function pattern_list_table_columns( $columns ) {
  * Render the contents of custom list table columns.
  *
  * @param string $column_name Column to render.
- * @param int    $post_id Post ID.
+ * @param int    $post_id     Post ID.
  *
  * @return void
  */
@@ -399,7 +399,7 @@ function handle_pattern_list_table_views( WP_Query $query ) {
  * More post states for the Patterns list table.
  *
  * @param array   $post_states Post state labels.
- * @param WP_Post $post Post being processed.
+ * @param WP_Post $post        Post being processed.
  *
  * @return array
  */

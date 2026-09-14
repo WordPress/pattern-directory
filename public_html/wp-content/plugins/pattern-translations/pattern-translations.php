@@ -51,7 +51,7 @@ if ( defined( 'WP_CLI' ) ) {
  */
 function is_translated_content_allowed( $html ) {
 	$blocks = parse_blocks( $html );
-	while ( count( $blocks ) > 0 ) { // phpcs:ignore -- inline count OK.
+	while ( $blocks ) {
 		$block = array_shift( $blocks );
 
 		if ( ! is_null( $block['blockName'] ) && ! is_block_allowed_in_pattern( $block['blockName'] ) ) {

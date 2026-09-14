@@ -5,8 +5,6 @@
  * @package WordPressdotorg\Pattern_Translations
  */
 
-//phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- DomDocument/DOMXPath returns classes that use camelCasing
-
 namespace WordPressdotorg\Pattern_Translations;
 
 require_once __DIR__ . '/parsers/BlockParser.php';

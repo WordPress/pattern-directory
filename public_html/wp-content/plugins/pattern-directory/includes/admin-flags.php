@@ -91,7 +91,7 @@ function flag_list_table_columns( $columns ) {
  * Render the contents of custom list table columns.
  *
  * @param string $column_name Column to render.
- * @param int    $post_id Post ID.
+ * @param int    $post_id     Post ID.
  *
  * @return void
  */
@@ -128,7 +128,7 @@ function flag_list_table_render_custom_columns( $column_name, $post_id ) {
  * Modify the post states for the flags list table.
  *
  * @param array   $post_states Post state labels.
- * @param WP_Post $post Post being processed.
+ * @param WP_Post $post        Post being processed.
  *
  * @return array
  */
@@ -145,7 +145,7 @@ function flag_list_table_post_states( $post_states, $post ) {
  * Set up row actions for pattern flags list table.
  *
  * @param array   $actions Available actions.
- * @param WP_Post $post Post being processed.
+ * @param WP_Post $post    Post being processed.
  *
  * @return array
  */
@@ -362,7 +362,7 @@ function flag_list_table_views( $views ) {
 /**
  * Update post counts when viewing only flags for a specific pattern.
  *
- * @param object $counts Post counts by status.
+ * @param object $counts    Post counts by status.
  * @param string $post_type Post type slug.
  *
  * @return object
@@ -406,7 +406,7 @@ function flag_list_table_count_flags_for_pattern( $counts, $post_type ) {
  * Set untrashed flag posts to pending status instead of draft.
  *
  * @param string $new_status New post status.
- * @param int    $post_id Post ID.
+ * @param int    $post_id    Post ID.
  *
  * @return string
  */

@@ -51,6 +51,6 @@ class TextNode implements BlockParser {
 			}
 		}
 
-		return parse_blocks( $this->removeHtml( $dom->saveHTML() ) )[0] ?? array();
+		return parse_blocks( $this->remove_html( $dom->saveHTML() ) )[0] ?? array();
 	}
 }

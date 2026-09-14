@@ -15,10 +15,10 @@ use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\has_reache
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 
-add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content', 10, 2 );
-add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_context', 10, 2 );
-add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_attributes', 10, 2 );
-add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_directives', 10, 2 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content' );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_context' );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_attributes' );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_directives' );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_status', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_parent', 11, 2 );
@@ -102,10 +102,9 @@ function is_not_empty_block( $block ) {
  * Validate the pattern content.
  *
  * @param object|\WP_Error $prepared_post Prepared post or a preceding validation error.
- * @param \WP_REST_Request $request       Request being validated.
  * @return object|\WP_Error Validated post or a validation error.
  */
-function validate_content( $prepared_post, $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Preserve the REST pre-insert filter signature.
+function validate_content( $prepared_post ) {
 	if ( is_wp_error( $prepared_post ) ) {
 		return $prepared_post;
 	}
@@ -130,7 +129,7 @@ function validate_content( $prepared_post, $request ) { // phpcs:ignore Generic.
 	$all_blocks   = array();
 
 	// Loop over all the nested blocks to flatten the block list into 1 dimension.
-	while ( count( $blocks_queue ) > 0 ) { // phpcs:ignore -- inline count OK.
+	while ( $blocks_queue ) {
 		$block = array_shift( $blocks_queue );
 
 		// The editor's linebreaks between blocks parse as nameless whitespace-only blocks: separators, not content.
@@ -218,12 +217,11 @@ function validate_content( $prepared_post, $request ) { // phpcs:ignore Generic.
  *
  * Out of context, such blocks expose attributes their parent should populate.
  *
- * @param object           $prepared_post The post object about to be inserted.
- * @param \WP_REST_Request $request       The request.
+ * @param object $prepared_post The post object about to be inserted.
  *
  * @return object|\WP_Error The post object, or an error if a block is used out of context.
  */
-function validate_block_context( $prepared_post, $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Preserve the REST pre-insert filter signature.
+function validate_block_context( $prepared_post ) {
 	if ( is_wp_error( $prepared_post ) ) {
 		return $prepared_post;
 	}
@@ -296,12 +294,11 @@ function block_context_is_valid( $blocks, $ancestors, $registry ) {
  * Reject executable URL schemes carried in block attributes, which are JSON in the block-delimiter
  * comment and therefore never sanitised by KSES.
  *
- * @param object           $prepared_post The post object about to be inserted.
- * @param \WP_REST_Request $request       The request.
+ * @param object $prepared_post The post object about to be inserted.
  *
  * @return object|\WP_Error The post object, or an error if an attribute carries a script URL.
  */
-function validate_block_attributes( $prepared_post, $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Preserve the REST pre-insert filter signature.
+function validate_block_attributes( $prepared_post ) {
 	if ( is_wp_error( $prepared_post ) ) {
 		return $prepared_post;
 	}
@@ -404,12 +401,11 @@ function attribute_has_unsafe_scheme( $value, $is_url = false ) {
  * KSES preserves them wherever they sit, so neither core sanitisation nor the URL-scheme check above
  * catches them.
  *
- * @param object           $prepared_post The post object about to be inserted.
- * @param \WP_REST_Request $request       The request.
+ * @param object $prepared_post The post object about to be inserted.
  *
  * @return object|\WP_Error The post object, or an error if the content carries a directive.
  */
-function validate_block_directives( $prepared_post, $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Preserve the REST pre-insert filter signature.
+function validate_block_directives( $prepared_post ) {
 	if ( is_wp_error( $prepared_post ) ) {
 		return $prepared_post;
 	}

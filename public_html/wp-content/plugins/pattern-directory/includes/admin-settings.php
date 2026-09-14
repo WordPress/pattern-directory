@@ -110,14 +110,13 @@ function admin_init() {
 function render_status_field() {
 	$current = get_option( 'wporg-pattern-default_status' );
 	$statii  = array(
-		'publish' => esc_html__( 'Published', 'wporg-patterns' ),
-		'pending' => esc_html__( 'Pending', 'wporg-patterns' ),
+		'publish' => __( 'Published', 'wporg-patterns' ),
+		'pending' => __( 'Pending', 'wporg-patterns' ),
 	);
 
 	echo '<select name="wporg-pattern-default_status" id="wporg-pattern-default_status" aria-describedby="wporg-pattern-default_status-help">';
 	foreach ( $statii as $value => $label ) {
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		printf( '<option value="%s" %s>%s</option>', $value, selected( $value, $current ), $label );
+		printf( '<option value="%s" %s>%s</option>', esc_attr( $value ), selected( $value, $current, false ), esc_html( $label ) );
 	}
 	echo '</select>';
 	printf( '<p id="wporg-pattern-default_status-help">%s</p>', esc_html__( 'Use this setting to control whether new patterns need moderation before showing up (pending) or not (published).', 'wporg-patterns' ) );

@@ -36,6 +36,8 @@ class Paragraph implements BlockParser {
 	/**
 	 * Replace translated strings in a block.
 	 *
+	 * @todo This needs a fix to properly rebuild innerContent - see ParagraphParserTest.
+	 *
 	 * @param array $block        Parsed block.
 	 * @param array $replacements Translations keyed by original string.
 	 * @return array Updated block.

@@ -33,7 +33,7 @@ $html_id = wp_unique_id( 'pattern-preview-help-' );
 
 ?>
 <div
-	<?php echo get_block_wrapper_attributes(); // phpcs:ignore ?>
+	<?php echo get_block_wrapper_attributes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 	data-wp-interactive="wporg/patterns/preview"
 	data-wp-context="<?php echo esc_attr( $encoded_state ); ?>"
 	data-wp-class--is-mobile-view="state.isWidthNarrow"

@@ -62,7 +62,7 @@ while ( $query->have_posts() ) {
 	$blocks       = parse_blocks( $pattern->post_content );
 	$blocks_queue = $blocks;
 
-	while ( count( $blocks_queue ) > 0 ) { // phpcs:ignore -- inline count OK.
+	while ( $blocks_queue ) {
 		$block = array_shift( $blocks_queue );
 		array_push( $all_blocks, $block );
 		if ( ! empty( $block['innerBlocks'] ) ) {

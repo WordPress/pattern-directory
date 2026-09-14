@@ -84,25 +84,23 @@ class ShortcodeBlock implements BlockParser {
 		return $block;
 	}
 
-	// phpcs:disable WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
 	/**
 	 * Convert an attribute name to shortcode casing.
 	 *
-	 * @param string $camelCaseString Attribute name.
+	 * @param string $camel_case_string Attribute name.
 	 * @return string Shortcode attribute name.
 	 */
-	protected function snake_case( $camelCaseString ) {
+	protected function snake_case( $camel_case_string ) {
 		return ltrim(
 			preg_replace_callback(
 				'/([A-Z]+)/',
 				function ( $matches ) {
 					return '_' . strtolower( $matches[1] ); },
-				$camelCaseString
+				$camel_case_string
 			),
 			'_'
 		);
 	}
-	// phpcs:enable WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
 
 	/**
 	 * Replace the value of a matched shortcode attribute.

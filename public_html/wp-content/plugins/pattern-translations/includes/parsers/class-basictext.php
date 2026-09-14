@@ -53,7 +53,7 @@ class BasicText implements BlockParser {
 			}
 		}
 
-		$block['innerHTML'] = $this->removeHtml( $dom->saveHTML() );
+		$block['innerHTML'] = $this->remove_html( $dom->saveHTML() );
 
 		foreach ( $block['innerContent'] as &$inner_content ) {
 			if ( is_string( $inner_content ) ) {

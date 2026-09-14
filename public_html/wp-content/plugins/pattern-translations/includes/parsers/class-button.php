@@ -67,7 +67,7 @@ class Button implements BlockParser {
 			}
 		}
 
-		$decoded_html          = $this->decode_tags( $this->removeHtml( $dom->saveHTML() ) );
+		$decoded_html          = $this->decode_tags( $this->remove_html( $dom->saveHTML() ) );
 		$block['innerHTML']    = $decoded_html;
 		$block['innerContent'] = array( $decoded_html );
 

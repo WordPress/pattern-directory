@@ -305,7 +305,7 @@ class Export_CSV {
 		header( 'Expires: Mon, 26 Jul 1997 05:00:00 GMT' ); // As seen in CampTix_Plugin::summarize_admin_init.
 
 		if ( ! empty( $this->error->get_error_messages() ) ) {
-			header( 'Content-Type: text' );
+			header( 'Content-Type: text/plain; charset=utf-8' );
 			header( 'Content-Disposition: attachment; filename="error.txt"' );
 
 			foreach ( $this->error->get_error_codes() as $code ) {

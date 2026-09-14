@@ -46,7 +46,7 @@ function sync_pattern_meta( $post_meta_safelist ) {
  * difficult to find variations, etc.
  *
  * @param bool     $handle_query Whether Jetpack should handle the query.
- * @param WP_Query $query Query being filtered.
+ * @param WP_Query $query        Query being filtered.
  *
  * @return bool
  */
@@ -185,7 +185,7 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
  * Log when Jetpack does not run the query.
  *
  * @param string $reason Reason the search was aborted.
- * @param array  $data Data to process.
+ * @param array  $data   Data to process.
  */
 function log_aborted_queries( $reason, $data ) {
 	if ( defined( 'WPORG_SANDBOXED' ) && WPORG_SANDBOXED ) {

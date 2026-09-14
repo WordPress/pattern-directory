@@ -4,6 +4,7 @@
  *
  * @package WordPressdotorg\Pattern_Directory
  *
+ * phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI output is plain text.
  * phpcs:disable WordPress.WP.AlternativeFunctions -- Native functions are needed for CLI bootstrap and streams.
  */
 
@@ -87,7 +88,7 @@ while ( $query->have_posts() ) {
 		++$count_spam;
 
 		if ( $opts['verbose'] ) {
-			echo "{$pattern->ID}: Spam found: $spam_reason\n"; // phpcs:ignore
+			echo "{$pattern->ID}: Spam found: $spam_reason\n";
 		}
 
 		if ( $opts['apply'] ) {
@@ -97,8 +98,7 @@ while ( $query->have_posts() ) {
 					'post_status' => SPAM_STATUS,
 				)
 			);
-			echo "{$pattern->ID}: Post status updated.\n"; // phpcs:ignore
-
+			echo "{$pattern->ID}: Post status updated.\n";
 			// Add a note explaining why this post is in pending, if it's due to spam.
 			if ( function_exists( '\WordPressdotorg\InternalNotes\create_note' ) ) {
 				\WordPressdotorg\InternalNotes\create_note(
@@ -111,9 +111,8 @@ while ( $query->have_posts() ) {
 			}
 		}
 	} elseif ( $opts['verbose'] ) {
-			echo "{$pattern->ID}: Not spam.\n"; // phpcs:ignore
-
+			echo "{$pattern->ID}: Not spam.\n";
 	}
 }
 
-echo "$count_checked patterns checked, $count_spam found to be spam.\n"; // phpcs:ignore
+echo "$count_checked patterns checked, $count_spam found to be spam.\n";

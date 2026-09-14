@@ -385,8 +385,6 @@ function callback_count_patterns_flagged_pending() {
 function callback_count_favorites() {
 	global $wpdb;
 
-	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$count = $wpdb->get_var(
 		$wpdb->prepare(
 			"
@@ -397,7 +395,6 @@ function callback_count_favorites() {
 			FAVORITE_META_KEY,
 		)
 	);
-	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 	return absint( $count );
 }
@@ -443,8 +440,6 @@ function callback_count_flags_resolved() {
 function callback_count_users_with_favorite() {
 	global $wpdb;
 
-	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery
 	$user_ids = $wpdb->get_col(
 		$wpdb->prepare(
 			"
@@ -455,7 +450,6 @@ function callback_count_users_with_favorite() {
 			FAVORITE_META_KEY,
 		)
 	);
-	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 	return count( $user_ids );
 }

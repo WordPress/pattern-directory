@@ -515,7 +515,7 @@ function register_post_statuses() {
  *
  * @param string   $new_status New post status.
  * @param string   $old_status Previous post status.
- * @param \WP_Post $post Post being processed.
+ * @param \WP_Post $post       Post being processed.
  *
  * @return void
  */
@@ -561,8 +561,8 @@ function update_contains_block_types_meta( $pattern_id ) {
  * This is a callback for the `auth_{$object_type}_meta_{$meta_key}` filter, and it's used to authorize access to
  * modifying post meta keys via the REST API.
  *
- * @param bool   $allowed Whether access is allowed.
- * @param string $meta_key Metadata key.
+ * @param bool   $allowed    Whether access is allowed.
+ * @param string $meta_key   Metadata key.
  * @param int    $pattern_id Pattern ID.
  *
  * @return bool

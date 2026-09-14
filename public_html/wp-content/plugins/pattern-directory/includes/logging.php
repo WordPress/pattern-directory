@@ -34,7 +34,7 @@ function logging_enabled() {
  *
  * @param string   $new_status New post status.
  * @param string   $old_status Previous post status.
- * @param \WP_Post $post Post being processed.
+ * @param \WP_Post $post       Post being processed.
  *
  * @return void
  */

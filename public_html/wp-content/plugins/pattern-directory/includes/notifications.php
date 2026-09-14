@@ -252,7 +252,7 @@ If you would like to resubmit your pattern, please make sure it follows the guid
 /**
  * Wrapper for wp_mail.
  *
- * @param string $to Recipient email address.
+ * @param string $to      Recipient email address.
  * @param string $subject Email subject.
  * @param string $message Email body.
  *
