@@ -47,10 +47,12 @@ class Pattern_Translated_Content_Test extends WP_UnitTestCase {
 	 */
 	public function data_disallowed_content(): array {
 		return array(
-			'directive in inner HTML'    => array( "<!-- wp:paragraph -->\n<p><span data-wp-interactive=\"x\" data-wp-init=\"actions.go\">t</span></p>\n<!-- /wp:paragraph -->" ),
-			'directive in a raw-text el' => array( "<!-- wp:paragraph -->\n<p><style><span data-wp-interactive=\"x\" data-wp-init=\"actions.go\">t</span></style></p>\n<!-- /wp:paragraph -->" ),
-			'directive in an attribute'  => array( '<!-- wp:heading {"placeholder":"<span data-wp-interactive="x" data-wp-init="actions.go">t</span>"} -->' . "\n<h2>t</h2>\n<!-- /wp:heading -->" ),
-			'disallowed block'           => array( '<!-- wp:shortcode -->[gallery]<!-- /wp:shortcode -->' ),
+			'directive in inner HTML'      => array( "<!-- wp:paragraph -->\n<p><span data-wp-interactive=\"x\" data-wp-init=\"actions.go\">t</span></p>\n<!-- /wp:paragraph -->" ),
+			'directive in a raw-text el'   => array( "<!-- wp:paragraph -->\n<p><style><span data-wp-interactive=\"x\" data-wp-init=\"actions.go\">t</span></style></p>\n<!-- /wp:paragraph -->" ),
+			// `<svg>` opens foreign content, so the tokenizer reads the nested `<script>` as text while KSES keeps what it held.
+			'directive in foreign content' => array( "<!-- wp:html -->\n<svg><script><a href=\"#\" data-wp-interactive=\"x\" data-wp-bind--href=\"context.url\">t</a></svg>\n<!-- /wp:html -->" ),
+			'directive in an attribute'    => array( '<!-- wp:heading {"placeholder":"<span data-wp-interactive="x" data-wp-init="actions.go">t</span>"} -->' . "\n<h2>t</h2>\n<!-- /wp:heading -->" ),
+			'disallowed block'             => array( '<!-- wp:shortcode -->[gallery]<!-- /wp:shortcode -->' ),
 		);
 	}
 
