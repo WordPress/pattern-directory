@@ -42,8 +42,7 @@
 		<exclude name="WordPress.DB.DirectDatabaseQuery" />
 		<exclude name="WordPress.DB.SlowDBQuery" />
 
-		<!-- Short array and ternary syntax are allowed on WordPress.org. -->
-		<exclude name="Universal.Arrays.DisallowShortArraySyntax" />
+		<!-- Short ternary syntax is allowed on WordPress.org. -->
 		<exclude name="Universal.Operators.DisallowShortTernary" />
 	</rule>
 

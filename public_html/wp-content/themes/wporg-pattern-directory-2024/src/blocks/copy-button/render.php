@@ -23,7 +23,7 @@ if ( 'small' === $variant ) {
 
 $current_post = get_post( $current_post_id );
 ?>
-<div <?php echo get_block_wrapper_attributes( [ 'class' => implode( ' ', $classes ) ] ); // phpcs:ignore ?>>
+<div <?php echo get_block_wrapper_attributes( array( 'class' => implode( ' ', $classes ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 	<button
 		class="wp-block-button__link wp-element-button"
 		disabled="disabled"

@@ -28,7 +28,7 @@ $encoded_state = wp_json_encode( $init_state );
 
 ?>
 <div
-	<?php echo get_block_wrapper_attributes( [ 'class' => 'is-small is-style-toggle' ] ); // phpcs:ignore ?>
+	<?php echo get_block_wrapper_attributes( array( 'class' => 'is-small is-style-toggle' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 	data-wp-interactive="wporg/patterns/delete-button"
 	data-wp-context="<?php echo esc_attr( $encoded_state ); ?>"
 >
