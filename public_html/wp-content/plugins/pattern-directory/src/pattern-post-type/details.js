@@ -2,10 +2,17 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
 import { ComboboxControl, FormTokenField, TextControl, TextareaControl } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
+// `PluginDocumentSettingPanel` moved from `@wordpress/edit-post` to `@wordpress/editor`.
+// Import from both and use whichever the running WordPress version provides.
+import {
+	PluginDocumentSettingPanel as PluginDocumentSettingPanelFromEditor,
+	store as editorStore,
+} from '@wordpress/editor';
+import { PluginDocumentSettingPanel as PluginDocumentSettingPanelFromEditPost } from '@wordpress/edit-post';
+
+const PluginDocumentSettingPanel = PluginDocumentSettingPanelFromEditor || PluginDocumentSettingPanelFromEditPost;
 
 const KEYWORD_SLUG = 'wpop_keywords';
 const DESCRIPTION_SLUG = 'wpop_description';

@@ -9,10 +9,43 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\{ POST_TYPE a
 defined( 'WPINC' ) || die();
 
 /**
+ * The post meta key holding the moderator's message to the author, which is
+ * included in the "pattern unlisted" email.
+ */
+const UNLISTED_DETAIL_META = '_wporg_unlist_reason_detail';
+
+/**
  * Actions and filters.
  */
 add_action( 'wp_after_insert_post', __NAMESPACE__ . '\trigger_notifications', 20, 4 );
 add_action( 'wporg_unlist_pattern', __NAMESPACE__ . '\notify_pattern_flagged' );
+add_action( 'init', __NAMESPACE__ . '\register_unlisted_meta' );
+
+/**
+ * Register the post meta used to store the moderator's message to the author.
+ *
+ * Editable by anyone who can edit the pattern (i.e. moderators), so it can be
+ * set from the Unlist modal in the block editor and read back when sending the
+ * "pattern unlisted" email.
+ *
+ * @return void
+ */
+function register_unlisted_meta() {
+	register_post_meta(
+		PATTERN,
+		UNLISTED_DETAIL_META,
+		array(
+			'type'              => 'string',
+			'description'       => 'A message from the moderator, included in the email sent to the author when a pattern is unlisted.',
+			'single'            => true,
+			'show_in_rest'      => true,
+			'sanitize_callback' => 'sanitize_textarea_field',
+			'auth_callback'     => function( $allowed, $meta_key, $object_id ) {
+				return current_user_can( 'edit_post', $object_id );
+			},
+		)
+	);
+}
 
 /**
  * Fire off relevant notification when a post is finished updating.
@@ -209,6 +242,12 @@ function notify_pattern_unlisted( $post ) {
 
 	if ( ! $reason ) {
 		$reason = get_default_reason_description();
+	}
+
+	// Append the moderator's message to the author, if one was provided.
+	$detail = get_post_meta( $post->ID, UNLISTED_DETAIL_META, true );
+	if ( $detail ) {
+		$reason .= "\n\n" . $detail;
 	}
 
 	$subject = esc_html__( 'Pattern unlisted', 'wporg-patterns' );
