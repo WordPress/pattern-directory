@@ -16,12 +16,14 @@ add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'init', __NAMESPACE__ . '\register_post_statuses' );
 add_action( 'transition_post_status', __NAMESPACE__ . '\status_transitions', 10, 3 );
 add_action( 'post_updated', __NAMESPACE__ . '\update_contains_block_types_meta' );
+add_action( 'rest_after_insert_' . POST_TYPE, __NAMESPACE__ . '\update_contains_block_types_meta' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
 add_filter( 'allowed_block_types_all', __NAMESPACE__ . '\remove_disallowed_blocks', 10, 2 );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
 add_filter( 'rest_' . POST_TYPE . '_collection_params', __NAMESPACE__ . '\filter_patterns_collection_params' );
 add_filter( 'rest_' . POST_TYPE . '_query', __NAMESPACE__ . '\filter_patterns_rest_query', 10, 2 );
 add_filter( 'user_has_cap', __NAMESPACE__ . '\set_pattern_caps' );
+add_filter( 'map_meta_cap', __NAMESPACE__ . '\protect_moderated_patterns', 10, 4 );
 add_filter( 'posts_orderby', __NAMESPACE__ . '\filter_orderby_locale', 10, 2 );
 add_action( 'init', __NAMESPACE__ . '\add_preview_endpoint' );
 add_action( 'setup_theme', __NAMESPACE__ . '\setup_preview_theme', 1 );
@@ -515,8 +517,8 @@ function status_transitions( $new_status, $old_status, $post ) {
 		return;
 	}
 
-	// If a pattern gets relisted, remove the reason that it was originally unlisted.
-	if ( UNLISTED_STATUS === $old_status && UNLISTED_STATUS !== $new_status ) {
+	// A reason preserved in the trash must also be cleared when the pattern is restored as a draft.
+	if ( in_array( $old_status, array( UNLISTED_STATUS, 'trash' ), true ) && UNLISTED_STATUS !== $new_status && 'trash' !== $new_status ) {
 		wp_delete_object_term_relationships( $post->ID, array( FLAG_REASON ) );
 	}
 }
@@ -527,7 +529,12 @@ function status_transitions( $new_status, $old_status, $post ) {
  * @param int $pattern_id Pattern ID.
  */
 function update_contains_block_types_meta( $pattern_id ) {
-	$pattern    = get_post( $pattern_id );
+	// `rest_after_insert_*` passes a post object where `post_updated` passes an ID.
+	$pattern = get_post( $pattern_id );
+	if ( ! $pattern ) {
+		return;
+	}
+
 	$blocks     = parse_blocks( $pattern->post_content );
 	$all_blocks = _flatten_blocks( $blocks );
 
@@ -538,7 +545,7 @@ function update_contains_block_types_meta( $pattern_id ) {
 	sort( $block_names );
 	$used_blocks = implode( ',', $block_names );
 
-	update_post_meta( $pattern_id, 'wpop_contains_block_types', $used_blocks );
+	update_post_meta( $pattern->ID, 'wpop_contains_block_types', $used_blocks );
 }
 
 /**
@@ -729,6 +736,35 @@ function filter_patterns_collection_params( $query_params ) {
 }
 
 /**
+ * Scope a non-public patterns query to the caller's own patterns.
+ *
+ * @param array            $args    Array of arguments to be passed to WP_Query.
+ * @param \WP_REST_Request $request The REST API request.
+ *
+ * @return array The arguments, restricted to the current user where the request reaches past public data.
+ */
+function restrict_collection_to_own_patterns( $args, $request ) {
+	if ( current_user_can( get_post_type_object( POST_TYPE )->cap->edit_others_posts ) ) {
+		return $args;
+	}
+
+	$statuses   = array_filter( (array) ( $request['status'] ?? array() ) );
+	$non_public = array_diff( $statuses, get_post_stati( array( 'public' => true ) ) );
+
+	if ( ! $non_public && 'edit' !== $request['context'] ) {
+		return $args;
+	}
+
+	// Every author var, not just `author`: core maps the request's `author` to `author__in`.
+	$args['author']         = get_current_user_id();
+	$args['author__in']     = array( get_current_user_id() );
+	$args['author__not_in'] = array();
+	unset( $args['author_name'] );
+
+	return $args;
+}
+
+/**
  * Filter the arguments passed to the pattern query in the API.
  *
  * @param array           $args    Array of arguments to be passed to WP_Query.
@@ -835,7 +871,8 @@ function filter_patterns_rest_query( $args, $request ) {
 		}
 	}
 
-	return $args;
+	// Last: this pins `author`, which the `author_name` branch above would otherwise overwrite.
+	return restrict_collection_to_own_patterns( $args, $request );
 }
 
 /**
@@ -922,6 +959,62 @@ function set_pattern_caps( $user_caps ) {
 	}
 
 	return $user_caps;
+}
+
+/**
+ * The status a moderator last set on a pattern, read through the trash.
+ *
+ * Trashing moves the previous status into `_wp_trash_meta_status`, so a check that reads only
+ * `post_status` stops seeing a moderator's decision the moment the pattern is trashed.
+ *
+ * @param int|\WP_Post $post The pattern.
+ *
+ * @return string The pattern's status, or the status it held before it was trashed.
+ */
+function get_moderated_status( $post ) {
+	$pattern = get_post( $post );
+	if ( ! $pattern ) {
+		return '';
+	}
+
+	if ( 'trash' !== $pattern->post_status ) {
+		return $pattern->post_status;
+	}
+
+	return (string) get_post_meta( $pattern->ID, '_wp_trash_meta_status', true );
+}
+
+/**
+ * Reserve deletion of a moderator-removed pattern to moderators.
+ *
+ * An author can untrash what they trashed, so refusing the status change is not enough: trashing itself
+ * takes the pattern out of the moderation queue and hides the status the moderator set.
+ *
+ * @param string[] $caps    Primitive capabilities required of the user.
+ * @param string   $cap     The capability being checked.
+ * @param int      $user_id The user ID.
+ * @param array    $args    Context, with the object ID at index 0.
+ *
+ * @return string[] The filtered primitive capabilities.
+ */
+function protect_moderated_patterns( $caps, $cap, $user_id, $args ) {
+	if ( 'delete_post' !== $cap || empty( $args[0] ) ) {
+		return $caps;
+	}
+
+	$pattern = get_post( $args[0] );
+	if ( ! $pattern || POST_TYPE !== $pattern->post_type ) {
+		return $caps;
+	}
+
+	if ( ! in_array( get_moderated_status( $pattern ), array( SPAM_STATUS, UNLISTED_STATUS ), true ) ) {
+		return $caps;
+	}
+
+	// Add to what deletion already required rather than replacing it.
+	$caps[] = get_post_type_object( POST_TYPE )->cap->edit_others_posts;
+
+	return $caps;
 }
 
 /**
@@ -1066,7 +1159,7 @@ function decode_pattern_content( $content ) {
  * @return string
  */
 function get_pattern_unlisted_reason( $post_id ) {
-	$reasons = wp_get_object_terms( get_the_ID(), FLAG_REASON );
+	$reasons = wp_get_object_terms( $post_id, FLAG_REASON );
 	if ( count( $reasons ) > 0 ) {
 		$reason = array_shift( $reasons );
 		return $reason->description;

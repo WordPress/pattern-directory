@@ -41,7 +41,7 @@ function register_block_bindings() {
 				/* translators: %s: Post title. Only visible to screen readers. */
 				return sprintf(
 					__( 'Edit <span class="screen-reader-text">"%s"</span>', 'wporg-patterns' ),
-					get_the_title( $post_id )
+					esc_html( get_the_title( $post_id ) )
 				);
 			},
 		)

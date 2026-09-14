@@ -146,6 +146,21 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></p>\n<!-- /wp:paragraph -->" ),
 			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:image -->\n<figure class=\"wp-block-image\"><img data-wp-bind--src=\"context.href\" alt=\"\"/></figure>\n<!-- /wp:image -->" ),
 
+			/*
+			 * A raw-text element hides its content from the tokenizer, but KSES deletes the wrapper on save
+			 * and leaves what it held as live markup. Every element the tokenizer skips carries the same payload.
+			 */
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.<style><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></style></p>\n<!-- /wp:paragraph -->" ),
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.<xmp><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></xmp></p>\n<!-- /wp:paragraph -->" ),
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.<noembed><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></noembed></p>\n<!-- /wp:paragraph -->" ),
+			// An unclosed one stops the tokenizer reporting at all, and nesting hides the wrapper from itself.
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.<script><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></p>\n<!-- /wp:paragraph -->" ),
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.<style><style><style><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></style></p>\n<!-- /wp:paragraph -->" ),
+			// A block delimiter is a comment, so the directive in its attribute JSON is not a tag either.
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:categories {\"displayAsDropdown\":true,\"showLabel\":true,\"label\":\"<span data-wp-interactive=\\u0022wporg/patterns\\u0022 data-wp-init=\\u0022actions.go\\u0022>x</span>\"} /-->" ),
+			// The same attribute with its angle brackets JSON-escaped, so the stored delimiter holds no markup.
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:categories {\"displayAsDropdown\":true,\"showLabel\":true,\"label\":\"\\u003cspan data-wp-interactive=\\u0022wporg/patterns\\u0022 data-wp-init=\\u0022actions.go\\u0022\\u003ex\\u003c/span\\u003e\"} /-->" ),
+
 			// A parent-only block (`core/page-list-item` belongs to `core/page-list`) used standalone is out
 			// of context. The second also carries a script URL, but the context check rejects it first.
 			array( 'rest_pattern_invalid_block_context', "$two_paragraphs\n\n<!-- wp:page-list-item {\"label\":\"Featured\"} /-->" ),
