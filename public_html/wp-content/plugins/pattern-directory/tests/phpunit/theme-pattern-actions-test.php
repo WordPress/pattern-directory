@@ -10,6 +10,7 @@ namespace WordPressdotorg\Pattern_Directory\Tests;
 use WP_UnitTestCase;
 use WP_UnitTest_Factory;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\{ POST_TYPE as FLAG_POST_TYPE, TAX_TYPE as FLAG_REASON };
 
 /**
  * `do_pattern_actions()` drafts a pattern through `wp_update_post()` rather than the REST API, so
@@ -214,5 +215,137 @@ class Theme_Pattern_Actions_Test extends WP_UnitTestCase {
 		$this->do_draft_action( $pattern_id );
 
 		$this->assertSame( 'draft', get_post_status( $pattern_id ) );
+	}
+
+	/**
+	 * The Delete button must match the permissions enforced by its REST endpoint.
+	 *
+	 * @dataProvider data_delete_button_permissions
+	 *
+	 * @param string $status       The pattern status.
+	 * @param bool   $is_moderator Whether to act as a moderator.
+	 * @param bool   $can_delete   Whether deletion should be offered and allowed.
+	 */
+	public function test_delete_button_permissions( string $status, bool $is_moderator, bool $can_delete ): void {
+		$pattern_id = $this->create_pattern( $status );
+		wp_set_current_user( $is_moderator ? self::$moderator : self::$member );
+		$block = (object) array( 'context' => array( 'postId' => $pattern_id ) );
+
+		ob_start();
+		try {
+			include dirname( __DIR__, 4 ) . '/themes/wporg-pattern-directory-2024/src/blocks/delete-button/render.php';
+			$html = ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		$has_button = false !== strpos( $html, 'actions.triggerDelete' );
+		$this->assertSame( $can_delete, $has_button );
+
+		$response = rest_do_request( new \WP_REST_Request( 'DELETE', '/wp/v2/wporg-pattern/' . $pattern_id ) );
+		$this->assertSame( $can_delete ? 200 : 403, $response->get_status() );
+	}
+
+	/**
+	 * Author and moderator permissions for ordinary and moderated patterns.
+	 *
+	 * @return array[]
+	 */
+	public function data_delete_button_permissions(): array {
+		return array(
+			'author draft'       => array( 'draft', false, true ),
+			'author published'   => array( 'publish', false, true ),
+			'author unlisted'    => array( UNLISTED_STATUS, false, false ),
+			'author spam'        => array( SPAM_STATUS, false, false ),
+			'moderator unlisted' => array( UNLISTED_STATUS, true, true ),
+			'moderator spam'     => array( SPAM_STATUS, true, true ),
+		);
+	}
+
+	/**
+	 * A report submitted through the public form must carry its reason.
+	 *
+	 * `wp_insert_post()` drops `tax_input` for a reporter who cannot `assign_terms`, which left every
+	 * flag raised from the front end with no reason for moderators to act on.
+	 */
+	public function test_report_records_its_reason_on_the_flag(): void {
+		$pattern_id = $this->create_pattern( 'publish' );
+		$reason     = self::factory()->term->create(
+			array(
+				'taxonomy' => FLAG_REASON,
+				'name'     => 'Against the guidelines',
+			)
+		);
+
+		wp_set_current_user( self::$member );
+		$this->go_to( get_permalink( $pattern_id ) );
+
+		$_REQUEST['action']      = 'report';
+		$_REQUEST['_wpnonce']    = wp_create_nonce( 'report-' . $pattern_id );
+		$_POST['report-reason']  = $reason;
+		$_POST['report-details'] = 'Why this pattern was reported.';
+
+		try {
+			\WordPressdotorg\Theme\Pattern_Directory_2024\do_pattern_actions();
+		} finally {
+			unset( $_POST['report-reason'], $_POST['report-details'] );
+		}
+
+		$flags = get_posts(
+			array(
+				'post_type'   => FLAG_POST_TYPE,
+				'post_parent' => $pattern_id,
+				'post_status' => 'any',
+			)
+		);
+
+		$this->assertCount( 1, $flags );
+		$this->assertSame( array( $reason ), wp_get_object_terms( $flags[0]->ID, FLAG_REASON, array( 'fields' => 'ids' ) ) );
+	}
+
+	/**
+	 * The report that crosses the threshold must contribute its reason to the notification.
+	 */
+	public function test_threshold_report_reason_is_in_notification(): void {
+		$pattern_id = $this->create_pattern( 'publish' );
+		$reason     = self::factory()->term->create(
+			array(
+				'taxonomy'    => FLAG_REASON,
+				'name'        => 'Report reason',
+				'description' => 'The submitted report reason.',
+			)
+		);
+		update_option( 'wporg-pattern-flag_threshold', 1 );
+		wp_set_current_user( self::$member );
+		$this->go_to( get_permalink( $pattern_id ) );
+
+		$messages = array();
+		/**
+		 * Capture notifications without delivering email.
+		 *
+		 * @param bool|null $result Short-circuit result.
+		 * @param array     $atts   Mail arguments.
+		 * @return bool
+		 */
+		$capture_mail = static function ( ?bool $result, array $atts ) use ( &$messages ): bool {
+			$messages[] = $atts['message'];
+			return true;
+		};
+		add_filter( 'pre_wp_mail', $capture_mail, 10, 2 );
+
+		$_REQUEST['action']     = 'report';
+		$_REQUEST['_wpnonce']   = wp_create_nonce( 'report-' . $pattern_id );
+		$_POST['report-reason'] = $reason;
+
+		try {
+			\WordPressdotorg\Theme\Pattern_Directory_2024\do_pattern_actions();
+		} finally {
+			remove_filter( 'pre_wp_mail', $capture_mail, 10 );
+			unset( $_POST['report-reason'] );
+		}
+
+		$this->assertSame( 'pending', get_post_status( $pattern_id ) );
+		$this->assertCount( 1, $messages );
+		$this->assertStringContainsString( 'The submitted report reason.', $messages[0] );
 	}
 }

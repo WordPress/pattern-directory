@@ -5,7 +5,9 @@ namespace WordPressdotorg\Pattern_Directory\Pattern_Validation;
 use WordPressdotorg\Pattern_Translations\Pattern as Translations_Pattern;
 use WordPressdotorg\Pattern_Translations\PatternParser as Translations_PatternParser;
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\is_block_allowed_in_pattern;
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\get_moderated_status;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content', 10, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_context', 10, 2 );
@@ -14,6 +16,7 @@ add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_dir
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_status', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_parent', 11, 2 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_flag_reason', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_against_spam', 20, 2 );
 add_action( 'transition_post_status', __NAMESPACE__ . '\note_spam_status', 10, 3 );
 
@@ -383,10 +386,10 @@ function attribute_has_unsafe_scheme( $value, $is_url = false ) {
 }
 
 /**
- * Reject Interactivity API `data-wp-*` directives carried in a block's HTML.
+ * Reject Interactivity API `data-wp-*` directives, in a block's HTML or in a block attribute.
  *
- * KSES preserves them and they sit in inner HTML, so neither core sanitisation nor the attribute check
- * above catches them.
+ * KSES preserves them wherever they sit, so neither core sanitisation nor the URL-scheme check above
+ * catches them.
  *
  * @param object           $prepared_post The post object about to be inserted.
  * @param \WP_REST_Request $request       The request.
@@ -398,41 +401,96 @@ function validate_block_directives( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
+	$has_directive = false;
+
 	// Every field the directory renders, not just the one the pattern editor writes.
 	foreach ( array( 'post_content', 'post_title', 'post_excerpt' ) as $field ) {
-		if ( ! isset( $prepared_post->$field ) ) {
-			continue;
+		if ( isset( $prepared_post->$field ) && content_has_block_directives( $prepared_post->$field ) ) {
+			$has_directive = true;
+			break;
 		}
+	}
 
-		if ( content_has_block_directives( $prepared_post->$field ) ) {
-			return new \WP_Error(
-				'rest_pattern_interactivity_directive',
-				__( 'Patterns cannot contain interactivity directives.', 'wporg-patterns' ),
-				array( 'status' => 400 )
-			);
-		}
+	// Attribute JSON sits in the delimiter comment, so the scan above never reads it as a tag.
+	if ( ! $has_directive && isset( $prepared_post->post_content ) ) {
+		$has_directive = blocks_have_directive_attribute( parse_blocks( $prepared_post->post_content ) );
+	}
+
+	if ( $has_directive ) {
+		return new \WP_Error(
+			'rest_pattern_interactivity_directive',
+			__( 'Patterns cannot contain interactivity directives.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
 	}
 
 	return $prepared_post;
 }
 
 /**
+ * Recursively test whether any block in the tree carries a directive in an attribute value.
+ *
+ * @param array $blocks Parsed blocks at the current depth.
+ *
+ * @return bool Whether any block attribute carries a directive.
+ */
+function blocks_have_directive_attribute( $blocks ) {
+	foreach ( $blocks as $block ) {
+		if ( isset( $block['attrs'] ) && attribute_has_directive( $block['attrs'] ) ) {
+			return true;
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) && blocks_have_directive_attribute( $block['innerBlocks'] ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Whether a block attribute value carries an Interactivity API directive.
+ *
+ * @param mixed $value A block attribute value, or a nested part of one.
+ *
+ * @return bool Whether the value carries a directive.
+ */
+function attribute_has_directive( $value ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $item ) {
+			if ( attribute_has_directive( $item ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	return is_string( $value ) && content_has_block_directives( $value );
+}
+
+/**
  * Whether any tag in the HTML carries an Interactivity API `data-wp-*` attribute.
+ *
+ * The sanitised markup is scanned too: a raw-text element hides its content from the tokenizer, and KSES
+ * then deletes that wrapper on save and keeps the tags it held.
  *
  * @param string $html The HTML to scan.
  *
  * @return bool Whether a directive is present.
  */
 function content_has_block_directives( $html ) {
-	// Directives are rare; don't tokenize the whole document when the marker can't be present.
+	// Directives are rare; don't sanitise or tokenize the whole document when the marker can't be present.
 	if ( false === stripos( $html, 'data-wp-' ) ) {
 		return false;
 	}
 
-	$tags = new \WP_HTML_Tag_Processor( $html );
-	while ( $tags->next_tag() ) {
-		if ( $tags->get_attribute_names_with_prefix( 'data-wp-' ) ) {
-			return true;
+	foreach ( array( $html, wp_kses_post( $html ) ) as $markup ) {
+		$tags = new \WP_HTML_Tag_Processor( $markup );
+		while ( $tags->next_tag() ) {
+			if ( $tags->get_attribute_names_with_prefix( 'data-wp-' ) ) {
+				return true;
+			}
 		}
 	}
 
@@ -492,7 +550,9 @@ function validate_status( $prepared_post, $request ) {
 
 	$post_type      = get_post_type_object( POST_TYPE );
 	$target_status  = isset( $request['status'] ) ? $request['status'] : '';
-	$current_status = isset( $prepared_post->ID ) ? get_post_status( $prepared_post->ID ) : '';
+
+	// Read through the trash: a trashed pattern still carries the status the moderator set.
+	$current_status = isset( $prepared_post->ID ) ? get_moderated_status( $prepared_post->ID ) : '';
 
 	// `unlisted` and spam are moderator-set; authors can't leave them. Must stay above the early returns below.
 	if (
@@ -591,6 +651,50 @@ function validate_parent( $prepared_post, $request ) {
 	}
 
 	return $prepared_post;
+}
+
+/**
+ * Reserve the flag-reason taxonomy on a pattern to moderators.
+ *
+ * It records why a moderator removed the pattern. Core's assign-terms check walks the submitted term ids,
+ * so an empty array satisfies it vacuously and then clears the taxonomy.
+ *
+ * @param object           $prepared_post The post object about to be inserted.
+ * @param \WP_REST_Request $request       The request.
+ *
+ * @return object|\WP_Error The post object, or an error if the reason is not the caller's to set.
+ */
+function validate_flag_reason( $prepared_post, $request ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	$taxonomy = get_taxonomy( FLAG_REASON );
+	$base     = ( $taxonomy && ! empty( $taxonomy->rest_base ) ) ? $taxonomy->rest_base : FLAG_REASON;
+
+	if ( ! isset( $request[ $base ] ) || current_user_can( get_post_type_object( POST_TYPE )->cap->edit_others_posts ) ) {
+		return $prepared_post;
+	}
+
+	$stored = isset( $prepared_post->ID )
+		? wp_get_object_terms( $prepared_post->ID, FLAG_REASON, array( 'fields' => 'ids' ) )
+		: array();
+
+	$stored    = is_wp_error( $stored ) ? array() : wp_parse_id_list( $stored );
+	$submitted = wp_parse_id_list( $request[ $base ] );
+	sort( $stored );
+	sort( $submitted );
+
+	// Re-sending the stored terms isn't a write. Clearing them is, which is what has to be refused.
+	if ( $submitted === $stored ) {
+		return $prepared_post;
+	}
+
+	return new \WP_Error(
+		'rest_pattern_cannot_set_flag_reason',
+		__( 'Only a directory moderator can change why a pattern was removed.', 'wporg-patterns' ),
+		array( 'status' => 403 )
+	);
 }
 
 /**

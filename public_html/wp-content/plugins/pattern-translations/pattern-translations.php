@@ -9,6 +9,7 @@
 namespace WordPressdotorg\Pattern_Translations;
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\is_block_allowed_in_pattern;
 use function WordPressdotorg\Pattern_Directory\Pattern_Validation\content_has_block_directives;
+use function WordPressdotorg\Pattern_Directory\Pattern_Validation\blocks_have_directive_attribute;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 const GLOTPRESS_PROJECT = 'patterns/core';
@@ -53,7 +54,8 @@ function is_translated_content_allowed( $html ) {
 		}
 	}
 
-	return ! content_has_block_directives( $html );
+	// Translated strings land in block attributes as well as inner HTML, and neither is sanitised by KSES.
+	return ! content_has_block_directives( $html ) && ! blocks_have_directive_attribute( parse_blocks( $html ) );
 }
 
 /**

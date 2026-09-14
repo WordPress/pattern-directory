@@ -7,6 +7,7 @@ use function WordPressdotorg\Theme\Pattern_Directory_2024\Block_Config\get_appli
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG_POST_TYPE;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\PENDING_STATUS;
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 
 // Block files
 require_once __DIR__ . '/src/blocks/copy-button/index.php';
@@ -133,12 +134,18 @@ function do_pattern_actions() {
 					'post_parent'  => $post_id,
 					'post_excerpt' => $report_details,
 					'post_status'  => PENDING_STATUS,
-					'tax_input'    => array(
-						'wporg-pattern-flag-reason' => $report_reason,
-					),
-				)
+				),
+				false,
+				false // Defer threshold checks and notifications until the report reason is saved.
 			);
+
+			if ( $success && $report_reason ) {
+				wp_set_object_terms( $success, array( $report_reason ), FLAG_REASON );
+			}
+
 			if ( $success ) {
+				wp_after_insert_post( $success, false, null );
+
 				$args = array(
 					'status' => 'reported',
 				);

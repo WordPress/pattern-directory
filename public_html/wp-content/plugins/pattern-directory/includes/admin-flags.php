@@ -312,7 +312,7 @@ function flag_list_table_views( $views ) {
 
 						return sprintf(
 							'href="%s"',
-							$new_url
+							esc_url( $new_url )
 						);
 					},
 					$item
