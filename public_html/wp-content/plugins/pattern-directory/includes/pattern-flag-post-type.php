@@ -146,10 +146,12 @@ function check_flag_threshold( $post_ID, $post, $update ) {
 	}
 
 	if ( has_reached_flag_threshold( $pattern->ID ) ) {
-		wp_update_post( array(
-			'ID'          => $pattern->ID,
-			'post_status' => SPAM_STATUS,
-		) );
+		wp_update_post(
+			array(
+				'ID'          => $pattern->ID,
+				'post_status' => SPAM_STATUS,
+			)
+		);
 
 		/**
 		 * Fires after a pattern is automatically unpublished for review.
@@ -183,19 +185,23 @@ function resolve_flags_on_approval( $new_status, $old_status, $post ) {
 		return;
 	}
 
-	$flags = get_posts( array(
-		'post_type'   => POST_TYPE,
-		'post_parent' => $post->ID,
-		'post_status' => PENDING_STATUS,
-		'numberposts' => -1,
-		'fields'      => 'ids',
-	) );
+	$flags = get_posts(
+		array(
+			'post_type'   => POST_TYPE,
+			'post_parent' => $post->ID,
+			'post_status' => PENDING_STATUS,
+			'numberposts' => -1,
+			'fields'      => 'ids',
+		)
+	);
 
 	foreach ( $flags as $flag_id ) {
-		wp_update_post( array(
-			'ID'          => $flag_id,
-			'post_status' => RESOLVED_STATUS,
-		) );
+		wp_update_post(
+			array(
+				'ID'          => $flag_id,
+				'post_status' => RESOLVED_STATUS,
+			)
+		);
 	}
 }
 

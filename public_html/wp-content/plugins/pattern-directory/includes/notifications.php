@@ -29,8 +29,9 @@ function trigger_notifications( $post_id, $post, $update, $post_before ) {
 		return;
 	}
 
-	// Only a translation records a locale, so a pattern without one is an English original.
-	if ( 'en_US' !== ( get_post_meta( $post_id, 'wpop_locale', true ) ?: 'en_US' ) ) {
+	// A missing locale identifies an English original.
+	$locale = get_post_meta( $post_id, 'wpop_locale', true );
+	if ( $locale && 'en_US' !== $locale ) {
 		return;
 	}
 
@@ -121,11 +122,13 @@ function notify_pattern_flagged( $post ) {
 	$reason = '';
 
 	// Reports carry their own reasons; the spam term covers the removals that leave no flags behind.
-	$flags = get_posts( array(
-		'post_type'   => FLAG,
-		'post_parent' => $post->ID,
-		'post_status' => PENDING_STATUS,
-	) );
+	$flags = get_posts(
+		array(
+			'post_type'   => FLAG,
+			'post_parent' => $post->ID,
+			'post_status' => PENDING_STATUS,
+		)
+	);
 
 	if ( ! empty( $flags ) ) {
 		$reasons = array();

@@ -1,6 +1,8 @@
 <?php
 /**
  * Test the automatic removal of a pattern that collects enough reports.
+ *
+ * @package WordPressdotorg\Pattern_Directory\Tests
  */
 
 declare( strict_types = 1 );
@@ -156,10 +158,12 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 		$this->create_flag( $pattern_id, self::$reporter );
 		$this->create_flag( $pattern_id, self::$other_reporter );
 
-		wp_update_post( array(
-			'ID'          => $pattern_id,
-			'post_status' => 'pending',
-		) );
+		wp_update_post(
+			array(
+				'ID'          => $pattern_id,
+				'post_status' => 'pending',
+			)
+		);
 
 		return $pattern_id;
 	}
@@ -226,10 +230,12 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 		$pattern_id = $this->create_pattern();
 
 		$flag_id = $this->create_flag( $pattern_id, self::$reporter );
-		wp_update_post( array(
-			'ID'          => $flag_id,
-			'post_status' => 'resolved',
-		) );
+		wp_update_post(
+			array(
+				'ID'          => $flag_id,
+				'post_status' => 'resolved',
+			)
+		);
 
 		$this->create_flag( $pattern_id, self::$other_reporter );
 		$this->assertSame( 'publish', get_post_status( $pattern_id ) );
@@ -317,10 +323,12 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	 */
 	public function test_author_cannot_publish_a_legacy_removal_through_a_draft(): void {
 		$pattern_id = $this->create_legacy_removal();
-		wp_update_post( array(
-			'ID'          => $pattern_id,
-			'post_status' => 'draft',
-		) );
+		wp_update_post(
+			array(
+				'ID'          => $pattern_id,
+				'post_status' => 'draft',
+			)
+		);
 
 		wp_set_current_user( self::$author );
 		$response = $this->publish_pattern( $pattern_id );
@@ -369,10 +377,12 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 	 */
 	public function test_author_can_still_save_a_published_reported_pattern(): void {
 		$pattern_id = $this->create_legacy_removal();
-		wp_update_post( array(
-			'ID'          => $pattern_id,
-			'post_status' => 'publish',
-		) );
+		wp_update_post(
+			array(
+				'ID'          => $pattern_id,
+				'post_status' => 'publish',
+			)
+		);
 
 		wp_set_current_user( self::$author );
 		$response = $this->publish_pattern( $pattern_id );
@@ -419,13 +429,15 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 		wp_set_current_user( self::$moderator );
 		$this->publish_pattern( $pattern_id );
 
-		$pending = get_posts( array(
-			'post_type'   => FLAG_POST_TYPE,
-			'post_parent' => $pattern_id,
-			'post_status' => 'pending',
-			'numberposts' => -1,
-			'fields'      => 'ids',
-		) );
+		$pending = get_posts(
+			array(
+				'post_type'   => FLAG_POST_TYPE,
+				'post_parent' => $pattern_id,
+				'post_status' => 'pending',
+				'numberposts' => -1,
+				'fields'      => 'ids',
+			)
+		);
 		$this->assertSame( array(), $pending );
 
 		wp_set_current_user( 0 );
@@ -446,13 +458,15 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 		wp_set_current_user( self::$author );
 		$this->assertFalse( $this->publish_pattern( $pattern_id )->is_error() );
 
-		$pending = get_posts( array(
-			'post_type'   => FLAG_POST_TYPE,
-			'post_parent' => $pattern_id,
-			'post_status' => 'pending',
-			'numberposts' => -1,
-			'fields'      => 'ids',
-		) );
+		$pending = get_posts(
+			array(
+				'post_type'   => FLAG_POST_TYPE,
+				'post_parent' => $pattern_id,
+				'post_status' => 'pending',
+				'numberposts' => -1,
+				'fields'      => 'ids',
+			)
+		);
 		$this->assertCount( 1, $pending );
 	}
 
@@ -470,13 +484,15 @@ class Flag_Threshold_Test extends WP_UnitTestCase {
 		wp_set_current_user( self::$moderator );
 		$this->assertFalse( $this->publish_pattern( $pattern_id )->is_error() );
 
-		$pending = get_posts( array(
-			'post_type'   => FLAG_POST_TYPE,
-			'post_parent' => $pattern_id,
-			'post_status' => 'pending',
-			'numberposts' => -1,
-			'fields'      => 'ids',
-		) );
+		$pending = get_posts(
+			array(
+				'post_type'   => FLAG_POST_TYPE,
+				'post_parent' => $pattern_id,
+				'post_status' => 'pending',
+				'numberposts' => -1,
+				'fields'      => 'ids',
+			)
+		);
 		$this->assertCount( 2, $pending, 'Unanswered reports must stay in the moderators\' queue.' );
 	}
 }
