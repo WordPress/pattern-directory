@@ -285,7 +285,8 @@ class Theme_Pattern_Actions_Test extends WP_UnitTestCase {
 		$_REQUEST['action']      = 'report';
 		$_REQUEST['_wpnonce']    = wp_create_nonce( 'report-' . $pattern_id );
 		$_POST['report-reason']  = $reason;
-		$_POST['report-details'] = 'Why this pattern was reported.';
+		$details                 = "Why this pattern was reported.\nSee C:\\patterns\\example & <b>bold</b>, where a < b &amp; c.";
+		$_POST['report-details'] = wp_slash( $details );
 
 		try {
 			\WordPressdotorg\Theme\Pattern_Directory_2024\do_pattern_actions();
@@ -302,6 +303,10 @@ class Theme_Pattern_Actions_Test extends WP_UnitTestCase {
 		);
 
 		$this->assertCount( 1, $flags );
+		$this->assertSame(
+			"Why this pattern was reported.\nSee C:\\patterns\\example &amp; &lt;b&gt;bold&lt;/b&gt;, where a &lt; b &amp;amp; c.",
+			$flags[0]->post_excerpt
+		);
 		$this->assertSame( array( $reason ), wp_get_object_terms( $flags[0]->ID, FLAG_REASON, array( 'fields' => 'ids' ) ) );
 	}
 
@@ -335,19 +340,106 @@ class Theme_Pattern_Actions_Test extends WP_UnitTestCase {
 		};
 		add_filter( 'pre_wp_mail', $capture_mail, 10, 2 );
 
-		$_REQUEST['action']     = 'report';
-		$_REQUEST['_wpnonce']   = wp_create_nonce( 'report-' . $pattern_id );
-		$_POST['report-reason'] = $reason;
+		$_REQUEST['action']      = 'report';
+		$_REQUEST['_wpnonce']    = wp_create_nonce( 'report-' . $pattern_id );
+		$_POST['report-reason']  = $reason;
+		$_POST['report-details'] = 'The pattern does not follow the guidelines.';
 
 		try {
 			\WordPressdotorg\Theme\Pattern_Directory_2024\do_pattern_actions();
 		} finally {
 			remove_filter( 'pre_wp_mail', $capture_mail, 10 );
-			unset( $_POST['report-reason'] );
+			unset( $_POST['report-reason'], $_POST['report-details'] );
 		}
 
 		$this->assertSame( SPAM_STATUS, get_post_status( $pattern_id ) );
 		$this->assertCount( 1, $messages );
 		$this->assertStringContainsString( 'The submitted report reason.', $messages[0] );
+	}
+
+	/**
+	 * Invalid report fields must not create flags or trigger moderation.
+	 *
+	 * @dataProvider data_invalid_reports
+	 *
+	 * @param array $fields Submitted form fields.
+	 */
+	public function test_invalid_reports_do_not_create_flags( array $fields ): void {
+		$pattern_id = $this->create_pattern( 'publish' );
+		$reason     = self::factory()->term->create( array( 'taxonomy' => FLAG_REASON ) );
+		if ( isset( $fields['report-reason'] ) && 'valid' === $fields['report-reason'] ) {
+			$fields['report-reason'] = (string) $reason;
+		}
+		update_option( 'wporg-pattern-flag_threshold', 1 );
+		wp_set_current_user( self::$member );
+		$this->go_to( get_permalink( $pattern_id ) );
+		$_REQUEST['action']   = 'report';
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'report-' . $pattern_id );
+		$original_post        = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve the test request for restoration.
+		$_POST                = $fields;
+
+		try {
+			\WordPressdotorg\Theme\Pattern_Directory_2024\do_pattern_actions();
+		} finally {
+			$_POST = $original_post;
+		}
+
+		$this->assertSame( 'publish', get_post_status( $pattern_id ) );
+		$this->assertSame(
+			array(),
+			get_posts(
+				array(
+					'post_type'      => FLAG_POST_TYPE,
+					'post_parent'    => $pattern_id,
+					'post_status'    => get_post_stati(),
+					'posts_per_page' => -1,
+					'fields'         => 'ids',
+				)
+			)
+		);
+		$this->assertStringContainsString( 'status=report-invalid', $this->redirected_to );
+	}
+
+	/**
+	 * Missing, malformed, and empty report fields.
+	 *
+	 * @return array[]
+	 */
+	public function data_invalid_reports(): array {
+		return array(
+			'missing fields'   => array( array() ),
+			'missing reason'   => array( array( 'report-details' => 'Details.' ) ),
+			'unknown reason'   => array(
+				array(
+					'report-reason'  => '999999999',
+					'report-details' => 'Details.',
+				),
+			),
+			'malformed reason' => array(
+				array(
+					'report-reason'  => '1suffix',
+					'report-details' => 'Details.',
+				),
+			),
+			'array reason'     => array(
+				array(
+					'report-reason'  => array( 1 ),
+					'report-details' => 'Details.',
+				),
+			),
+			'missing details'  => array( array( 'report-reason' => 'valid' ) ),
+			'empty details'    => array(
+				array(
+					'report-reason'  => 'valid',
+					'report-details' => " \n\t ",
+				),
+			),
+			'array details'    => array(
+				array(
+					'report-reason'  => 'valid',
+					'report-details' => array( 'Details.' ),
+				),
+			),
+		);
 	}
 }

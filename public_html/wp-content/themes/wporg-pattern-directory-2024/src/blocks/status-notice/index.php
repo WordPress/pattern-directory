@@ -48,40 +48,40 @@ function render( $attributes, $content, $block ) {
 		case 'pending':
 			$type     = 'alert';
 			$message .= '<p>';
-			$message .= '<strong>' . __( 'Review pending.', 'wporg-patterns' ) . '</strong> ';
-			$message .= __( 'This pattern is only visible to you. Once approved it will be published to everyone.', 'wporg-patterns' );
+			$message .= '<strong>' . esc_html__( 'Review pending.', 'wporg-patterns' ) . '</strong> ';
+			$message .= esc_html__( 'This pattern is only visible to you. Once approved it will be published to everyone.', 'wporg-patterns' );
 			$message .= '</p>';
-			$message .= '<p>' . __( 'All patterns submitted to WordPress.org are subject to both automated and manual approval. It might take a few days for your pattern to be approved.', 'wporg-patterns' ) . '</p>';
-			$message .= '<p>' . __( 'Reviewers look for content that may be problematic (copyright or trademark issues) and whether your pattern works as intended.', 'wporg-patterns' ) . '</p>';
+			$message .= '<p>' . esc_html__( 'All patterns submitted to WordPress.org are subject to both automated and manual approval. It might take a few days for your pattern to be approved.', 'wporg-patterns' ) . '</p>';
+			$message .= '<p>' . esc_html__( 'Reviewers look for content that may be problematic (copyright or trademark issues) and whether your pattern works as intended.', 'wporg-patterns' ) . '</p>';
 			break;
 		case 'draft':
 			$message .= '<p>';
-			$message .= '<strong>' . __( 'Saved as draft.', 'wporg-patterns' ) . '</strong> ';
-			$message .= __( 'This pattern is only visible to you. When you’re ready, submit it to be published to everyone.', 'wporg-patterns' );
+			$message .= '<strong>' . esc_html__( 'Saved as draft.', 'wporg-patterns' ) . '</strong> ';
+			$message .= esc_html__( 'This pattern is only visible to you. When you’re ready, submit it to be published to everyone.', 'wporg-patterns' );
 			$message .= '</p>';
-			$message .= '<p>' . __( 'Patterns can be saved as a draft which can be submitted for approval at any time. This allows you to save your design and come back to it later to submit.', 'wporg-patterns' ) . '</p>';
+			$message .= '<p>' . esc_html__( 'Patterns can be saved as a draft which can be submitted for approval at any time. This allows you to save your design and come back to it later to submit.', 'wporg-patterns' ) . '</p>';
 			break;
 		case 'unlisted':
 			$type     = 'warning';
 			$reason   = get_pattern_unlisted_reason( $post_id );
 			$message .= '<p>';
-			$message .= '<strong>' . __( 'Pattern declined.', 'wporg-patterns' ) . '</strong> ';
-			$message .= __( 'WordPress.org has chosen not to include this pattern in the directory.', 'wporg-patterns' );
+			$message .= '<strong>' . esc_html__( 'Pattern declined.', 'wporg-patterns' ) . '</strong> ';
+			$message .= esc_html__( 'WordPress.org has chosen not to include this pattern in the directory.', 'wporg-patterns' );
 			$message .= '</p>';
 			if ( $reason ) {
 				$message .= sprintf(
 					'<p>%s %s</p>',
-					__( 'WordPress.org has removed your pattern from the directory for the following reason:', 'wporg-patterns' ),
+					esc_html__( 'WordPress.org has removed your pattern from the directory for the following reason:', 'wporg-patterns' ),
 					wp_kses_post( $reason )
 				);
 			}
-			$message .= '<p>' . __( 'You can update your pattern to resubmit it for approval at any time.', 'wporg-patterns' ) . '</p>';
+			$message .= '<p>' . esc_html__( 'You can update your pattern to resubmit it for approval at any time.', 'wporg-patterns' ) . '</p>';
 			break;
 		case 'publish':
 			$type     = 'tip';
 			$message .= '<p>';
-			$message .= '<strong>' . __( 'Pattern published!', 'wporg-patterns' ) . '</strong> ';
-			$message .= __( 'Your new design is now available to everyone.', 'wporg-patterns' );
+			$message .= '<strong>' . esc_html__( 'Pattern published!', 'wporg-patterns' ) . '</strong> ';
+			$message .= esc_html__( 'Your new design is now available to everyone.', 'wporg-patterns' );
 			$message .= '</p>';
 			break;
 	}

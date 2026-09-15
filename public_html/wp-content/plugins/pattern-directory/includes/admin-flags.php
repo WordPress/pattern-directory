@@ -119,7 +119,8 @@ function flag_list_table_render_custom_columns( $column_name, $post_id ) {
 			break;
 
 		case 'details':
-			echo wp_kses_data( get_the_excerpt( $current_flag ) );
+			// `br` is not in the kses data allowlist, so the line breaks have to be added after escaping.
+			echo nl2br( wp_kses_data( get_the_excerpt( $current_flag ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			break;
 	}
 }
@@ -179,7 +180,7 @@ function flag_list_table_row_actions( $actions, $post ) {
 		esc_url( $pattern_url ),
 		/* translators: %s: Post title. */
 		esc_attr( sprintf( __( 'Review &#8220;%s&#8221;', 'wporg-patterns' ), $pattern_title ) ),
-		__( 'Review Pattern', 'wporg-patterns' )
+		esc_html__( 'Review Pattern', 'wporg-patterns' )
 	);
 
 	if ( PENDING_STATUS === get_post_status( $post ) ) {
@@ -195,7 +196,7 @@ function flag_list_table_row_actions( $actions, $post ) {
 			'<a href="%s" aria-label="%s">%s</a>',
 			esc_url( $resolve_url ),
 			esc_attr( __( 'Mark this flag as resolved', 'wporg-patterns' ) ),
-			__( 'Resolve', 'wporg-patterns' )
+			esc_html__( 'Resolve', 'wporg-patterns' )
 		);
 	}
 
@@ -212,7 +213,7 @@ function flag_list_table_row_actions( $actions, $post ) {
 			'<a href="%s" aria-label="%s">%s</a>',
 			esc_url( $unresolve_url ),
 			esc_attr( __( 'Mark this flag as pending', 'wporg-patterns' ) ),
-			__( 'Unresolve', 'wporg-patterns' )
+			esc_html__( 'Unresolve', 'wporg-patterns' )
 		);
 	}
 
@@ -233,7 +234,7 @@ function flag_list_table_row_actions( $actions, $post ) {
 			esc_url( $view_all_url ),
 			/* translators: %s: Post title. */
 			esc_attr( sprintf( __( 'View all flags for &#8220;%s&#8221;', 'wporg-patterns' ), $pattern_title ) ),
-			__( 'View All Flags For This Pattern', 'wporg-patterns' )
+			esc_html__( 'View All Flags For This Pattern', 'wporg-patterns' )
 		);
 	}
 
@@ -340,7 +341,7 @@ function flag_list_table_views( $views ) {
 			'filtered' => sprintf(
 				'<strong>%s</strong>',
 				/* translators: %s: Pattern title. */
-				sprintf( __( 'Viewing flags for &#8220;%s&#8221;', 'wporg-patterns' ), $parent_title )
+				esc_html( sprintf( __( 'Viewing flags for &#8220;%s&#8221;', 'wporg-patterns' ), $parent_title ) )
 			),
 		);
 

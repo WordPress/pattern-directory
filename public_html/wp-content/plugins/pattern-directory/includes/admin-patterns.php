@@ -290,14 +290,16 @@ function pattern_list_table_views( $views ) {
 		esc_url( $url ),
 		$extra_attributes,
 		sprintf(
-			/* translators: %s: Number of posts. */
-			_n(
-				'Has Flags <span class="count">(%s)</span>',
-				'Have Flags <span class="count">(%s)</span>',
-				count( $patterns_with_flags ),
-				'wporg-patterns'
+			wp_kses_post(
+				/* translators: %s: Number of posts. */
+				_n(
+					'Has Flags <span class="count">(%s)</span>',
+					'Have Flags <span class="count">(%s)</span>',
+					count( $patterns_with_flags ),
+					'wporg-patterns'
+				)
 			),
-			number_format_i18n( count( $patterns_with_flags ) )
+			esc_html( number_format_i18n( count( $patterns_with_flags ) ) )
 		)
 	);
 
@@ -327,14 +329,16 @@ function pattern_list_table_views( $views ) {
 		esc_url( $url ),
 		$extra_attributes,
 		sprintf(
-			/* translators: %s: Number of posts. */
-			_n(
-				'Original <span class="count">(%s)</span>',
-				'Originals <span class="count">(%s)</span>',
-				$query->found_posts,
-				'wporg-patterns'
+			wp_kses_post(
+				/* translators: %s: Number of posts. */
+				_n(
+					'Original <span class="count">(%s)</span>',
+					'Originals <span class="count">(%s)</span>',
+					$query->found_posts,
+					'wporg-patterns'
+				)
 			),
-			number_format_i18n( $query->found_posts )
+			esc_html( number_format_i18n( $query->found_posts ) )
 		)
 	);
 
@@ -452,7 +456,7 @@ function add_row_actions( $actions, $post ) {
 			esc_url( $publish_url ),
 			/* translators: %s: Post title. */
 			esc_attr( sprintf( __( 'Publish &#8220;%s&#8221;', 'wporg-patterns' ), $title ) ),
-			_x( 'Publish', 'verb', 'wporg-patterns' )
+			esc_html_x( 'Publish', 'verb', 'wporg-patterns' )
 		);
 	}
 
@@ -470,7 +474,7 @@ function add_row_actions( $actions, $post ) {
 			esc_url( $unlist_url ),
 			/* translators: %s: Post title. */
 			esc_attr( sprintf( __( 'Remove &#8220;%s&#8221; from the directory', 'wporg-patterns' ), $title ) ),
-			_x( 'Unlist', 'verb', 'wporg-patterns' )
+			esc_html_x( 'Unlist', 'verb', 'wporg-patterns' )
 		);
 	}
 
@@ -488,7 +492,7 @@ function add_row_actions( $actions, $post ) {
 			esc_url( $spam_url ),
 			/* translators: %s: Post title. */
 			esc_attr( sprintf( __( 'Mark &#8220;%s&#8221; as spam', 'wporg-patterns' ), $title ) ),
-			_x( 'Spam', 'verb', 'wporg-patterns' )
+			esc_html_x( 'Spam', 'verb', 'wporg-patterns' )
 		);
 	}
 

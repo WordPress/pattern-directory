@@ -1166,12 +1166,16 @@ function load_pattern_preview( $template ) {
 add_action(
 	'the_post',
 	function ( $post ) {
-		$post->post_content = decode_pattern_content( $post->post_content );
+		if ( POST_TYPE === $post->post_type ) {
+			$post->post_content = decode_pattern_content( $post->post_content );
+		}
 	}
 );
 
 /**
  * Process post content, replacing broken encoding & removing refs.
+ *
+ * Note that the creator persists the normalization this does, via the pattern_content REST field.
  *
  * Some image URLs have &s, which are double-encoded and sanitized to become malformed,
  * for example, `https://img.rawpixel.com/s3fs-private/rawpixel_images/website_content/a010-markuss-0964.jpg?w=1200\u0026amp;h=1200\u0026amp;fit=clip\u0026amp;crop=default\u0026amp;dpr=1\u0026amp;q=75\u0026amp;vib=3\u0026amp;con=3\u0026amp;usm=15\u0026amp;cs=srgb\u0026amp;bg=F4F4F3\u0026amp;ixlib=js-2.2.1\u0026amp;s=7d494bd5db8acc2a34321c15ed18ace5`.
@@ -1183,8 +1187,8 @@ add_action(
 function decode_pattern_content( $content ) {
 	// Sometimes the initial `\` is missing, so look for both versions.
 	$content = str_replace( array( '\u0026amp;', 'u0026amp;' ), '&', $content );
-	// Remove `ref` from all content.
-	$content = preg_replace( '/"ref":\d+,?/', '', $content );
+	// Remove `ref` from all content, taking the comma from whichever side of the key it sits on.
+	$content = preg_replace( '/"ref":\d+,|,?"ref":\d+/', '', $content );
 	return $content;
 }
 

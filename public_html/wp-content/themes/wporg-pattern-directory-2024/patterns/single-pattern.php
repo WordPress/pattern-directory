@@ -14,6 +14,8 @@ $notice_type   = 'warning';
 
 if ( 'report-failed' === $action_status ) {
 	$notice = __( 'Your pattern report could not be saved. Please try again.', 'wporg-patterns' );
+} elseif ( 'report-invalid' === $action_status ) {
+	$notice = __( 'A report needs both a reason and details. Please fill in both and submit again.', 'wporg-patterns' );
 } elseif ( 'logged-out' === $action_status ) {
 	$notice = __( 'You must be logged in to report a pattern.', 'wporg-patterns' );
 } elseif ( 'reported' === $action_status ) {
