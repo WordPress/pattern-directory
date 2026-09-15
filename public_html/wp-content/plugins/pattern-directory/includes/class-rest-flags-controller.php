@@ -197,11 +197,16 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 
 		$prepared_post = parent::prepare_item_for_database( $request );
 
+		if ( is_wp_error( $prepared_post ) ) {
+			return $prepared_post;
+		}
+
 		$prepared_post->post_author = get_current_user_id();
 
 		/*
 		 * Details are captured on create, matching the front-end form; updates only carry status.
-		 * Re-encoding an already-encoded excerpt would compound on every save.
+		 * Re-encoding an already-encoded excerpt would compound on every save, so an excerpt sent
+		 * with an update is discarded rather than stored unencoded.
 		 */
 		if ( empty( $prepared_post->ID ) ) {
 			$prepared_post->post_excerpt = flag_details_to_html( $prepared_post->post_excerpt ?? '' );
@@ -213,6 +218,8 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 					array( 'status' => 400 )
 				);
 			}
+		} else {
+			unset( $prepared_post->post_excerpt );
 		}
 
 		if ( ! isset( $request['status'] ) ) {
