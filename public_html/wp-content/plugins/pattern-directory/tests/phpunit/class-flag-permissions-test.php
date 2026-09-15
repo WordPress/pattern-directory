@@ -14,6 +14,7 @@ use WP_UnitTestCase;
 use WP_UnitTest_Factory;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG_POST_TYPE;
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 
 /**
  * Pattern flags are abuse reports, carrying who reported a pattern and why; only moderators may read them.
@@ -226,5 +227,121 @@ class Flag_Permissions_Test extends WP_UnitTestCase {
 
 		$this->assertFalse( $response->is_error(), 'A moderator should be able to read a flag.' );
 		$this->assertSame( self::$flag_id, $response->get_data()['id'] );
+	}
+
+	/**
+	 * Report details filed over REST are stored the way the front-end report form stores them.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\REST_Flags_Controller::prepare_item_for_database
+	 */
+	public function test_rest_created_flag_encodes_report_details(): void {
+		update_option( 'wporg-pattern-flag_threshold', 10 );
+		wp_set_current_user( self::$member );
+		$reason = self::factory()->term->create( array( 'taxonomy' => FLAG_REASON ) );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/' . FLAG_POST_TYPE );
+		$request->set_body_params(
+			array(
+				'parent'    => self::$pattern_id,
+				'excerpt'   => "Uses <b>bold</b> & more.\nSee C:\\patterns\\example, where a < b &amp; c.",
+				FLAG_REASON => array( $reason ),
+			)
+		);
+		$response = rest_do_request( $request );
+
+		$this->assertFalse( $response->is_error(), 'A member should be able to file a flag.' );
+		$this->assertSame(
+			"Uses &lt;b&gt;bold&lt;/b&gt; &amp; more.\nSee C:\\patterns\\example, where a &lt; b &amp;amp; c.",
+			get_post( $response->get_data()['id'] )->post_excerpt
+		);
+	}
+
+	/**
+	 * A report filed over REST needs details, the same way the front-end report form does.
+	 *
+	 * @dataProvider data_empty_report_details
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\REST_Flags_Controller::prepare_item_for_database
+	 *
+	 * @param array  $body          Request body, without the parent and reason.
+	 * @param string $expected_code The error code the request should fail with.
+	 */
+	public function test_rest_created_flag_requires_report_details( array $body, string $expected_code ): void {
+		update_option( 'wporg-pattern-flag_threshold', 10 );
+		wp_set_current_user( self::$member );
+		$reason = self::factory()->term->create( array( 'taxonomy' => FLAG_REASON ) );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/' . FLAG_POST_TYPE );
+		$request->set_body_params(
+			array_merge(
+				array(
+					'parent'    => self::$pattern_id,
+					FLAG_REASON => array( $reason ),
+				),
+				$body
+			)
+		);
+		$response = rest_do_request( $request );
+
+		$this->assertTrue( $response->is_error(), 'A flag without details should be rejected.' );
+		$this->assertSame( $expected_code, $response->as_error()->get_error_code() );
+		$this->assertSame(
+			array(),
+			get_posts(
+				array(
+					'post_type'      => FLAG_POST_TYPE,
+					'post_parent'    => self::$pattern_id,
+					'post_status'    => get_post_stati(),
+					'exclude'        => array( self::$flag_id ),
+					'posts_per_page' => -1,
+					'fields'         => 'ids',
+				)
+			)
+		);
+	}
+
+	/**
+	 * Omitted, empty, and whitespace-only report details.
+	 *
+	 * @return array[]
+	 */
+	public function data_empty_report_details(): array {
+		return array(
+			'omitted'         => array( array(), 'rest_missing_callback_param' ),
+			'empty'           => array( array( 'excerpt' => '' ), 'rest_missing_report_details' ),
+			'whitespace only' => array( array( 'excerpt' => " \n\t " ), 'rest_missing_report_details' ),
+		);
+	}
+
+	/**
+	 * Editing a flag must not re-encode details that are already encoded.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\REST_Flags_Controller::prepare_item_for_database
+	 */
+	public function test_rest_updated_flag_does_not_re_encode_report_details(): void {
+		$excerpt = 'Reported because a &lt; b &amp;amp; c.';
+		$flag_id = self::factory()->post->create(
+			array(
+				'post_type'    => FLAG_POST_TYPE,
+				'post_status'  => 'pending',
+				'post_parent'  => self::$pattern_id,
+				'post_excerpt' => $excerpt,
+			)
+		);
+		wp_set_current_user( self::$moderator );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/' . FLAG_POST_TYPE . '/' . $flag_id );
+		$request->set_body_params(
+			array(
+				'status'  => 'resolved',
+				'excerpt' => $excerpt,
+			)
+		);
+		$response = rest_do_request( $request );
+
+		$this->assertFalse( $response->is_error(), 'A moderator should be able to resolve a flag.' );
+		$this->assertSame( $excerpt, get_post( $flag_id )->post_excerpt );
+
+		wp_delete_post( $flag_id, true );
 	}
 }

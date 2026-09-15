@@ -9,6 +9,7 @@ namespace WordPressdotorg\Pattern_Directory;
 
 use WP_Error, WP_Post, WP_Query;
 use WP_REST_Posts_Controller, WP_REST_Request, WP_REST_Server;
+use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\flag_details_to_html;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTERN;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_TAX;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\PENDING_STATUS;
@@ -198,11 +199,30 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 
 		$prepared_post->post_author = get_current_user_id();
 
+		/*
+		 * Details are captured on create, matching the front-end form; updates only carry status.
+		 * Re-encoding an already-encoded excerpt would compound on every save.
+		 */
+		if ( empty( $prepared_post->ID ) ) {
+			$prepared_post->post_excerpt = flag_details_to_html( $prepared_post->post_excerpt ?? '' );
+
+			if ( '' === $prepared_post->post_excerpt ) {
+				return new WP_Error(
+					'rest_missing_report_details',
+					__( 'A report needs details explaining why the pattern was flagged.', 'wporg-patterns' ),
+					array( 'status' => 400 )
+				);
+			}
+		}
+
 		if ( ! isset( $request['status'] ) ) {
 			$prepared_post->post_status = $schema['properties']['status']['default'];
 		}
 
-		foreach ( $request['wporg-pattern-flag-reason'] as $term_id ) {
+		// Reasons are only required on create, so an update can legitimately carry none.
+		$reasons = isset( $request[ FLAG_TAX ] ) ? (array) $request[ FLAG_TAX ] : array();
+
+		foreach ( $reasons as $term_id ) {
 			if ( ! term_exists( $term_id, FLAG_TAX ) ) {
 				return new WP_Error(
 					'rest_invalid_term_id',
@@ -234,6 +254,9 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 		);
 
 		$schema['properties']['wporg-pattern-flag-reason']['required'] = true;
+
+		// Report details are mandatory, matching the front-end report form. `required` only binds on create.
+		$schema['properties']['excerpt']['required'] = true;
 
 		return $schema;
 	}

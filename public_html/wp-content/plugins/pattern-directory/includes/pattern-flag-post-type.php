@@ -128,6 +128,25 @@ function get_default_reason_description() {
 }
 
 /**
+ * Convert the free text a reporter submitted into the HTML that `post_excerpt` stores.
+ *
+ * Encoded on the way in, not out: kses rewrites a raw `a < b and c > d` into `a  d`.
+ *
+ * Invalid UTF-8 is stripped rather than emptying the whole report.
+ *
+ * @param mixed $details Raw, unslashed report details.
+ *
+ * @return string Report details as HTML, or an empty string when nothing usable was submitted.
+ */
+function flag_details_to_html( $details ) {
+	if ( ! is_string( $details ) ) {
+		return '';
+	}
+
+	return trim( htmlspecialchars( wp_check_invalid_utf8( $details, true ), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', true ) );
+}
+
+/**
  * Hold a pattern for moderator review when it reaches the report threshold.
  *
  * Unlike `pending`, the review status prevents authors from republishing the pattern.

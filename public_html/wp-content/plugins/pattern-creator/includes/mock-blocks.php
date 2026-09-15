@@ -28,7 +28,7 @@ add_filter( 'get_custom_logo', __NAMESPACE__ . '\provide_mock_logo' );
 function render_archives( $block_content, $block, $block_instance ) {
 	$show_post_count = ! empty( $block_instance->attributes['showPostCounts'] );
 	$show_dropdown   = ! empty( $block_instance->attributes['displayAsDropdown'] );
-	$dropdown_id     = esc_attr( uniqid( 'wp-block-archives-' ) );
+	$dropdown_id     = uniqid( 'wp-block-archives-' );
 	$class           = '';
 
 	$dates   = array();
@@ -46,13 +46,13 @@ function render_archives( $block_content, $block, $block_instance ) {
 
 		foreach ( $dates as $date ) {
 			if ( $show_post_count ) {
-				$archives .= sprintf( '<option>%1$s (%2$s)</option>', $date, wp_rand( 5, 25 ) );
+				$archives .= sprintf( '<option>%1$s (%2$s)</option>', esc_html( $date ), wp_rand( 5, 25 ) );
 			} else {
-				$archives .= sprintf( '<option>%s</option>', $date );
+				$archives .= sprintf( '<option>%s</option>', esc_html( $date ) );
 			}
 		}
 
-		$block_content = '<label for="' . $dropdown_id . '">' . $title . '</label><select id="' . $dropdown_id . '" name="archive-dropdown"><option value="">' . $label . '</option>' . $archives . '</select>';
+		$block_content = '<label for="' . esc_attr( $dropdown_id ) . '">' . esc_html( $title ) . '</label><select id="' . esc_attr( $dropdown_id ) . '" name="archive-dropdown"><option value="">' . esc_html( $label ) . '</option>' . $archives . '</select>';
 
 		$class     .= ' wp-block-archives-dropdown';
 		$classnames = esc_attr( $class );
@@ -73,9 +73,9 @@ function render_archives( $block_content, $block, $block_instance ) {
 
 		foreach ( $dates as $date ) {
 			if ( $show_post_count ) {
-				$archives .= sprintf( '<li><a href="">%1$s</a> (%2$s)</li>', $date, wp_rand( 5, 25 ) );
+				$archives .= sprintf( '<li><a href="">%1$s</a> (%2$s)</li>', esc_html( $date ), wp_rand( 5, 25 ) );
 			} else {
-				$archives .= sprintf( '<li><a href="">%s</a></li>', $date );
+				$archives .= sprintf( '<li><a href="">%s</a></li>', esc_html( $date ) );
 			}
 		}
 
@@ -141,8 +141,8 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
 		$list_items_markup .= '<article>';
 		$list_items_markup .= '<footer class="wp-block-latest-comments__comment-meta">';
 
-		$author_markup = '<span class="wp-block-latest-comments__comment-author">' . $comment['author'] . '</span>';
-		$post_title    = '<a class="wp-block-latest-comments__comment-link" href="#">' . $comment['post_title'] . '</a>';
+		$author_markup = '<span class="wp-block-latest-comments__comment-author">' . esc_html( $comment['author'] ) . '</span>';
+		$post_title    = '<a class="wp-block-latest-comments__comment-link" href="#">' . esc_html( $comment['post_title'] ) . '</a>';
 
 		$list_items_markup .= sprintf(
 			/* translators: 1: author name, 2: post title related to this comment */
@@ -155,7 +155,7 @@ function render_latest_comments( $block_content, $block, $block_instance ) {
 			$list_items_markup .= sprintf(
 				'<time datetime="%1$s" class="wp-block-latest-comments__comment-date">%2$s</time>',
 				esc_attr( wp_date( 'c', $comment['date'] ) ),
-				wp_date( get_option( 'date_format' ), $comment['date'] )
+				esc_html( wp_date( get_option( 'date_format' ), $comment['date'] ) )
 			);
 		}
 		$list_items_markup .= '</footer>';
@@ -294,6 +294,6 @@ function provide_mock_logo() {
 	return sprintf(
 		'<span class="custom-logo-link"><img src="%s" class="custom-logo" alt="%s"></span>',
 		'https://s.w.org/images/wmark.png',
-		__( 'Site logo', 'wporg-patterns' )
+		esc_attr__( 'Site logo', 'wporg-patterns' )
 	);
 }

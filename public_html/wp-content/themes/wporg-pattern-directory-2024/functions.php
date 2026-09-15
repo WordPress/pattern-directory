@@ -8,6 +8,7 @@
 namespace WordPressdotorg\Theme\Pattern_Directory_2024;
 
 use function WordPressdotorg\Pattern_Directory\Favorite\{get_favorites, get_favorite_count};
+use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\flag_details_to_html;
 use function WordPressdotorg\Theme\Pattern_Directory_2024\Block_Config\get_applied_filter_list;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG_POST_TYPE;
@@ -72,6 +73,7 @@ function enqueue_assets() {
  *
  * Available actions:
  * - draft: Update the current post to a draft.
+ * - report: Flag the current post for moderation.
  */
 function do_pattern_actions() {
 	if ( ! is_singular( POST_TYPE ) ) {
@@ -132,25 +134,30 @@ function do_pattern_actions() {
 				return;
 			}
 
-			$report_details = isset( $_POST['report-details'] ) ? sanitize_text_field( wp_unslash( $_POST['report-details'] ) ) : '';
-			$report_reason  = isset( $_POST['report-reason'] ) ? intval( $_POST['report-reason'] ) : 0;
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- flag_details_to_html() entity-encodes the value.
+			$report_details = isset( $_POST['report-details'] ) ? flag_details_to_html( wp_unslash( $_POST['report-details'] ) ) : '';
+			$report_reason  = isset( $_POST['report-reason'] )
+				? filter_var( wp_unslash( $_POST['report-reason'] ), FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) ) : false;
+
+			if ( '' === $report_details || ! $report_reason || ! term_exists( $report_reason, FLAG_REASON ) ) {
+				// Distinct from `report-failed`, since resubmitting an incomplete form unchanged cannot succeed.
+				wp_safe_redirect( add_query_arg( array( 'status' => 'report-invalid' ), get_the_permalink() ) );
+				return;
+			}
 
 			$success = wp_insert_post(
 				array(
 					'post_type'    => FLAG_POST_TYPE,
 					'post_parent'  => $post_id,
-					'post_excerpt' => $report_details,
+					'post_excerpt' => wp_slash( $report_details ),
 					'post_status'  => PENDING_STATUS,
 				),
 				false,
 				false // Defer threshold checks and notifications until the report reason is saved.
 			);
 
-			if ( $success && $report_reason ) {
-				wp_set_object_terms( $success, array( $report_reason ), FLAG_REASON );
-			}
-
 			if ( $success ) {
+				wp_set_object_terms( $success, array( $report_reason ), FLAG_REASON );
 				wp_after_insert_post( $success, false, null );
 
 				$args = array(
