@@ -344,4 +344,64 @@ class Flag_Permissions_Test extends WP_UnitTestCase {
 
 		wp_delete_post( $flag_id, true );
 	}
+
+	/**
+	 * Moderating a flag must leave the reporter on it.
+	 *
+	 * `post_author` is the reporter identity that both the create permission check and the front-end
+	 * duplicate check query on, so reassigning it to the moderator would let the original reporter file
+	 * a second report against the same pattern and push it over the flag threshold.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\REST_Flags_Controller::prepare_item_for_database
+	 */
+	public function test_rest_updated_flag_keeps_reporter_as_author(): void {
+		$flag_id = self::factory()->post->create(
+			array(
+				'post_type'    => FLAG_POST_TYPE,
+				'post_status'  => 'pending',
+				'post_parent'  => self::$pattern_id,
+				'post_author'  => self::$member,
+				'post_excerpt' => 'Reported by a member.',
+			)
+		);
+		wp_set_current_user( self::$moderator );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/' . FLAG_POST_TYPE . '/' . $flag_id );
+		$request->set_body_params( array( 'status' => 'resolved' ) );
+		$response = rest_do_request( $request );
+
+		$this->assertFalse( $response->is_error(), 'A moderator should be able to resolve a flag.' );
+		$this->assertSame( self::$member, (int) get_post( $flag_id )->post_author );
+
+		wp_delete_post( $flag_id, true );
+	}
+
+	/**
+	 * An update that does not carry a status must not reset the flag to the create-time default.
+	 *
+	 * Reverting a resolved flag to `pending` would re-arm the threshold check on the next save.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\REST_Flags_Controller::prepare_item_for_database
+	 */
+	public function test_rest_updated_flag_keeps_status_when_none_is_sent(): void {
+		$flag_id = self::factory()->post->create(
+			array(
+				'post_type'    => FLAG_POST_TYPE,
+				'post_status'  => 'resolved',
+				'post_parent'  => self::$pattern_id,
+				'post_author'  => self::$member,
+				'post_excerpt' => 'Already handled.',
+			)
+		);
+		wp_set_current_user( self::$moderator );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/' . FLAG_POST_TYPE . '/' . $flag_id );
+		$request->set_body_params( array( 'title' => 'Renamed report' ) );
+		$response = rest_do_request( $request );
+
+		$this->assertFalse( $response->is_error(), 'A moderator should be able to update a flag.' );
+		$this->assertSame( 'resolved', get_post( $flag_id )->post_status );
+
+		wp_delete_post( $flag_id, true );
+	}
 }
