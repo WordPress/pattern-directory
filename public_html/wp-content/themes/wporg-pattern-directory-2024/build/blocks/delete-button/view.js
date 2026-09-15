@@ -1,0 +1,1 @@
+import{getContext as t,store as e}from"@wordpress/interactivity";e("wporg/patterns/delete-button",{actions:{*triggerDelete(){const{postId:e,message:r,redirectUrl:o}=t();if(yield window.confirm(r)){try{yield wp.apiFetch({path:`/wp/v2/wporg-pattern/${e}/`,method:"DELETE"})}catch{return}window.location=o}}}});
