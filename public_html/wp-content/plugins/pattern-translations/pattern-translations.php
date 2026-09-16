@@ -50,21 +50,29 @@ if ( defined( 'WP_CLI' ) ) {
  * @return bool Whether the HTML is safe to store as a pattern.
  */
 function is_translated_content_allowed( $html ) {
-	$blocks = parse_blocks( $html );
-	while ( $blocks ) {
-		$block = array_shift( $blocks );
+	// The job runs without a user, so the save-time filters change the bytes; check what the row will hold as well as the assembled form.
+	$stored = wp_unslash( sanitize_post_field( 'post_content', wp_slash( $html ), 0, 'db' ) );
+	foreach ( array_unique( array( $html, $stored ) ) as $markup ) {
+		$blocks = parse_blocks( $markup );
+		while ( $blocks ) {
+			$block = array_shift( $blocks );
 
-		if ( ! is_null( $block['blockName'] ) && ! is_block_allowed_in_pattern( $block['blockName'] ) ) {
-			return false;
+			if ( ! is_null( $block['blockName'] ) && ! is_block_allowed_in_pattern( $block['blockName'] ) ) {
+				return false;
+			}
+
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$blocks = array_merge( $blocks, $block['innerBlocks'] );
+			}
 		}
 
-		if ( ! empty( $block['innerBlocks'] ) ) {
-			$blocks = array_merge( $blocks, $block['innerBlocks'] );
+		// Translated strings land in block attributes as well as inner HTML, and neither is sanitised by KSES.
+		if ( content_has_block_directives( $markup ) || blocks_have_directive_attribute( parse_blocks( $markup ) ) ) {
+			return false;
 		}
 	}
 
-	// Translated strings land in block attributes as well as inner HTML, and neither is sanitised by KSES.
-	return ! content_has_block_directives( $html ) && ! blocks_have_directive_attribute( parse_blocks( $html ) );
+	return true;
 }
 
 /**
@@ -101,10 +109,10 @@ function create_or_update_translated_pattern( Pattern $pattern ) {
 			'wpop_description'          => $pattern->description,
 			'wpop_locale'               => $pattern->locale,
 			'wpop_keywords'             => $pattern->keywords,
-			'wpop_viewport_width'       => $parent->wpop_viewport_width,
-			'wpop_block_types'          => $parent->wpop_block_types,
-			'wpop_contains_block_types' => $parent->wpop_contains_block_types,
-			'wpop_wp_version'           => $parent->wpop_wp_version,
+			'wpop_viewport_width'       => $parent->wpop_viewport_width ?? '',
+			'wpop_block_types'          => $parent->wpop_block_types ?? '',
+			'wpop_contains_block_types' => $parent->wpop_contains_block_types ?? '',
+			'wpop_wp_version'           => $parent->wpop_wp_version ?? '',
 			'wpop_is_translation'       => true,
 		),
 	);
@@ -113,7 +121,12 @@ function create_or_update_translated_pattern( Pattern $pattern ) {
 		unset( $args['ID'] );
 	}
 
-	$post_id = wp_insert_post( $args, true );
+	/*
+	 * `wp_insert_post()` expects slashed input and unslashes every field, `meta_input` included, before it
+	 * writes. Nothing in $args arrives slashed (GlotPress strings, `get_post()` reads), so without this a
+	 * literal backslash, or the `\u002d\u002d` the block serialiser writes for `--`, is stored one backslash short.
+	 */
+	$post_id = wp_insert_post( wp_slash( $args ), true );
 
 	// Copy the terms from the parent if required.
 	if ( $post_id && ! is_wp_error( $post_id ) && $pattern->parent ) {
