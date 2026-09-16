@@ -479,31 +479,22 @@ function attribute_has_directive( $value ) {
 }
 
 /**
- * Whether any tag in the HTML carries an Interactivity API `data-wp-*` attribute.
+ * Whether the HTML carries an Interactivity API `data-wp-*` marker.
  *
- * The sanitised markup is scanned too: a raw-text element hides its content from the tokenizer, and KSES
- * then deletes that wrapper on save and keeps the tags it held.
+ * A pattern may not carry one at all, in a tag or anywhere else, so the marker itself is the test.
+ *
+ * Reading it as markup instead would be narrower than the rule. `WP_HTML_Tag_Processor` does not
+ * descend into a raw-text or RCDATA element, so a tag inside one is invisible to it, and scanning the
+ * `wp_kses_post()` form as well only helps where KSES removes the element that did the hiding. It does
+ * that for `<script>` and `<style>`, and not for `<title>` or `<textarea>`, which it keeps: those hold
+ * their contents as text, so neither pass ever reads the tag. A substring test has no such blind spot.
  *
  * @param string $html The HTML to scan.
  *
  * @return bool Whether a directive is present.
  */
 function content_has_block_directives( $html ) {
-	// Directives are rare; don't sanitise or tokenize the whole document when the marker can't be present.
-	if ( false === stripos( $html, 'data-wp-' ) ) {
-		return false;
-	}
-
-	foreach ( array( $html, wp_kses_post( $html ) ) as $markup ) {
-		$tags = new \WP_HTML_Tag_Processor( $markup );
-		while ( $tags->next_tag() ) {
-			if ( $tags->get_attribute_names_with_prefix( 'data-wp-' ) ) {
-				return true;
-			}
-		}
-	}
-
-	return false;
+	return false !== stripos( $html, 'data-wp-' );
 }
 
 /**
