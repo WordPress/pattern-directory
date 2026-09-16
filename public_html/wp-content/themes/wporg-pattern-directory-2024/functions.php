@@ -18,6 +18,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as F
 // Block files.
 require_once __DIR__ . '/src/blocks/copy-button/index.php';
 require_once __DIR__ . '/src/blocks/delete-button/index.php';
+require_once __DIR__ . '/src/blocks/draft-button/index.php';
 require_once __DIR__ . '/src/blocks/pattern-preview/index.php';
 require_once __DIR__ . '/src/blocks/pattern-thumbnail/index.php';
 require_once __DIR__ . '/src/blocks/post-status/index.php';
@@ -80,8 +81,13 @@ function do_pattern_actions() {
 		return;
 	}
 
-	$action  = isset( $_REQUEST['action'] ) ? sanitize_key( wp_unslash( $_REQUEST['action'] ) ) : false;
-	$nonce   = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : false;
+	// Both actions change state, so a request the browser makes on its own (a link, an image) must not reach them.
+	if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
+		return;
+	}
+
+	$action  = isset( $_POST['action'] ) ? sanitize_key( wp_unslash( $_POST['action'] ) ) : false;
+	$nonce   = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : false;
 	$post_id = get_the_ID();
 
 	if ( 'draft' === $action ) {

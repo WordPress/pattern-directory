@@ -244,6 +244,60 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Content the save filters would rewrite is refused, so what the validators checked is what the row holds.
+	 *
+	 * @dataProvider data_content_rewritten_on_save
+	 *
+	 * @param string $expected_error_code The error the submission is refused with.
+	 * @param string $content             Content that saving would turn into something else.
+	 */
+	public function test_content_rewritten_on_save_is_refused( $expected_error_code, $content ) {
+		// Members have their content filtered on save; that is the path the checks have to match.
+		$member         = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		$member_pattern = self::factory()->post->create(
+			array(
+				'post_type'   => POST_TYPE,
+				'post_author' => $member,
+				'post_status' => 'draft',
+			)
+		);
+		wp_set_current_user( $member );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . $member_pattern );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'content' => $content ) ) );
+
+		$response = rest_do_request( $request );
+
+		$this->assertTrue( $response->is_error() );
+		$this->assertSame( $expected_error_code, $response->get_data()['code'] );
+	}
+
+	/**
+	 * Content whose blocks, or their nesting, are not what they would be once saved.
+	 *
+	 * @return array
+	 */
+	public function data_content_rewritten_on_save() {
+		$in_paragraph = function ( $markup ) {
+			return self::TWO_PARAGRAPHS . "\n\n<!-- wp:paragraph -->\n<p>Three $markup</p>\n<!-- /wp:paragraph -->";
+		};
+
+		return array(
+			'control character in a name'       => array( 'rest_pattern_control_characters', $in_paragraph( "<!-- wp:wpor\x00g/modal {\"a\":\"b\"} /-->" ) ),
+			'control character in a marker'     => array( 'rest_pattern_control_characters', $in_paragraph( "<!-- wp:wporg/modal \x01/-->" ) ),
+			'extra dash on the closer'          => array( 'rest_pattern_unstable_blocks', $in_paragraph( '<!-- wp:wporg/modal /--->' ) ),
+			'two extra dashes'                  => array( 'rest_pattern_unstable_blocks', $in_paragraph( '<!-- wp:wporg/modal /---->' ) ),
+			'container with extra dashes'       => array( 'rest_pattern_unstable_blocks', $in_paragraph( '<!-- wp:wporg/modal ---><!-- /wp:wporg/modal --->' ) ),
+			// Same names in the same order, but the extra dash on the closing delimiter un-nests what follows it.
+			'extra dash on a closing delimiter' => array(
+				'rest_pattern_unstable_blocks',
+				"<!-- wp:query {\"query\":{\"perPage\":2}} -->\n<div class=\"wp-block-query\">\n<!-- /wp:query --->\n<!-- wp:post-template -->\n<!-- wp:post-title /-->\n<!-- /wp:post-template -->\n</div>\n<!-- /wp:query -->",
+			),
+		);
+	}
+
+	/**
 	 * Test a block that's detected as spam should be pending.
 	 */
 	public function test_spam_should_be_pending() {
