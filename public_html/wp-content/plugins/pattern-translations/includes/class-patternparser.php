@@ -208,6 +208,7 @@ class PatternParser {
 			'\\u003e',        // '>'.
 			'\\u0026',        // '&'.
 			'\\u0022',        // '"'.
+			'\\u005c',        // '\', a bare one would start a new escape sequence in the JSON.
 		);
 
 		// Match any uninterrupted sequence of \u escaped unicode characters.
@@ -221,7 +222,14 @@ class PatternParser {
 					}
 				}
 				// If we didn't encounter excluded characters, use json_decode to do the heavy lifting.
-				return json_decode( '"' . $matches[0] . '"' );
+				$decoded = json_decode( '"' . $matches[0] . '"' );
+
+				// KSES deletes these bytes on save, so decoding them here would store different markup from what was checked.
+				if ( ! is_string( $decoded ) || preg_match( '/[\x00-\x08\x0B\x0C\x0E-\x1F]/', $decoded ) ) {
+					return $matches[0];
+				}
+
+				return $decoded;
 			},
 			$serialized
 		);

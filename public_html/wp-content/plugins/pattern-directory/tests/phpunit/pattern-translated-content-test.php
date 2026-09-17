@@ -53,6 +53,8 @@ class Pattern_Translated_Content_Test extends WP_UnitTestCase {
 			'directive in foreign content' => array( "<!-- wp:html -->\n<svg><script><a href=\"#\" data-wp-interactive=\"x\" data-wp-bind--href=\"context.url\">t</a></svg>\n<!-- /wp:html -->" ),
 			'directive in an attribute'    => array( '<!-- wp:heading {"placeholder":"<span data-wp-interactive="x" data-wp-init="actions.go">t</span>"} -->' . "\n<h2>t</h2>\n<!-- /wp:heading -->" ),
 			'disallowed block'             => array( '<!-- wp:shortcode -->[gallery]<!-- /wp:shortcode -->' ),
+			// Not a delimiter until KSES removes the byte on save.
+			'delimiter with control byte'  => array( "<!-- wp:paragraph -->\n<p><!--\x01 wp:shortcode /--></p>\n<!-- /wp:paragraph -->" ),
 		);
 	}
 
