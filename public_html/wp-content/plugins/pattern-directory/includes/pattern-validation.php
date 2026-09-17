@@ -15,6 +15,12 @@ use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\has_reache
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 
+/**
+ * The rendered text fields, the ones the directory outputs and so has to check.
+ */
+const RENDERED_FIELDS = array( 'post_content', 'post_title', 'post_excerpt' );
+
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\reject_control_characters', 5 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content' );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_context' );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_attributes' );
@@ -23,8 +29,102 @@ add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 1
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_status', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_parent', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_flag_reason', 11, 2 );
+// After the specific checks, so a submission they can name gets their message; this catches what they cannot see.
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\reject_unstable_blocks', 15 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_against_spam', 20, 2 );
 add_action( 'transition_post_status', __NAMESPACE__ . '\note_spam_status', 10, 3 );
+
+/**
+ * The ASCII control characters (bytes 0-31), minus the three that are ordinary whitespace: tab (9), line
+ * feed (10) and carriage return (13). So: 0-8, 11, 12 and 14-31. It is the set `wp_kses_no_null()` deletes
+ * on save.
+ */
+const CONTROL_CHARACTERS = '/[\x00-\x08\x0B\x0C\x0E-\x1F]/';
+
+/**
+ * Refuse a submission that carries a control character in a rendered field.
+ *
+ * No legitimate pattern contains one, and the save filters delete them, so a submission that carries one
+ * is not stored as it was checked. Refusing it keeps the two the same without rewriting the submission.
+ *
+ * @param object|\WP_Error $prepared_post Prepared post or a preceding validation error.
+ * @return object|\WP_Error The post, or an error if a rendered field carries a control character.
+ */
+function reject_control_characters( $prepared_post ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	foreach ( RENDERED_FIELDS as $field ) {
+		$value = $prepared_post->$field ?? null;
+		if ( is_string( $value ) && preg_match( CONTROL_CHARACTERS, $value ) ) {
+			return new \WP_Error(
+				'rest_pattern_control_characters',
+				__( 'Pattern content contains invisible control characters, usually from text pasted from another application. Retype or re-paste the affected text.', 'wporg-patterns' ),
+				array( 'status' => 400 )
+			);
+		}
+	}
+
+	return $prepared_post;
+}
+
+/**
+ * Refuse content that does not parse to the same block tree once the save filters have run over it.
+ *
+ * Every validator below parses the content as submitted, but `wp_insert_post()` passes it through
+ * `content_save_pre` first, and for most submitters that rewrites markup. A block, or a nesting, that only
+ * exists after the rewrite is never checked. Rather than list the rewrites that can do that, compute the
+ * bytes that will be stored and require both parses to give the same blocks, in the same order and nesting.
+ *
+ * This runs `content_save_pre` once here and `wp_insert_post()` runs it again; core's callbacks are pure,
+ * so the second pass gives the same bytes. Attributes are deliberately not compared: the save filters
+ * entity-normalise string attributes (`&` to `&amp;`), which would refuse ordinary content, and they only
+ * ever remove from a value, so what the attribute validators saw is never weaker than what is stored.
+ *
+ * @param object|\WP_Error $prepared_post Prepared post or a preceding validation error.
+ * @return object|\WP_Error The post, or an error if saving would change its blocks.
+ */
+function reject_unstable_blocks( $prepared_post ) {
+	if ( is_wp_error( $prepared_post ) || ! isset( $prepared_post->post_content ) ) {
+		return $prepared_post;
+	}
+
+	$submitted = $prepared_post->post_content;
+	// The same call `wp_insert_post()` makes, on the slashed value it receives. The `db` context never reads the post ID.
+	$stored = wp_unslash( sanitize_post_field( 'post_content', wp_slash( $submitted ), 0, 'db' ) );
+
+	if ( block_shape( parse_blocks( $submitted ) ) !== block_shape( parse_blocks( $stored ) ) ) {
+		return new \WP_Error(
+			'rest_pattern_unstable_blocks',
+			__( 'Pattern content contains block markup that would change when saved. Copy the blocks into a new pattern and try again.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	return $prepared_post;
+}
+
+/**
+ * The block names of a parsed tree with their nesting, in document order. Text between blocks is skipped.
+ *
+ * Nested arrays compare with `!==` recursively and in order, so two trees are equal only if every block
+ * sits in the same place.
+ *
+ * @param array $blocks Parsed blocks.
+ * @return array Each block as `array( name, children )`.
+ */
+function block_shape( $blocks ) {
+	$shape = array();
+	foreach ( $blocks as $block ) {
+		if ( null === $block['blockName'] ) {
+			continue;
+		}
+		$shape[] = array( $block['blockName'], block_shape( $block['innerBlocks'] ) );
+	}
+
+	return $shape;
+}
 
 /**
  * Strip out basic HTML to get at the manually-entered content in block content.
@@ -123,7 +223,7 @@ function validate_content( $prepared_post ) {
 		);
 	}
 
-	// Parse the exact content that will be stored: normalising it first could hide a block from validation.
+	// `reject_unstable_blocks()` refuses, further down the chain, any content whose stored form parses to a different tree.
 	$blocks       = parse_blocks( $content );
 	$blocks_queue = $blocks;
 	$all_blocks   = array();
@@ -413,7 +513,7 @@ function validate_block_directives( $prepared_post ) {
 	$has_directive = false;
 
 	// Every field the directory renders, not just the one the pattern editor writes.
-	foreach ( array( 'post_content', 'post_title', 'post_excerpt' ) as $field ) {
+	foreach ( RENDERED_FIELDS as $field ) {
 		if ( isset( $prepared_post->$field ) && content_has_block_directives( $prepared_post->$field ) ) {
 			$has_directive = true;
 			break;

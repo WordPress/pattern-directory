@@ -122,7 +122,7 @@ class Theme_Pattern_Actions_Test extends WP_UnitTestCase {
 	 */
 	public function tear_down(): void {
 		remove_filter( 'wp_redirect', $this->suppress_redirect );
-		unset( $_REQUEST['action'], $_REQUEST['_wpnonce'] );
+		unset( $_POST['action'], $_POST['_wpnonce'], $_SERVER['REQUEST_METHOD'] );
 		wp_set_current_user( 0 );
 
 		parent::tear_down();
@@ -131,13 +131,15 @@ class Theme_Pattern_Actions_Test extends WP_UnitTestCase {
 	/**
 	 * Run the theme's draft action against a pattern, as the current user.
 	 *
-	 * @param int $pattern_id The pattern to act on.
+	 * @param int    $pattern_id The pattern to act on.
+	 * @param string $method     The request method to send it with.
 	 */
-	protected function do_draft_action( int $pattern_id ): void {
+	protected function do_draft_action( int $pattern_id, string $method = 'POST' ): void {
 		$this->go_to( get_permalink( $pattern_id ) );
 
-		$_REQUEST['action']   = 'draft';
-		$_REQUEST['_wpnonce'] = wp_create_nonce( 'draft-' . $pattern_id );
+		$_SERVER['REQUEST_METHOD'] = $method;
+		$_POST['action']           = 'draft';
+		$_POST['_wpnonce']         = wp_create_nonce( 'draft-' . $pattern_id );
 
 		\WordPressdotorg\Theme\Pattern_Directory_2024\do_pattern_actions();
 	}
@@ -220,6 +222,45 @@ class Theme_Pattern_Actions_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The draft action is only taken from a form submission: a valid nonce on a GET changes nothing.
+	 *
+	 * @covers \WordPressdotorg\Theme\Pattern_Directory_2024\do_pattern_actions
+	 */
+	public function test_draft_action_is_not_taken_on_get(): void {
+		$pattern_id = $this->create_pattern( 'publish' );
+		wp_set_current_user( self::$member );
+
+		$this->do_draft_action( $pattern_id, 'GET' );
+
+		$this->assertSame( 'publish', get_post_status( $pattern_id ) );
+		$this->assertSame( '', $this->redirected_to, 'A GET must render the page as it is, not redirect.' );
+	}
+
+	/**
+	 * The draft control is a form that posts back to the pattern with its nonce, never a link.
+	 *
+	 * @covers \WordPressdotorg\Theme\Pattern_Directory_2024\Draft_Button_Block\render
+	 */
+	public function test_draft_button_renders_a_post_form(): void {
+		// The suite loads the theme after `init`, so the block's registration hook never fired; register it here.
+		if ( ! \WP_Block_Type_Registry::get_instance()->is_registered( 'wporg/draft-button' ) ) {
+			\WordPressdotorg\Theme\Pattern_Directory_2024\Draft_Button_Block\init();
+		}
+
+		$pattern_id = $this->create_pattern( 'publish' );
+		wp_set_current_user( self::$member );
+
+		// Render with the context the singular template supplies, rather than through a Query Loop.
+		$parsed = parse_blocks( '<!-- wp:wporg/draft-button /-->' );
+		$html   = ( new \WP_Block( $parsed[0], array( 'postId' => $pattern_id ) ) )->render();
+
+		$this->assertStringContainsString( 'method="post"', $html );
+		$this->assertStringContainsString( 'name="action" value="draft"', $html );
+		$this->assertMatchesRegularExpression( '/name="_wpnonce" value="[a-f0-9]{10}"/', $html );
+		$this->assertStringNotContainsString( 'href=', $html, 'The status change must not be reachable as a link.' );
+	}
+
+	/**
 	 * The Delete button must match the permissions enforced by its REST endpoint.
 	 *
 	 * @dataProvider data_delete_button_permissions
@@ -282,11 +323,12 @@ class Theme_Pattern_Actions_Test extends WP_UnitTestCase {
 		wp_set_current_user( self::$member );
 		$this->go_to( get_permalink( $pattern_id ) );
 
-		$_REQUEST['action']      = 'report';
-		$_REQUEST['_wpnonce']    = wp_create_nonce( 'report-' . $pattern_id );
-		$_POST['report-reason']  = $reason;
-		$details                 = "Why this pattern was reported.\nSee C:\\patterns\\example & <b>bold</b>, where a < b &amp; c.";
-		$_POST['report-details'] = wp_slash( $details );
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$_POST['action']           = 'report';
+		$_POST['_wpnonce']         = wp_create_nonce( 'report-' . $pattern_id );
+		$_POST['report-reason']    = $reason;
+		$details                   = "Why this pattern was reported.\nSee C:\\patterns\\example & <b>bold</b>, where a < b &amp; c.";
+		$_POST['report-details']   = wp_slash( $details );
 
 		try {
 			\WordPressdotorg\Theme\Pattern_Directory_2024\do_pattern_actions();
@@ -340,10 +382,11 @@ class Theme_Pattern_Actions_Test extends WP_UnitTestCase {
 		};
 		add_filter( 'pre_wp_mail', $capture_mail, 10, 2 );
 
-		$_REQUEST['action']      = 'report';
-		$_REQUEST['_wpnonce']    = wp_create_nonce( 'report-' . $pattern_id );
-		$_POST['report-reason']  = $reason;
-		$_POST['report-details'] = 'The pattern does not follow the guidelines.';
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$_POST['action']           = 'report';
+		$_POST['_wpnonce']         = wp_create_nonce( 'report-' . $pattern_id );
+		$_POST['report-reason']    = $reason;
+		$_POST['report-details']   = 'The pattern does not follow the guidelines.';
 
 		try {
 			\WordPressdotorg\Theme\Pattern_Directory_2024\do_pattern_actions();
@@ -373,10 +416,15 @@ class Theme_Pattern_Actions_Test extends WP_UnitTestCase {
 		update_option( 'wporg-pattern-flag_threshold', 1 );
 		wp_set_current_user( self::$member );
 		$this->go_to( get_permalink( $pattern_id ) );
-		$_REQUEST['action']   = 'report';
-		$_REQUEST['_wpnonce'] = wp_create_nonce( 'report-' . $pattern_id );
-		$original_post        = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve the test request for restoration.
-		$_POST                = $fields;
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+		$original_post             = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve the test request for restoration.
+		$_POST                     = array_merge(
+			array(
+				'action'   => 'report',
+				'_wpnonce' => wp_create_nonce( 'report-' . $pattern_id ),
+			),
+			$fields
+		);
 
 		try {
 			\WordPressdotorg\Theme\Pattern_Directory_2024\do_pattern_actions();

@@ -32,6 +32,7 @@ add_filter( 'map_meta_cap', __NAMESPACE__ . '\protect_moderated_patterns', 10, 4
 add_filter( 'posts_orderby', __NAMESPACE__ . '\filter_orderby_locale', 10, 2 );
 add_action( 'init', __NAMESPACE__ . '\add_preview_endpoint' );
 add_action( 'setup_theme', __NAMESPACE__ . '\setup_preview_theme', 1 );
+add_filter( 'request', __NAMESPACE__ . '\limit_preview_query_var' );
 add_action( 'template_include', __NAMESPACE__ . '\load_pattern_preview', 100 );
 add_filter( 'jetpack_sitemap_post_types', __NAMESPACE__ . '\jetpack_sitemap_post_types' );
 
@@ -1051,17 +1052,64 @@ function add_preview_endpoint() {
 }
 
 /**
+ * Whether the request is for the pattern preview.
+ *
+ * The preview is the pretty `/view/` endpoint or, for permalinks that are not pretty, `?view=1`; `?view=true`
+ * is kept from the earlier check. The theme switch runs at `setup_theme`, before the query is parsed, so it
+ * can only read the URL, and every later reader of the `view` query var must reach the same answer from the
+ * same input. That is why this is the one place the decision is made: `setup_preview_theme()` asks it, and
+ * `limit_preview_query_var()` drops the query var whenever it says no.
+ *
+ * @return bool Whether the request is a preview.
+ */
+function is_preview_request() {
+	// Parsed and compared, never output or stored, so read as sent: a sanitiser would drop bytes `WP` keeps.
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '/';
+	$parts       = (array) wp_parse_url( $request_uri );
+	$path        = $parts['path'] ?? '';
+	$query       = $parts['query'] ?? '';
+
+	if ( preg_match( '#/view/$#', $path ) ) {
+		return true;
+	}
+
+	wp_parse_str( $query, $args );
+
+	return isset( $args['view'] ) && in_array( $args['view'], array( '1', 'true' ), true );
+}
+
+/**
+ * Keep the `view` query var only on requests that are previews.
+ *
+ * `WP::parse_request()` fills the endpoint's query var from the URL query, the POST body or the rewrite
+ * match, so `?view=`, `?view=2` and `/view/anything/` all set it, and everything that reads the var
+ * (`load_pattern_preview()`, the theme's query tweaks, the creator's site-data mocks) only tests whether
+ * it is set. `setup_preview_theme()` has already run at `setup_theme` and switched the theme if, and only
+ * if, `is_preview_request()` said so. Asking `is_preview_request()` again here and dropping the var when
+ * it says no means a request is a preview everywhere or nowhere: the theme cannot stay on the directory
+ * while the preview template still renders.
+ *
+ * @param array $query_vars The parsed query vars.
+ * @return array The query vars, without `view` unless the request is a preview.
+ */
+function limit_preview_query_var( $query_vars ) {
+	if ( isset( $query_vars['view'] ) && ! is_preview_request() ) {
+		unset( $query_vars['view'] );
+	}
+
+	return $query_vars;
+}
+
+/**
  * When viewing a `view` page, set up the preview theme.
  *
- * This should switch the theme to twentytwentyone, with a white background,
+ * This should switch the theme to twentytwentythree, with a white background,
  * and inject the image placeholder workaround.
  */
 function setup_preview_theme() {
-	// query_vars are not set yet, so just check the URL.
-	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
-
-	// Match pretty & non-pretty permalinks for unpublished patterns.
-	if ( preg_match( '#/view/$#', $request_uri ) || preg_match( '#[?&]view=[1|true]#', $request_uri ) ) {
+	// query_vars are not set yet, so the decision has to come from the URL.
+	if ( is_preview_request() ) {
 		add_filter( 'show_admin_bar', '__return_false', 2000 );
 
 		add_filter(
