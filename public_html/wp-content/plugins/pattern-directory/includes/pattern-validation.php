@@ -21,7 +21,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as F
  */
 const RENDERED_FIELDS = array( 'post_content', 'post_title', 'post_excerpt' );
 
-add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\reject_control_characters', 5 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\reject_control_characters', 5, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content' );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_context' );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_attributes' );
@@ -43,31 +43,57 @@ add_action( 'transition_post_status', __NAMESPACE__ . '\note_spam_status', 10, 3
 const CONTROL_CHARACTERS = '/[\x00-\x08\x0B\x0C\x0E-\x1F]/';
 
 /**
- * Refuse a submission that carries a control character in a rendered field.
+ * Refuse a submission that carries a control character in anything the directory renders.
  *
  * No legitimate pattern contains one, and the save filters delete them, so a submission that carries one
  * is not stored as it was checked. Refusing it keeps the two the same without rewriting the submission.
  *
  * @param object|\WP_Error $prepared_post Prepared post or a preceding validation error.
- * @return object|\WP_Error The post, or an error if a rendered field carries a control character.
+ * @param \WP_REST_Request $request       Request being validated.
+ * @return object|\WP_Error The post, or an error if a rendered value carries a control character.
  */
-function reject_control_characters( $prepared_post ) {
+function reject_control_characters( $prepared_post, $request ) {
 	if ( is_wp_error( $prepared_post ) ) {
 		return $prepared_post;
 	}
 
+	$values = array( $request['meta'] ?? null );
 	foreach ( RENDERED_FIELDS as $field ) {
-		$value = $prepared_post->$field ?? null;
-		if ( is_string( $value ) && preg_match( CONTROL_CHARACTERS, $value ) ) {
-			return new \WP_Error(
-				'rest_pattern_control_characters',
-				__( 'Pattern content contains invisible control characters, usually from text pasted from another application. Retype or re-paste the affected text.', 'wporg-patterns' ),
-				array( 'status' => 400 )
-			);
-		}
+		$values[] = $prepared_post->$field ?? null;
+	}
+
+	if ( value_has_control_characters( $values ) ) {
+		return new \WP_Error(
+			'rest_pattern_control_characters',
+			__( 'Pattern content contains invisible control characters, usually from text pasted from another application. Retype or re-paste the affected text.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
 	}
 
 	return $prepared_post;
+}
+
+/**
+ * Whether a value, or anything nested in one, carries a control character.
+ *
+ * Meta is held to this too: the markers downstream are matched as substrings, so a NUL inside `data-wp-`
+ * passes `content_has_block_directives()` and the storage filters then delete it.
+ *
+ * @param mixed $value A submitted value, possibly nested.
+ * @return bool Whether a control character is present.
+ */
+function value_has_control_characters( $value ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $item ) {
+			if ( value_has_control_characters( $item ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	return is_string( $value ) && 1 === preg_match( CONTROL_CHARACTERS, $value );
 }
 
 /**
