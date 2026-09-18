@@ -166,8 +166,9 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:image -->\n<figure class=\"wp-block-image\"><img data-wp-bind--src=\"context.href\" alt=\"\"/></figure>\n<!-- /wp:image -->" ),
 
 			/*
-			 * A raw-text element hides its content from the tokenizer, but KSES deletes the wrapper on save
-			 * and leaves what it held as live markup. Every element the tokenizer skips carries the same payload.
+			 * The rows below put the directive somewhere a check that read the content as markup would not
+			 * have found it. An element whose contents are text -- raw-text or RCDATA -- hides the tag from
+			 * `WP_HTML_Tag_Processor`, and nesting or leaving one unclosed hides it further.
 			 */
 			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.<style><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></style></p>\n<!-- /wp:paragraph -->" ),
 			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.<xmp><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></xmp></p>\n<!-- /wp:paragraph -->" ),
@@ -176,9 +177,19 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.<script><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></p>\n<!-- /wp:paragraph -->" ),
 			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.<style><style><style><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></style></p>\n<!-- /wp:paragraph -->" ),
 
-			// `<svg>` is foreign content rather than a raw-text element, so the nested `<script>` hides the anchor too.
+			// The same `<script>`, inside `<svg>`, closed and unclosed.
 			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:html -->\n<svg><script><a href=\"#\" data-wp-interactive=\"core/query\" data-wp-context='{\"url\":\"javascript:alert(1)\"}' data-wp-bind--href=\"context.url\">x</a></svg>\n<!-- /wp:html -->" ),
 			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:html -->\n<svg><script><a href=\"#\" data-wp-interactive=\"core/query\" data-wp-bind--href=\"context.url\">x</a></script></svg>\n<!-- /wp:html -->" ),
+
+			/*
+			 * `<title>` and `<textarea>` hold their contents as text like `<script>` does, but KSES keeps
+			 * both elements, so sanitising the markup first does not expose the tag the way it does for a
+			 * wrapper KSES removes. Nothing that reads these as markup sees the directive at all.
+			 */
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:html -->\n<title><a href=\"#\" data-wp-interactive=\"wporg/patterns\" data-wp-bind--href=\"context.url\">x</a></title>\n<!-- /wp:html -->" ),
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:html -->\n<textarea><a href=\"#\" data-wp-interactive=\"wporg/patterns\" data-wp-bind--href=\"context.url\">x</a></textarea>\n<!-- /wp:html -->" ),
+			// The marker in ordinary text, with no tag anywhere near it.
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Bind it with data-wp-bind--href.</p>\n<!-- /wp:paragraph -->" ),
 
 			// A block delimiter is a comment, so the directive in its attribute JSON is not a tag either.
 			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:categories {\"displayAsDropdown\":true,\"showLabel\":true,\"label\":\"<span data-wp-interactive=\\u0022wporg/patterns\\u0022 data-wp-init=\\u0022actions.go\\u0022>x</span>\"} /-->" ),
