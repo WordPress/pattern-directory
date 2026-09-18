@@ -10,6 +10,7 @@ namespace WordPressdotorg\Pattern_Directory\Pattern_Validation;
 use WordPressdotorg\Pattern_Translations\Pattern as Translations_Pattern;
 use WordPressdotorg\Pattern_Translations\PatternParser as Translations_PatternParser;
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\is_block_allowed_in_pattern;
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content;
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\get_moderated_status;
 use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\has_reached_flag_threshold;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
@@ -24,7 +25,7 @@ add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\reject_control_cha
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content' );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_context' );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_attributes' );
-add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_directives' );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_directives', 10, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_status', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_parent', 11, 2 );
@@ -279,6 +280,35 @@ function validate_content( $prepared_post ) {
 		);
 	}
 
+	/*
+	 * A pattern is block markup, which is why `core/shortcode` is on the disallowed list above. The same
+	 * rule has to hold for bare shortcode syntax: `do_shortcode()` runs on `the_content` after every
+	 * write-time filter, so what a callback emits is markup no validator here ever read. The title is
+	 * already held to this by `is_title_valid()`.
+	 *
+	 * Every form a renderer reads is tested, because `strip_shortcodes()` only matches a registered tag name
+	 * immediately after a literal `[`, and each step on the way to the page can produce one the step before
+	 * did not have:
+	 *
+	 * - the save filters delete elements, so `[cap<script></script>tion …]` becomes `[caption …]`;
+	 * - `decode_pattern_content()` strips `"ref":<n>` on `the_post`, so `[cap"ref":1tion …]` does the same;
+	 * - attribute JSON lives in the delimiter comment, where `\u005b` is not a bracket until the block is
+	 *   parsed and the block renders the decoded value into the page.
+	 */
+	$stored     = wp_unslash( sanitize_post_field( 'post_content', wp_slash( $content ), 0, 'db' ) );
+	$attributes = (string) wp_json_encode( wp_list_pluck( $all_blocks, 'attrs' ) );
+	$forms      = array( $content, $stored, decode_pattern_content( $stored ), $attributes );
+
+	foreach ( array_unique( $forms ) as $markup ) {
+		if ( strip_shortcodes( $markup ) !== $markup ) {
+			return new \WP_Error(
+				'rest_pattern_shortcode',
+				__( 'Pattern content cannot contain shortcodes.', 'wporg-patterns' ),
+				array( 'status' => 400 )
+			);
+		}
+	}
+
 	// Next, filter out any empty blocks.
 	$real_blocks = array_filter( $all_blocks, __NAMESPACE__ . '\is_not_empty_block' );
 
@@ -496,16 +526,17 @@ function attribute_has_unsafe_scheme( $value, $is_url = false ) {
 }
 
 /**
- * Reject Interactivity API `data-wp-*` directives, in a block's HTML or in a block attribute.
+ * Reject Interactivity API `data-wp-*` directives, in a block's HTML, a block attribute or post meta.
  *
  * KSES preserves them wherever they sit, so neither core sanitisation nor the URL-scheme check above
  * catches them.
  *
- * @param object $prepared_post The post object about to be inserted.
+ * @param object           $prepared_post The post object about to be inserted.
+ * @param \WP_REST_Request $request       Request being validated.
  *
  * @return object|\WP_Error The post object, or an error if the content carries a directive.
  */
-function validate_block_directives( $prepared_post ) {
+function validate_block_directives( $prepared_post, $request ) {
 	if ( is_wp_error( $prepared_post ) ) {
 		return $prepared_post;
 	}
@@ -523,6 +554,15 @@ function validate_block_directives( $prepared_post ) {
 	// Attribute JSON sits in the delimiter comment, so the scan above never reads it as a tag.
 	if ( ! $has_directive && isset( $prepared_post->post_content ) ) {
 		$has_directive = blocks_have_directive_attribute( parse_blocks( $prepared_post->post_content ) );
+	}
+
+	/*
+	 * Meta is rendered too and never reaches `$prepared_post`: core registers `footnotes` on every post type
+	 * supporting editor, custom fields and revisions, with no sanitise callback, and `render_block_core_footnotes()`
+	 * emits it through `wp_kses_post()` — the profile whose `data-*` allowance this check exists to compensate for.
+	 */
+	if ( ! $has_directive && is_array( $request['meta'] ?? null ) ) {
+		$has_directive = attribute_has_directive( $request['meta'] );
 	}
 
 	if ( $has_directive ) {

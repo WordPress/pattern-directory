@@ -35,6 +35,8 @@ add_action( 'setup_theme', __NAMESPACE__ . '\setup_preview_theme', 1 );
 add_filter( 'request', __NAMESPACE__ . '\limit_preview_query_var' );
 add_action( 'template_include', __NAMESPACE__ . '\load_pattern_preview', 100 );
 add_filter( 'jetpack_sitemap_post_types', __NAMESPACE__ . '\jetpack_sitemap_post_types' );
+// Priority 10: after `do_blocks` at 9 has produced the final markup, before `do_shortcode` at 11 reads it.
+add_filter( 'the_content', __NAMESPACE__ . '\escape_shortcode_syntax_in_pattern', 10 );
 
 /**
  * Registers post types and associated taxonomies, meta data, etc.
@@ -1175,6 +1177,30 @@ function enqueue_preview_assets() {
 		$asset['version'],
 		true
 	);
+}
+
+/**
+ * Escape bracket syntax in a pattern's rendered content, ahead of `do_shortcode()`.
+ *
+ * `validate_content()` refuses shortcodes on submission and has to keep doing so, because the directory
+ * hands pattern content to other sites that render it themselves. But that check reads stored bytes while
+ * `do_shortcode()` reads the output of block rendering, and the two disagree: the save filters deleting an
+ * element, `decode_pattern_content()` stripping `"ref":<n>`, and a `\u005b` in attribute JSON have each
+ * produced a shortcode that no submitted form carried.
+ *
+ * Escaping here needs to know none of that. Whatever produced the bracket, it is text before a callback can
+ * see it, and `&#91;` renders as `[`.
+ *
+ * @param string $content The rendered post content.
+ *
+ * @return string The content with bracket syntax escaped.
+ */
+function escape_shortcode_syntax_in_pattern( $content ) {
+	if ( POST_TYPE !== get_post_type() ) {
+		return $content;
+	}
+
+	return str_replace( '[', '&#91;', $content );
 }
 
 /**
