@@ -10,6 +10,7 @@ namespace WordPressdotorg\Pattern_Directory\Pattern_Validation;
 use WordPressdotorg\Pattern_Translations\Pattern as Translations_Pattern;
 use WordPressdotorg\Pattern_Translations\PatternParser as Translations_PatternParser;
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\is_block_allowed_in_pattern;
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content;
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\get_moderated_status;
 use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\has_reached_flag_threshold;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
@@ -20,11 +21,11 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as F
  */
 const RENDERED_FIELDS = array( 'post_content', 'post_title', 'post_excerpt' );
 
-add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\reject_control_characters', 5 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\reject_control_characters', 5, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content' );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_context' );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_attributes' );
-add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_directives' );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_directives', 10, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_status', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_parent', 11, 2 );
@@ -42,31 +43,57 @@ add_action( 'transition_post_status', __NAMESPACE__ . '\note_spam_status', 10, 3
 const CONTROL_CHARACTERS = '/[\x00-\x08\x0B\x0C\x0E-\x1F]/';
 
 /**
- * Refuse a submission that carries a control character in a rendered field.
+ * Refuse a submission that carries a control character in anything the directory renders.
  *
  * No legitimate pattern contains one, and the save filters delete them, so a submission that carries one
  * is not stored as it was checked. Refusing it keeps the two the same without rewriting the submission.
  *
  * @param object|\WP_Error $prepared_post Prepared post or a preceding validation error.
- * @return object|\WP_Error The post, or an error if a rendered field carries a control character.
+ * @param \WP_REST_Request $request       Request being validated.
+ * @return object|\WP_Error The post, or an error if a rendered value carries a control character.
  */
-function reject_control_characters( $prepared_post ) {
+function reject_control_characters( $prepared_post, $request ) {
 	if ( is_wp_error( $prepared_post ) ) {
 		return $prepared_post;
 	}
 
+	$values = array( $request['meta'] ?? null );
 	foreach ( RENDERED_FIELDS as $field ) {
-		$value = $prepared_post->$field ?? null;
-		if ( is_string( $value ) && preg_match( CONTROL_CHARACTERS, $value ) ) {
-			return new \WP_Error(
-				'rest_pattern_control_characters',
-				__( 'Pattern content contains invisible control characters, usually from text pasted from another application. Retype or re-paste the affected text.', 'wporg-patterns' ),
-				array( 'status' => 400 )
-			);
-		}
+		$values[] = $prepared_post->$field ?? null;
+	}
+
+	if ( value_has_control_characters( $values ) ) {
+		return new \WP_Error(
+			'rest_pattern_control_characters',
+			__( 'Pattern content contains invisible control characters, usually from text pasted from another application. Retype or re-paste the affected text.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
 	}
 
 	return $prepared_post;
+}
+
+/**
+ * Whether a value, or anything nested in one, carries a control character.
+ *
+ * Meta is held to this too: the markers downstream are matched as substrings, so a NUL inside `data-wp-`
+ * passes `content_has_block_directives()` and the storage filters then delete it.
+ *
+ * @param mixed $value A submitted value, possibly nested.
+ * @return bool Whether a control character is present.
+ */
+function value_has_control_characters( $value ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $item ) {
+			if ( value_has_control_characters( $item ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	return is_string( $value ) && 1 === preg_match( CONTROL_CHARACTERS, $value );
 }
 
 /**
@@ -124,6 +151,33 @@ function block_shape( $blocks ) {
 	}
 
 	return $shape;
+}
+
+/**
+ * A parsed tree flattened to one dimension, nested blocks included.
+ *
+ * @param array $blocks Parsed blocks.
+ * @return array Every block in the tree.
+ */
+function flatten_blocks( $blocks ) {
+	$queue     = $blocks;
+	$flattened = array();
+
+	while ( $queue ) {
+		$block = array_shift( $queue );
+
+		// The editor's linebreaks between blocks parse as nameless whitespace-only blocks: separators, not content.
+		if ( is_null( $block['blockName'] ) && '' === trim( $block['innerHTML'] ) ) {
+			continue;
+		}
+
+		array_push( $flattened, $block );
+		foreach ( $block['innerBlocks'] as $inner_block ) {
+			array_push( $queue, $inner_block );
+		}
+	}
+
+	return $flattened;
 }
 
 /**
@@ -224,26 +278,7 @@ function validate_content( $prepared_post ) {
 	}
 
 	// `reject_unstable_blocks()` refuses, further down the chain, any content whose stored form parses to a different tree.
-	$blocks       = parse_blocks( $content );
-	$blocks_queue = $blocks;
-	$all_blocks   = array();
-
-	// Loop over all the nested blocks to flatten the block list into 1 dimension.
-	while ( $blocks_queue ) {
-		$block = array_shift( $blocks_queue );
-
-		// The editor's linebreaks between blocks parse as nameless whitespace-only blocks: separators, not content.
-		if ( is_null( $block['blockName'] ) && '' === trim( $block['innerHTML'] ) ) {
-			continue;
-		}
-
-		array_push( $all_blocks, $block );
-		if ( ! empty( $block['innerBlocks'] ) ) {
-			foreach ( $block['innerBlocks'] as $inner_block ) {
-				array_push( $blocks_queue, $inner_block );
-			}
-		}
-	}
+	$all_blocks = flatten_blocks( parse_blocks( $content ) );
 
 	// Check that each block in the list has a blockName and is registered.
 	$registry       = \WP_Block_Type_Registry::get_instance();
@@ -277,6 +312,21 @@ function validate_content( $prepared_post ) {
 			__( 'Pattern content contains blocks that are not allowed. Patterns shared on the Pattern Directory can only use core blocks.', 'wporg-patterns' ),
 			array( 'status' => 400 )
 		);
+	}
+
+	// `strip_shortcodes()` only matches a registered tag right after a literal `[`, which each form can rejoin.
+	$stored = wp_unslash( sanitize_post_field( 'post_content', wp_slash( $content ), 0, 'db' ) );
+
+	foreach ( array( $content, $stored, decode_pattern_content( $stored ) ) as $markup ) {
+		$attributes = (string) wp_json_encode( wp_list_pluck( flatten_blocks( parse_blocks( $markup ) ), 'attrs' ) );
+
+		if ( strip_shortcodes( $markup ) !== $markup || strip_shortcodes( $attributes ) !== $attributes ) {
+			return new \WP_Error(
+				'rest_pattern_shortcode',
+				__( 'Pattern content cannot contain shortcodes.', 'wporg-patterns' ),
+				array( 'status' => 400 )
+			);
+		}
 	}
 
 	// Next, filter out any empty blocks.
@@ -496,16 +546,17 @@ function attribute_has_unsafe_scheme( $value, $is_url = false ) {
 }
 
 /**
- * Reject Interactivity API `data-wp-*` directives, in a block's HTML or in a block attribute.
+ * Reject Interactivity API `data-wp-*` directives, in a block's HTML, a block attribute or post meta.
  *
  * KSES preserves them wherever they sit, so neither core sanitisation nor the URL-scheme check above
  * catches them.
  *
- * @param object $prepared_post The post object about to be inserted.
+ * @param object           $prepared_post The post object about to be inserted.
+ * @param \WP_REST_Request $request       Request being validated.
  *
  * @return object|\WP_Error The post object, or an error if the content carries a directive.
  */
-function validate_block_directives( $prepared_post ) {
+function validate_block_directives( $prepared_post, $request ) {
 	if ( is_wp_error( $prepared_post ) ) {
 		return $prepared_post;
 	}
@@ -523,6 +574,14 @@ function validate_block_directives( $prepared_post ) {
 	// Attribute JSON sits in the delimiter comment, so the scan above never reads it as a tag.
 	if ( ! $has_directive && isset( $prepared_post->post_content ) ) {
 		$has_directive = blocks_have_directive_attribute( parse_blocks( $prepared_post->post_content ) );
+	}
+
+	/*
+	 * Meta never reaches `$prepared_post`, and `render_block_core_footnotes()` emits `footnotes` through
+	 * `wp_kses_post()`, which keeps `data-*`.
+	 */
+	if ( ! $has_directive && is_array( $request['meta'] ?? null ) ) {
+		$has_directive = attribute_has_directive( $request['meta'] );
 	}
 
 	if ( $has_directive ) {

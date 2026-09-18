@@ -215,6 +215,15 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 			// A `data:` URL, allowed by neither `wp_allowed_protocols()` nor the block editor.
 			array( 'rest_pattern_unsafe_attribute', "$two_paragraphs\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"url\":\"data:text/html,<script>alert(1)</script>\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Go</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons -->" ),
 
+			array( 'rest_pattern_shortcode', "$three_paragraphs\n\n<!-- wp:paragraph -->\n<p>PROBE [caption id=c width=1 caption=x]body[/caption]</p>\n<!-- /wp:paragraph -->" ),
+			// The C escapes `shortcode_parse_atts()` decodes never reach a callback; the tag is refused first.
+			array( 'rest_pattern_shortcode', "$three_paragraphs\n\n<!-- wp:paragraph -->\n<p>[caption id=c width=1 caption=x\\x3cspan\\x3ex\\x3c/span\\x3e]body[/caption]</p>\n<!-- /wp:paragraph -->" ),
+			// `decode_pattern_content()` strips `"ref":<n>` on `the_post`, rejoining the tag name.
+			array( 'rest_pattern_shortcode', "$three_paragraphs\n\n<!-- wp:paragraph -->\n<p>PROBE [cap\"ref\":1tion id=c width=1 caption=hello]body[/caption]</p>\n<!-- /wp:paragraph -->" ),
+
+			// `parse_blocks()` turns `\u005b` in the delimiter's attribute JSON into a bracket the page renders.
+			array( 'rest_pattern_shortcode', "$three_paragraphs\n\n<!-- wp:categories {\"displayAsDropdown\":true,\"showLabel\":true,\"label\":\"\\u005bcaption id=c width=1 caption=hello\\u005d\"} /-->" ),
+
 			// Only 2 paragraphs.
 			array( 'rest_pattern_insufficient_blocks', $two_paragraphs ),
 			// Single group with a heading.
@@ -295,6 +304,8 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 		};
 
 		return array(
+			// `strip_shortcodes()` stops matching a tag name at `<`; KSES deletes the element and rejoins it.
+			'shortcode split by a deleted tag'  => array( 'rest_pattern_shortcode', $in_paragraph( '[cap<script></script>tion id=c width=1 caption=x]body[/caption]' ) ),
 			'control character in a name'       => array( 'rest_pattern_control_characters', $in_paragraph( "<!-- wp:wpor\x00g/modal {\"a\":\"b\"} /-->" ) ),
 			'control character in a marker'     => array( 'rest_pattern_control_characters', $in_paragraph( "<!-- wp:wporg/modal \x01/-->" ) ),
 			'extra dash on the closer'          => array( 'rest_pattern_unstable_blocks', $in_paragraph( '<!-- wp:wporg/modal /--->' ) ),
@@ -341,6 +352,82 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 		$data = $response->get_data();
 
 		$this->assertSame( SPAM_STATUS, $data['status'] );
+	}
+
+	/**
+	 * A directive in submitted meta is refused, like one in a rendered post field.
+	 *
+	 * @dataProvider data_meta_with_directive
+	 *
+	 * @param array $meta The `meta` payload submitted alongside valid content.
+	 */
+	public function test_directive_in_meta_is_refused( $meta ) {
+		wp_set_current_user( self::$user );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'content' => self::TWO_PARAGRAPHS . "\n\n<!-- wp:footnotes /-->",
+					'meta'    => $meta,
+				)
+			)
+		);
+
+		$response = rest_do_request( $request );
+
+		$this->assertTrue( $response->is_error() );
+		$this->assertSame( 'rest_pattern_interactivity_directive', $response->get_data()['code'] );
+	}
+
+	/**
+	 * Meta payloads carrying a directive.
+	 *
+	 * @return array
+	 */
+	public function data_meta_with_directive() {
+		$island = '<span data-wp-interactive=\'{"namespace":"probe"}\' data-wp-context=\'{"u":"javascript:alert(1)"}\'><a data-wp-bind--href="context.u">note</a></span>';
+
+		return array(
+			'footnotes'         => array(
+				array(
+					'footnotes' => wp_json_encode(
+						array(
+							array(
+								'id'      => 'fn1',
+								'content' => $island,
+							),
+						)
+					),
+				),
+			),
+			'directive marker'  => array( array( 'footnotes' => '[{"id":"fn1","content":"data-wp-bind--href"}]' ) ),
+			'a plugin meta key' => array( array( 'wpop_description' => "A hero band. $island" ) ),
+			'a list-valued key' => array( array( 'wpop_block_types' => array( 'core/group', $island ) ) ),
+		);
+	}
+
+	/**
+	 * Meta with no directive still saves, so the check is not refusing every submission.
+	 */
+	public function test_meta_without_a_directive_is_accepted() {
+		wp_set_current_user( self::$user );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'content' => self::TWO_PARAGRAPHS . "\n\n<!-- wp:footnotes /-->",
+					'meta'    => array( 'footnotes' => '[{"id":"fn1","content":"An ordinary <em>note</em>."}]' ),
+				)
+			)
+		);
+
+		$response = rest_do_request( $request );
+
+		$this->assertFalse( $response->is_error() );
 	}
 
 	/**

@@ -35,6 +35,8 @@ add_action( 'setup_theme', __NAMESPACE__ . '\setup_preview_theme', 1 );
 add_filter( 'request', __NAMESPACE__ . '\limit_preview_query_var' );
 add_action( 'template_include', __NAMESPACE__ . '\load_pattern_preview', 100 );
 add_filter( 'jetpack_sitemap_post_types', __NAMESPACE__ . '\jetpack_sitemap_post_types' );
+remove_filter( 'the_content', 'do_shortcode', 11 );
+add_filter( 'the_content', __NAMESPACE__ . '\do_shortcode_except_in_patterns', 11 );
 
 /**
  * Registers post types and associated taxonomies, meta data, etc.
@@ -1175,6 +1177,27 @@ function enqueue_preview_assets() {
 		$asset['version'],
 		true
 	);
+}
+
+/**
+ * Expand shortcodes in place of core's `do_shortcode()`, leaving a pattern's own content alone.
+ *
+ * `validate_content()` reads stored bytes; this reads what block rendering produced, which rows stored
+ * before that rule never passed. Skipping expansion rather than escaping keeps those bytes faithful, and
+ * the global post is the only scope `the_content` offers.
+ *
+ * @param string $content The rendered post content.
+ *
+ * @return string The content, with shortcodes expanded unless it belongs to a pattern.
+ */
+function do_shortcode_except_in_patterns( $content ) {
+	$post = get_post();
+
+	if ( $post && POST_TYPE === $post->post_type ) {
+		return $content;
+	}
+
+	return do_shortcode( $content );
 }
 
 /**
