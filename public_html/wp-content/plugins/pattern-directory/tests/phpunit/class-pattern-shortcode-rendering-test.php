@@ -34,6 +34,8 @@ class Pattern_Shortcode_Rendering_Test extends WP_UnitTestCase {
 				'post_status' => 'any',
 			)
 		);
+
+		$this->assertTrue( $query->have_posts(), 'The fixture no longer matches, so the assertions below would be vacuous.' );
 		$query->the_post();
 
 		$rendered = apply_filters( 'the_content', get_the_content() );
