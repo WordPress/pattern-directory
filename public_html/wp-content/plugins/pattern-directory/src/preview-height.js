@@ -12,7 +12,7 @@ if ( content && window.parent !== window ) {
 		window.parent.postMessage( { type: 'wporg/patterns/preview-height', height: content.clientHeight }, '*' );
 	};
 
-	// Answering a request is what makes this reliable: an unprompted report can land before the embedder listens.
+	// Prompted only: the embedder sizes the frame from this height, so watching for resizes would chase it.
 	window.addEventListener( 'message', ( event ) => {
 		if ( 'wporg/patterns/preview-height-request' === event.data?.type ) {
 			report();
@@ -20,5 +20,4 @@ if ( content && window.parent !== window ) {
 	} );
 
 	window.addEventListener( 'load', report );
-	new window.ResizeObserver( report ).observe( content );
 }

@@ -5,8 +5,8 @@ import { getContext, getElement, store, withScope } from '@wordpress/interactivi
 
 const CONTROLLED_HEIGHT = 600;
 
-// The frame is untrusted, so the height it claims is capped well above any real pattern.
-const MAX_CONTENT_HEIGHT = 5000;
+// The frame is untrusted, so the height it claims is bounded — far above any pattern, but bounded.
+const MAX_CONTENT_HEIGHT = 20000;
 
 const { actions, state } = store( 'wporg/patterns/preview', {
 	state: {
@@ -15,16 +15,20 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 			const scale = parseInt( pageWidth, 10 ) / previewWidth;
 			return scale > 1 ? 1 : scale;
 		},
+		// `scale` is not finite until `handleOnResize()` has measured the page, which can be after first paint.
+		get safeScale() {
+			return Number.isFinite( state.scale ) && state.scale > 0 ? state.scale : 1;
+		},
 		get previewHeightCSS() {
 			const { contentHeight, isControlled } = getContext();
-			return `${ isControlled ? CONTROLLED_HEIGHT : contentHeight * state.scale }px`;
+			return `${ isControlled ? CONTROLLED_HEIGHT : contentHeight * state.safeScale }px`;
 		},
 		get iframeWidthCSS() {
 			return `${ getContext().previewWidth }px`;
 		},
 		get iframeHeightCSS() {
 			const { contentHeight, isControlled } = getContext();
-			return `${ isControlled ? CONTROLLED_HEIGHT / state.scale : contentHeight }px`;
+			return `${ isControlled ? CONTROLLED_HEIGHT / state.safeScale : contentHeight }px`;
 		},
 		get transformCSS() {
 			return `scale(${ state.scale })`;
@@ -113,6 +117,8 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 			// Covers a frame that loaded before this ran, and one that has not loaded yet.
 			request();
 			ref.addEventListener( 'load', request );
+
+			return () => ref.removeEventListener( 'load', request );
 		},
 		onPreviewHeight( event ) {
 			const { ref } = getElement();
