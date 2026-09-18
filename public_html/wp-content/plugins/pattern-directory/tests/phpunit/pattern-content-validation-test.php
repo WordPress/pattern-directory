@@ -215,18 +215,14 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 			// A `data:` URL, allowed by neither `wp_allowed_protocols()` nor the block editor.
 			array( 'rest_pattern_unsafe_attribute', "$two_paragraphs\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"url\":\"data:text/html,<script>alert(1)</script>\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Go</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons -->" ),
 
-			// A pattern is block markup; `do_shortcode()` would run over it after every write-time filter.
+			// `do_shortcode()` would run over the rendered pattern after every write-time filter.
 			array( 'rest_pattern_shortcode', "$three_paragraphs\n\n<!-- wp:paragraph -->\n<p>PROBE [caption id=c width=1 caption=x]body[/caption]</p>\n<!-- /wp:paragraph -->" ),
-			// The C escapes `shortcode_parse_atts()` decodes never reach a callback, because the tag is refused first.
+			// The C escapes `shortcode_parse_atts()` decodes never reach a callback; the tag is refused first.
 			array( 'rest_pattern_shortcode', "$three_paragraphs\n\n<!-- wp:paragraph -->\n<p>[caption id=c width=1 caption=x\\x3cspan\\x3ex\\x3c/span\\x3e]body[/caption]</p>\n<!-- /wp:paragraph -->" ),
-			// `decode_pattern_content()` strips `"ref":<n>` on `the_post`, rejoining the tag name before render.
+			// `decode_pattern_content()` strips `"ref":<n>` on `the_post`, rejoining the tag name.
 			array( 'rest_pattern_shortcode', "$three_paragraphs\n\n<!-- wp:paragraph -->\n<p>PROBE [cap\"ref\":1tion id=c width=1 caption=hello]body[/caption]</p>\n<!-- /wp:paragraph -->" ),
 
-			/*
-			 * A bracket escaped as `\u005b` in the delimiter's attribute JSON is not a bracket until
-			 * `parse_blocks()` decodes it, and `core/categories` renders the decoded label into the page
-			 * ahead of `do_shortcode()`.
-			 */
+			// `parse_blocks()` turns `\u005b` in the delimiter's attribute JSON into a bracket the page renders.
 			array( 'rest_pattern_shortcode', "$three_paragraphs\n\n<!-- wp:categories {\"displayAsDropdown\":true,\"showLabel\":true,\"label\":\"\\u005bcaption id=c width=1 caption=hello\\u005d\"} /-->" ),
 
 			// Only 2 paragraphs.
@@ -310,11 +306,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 
 		return array(
 
-			/*
-			 * `strip_shortcodes()` stops matching a tag name at `<`, so the submitted bytes carry no
-			 * shortcode it can see. KSES deletes the element on save and leaves `[caption …]` behind,
-			 * whose callback C-unescapes its attributes and re-filters them at the post KSES level.
-			 */
+			// `strip_shortcodes()` stops matching a tag name at `<`; KSES deletes the element and rejoins it.
 			'shortcode split by a deleted tag'  => array( 'rest_pattern_shortcode', $in_paragraph( '[cap<script></script>tion id=c width=1 caption=x]body[/caption]' ) ),
 			'control character in a name'       => array( 'rest_pattern_control_characters', $in_paragraph( "<!-- wp:wpor\x00g/modal {\"a\":\"b\"} /-->" ) ),
 			'control character in a marker'     => array( 'rest_pattern_control_characters', $in_paragraph( "<!-- wp:wporg/modal \x01/-->" ) ),
@@ -366,9 +358,6 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 
 	/**
 	 * A directive in submitted meta is refused, like one in a rendered post field.
-	 *
-	 * Core registers `footnotes` on this post type with no sanitise callback, and
-	 * `render_block_core_footnotes()` emits it through `wp_kses_post()`, which keeps any `data-*`.
 	 *
 	 * @dataProvider data_meta_with_directive
 	 *

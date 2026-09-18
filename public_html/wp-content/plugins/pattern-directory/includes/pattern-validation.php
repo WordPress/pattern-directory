@@ -281,19 +281,10 @@ function validate_content( $prepared_post ) {
 	}
 
 	/*
-	 * A pattern is block markup, which is why `core/shortcode` is on the disallowed list above. The same
-	 * rule has to hold for bare shortcode syntax: `do_shortcode()` runs on `the_content` after every
-	 * write-time filter, so what a callback emits is markup no validator here ever read. The title is
-	 * already held to this by `is_title_valid()`.
-	 *
-	 * Every form a renderer reads is tested, because `strip_shortcodes()` only matches a registered tag name
-	 * immediately after a literal `[`, and each step on the way to the page can produce one the step before
-	 * did not have:
-	 *
-	 * - the save filters delete elements, so `[cap<script></script>tion …]` becomes `[caption …]`;
-	 * - `decode_pattern_content()` strips `"ref":<n>` on `the_post`, so `[cap"ref":1tion …]` does the same;
-	 * - attribute JSON lives in the delimiter comment, where `\u005b` is not a bracket until the block is
-	 *   parsed and the block renders the decoded value into the page.
+	 * Bare bracket syntax is refused like `core/shortcode` above. Each form a renderer reads is checked,
+	 * because `strip_shortcodes()` only matches a tag name immediately after a literal `[`, and KSES
+	 * deleting an element, `decode_pattern_content()` stripping `"ref":<n>`, or `parse_blocks()` decoding
+	 * `\u005b` in attribute JSON each produce a tag the submitted bytes did not carry.
 	 */
 	$stored     = wp_unslash( sanitize_post_field( 'post_content', wp_slash( $content ), 0, 'db' ) );
 	$attributes = (string) wp_json_encode( wp_list_pluck( $all_blocks, 'attrs' ) );
@@ -557,9 +548,8 @@ function validate_block_directives( $prepared_post, $request ) {
 	}
 
 	/*
-	 * Meta is rendered too and never reaches `$prepared_post`: core registers `footnotes` on every post type
-	 * supporting editor, custom fields and revisions, with no sanitise callback, and `render_block_core_footnotes()`
-	 * emits it through `wp_kses_post()` — the profile whose `data-*` allowance this check exists to compensate for.
+	 * Meta is rendered too and never reaches `$prepared_post`: core registers `footnotes` with no sanitise
+	 * callback, and `render_block_core_footnotes()` emits it through `wp_kses_post()`, which keeps `data-*`.
 	 */
 	if ( ! $has_directive && is_array( $request['meta'] ?? null ) ) {
 		$has_directive = attribute_has_directive( $request['meta'] );

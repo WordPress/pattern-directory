@@ -1,6 +1,6 @@
 <?php
 /**
- * Tests for the render-side bracket escape on a pattern's content.
+ * Tests that shortcode syntax in a pattern stays text when the content is rendered.
  *
  * @package WordPress\Pattern_Directory
  */
@@ -15,8 +15,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 /**
  * `validate_content()` reads stored bytes; `do_shortcode()` reads the output of block rendering. These cover
- * the gap between them, using rows written straight to the database the way a legacy pattern, a WP-CLI
- * import or a submission accepted before the rule existed would be.
+ * the gap, using rows written straight to the database the way a legacy pattern or a WP-CLI import would be.
  */
 class Pattern_Shortcode_Rendering_Test extends WP_UnitTestCase {
 
@@ -46,7 +45,7 @@ class Pattern_Shortcode_Rendering_Test extends WP_UnitTestCase {
 	/**
 	 * A shortcode in a pattern's content is text by the time a callback could run.
 	 *
-	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\escape_shortcode_syntax_in_pattern
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\do_shortcode_except_in_patterns
 	 */
 	public function test_shortcode_in_content_does_not_run(): void {
 		$pattern = self::factory()->post->create(
@@ -60,52 +59,48 @@ class Pattern_Shortcode_Rendering_Test extends WP_UnitTestCase {
 		$rendered = $this->render( $pattern );
 
 		$this->assertStringNotContainsString( 'wp-caption', $rendered );
-		$this->assertStringContainsString( '&#91;caption', $rendered );
+		$this->assertStringContainsString( '[caption id=c', $rendered );
 	}
 
 	/**
-	 * A bracket that only exists once the block is parsed is escaped too, because this runs after `do_blocks`.
+	 * A bracket that only exists once the block is parsed is text too, because this runs after `do_blocks`.
 	 *
-	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\escape_shortcode_syntax_in_pattern
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\do_shortcode_except_in_patterns
 	 */
 	public function test_shortcode_from_a_block_attribute_does_not_run(): void {
-		self::factory()->term->create(
-			array(
-				'taxonomy' => 'category',
-				'name'     => 'Probe Cat',
-			)
-		);
-
-		$label   = '[caption id=c width=1 caption=x\x3cspan\x20\x64ata-wp-interactive\x3d\x22probe\x22\x3ehi\x3c/span\x3e]body[/caption]';
 		$json    = str_replace(
 			array( '[', ']' ),
-			array( '[', ']' ),
+			array( '\u005b', '\u005d' ),
 			(string) wp_json_encode(
 				array(
 					'displayAsDropdown' => true,
 					'showLabel'         => true,
-					'label'             => $label,
+					'label'             => '[caption id=c width=1 caption=hello]body[/caption]',
 				)
 			)
 		);
+		$content = "<!-- wp:categories $json /-->";
+
+		$this->assertStringNotContainsString( '[', $content, 'The bracket has to arrive by JSON decoding, or this repeats the test above.' );
+
 		$pattern = self::factory()->post->create(
 			array(
 				'post_type'    => POST_TYPE,
 				'post_status'  => 'publish',
-				'post_content' => wp_slash( "<!-- wp:categories $json /-->" ),
+				'post_content' => wp_slash( $content ),
 			)
 		);
 
 		$rendered = $this->render( $pattern );
 
+		$this->assertStringContainsString( '[caption id=c', $rendered );
 		$this->assertStringNotContainsString( 'wp-caption', $rendered );
-		$this->assertStringNotContainsString( 'data-wp-', $rendered );
 	}
 
 	/**
-	 * The escape is scoped to patterns, so an ordinary post still expands its shortcodes.
+	 * The scope is patterns, so an ordinary post still expands its shortcodes.
 	 *
-	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\escape_shortcode_syntax_in_pattern
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\do_shortcode_except_in_patterns
 	 */
 	public function test_other_post_types_still_expand_shortcodes(): void {
 		$post_id = self::factory()->post->create(
