@@ -35,7 +35,6 @@ add_action( 'setup_theme', __NAMESPACE__ . '\setup_preview_theme', 1 );
 add_filter( 'request', __NAMESPACE__ . '\limit_preview_query_var' );
 add_action( 'template_include', __NAMESPACE__ . '\load_pattern_preview', 100 );
 add_filter( 'jetpack_sitemap_post_types', __NAMESPACE__ . '\jetpack_sitemap_post_types' );
-// A pattern is block markup, so it never wants shortcode expansion; stand in for core's callback.
 remove_filter( 'the_content', 'do_shortcode', 11 );
 add_filter( 'the_content', __NAMESPACE__ . '\do_shortcode_except_in_patterns', 11 );
 
@@ -1183,9 +1182,9 @@ function enqueue_preview_assets() {
 /**
  * Expand shortcodes in place of core's `do_shortcode()`, leaving a pattern's own content alone.
  *
- * `validate_content()` reads stored bytes, while this reads the output of block rendering; rows stored before
- * that rule existed were never held to it. Skipping expansion, rather than escaping the bracket, keeps
- * `content.rendered` and excerpts byte-faithful. Scope is the global post, which is all `the_content` offers.
+ * `validate_content()` reads stored bytes; this reads what block rendering produced, which rows stored
+ * before that rule never passed. Skipping expansion rather than escaping keeps those bytes faithful, and
+ * the global post is the only scope `the_content` offers.
  *
  * @param string $content The rendered post content.
  *

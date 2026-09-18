@@ -215,7 +215,6 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 			// A `data:` URL, allowed by neither `wp_allowed_protocols()` nor the block editor.
 			array( 'rest_pattern_unsafe_attribute', "$two_paragraphs\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"url\":\"data:text/html,<script>alert(1)</script>\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Go</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons -->" ),
 
-			// `do_shortcode()` would run over the rendered pattern after every write-time filter.
 			array( 'rest_pattern_shortcode', "$three_paragraphs\n\n<!-- wp:paragraph -->\n<p>PROBE [caption id=c width=1 caption=x]body[/caption]</p>\n<!-- /wp:paragraph -->" ),
 			// The C escapes `shortcode_parse_atts()` decodes never reach a callback; the tag is refused first.
 			array( 'rest_pattern_shortcode', "$three_paragraphs\n\n<!-- wp:paragraph -->\n<p>[caption id=c width=1 caption=x\\x3cspan\\x3ex\\x3c/span\\x3e]body[/caption]</p>\n<!-- /wp:paragraph -->" ),
@@ -305,7 +304,6 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 		};
 
 		return array(
-
 			// `strip_shortcodes()` stops matching a tag name at `<`; KSES deletes the element and rejoins it.
 			'shortcode split by a deleted tag'  => array( 'rest_pattern_shortcode', $in_paragraph( '[cap<script></script>tion id=c width=1 caption=x]body[/caption]' ) ),
 			'control character in a name'       => array( 'rest_pattern_control_characters', $in_paragraph( "<!-- wp:wpor\x00g/modal {\"a\":\"b\"} /-->" ) ),
@@ -411,7 +409,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Meta with no directive still saves, so the check above is not refusing every submission.
+	 * Meta with no directive still saves, so the check is not refusing every submission.
 	 */
 	public function test_meta_without_a_directive_is_accepted() {
 		wp_set_current_user( self::$user );

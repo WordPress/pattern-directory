@@ -63,7 +63,7 @@ class Pattern_Shortcode_Rendering_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A bracket that only exists once the block is parsed is text too, because this runs after `do_blocks`.
+	 * A bracket that only exists once the block is parsed is left as text too.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\do_shortcode_except_in_patterns
 	 */
@@ -98,7 +98,7 @@ class Pattern_Shortcode_Rendering_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The scope is patterns, so an ordinary post still expands its shortcodes.
+	 * An ordinary post still expands its shortcodes.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\do_shortcode_except_in_patterns
 	 */

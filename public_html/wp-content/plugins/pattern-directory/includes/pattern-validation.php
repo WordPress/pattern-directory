@@ -281,10 +281,9 @@ function validate_content( $prepared_post ) {
 	}
 
 	/*
-	 * Bare bracket syntax is refused like `core/shortcode` above. Each form a renderer reads is checked,
-	 * because `strip_shortcodes()` only matches a tag name immediately after a literal `[`, and KSES
-	 * deleting an element, `decode_pattern_content()` stripping `"ref":<n>`, or `parse_blocks()` decoding
-	 * `\u005b` in attribute JSON each produce a tag the submitted bytes did not carry.
+	 * Every form a renderer reads is checked: `strip_shortcodes()` only matches a tag name immediately
+	 * after a literal `[`, and KSES deleting an element, `decode_pattern_content()` stripping `"ref":<n>`,
+	 * or `parse_blocks()` decoding `\u005b` each rejoin one the submitted bytes did not carry.
 	 */
 	$stored     = wp_unslash( sanitize_post_field( 'post_content', wp_slash( $content ), 0, 'db' ) );
 	$attributes = (string) wp_json_encode( wp_list_pluck( $all_blocks, 'attrs' ) );
@@ -548,8 +547,8 @@ function validate_block_directives( $prepared_post, $request ) {
 	}
 
 	/*
-	 * Meta is rendered too and never reaches `$prepared_post`: core registers `footnotes` with no sanitise
-	 * callback, and `render_block_core_footnotes()` emits it through `wp_kses_post()`, which keeps `data-*`.
+	 * Meta never reaches `$prepared_post`, and `render_block_core_footnotes()` emits `footnotes` through
+	 * `wp_kses_post()`, which keeps `data-*`.
 	 */
 	if ( ! $has_directive && is_array( $request['meta'] ?? null ) ) {
 		$has_directive = attribute_has_directive( $request['meta'] );
