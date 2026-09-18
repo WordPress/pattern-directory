@@ -3,6 +3,11 @@
  */
 import { getContext, getElement, store, withScope } from '@wordpress/interactivity';
 
+const CONTROLLED_HEIGHT = 600;
+
+// The frame is untrusted, so the height it claims is bounded — far above any pattern, but bounded.
+const MAX_CONTENT_HEIGHT = 20000;
+
 const { actions, state } = store( 'wporg/patterns/preview', {
 	state: {
 		get scale() {
@@ -10,17 +15,23 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 			const scale = parseInt( pageWidth, 10 ) / previewWidth;
 			return scale > 1 ? 1 : scale;
 		},
+		// `scale` is not finite until `handleOnResize()` has measured the page, which can be after first paint.
+		get safeScale() {
+			return Number.isFinite( state.scale ) && state.scale > 0 ? state.scale : 1;
+		},
 		get previewHeightCSS() {
-			return `${ getContext().previewHeight }px`;
+			const { contentHeight, isControlled } = getContext();
+			return `${ isControlled ? CONTROLLED_HEIGHT : contentHeight * state.safeScale }px`;
 		},
 		get iframeWidthCSS() {
 			return `${ getContext().previewWidth }px`;
 		},
 		get iframeHeightCSS() {
-			return `${ getContext().previewHeight / state.scale }px`;
+			const { contentHeight, isControlled } = getContext();
+			return `${ isControlled ? CONTROLLED_HEIGHT / state.safeScale : contentHeight }px`;
 		},
 		get transformCSS() {
-			return `scale(${ state.scale })`;
+			return `scale(${ state.safeScale })`;
 		},
 		get isWidthWide() {
 			return getContext().previewWidth >= 1200;
@@ -98,34 +109,28 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 			state.isDrag = false;
 			state.direction = '';
 		},
-		*onLoad() {
+		requestPreviewHeight() {
+			const { ref } = getElement();
+			const request = () =>
+				ref.contentWindow?.postMessage( { type: 'wporg/patterns/preview-height-request' }, '*' );
+
+			// Covers a frame that loaded before this ran, and one that has not loaded yet.
+			request();
+			ref.addEventListener( 'load', request );
+
+			return () => ref.removeEventListener( 'load', request );
+		},
+		onPreviewHeight( event ) {
 			const { ref } = getElement();
 
-			yield new Promise( ( resolve ) => {
-				ref.addEventListener( 'load', () => resolve() );
-			} );
-
-			// iframe is loaded now, so we should adjust the height.
-			actions.updatePreviewHeight();
-		},
-		updatePreviewHeight() {
-			const context = getContext();
-
-			// If this is a "controlled" preview (has the toggles and
-			// drag handles), it should also have a fixed height.
-			if ( context.isControlled ) {
-				context.previewHeight = 600;
+			// Opaque origins are all "null", so only the frame this handler is bound to may set this height.
+			if ( event.source !== ref.contentWindow || 'wporg/patterns/preview-height' !== event.data?.type ) {
 				return;
 			}
 
-			// Need to "use" previewWidth so that `data-wp-watch` will re-run this action when it changes.
-			context.previewWidth; // eslint-disable-line no-unused-expressions
-
-			const { ref } = getElement();
-			const iframeDoc = ref.contentDocument;
-			const height = iframeDoc.querySelector( '.entry-content' )?.clientHeight;
-			if ( height ) {
-				context.previewHeight = height * state.scale;
+			const height = parseInt( event.data.height, 10 );
+			if ( height > 0 ) {
+				getContext().contentHeight = Math.min( height, MAX_CONTENT_HEIGHT );
 			}
 		},
 		handleOnResize() {

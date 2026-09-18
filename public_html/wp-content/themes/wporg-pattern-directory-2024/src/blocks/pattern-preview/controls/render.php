@@ -17,7 +17,7 @@ $view_url = get_pattern_preview_url( $block->context['postId'] );
 $init_state    = array(
 	'url'           => $view_url,
 	'previewWidth'  => 1200,
-	'previewHeight' => 200,
+	'contentHeight' => 600,
 	'isControlled'  => true,
 );
 $encoded_state = wp_json_encode( $init_state );
