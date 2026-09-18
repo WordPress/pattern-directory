@@ -1111,6 +1111,7 @@ function setup_preview_theme() {
 	// query_vars are not set yet, so the decision has to come from the URL.
 	if ( is_preview_request() ) {
 		add_filter( 'show_admin_bar', '__return_false', 2000 );
+		add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_preview_assets' );
 
 		add_filter(
 			'template',
@@ -1149,6 +1150,31 @@ function setup_preview_theme() {
 		add_filter( 'render_block_core/video', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
 		add_filter( 'render_block_core/site-logo', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
 	}
+}
+
+/**
+ * Enqueue the preview's own assets.
+ *
+ * The frame is sandboxed without `allow-same-origin`, so the embedding page cannot measure it and the
+ * preview has to report its height itself.
+ */
+function enqueue_preview_assets() {
+	$asset_path = dirname( __DIR__ ) . '/build/preview-height.asset.php';
+
+	// A missing build costs the frame its height, not its content, so let the preview render without it.
+	if ( ! file_exists( $asset_path ) ) {
+		return;
+	}
+
+	$asset = require $asset_path;
+
+	wp_enqueue_script(
+		'wporg-pattern-preview-height',
+		plugins_url( 'build/preview-height.js', __DIR__ ),
+		$asset['dependencies'],
+		$asset['version'],
+		true
+	);
 }
 
 /**

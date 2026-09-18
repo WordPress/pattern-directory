@@ -22,7 +22,7 @@ if ( ! $viewport_width ) {
 $init_state    = array(
 	'url'           => $view_url,
 	'previewWidth'  => $viewport_width,
-	'previewHeight' => 200,
+	'contentHeight' => 200,
 	'isControlled'  => false,
 );
 $encoded_state = wp_json_encode( $init_state );
@@ -38,15 +38,17 @@ $encoded_state = wp_json_encode( $init_state );
 	tabIndex="-1"
 >
 	<div class="wp-block-wporg-pattern-preview__container">
+		<?php // No `allow-same-origin`: the frame gets an opaque origin, so it reports its height over `postMessage`. ?>
 		<iframe
 			title="<?php esc_attr_e( 'Pattern Preview', 'wporg-patterns' ); ?>"
 			tabIndex="-1"
+			sandbox="allow-scripts"
 			src="<?php echo esc_url( $view_url ); ?>"
 			data-wp-style--width="state.iframeWidthCSS"
 			data-wp-style--height="state.iframeHeightCSS"
 			data-wp-style--transform="state.transformCSS"
-			data-wp-init="actions.onLoad"
-			data-wp-watch="actions.updatePreviewHeight"
+			data-wp-init="actions.requestPreviewHeight"
+			data-wp-on-window--message="actions.onPreviewHeight"
 			style="transform-origin: <?php echo is_rtl() ? 'top right' : 'top left'; ?>;"
 		></iframe>
 	</div>
