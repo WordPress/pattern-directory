@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "wporg/pattern-thumbnail",
+  "version": "0.1.0",
+  "title": "Pattern Thumbnail",
+  "category": "design",
+  "icon": "",
+  "description": "Display a thumbnail for the current pattern.",
+  "textdomain": "wporg",
+  "attributes": {
+    "isLink": {
+      "type": "boolean",
+      "default": false
+    },
+    "lazyLoad": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "supports": {
+    "align": [
+      "wide",
+      "full"
+    ],
+    "html": false,
+    "spacing": {
+      "margin": true,
+      "padding": false,
+      "blockGap": false
+    }
+  },
+  "usesContext": [
+    "postId",
+    "postType",
+    "queryId"
+  ],
+  "editorScript": "file:./index.js",
+  "style": "file:./style-index.css",
+  "viewScriptModule": "file:./view.js",
+  "render": "file:./render.php"
+}

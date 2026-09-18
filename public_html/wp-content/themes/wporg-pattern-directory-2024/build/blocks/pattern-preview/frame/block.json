@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "wporg/pattern-preview",
+  "version": "0.1.0",
+  "title": "Pattern Preview",
+  "category": "design",
+  "icon": "",
+  "description": "Display a preview for the current pattern.",
+  "textdomain": "wporg",
+  "supports": {
+    "align": [
+      "wide",
+      "full"
+    ],
+    "html": false,
+    "spacing": {
+      "margin": true,
+      "padding": false,
+      "blockGap": false
+    }
+  },
+  "usesContext": [
+    "postId",
+    "postType",
+    "queryId"
+  ],
+  "editorScript": "file:./index.js",
+  "style": "file:./style-index.css",
+  "viewScriptModule": "wporg-pattern-view-control-view-script-module",
+  "render": "file:./render.php"
+}
