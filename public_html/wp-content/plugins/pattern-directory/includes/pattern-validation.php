@@ -128,6 +128,33 @@ function block_shape( $blocks ) {
 }
 
 /**
+ * A parsed tree flattened to one dimension, nested blocks included.
+ *
+ * @param array $blocks Parsed blocks.
+ * @return array Every block in the tree.
+ */
+function flatten_blocks( $blocks ) {
+	$queue     = $blocks;
+	$flattened = array();
+
+	while ( $queue ) {
+		$block = array_shift( $queue );
+
+		// The editor's linebreaks between blocks parse as nameless whitespace-only blocks: separators, not content.
+		if ( is_null( $block['blockName'] ) && '' === trim( $block['innerHTML'] ) ) {
+			continue;
+		}
+
+		array_push( $flattened, $block );
+		foreach ( $block['innerBlocks'] as $inner_block ) {
+			array_push( $queue, $inner_block );
+		}
+	}
+
+	return $flattened;
+}
+
+/**
  * Strip out basic HTML to get at the manually-entered content in block content.
  *
  * First, remove class attributes, since custom class names will be caught by attribute checks.
@@ -225,26 +252,7 @@ function validate_content( $prepared_post ) {
 	}
 
 	// `reject_unstable_blocks()` refuses, further down the chain, any content whose stored form parses to a different tree.
-	$blocks       = parse_blocks( $content );
-	$blocks_queue = $blocks;
-	$all_blocks   = array();
-
-	// Loop over all the nested blocks to flatten the block list into 1 dimension.
-	while ( $blocks_queue ) {
-		$block = array_shift( $blocks_queue );
-
-		// The editor's linebreaks between blocks parse as nameless whitespace-only blocks: separators, not content.
-		if ( is_null( $block['blockName'] ) && '' === trim( $block['innerHTML'] ) ) {
-			continue;
-		}
-
-		array_push( $all_blocks, $block );
-		if ( ! empty( $block['innerBlocks'] ) ) {
-			foreach ( $block['innerBlocks'] as $inner_block ) {
-				array_push( $blocks_queue, $inner_block );
-			}
-		}
-	}
+	$all_blocks = flatten_blocks( parse_blocks( $content ) );
 
 	// Check that each block in the list has a blockName and is registered.
 	$registry       = \WP_Block_Type_Registry::get_instance();
@@ -280,17 +288,13 @@ function validate_content( $prepared_post ) {
 		);
 	}
 
-	/*
-	 * Every form a renderer reads is checked: `strip_shortcodes()` only matches a tag name immediately
-	 * after a literal `[`, and KSES deleting an element, `decode_pattern_content()` stripping `"ref":<n>`,
-	 * or `parse_blocks()` decoding `\u005b` each rejoin one the submitted bytes did not carry.
-	 */
-	$stored     = wp_unslash( sanitize_post_field( 'post_content', wp_slash( $content ), 0, 'db' ) );
-	$attributes = (string) wp_json_encode( wp_list_pluck( $all_blocks, 'attrs' ) );
-	$forms      = array( $content, $stored, decode_pattern_content( $stored ), $attributes );
+	// `strip_shortcodes()` only matches a registered tag right after a literal `[`, which each form can rejoin.
+	$stored = wp_unslash( sanitize_post_field( 'post_content', wp_slash( $content ), 0, 'db' ) );
 
-	foreach ( array_unique( $forms ) as $markup ) {
-		if ( strip_shortcodes( $markup ) !== $markup ) {
+	foreach ( array( $content, $stored, decode_pattern_content( $stored ) ) as $markup ) {
+		$attributes = (string) wp_json_encode( wp_list_pluck( flatten_blocks( parse_blocks( $markup ) ), 'attrs' ) );
+
+		if ( strip_shortcodes( $markup ) !== $markup || strip_shortcodes( $attributes ) !== $attributes ) {
 			return new \WP_Error(
 				'rest_pattern_shortcode',
 				__( 'Pattern content cannot contain shortcodes.', 'wporg-patterns' ),
