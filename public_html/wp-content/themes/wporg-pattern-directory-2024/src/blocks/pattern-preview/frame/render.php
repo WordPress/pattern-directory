@@ -22,7 +22,7 @@ if ( ! $viewport_width ) {
 $init_state    = array(
 	'url'           => $view_url,
 	'previewWidth'  => $viewport_width,
-	'contentHeight' => 200,
+	'contentHeight' => 600,
 	'isControlled'  => false,
 );
 $encoded_state = wp_json_encode( $init_state );

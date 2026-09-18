@@ -31,7 +31,7 @@ const { actions, state } = store( 'wporg/patterns/preview', {
 			return `${ isControlled ? CONTROLLED_HEIGHT / state.safeScale : contentHeight }px`;
 		},
 		get transformCSS() {
-			return `scale(${ state.scale })`;
+			return `scale(${ state.safeScale })`;
 		},
 		get isWidthWide() {
 			return getContext().previewWidth >= 1200;

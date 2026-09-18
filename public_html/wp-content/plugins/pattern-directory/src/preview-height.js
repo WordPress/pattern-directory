@@ -12,7 +12,7 @@ if ( content && window.parent !== window ) {
 		window.parent.postMessage( { type: 'wporg/patterns/preview-height', height: content.clientHeight }, '*' );
 	};
 
-	// Prompted only: the embedder sizes the frame from this height, so watching for resizes would chase it.
+	// No resize observer: the embedder sizes the frame from this height, so watching would chase it.
 	window.addEventListener( 'message', ( event ) => {
 		if ( 'wporg/patterns/preview-height-request' === event.data?.type ) {
 			report();
