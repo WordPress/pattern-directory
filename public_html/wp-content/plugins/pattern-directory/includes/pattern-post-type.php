@@ -95,6 +95,7 @@ function register_post_type_data() {
 			),
 			'query_var'         => 'pattern-categories',
 			// Authors assign categories to their own patterns; the category list itself is curated by moderators.
+			// This relies on `hierarchical` above: in a flat taxonomy, anyone who can assign terms can also create them.
 			'capabilities'      => array(
 				'assign_terms' => 'edit_patterns',
 				'edit_terms'   => 'edit_others_patterns',

@@ -85,14 +85,16 @@ class Category_Management_Test extends WP_UnitTestCase {
 	 *
 	 * @param string $method HTTP method.
 	 * @param string $path   Path below the route base.
-	 * @param array  $body   Request body.
+	 * @param array  $params Request parameters: the JSON body for POST, query parameters otherwise.
 	 * @return WP_REST_Response
 	 */
-	protected function request( string $method, string $path = '', array $body = array() ): WP_REST_Response {
+	protected function request( string $method, string $path = '', array $params = array() ): WP_REST_Response {
 		$request = new WP_REST_Request( $method, '/wp/v2/pattern-categories' . $path );
-		if ( $body ) {
+		if ( 'POST' === $method && $params ) {
 			$request->set_header( 'content-type', 'application/json' );
-			$request->set_body( wp_json_encode( $body ) );
+			$request->set_body( wp_json_encode( $params ) );
+		} elseif ( $params ) {
+			$request->set_query_params( $params );
 		}
 
 		return rest_do_request( $request );
@@ -126,6 +128,21 @@ class Category_Management_Test extends WP_UnitTestCase {
 		$this->assertSame( 403, $response->get_status() );
 		$this->assertSame( 'rest_cannot_update', $response->get_data()['code'] );
 		$this->assertSame( 'Headers', get_term( self::$category_term_id )->name );
+	}
+
+	/**
+	 * A member cannot delete a category.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\register_post_type_data
+	 */
+	public function test_member_cannot_delete_category(): void {
+		wp_set_current_user( self::$member );
+
+		$response = $this->request( 'DELETE', '/' . self::$category_term_id, array( 'force' => true ) );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 'rest_cannot_delete', $response->get_data()['code'] );
+		$this->assertInstanceOf( \WP_Term::class, get_term( self::$category_term_id ) );
 	}
 
 	/**
