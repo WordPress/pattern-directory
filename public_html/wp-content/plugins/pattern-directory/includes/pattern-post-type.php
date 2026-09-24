@@ -94,9 +94,11 @@ function register_post_type_data() {
 				'slug' => 'categories',
 			),
 			'query_var'         => 'pattern-categories',
+			// Authors assign categories to their own patterns; the category list itself is curated by moderators.
+			// This relies on `hierarchical` above: in a flat taxonomy, anyone who can assign terms can also create them.
 			'capabilities'      => array(
 				'assign_terms' => 'edit_patterns',
-				'edit_terms'   => 'edit_patterns',
+				'edit_terms'   => 'edit_others_patterns',
 			),
 		)
 	);
@@ -113,7 +115,7 @@ function register_post_type_data() {
 			'rewrite'           => array(
 				'slug' => 'pattern-keywords',
 			),
-			// Keywords are moderator-only (the `core` term feeds Core's pattern distribution), unlike categories.
+			// Keywords are moderator-only (the `core` term feeds Core's pattern distribution), to assign as well as to manage.
 			'capabilities'      => array(
 				'assign_terms' => 'edit_others_patterns',
 				'edit_terms'   => 'edit_others_patterns',
