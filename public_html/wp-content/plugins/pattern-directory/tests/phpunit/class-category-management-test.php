@@ -152,9 +152,14 @@ class Category_Management_Test extends WP_UnitTestCase {
 
 		$created = $this->request( 'POST', '', array( 'name' => 'Moderator Category' ) );
 		$this->assertSame( 201, $created->get_status() );
+		$term_id = $created->get_data()['id'];
 
-		$updated = $this->request( 'POST', '/' . $created->get_data()['id'], array( 'name' => 'Renamed' ) );
-		$this->assertSame( 200, $updated->get_status() );
-		$this->assertSame( 'Renamed', get_term( $created->get_data()['id'] )->name );
+		try {
+			$updated = $this->request( 'POST', '/' . $term_id, array( 'name' => 'Renamed' ) );
+			$this->assertSame( 200, $updated->get_status() );
+			$this->assertSame( 'Renamed', get_term( $term_id )->name );
+		} finally {
+			wp_delete_term( $term_id, 'wporg-pattern-category' );
+		}
 	}
 }
