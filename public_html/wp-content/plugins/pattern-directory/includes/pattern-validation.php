@@ -687,10 +687,11 @@ function validate_title( $prepared_post, $request ) {
 		);
 	}
 
-	if ( ! is_title_valid( $title ) ) {
+	$title_error = get_title_error( $title );
+	if ( $title_error ) {
 		return new \WP_Error(
 			'rest_pattern_invalid_title',
-			__( 'Pattern title is invalid. The pattern title should describe the pattern.', 'wporg-patterns' ),
+			$title_error,
 			array( 'status' => 400 )
 		);
 	}
@@ -1120,33 +1121,33 @@ function check_for_spam( $post ) {
 }
 
 /**
- * Helper function to check for a valid pattern title.
+ * Explain why a pattern title is invalid, so the author knows what to change.
  *
  * @param string $title Pattern title.
- * @return boolean
+ * @return string The reason the title is invalid, or an empty string if it's valid.
  */
-function is_title_valid( $title ) {
+function get_title_error( $title ) {
 	if ( strip_shortcodes( $title ) !== $title || wp_strip_all_tags( $title ) !== $title ) {
-		return false;
+		return __( 'Pattern titles cannot contain HTML or shortcodes.', 'wporg-patterns' );
 	}
 
 	if ( content_has_block_directives( $title ) ) {
-		return false;
+		return __( 'Pattern titles cannot contain interactivity directives.', 'wporg-patterns' );
 	}
 
-	// Check title against a list of disallowed words.
-	// Note the space after `test ` to avoid matching "testimonial".
-	$disallow_list = array( 'test ', 'testing', 'my pattern', 'wordpress', 'example' );
-
-	if ( 'test' === strtolower( $title ) ) {
-		return false;
-	}
+	// Whole words only, so "Latest Posts" and "Testimonial" are fine.
+	$disallow_list = array( 'test', 'testing', 'my pattern', 'my patterns', 'wordpress', 'example' );
 
 	foreach ( $disallow_list as $disallowed ) {
-		if ( false !== stripos( $title, $disallowed ) ) {
-			return false;
+		$pattern = '/\b' . str_replace( ' ', '\s+', preg_quote( $disallowed, '/' ) ) . '\b/iu';
+		if ( preg_match( $pattern, $title, $matches ) ) {
+			return sprintf(
+				/* translators: %s: The word from the title that isn't allowed, e.g. "test". */
+				__( 'Pattern titles cannot include "%s". The title should describe the pattern.', 'wporg-patterns' ),
+				$matches[0]
+			);
 		}
 	}
 
-	return true;
+	return '';
 }
