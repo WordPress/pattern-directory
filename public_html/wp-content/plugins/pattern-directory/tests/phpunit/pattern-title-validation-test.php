@@ -84,6 +84,16 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 			array(
 				array_merge( $defaults, array( 'title' => 'Testimonial' ) ),
 			),
+			// Disallowed words inside other words.
+			array(
+				array_merge( $defaults, array( 'title' => 'Latest Posts' ) ),
+			),
+			array(
+				array_merge( $defaults, array( 'title' => 'Contest Banner' ) ),
+			),
+			array(
+				array_merge( $defaults, array( 'title' => 'Examples Grid' ) ),
+			),
 			array(
 				array(
 					'title'   => '',
@@ -175,6 +185,48 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 				'rest_pattern_interactivity_directive',
 				array_merge( $defaults, array( 'title' => 'Quote <span data-wp-interactive="x">y</span>' ) ),
 			),
+		);
+	}
+
+	/**
+	 * Test that the error says why the title is invalid.
+	 *
+	 * @dataProvider data_invalid_title_message
+	 *
+	 * @param string $title            Submitted title.
+	 * @param string $expected_message Expected error message.
+	 */
+	public function test_invalid_title_message( $title, $expected_message ) {
+		wp_set_current_user( self::$user );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'title'   => $title,
+					'status'  => 'publish',
+					'content' => self::$valid_content,
+				)
+			)
+		);
+
+		$data = rest_do_request( $request )->get_data();
+		$this->assertSame( 'rest_pattern_invalid_title', $data['code'] );
+		$this->assertSame( $expected_message, $data['message'] );
+	}
+
+	/**
+	 * Data provider for the invalid title messages.
+	 *
+	 * @return array
+	 */
+	public function data_invalid_title_message() {
+		return array(
+			array( 'Test Pattern', 'Pattern titles cannot include "Test". The title should describe the pattern.' ),
+			array( 'My  Pattern', 'Pattern titles cannot include "My  Pattern". The title should describe the pattern.' ),
+			array( 'WordPress Header', 'Pattern titles cannot include "WordPress". The title should describe the pattern.' ),
+			array( 'Quote <span>markup</span>', 'Pattern titles cannot contain HTML or shortcodes.' ),
 		);
 	}
 
