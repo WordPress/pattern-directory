@@ -33,7 +33,7 @@ const UnlistNotice = () => {
 		} else {
 			removeNotice( NOTICE_ID );
 		}
-	}, [ status ] );
+	}, [ status, createNotice, removeNotice ] );
 
 	return null;
 };

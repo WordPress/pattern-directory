@@ -5,9 +5,12 @@
  * Forked from core's template-canvas.php.
  *
  * @see https://github.com/WordPress/wordpress-develop/blob/6.1/src/wp-includes/template-canvas.php
+ *
+ * @package WordPressdotorg\Pattern_Directory
  */
 
 namespace WordPressdotorg\Pattern_Directory;
+
 use function WordPressdotorg\Pattern_Creator\MockBlocks\{attach_site_data_filters, remove_site_data_filters};
 
 remove_action( 'wp_footer', 'stats_footer', 101 );
@@ -16,7 +19,7 @@ remove_action( 'wp_footer', 'stats_footer', 101 );
 attach_site_data_filters();
 global $_wp_current_template_content;
 // Override the theme template to only output the pattern content.
-$_wp_current_template_content = <<<HTML
+$_wp_current_template_content = <<<'HTML'
 <!-- wp:group {"tagName":"main"} -->
 <main class="wp-block-group">
 <!-- wp:post-content {"layout":{"type":"constrained"}} /-->

@@ -1,7 +1,13 @@
 <?php
+/**
+ * Block translation parser helpers.
+ *
+ * @package WordPressdotorg\Pattern_Translations
+ */
+
 namespace WordPressdotorg\Pattern_Translations\Parsers;
 
-/*
+/**
  * Handle blocks with attributes present in the attributes that are also used
  * in a shortcode within the block content.
  *
@@ -10,14 +16,30 @@ namespace WordPressdotorg\Pattern_Translations\Parsers;
 class ShortcodeBlock implements BlockParser {
 	use GetSetAttribute;
 
-	public $attribute_names = [];
+	/**
+	 * Translatable shortcode attributes.
+	 *
+	 * @var string[]
+	 */
+	public $attribute_names = array();
 
+	/**
+	 * Set the translatable shortcode attributes.
+	 *
+	 * @param array $attribute_names Attribute names.
+	 */
 	public function __construct( array $attribute_names ) {
 		$this->attribute_names = $attribute_names;
 	}
 
-	public function to_strings( array $block ) : array {
-		$strings = [];
+	/**
+	 * Extract translatable block strings.
+	 *
+	 * @param array $block Parsed block.
+	 * @return array Extracted strings.
+	 */
+	public function to_strings( array $block ): array {
+		$strings = array();
 		foreach ( $this->attribute_names as $attribute_name ) {
 			$strings = array_merge( $strings, $this->get_attribute( $attribute_name, $block ) );
 		}
@@ -25,7 +47,14 @@ class ShortcodeBlock implements BlockParser {
 		return $strings;
 	}
 
-	public function replace_strings( array $block, array $replacements ) : array {
+	/**
+	 * Replace translated strings in a block.
+	 *
+	 * @param array $block        Parsed block.
+	 * @param array $replacements Translations keyed by original string.
+	 * @return array Updated block.
+	 */
+	public function replace_strings( array $block, array $replacements ): array {
 		foreach ( $this->attribute_names as $attribute_name ) {
 			$this->set_attribute( $attribute_name, $block, $replacements );
 
@@ -35,7 +64,7 @@ class ShortcodeBlock implements BlockParser {
 
 					$block['innerContent'][ $i ] = preg_replace_callback(
 						$shortcode_param_regex,
-						function( $matches ) use ( $replacements ) {
+						function ( $matches ) use ( $replacements ) {
 							return $this->preg_replace_gutenberg_attributes_handler( $matches, $replacements );
 						},
 						$inner_content
@@ -47,7 +76,7 @@ class ShortcodeBlock implements BlockParser {
 		$regex              = '/\b(\w*?)="(.*?)(")/';
 		$block['innerHTML'] = preg_replace_callback(
 			$regex,
-			function( $matches ) use ( $replacements ) {
+			function ( $matches ) use ( $replacements ) {
 				return $this->preg_replace_gutenberg_attributes_handler( $matches, $replacements );
 			},
 			$block['innerHTML']
@@ -55,20 +84,31 @@ class ShortcodeBlock implements BlockParser {
 		return $block;
 	}
 
-	// phpcs:disable WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
-	protected function snake_case( $camelCaseString ) {
+	/**
+	 * Convert an attribute name to shortcode casing.
+	 *
+	 * @param string $camel_case_string Attribute name.
+	 * @return string Shortcode attribute name.
+	 */
+	protected function snake_case( $camel_case_string ) {
 		return ltrim(
 			preg_replace_callback(
 				'/([A-Z]+)/',
-				function( $matches ) {
+				function ( $matches ) {
 					return '_' . strtolower( $matches[1] ); },
-				$camelCaseString
+				$camel_case_string
 			),
 			'_'
 		);
 	}
-	// phpcs:enable WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase
 
+	/**
+	 * Replace the value of a matched shortcode attribute.
+	 *
+	 * @param array $matches      Regular expression matches.
+	 * @param array $replacements Translations keyed by original string.
+	 * @return string Updated attribute.
+	 */
 	public function preg_replace_gutenberg_attributes_handler( array $matches, array $replacements ) {
 		$current_value = $matches[2];
 

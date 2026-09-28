@@ -131,8 +131,9 @@ function PatternCategoriesControl( { selectedTerms = EMPTY_ARRAY, setTerms } ) {
 
 	const availableTermsTree = useMemo(
 		() => sortBySelected( availableTerms, selectedTerms ),
-		// Remove `terms` from the dependency list to avoid reordering every time
-		// checking or unchecking a term.
+		// `selectedTerms` is intentionally omitted from the dependency list to
+		// avoid reordering the list every time a term is checked or unchecked.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[ availableTerms ]
 	);
 

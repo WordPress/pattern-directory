@@ -7,6 +7,11 @@
  *
  * To run in a sandbox, use php directly, ex:
  * php ./bin/update-contains-block-types.php --all --apply
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ *
+ * phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI output is plain text.
+ * phpcs:disable WordPress.WP.AlternativeFunctions -- Native functions are needed for CLI bootstrap and streams.
  */
 
 namespace WordPressdotorg\Pattern_Directory;
@@ -14,7 +19,7 @@ namespace WordPressdotorg\Pattern_Directory;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE };
 
 // This script should only be called in a CLI environment.
-if ( 'cli' != php_sapi_name() ) {
+if ( 'cli' !== php_sapi_name() ) {
 	die();
 }
 
@@ -32,7 +37,7 @@ $opts['apply']   = isset( $opts['apply'] );
 $opts['verbose'] = isset( $opts['verbose'] );
 $opts['all']     = isset( $opts['all'] );
 
-// Bootstrap WordPress
+// Bootstrap WordPress.
 $_SERVER['HTTP_HOST']   = parse_url( $opts['url'], PHP_URL_HOST );
 $_SERVER['REQUEST_URI'] = parse_url( $opts['url'], PHP_URL_PATH );
 
@@ -65,11 +70,11 @@ $args = array(
 if ( isset( $opts['post'] ) ) {
 	$args = array(
 		'post_type' => POST_TYPE,
-		'p' => absint( $opts['post'] ),
+		'p'         => absint( $opts['post'] ),
 	);
 }
 
-$query = new \WP_Query( $args );
+$query        = new \WP_Query( $args );
 $meta_updated = 0;
 
 while ( $query->have_posts() ) {
@@ -89,14 +94,14 @@ while ( $query->have_posts() ) {
 	if ( $opts['apply'] ) {
 		$result = update_post_meta( $pattern_id, 'wpop_contains_block_types', $used_blocks );
 		if ( $result ) {
-			$meta_updated++;
-		} else if ( $opts['verbose'] ) {
-			echo "Error updating {$pattern_id}.\n"; // phpcs:ignore
+			++$meta_updated;
+		} elseif ( $opts['verbose'] ) {
+			echo "Error updating {$pattern_id}.\n";
 		}
-	} else if ( $opts['verbose'] ) {
-		echo "Will update {$pattern_id} with '{$used_blocks}'.\n"; // phpcs:ignore
+	} elseif ( $opts['verbose'] ) {
+		echo "Will update {$pattern_id} with '{$used_blocks}'.\n";
 	}
 }
 
-echo "Updated {$meta_updated} patterns.\n"; // phpcs:ignore
-echo "Done.\n\n"; // phpcs:ignore
+echo "Updated {$meta_updated} patterns.\n";
+echo "Done.\n\n";

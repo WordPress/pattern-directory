@@ -1,4 +1,10 @@
 <?php
+/**
+ * Pattern localization helpers.
+ *
+ * @package WordPressdotorg\Pattern_Translations
+ */
+
 namespace WordPressdotorg\Pattern_Translations;
 
 /**
@@ -7,7 +13,7 @@ namespace WordPressdotorg\Pattern_Translations;
  * @param array $patterns An array of Pattern objects to translate.
  * @return array The translated pattern objects.
  */
-function translate_patterns( array $patterns ) : array {
+function translate_patterns( array $patterns ): array {
 	return translate_patterns_to( $patterns, get_locale() );
 }
 
@@ -18,8 +24,11 @@ function translate_patterns( array $patterns ) : array {
  * @param string $locale   The locale to translate into.
  * @return array The translated pattern objects.
  */
-function translate_patterns_to( array $patterns, string $locale ) : array {
-	return array_map( function( $pattern ) use ( $locale ) {
-		return $pattern->to_locale( $locale ) ?: $pattern;
-	}, $patterns );
+function translate_patterns_to( array $patterns, string $locale ): array {
+	return array_map(
+		function ( $pattern ) use ( $locale ) {
+			return $pattern->to_locale( $locale ) ?: $pattern;
+		},
+		$patterns
+	);
 }

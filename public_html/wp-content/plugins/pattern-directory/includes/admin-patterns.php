@@ -1,4 +1,9 @@
 <?php
+/**
+ * Admin patterns for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Admin\Patterns;
 
@@ -9,7 +14,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTE
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\PENDING_STATUS;
-use const  WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ UNLISTED_STATUS, SPAM_STATUS };
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ UNLISTED_STATUS, SPAM_STATUS };
 
 defined( 'WPINC' ) || die();
 
@@ -29,7 +34,7 @@ add_filter( 'handle_bulk_actions-edit-' . PATTERN, __NAMESPACE__ . '\handle_bulk
 /**
  * Modify the patterns list table columns.
  *
- * @param array $columns
+ * @param array $columns List table columns.
  *
  * @return array
  */
@@ -49,8 +54,8 @@ function pattern_list_table_columns( $columns ) {
 /**
  * Render the contents of custom list table columns.
  *
- * @param string $column_name
- * @param int    $post_id
+ * @param string $column_name Column to render.
+ * @param int    $post_id     Post ID.
  *
  * @return void
  */
@@ -59,12 +64,14 @@ function pattern_list_table_render_custom_columns( $column_name, $post_id ) {
 
 	switch ( $column_name ) {
 		case 'flags':
-			$flags = new WP_Query( array(
-				'post_type'   => FLAG,
-				'post_status' => array( 'pending' ),
-				'post_parent' => $current_pattern->ID,
-				'numberposts' => 1,
-			) );
+			$flags = new WP_Query(
+				array(
+					'post_type'   => FLAG,
+					'post_status' => array( 'pending' ),
+					'post_parent' => $current_pattern->ID,
+					'numberposts' => 1,
+				)
+			);
 
 			if ( $flags->found_posts > 0 ) {
 				$url = add_query_arg(
@@ -84,12 +91,15 @@ function pattern_list_table_render_custom_columns( $column_name, $post_id ) {
 					esc_attr( $url ),
 					esc_html( number_format_i18n( $flags->found_posts ) ),
 					sprintf(
-						esc_html( _n(
-							'%s pending flag',
-							'%s pending flags',
-							$flags->found_posts,
-							'wporg-patterns'
-						) ),
+						esc_html(
+							/* translators: %s: Number of pending flags. */
+							_n(
+								'%s pending flag',
+								'%s pending flags',
+								$flags->found_posts,
+								'wporg-patterns'
+							)
+						),
 						esc_html( number_format_i18n( $flags->found_posts ) )
 					)
 				);
@@ -167,12 +177,15 @@ function pattern_list_table_render_custom_columns( $column_name, $post_id ) {
 					'<a href="%1$s" class="language-context-link">%2$s</a>',
 					esc_url( $view_url ),
 					sprintf(
-						esc_html( _n(
-							'%s translation',
-							'%s translations',
-							$translations->found_posts,
-							'wporg-patterns'
-						) ),
+						esc_html(
+							/* translators: %s: Number of translations. */
+							_n(
+								'%s translation',
+								'%s translations',
+								$translations->found_posts,
+								'wporg-patterns'
+							)
+						),
 						esc_html( number_format_i18n( $translations->found_posts ) )
 					)
 				);
@@ -184,7 +197,7 @@ function pattern_list_table_render_custom_columns( $column_name, $post_id ) {
 /**
  * Add some styles for the patterns list table.
  *
- * @param string $which
+ * @param string $which Position of the table navigation.
  *
  * @return void
  */
@@ -249,7 +262,7 @@ function pattern_list_table_styles( $which ) {
 /**
  * Add view links to the patterns list table.
  *
- * @param array $views
+ * @param array $views List table views.
  *
  * @return array
  */
@@ -277,14 +290,16 @@ function pattern_list_table_views( $views ) {
 		esc_url( $url ),
 		$extra_attributes,
 		sprintf(
-			/* translators: %s: Number of posts. */
-			_n(
-				'Has Flags <span class="count">(%s)</span>',
-				'Have Flags <span class="count">(%s)</span>',
-				count( $patterns_with_flags ),
-				'wporg-patterns'
+			wp_kses_post(
+				/* translators: %s: Number of posts. */
+				_n(
+					'Has Flags <span class="count">(%s)</span>',
+					'Have Flags <span class="count">(%s)</span>',
+					count( $patterns_with_flags ),
+					'wporg-patterns'
+				)
 			),
-			number_format_i18n( count( $patterns_with_flags ) )
+			esc_html( number_format_i18n( count( $patterns_with_flags ) ) )
 		)
 	);
 
@@ -301,7 +316,7 @@ function pattern_list_table_views( $views ) {
 		$extra_attributes = ' class="current" aria-current="page"';
 	}
 
-	$args = array(
+	$args  = array(
 		'post_type'   => PATTERN,
 		'post_status' => array( 'draft', 'pending', 'publish' ),
 		'post_parent' => 0,
@@ -314,14 +329,16 @@ function pattern_list_table_views( $views ) {
 		esc_url( $url ),
 		$extra_attributes,
 		sprintf(
-			/* translators: %s: Number of posts. */
-			_n(
-				'Original <span class="count">(%s)</span>',
-				'Originals <span class="count">(%s)</span>',
-				$query->found_posts,
-				'wporg-patterns'
+			wp_kses_post(
+				/* translators: %s: Number of posts. */
+				_n(
+					'Original <span class="count">(%s)</span>',
+					'Originals <span class="count">(%s)</span>',
+					$query->found_posts,
+					'wporg-patterns'
+				)
 			),
-			number_format_i18n( $query->found_posts )
+			esc_html( number_format_i18n( $query->found_posts ) )
 		)
 	);
 
@@ -331,7 +348,7 @@ function pattern_list_table_views( $views ) {
 /**
  * Modify the query that populates the patterns list table.
  *
- * @param WP_Query $query
+ * @param WP_Query $query Query being filtered.
  *
  * @return void
  */
@@ -364,7 +381,7 @@ function handle_pattern_list_table_views( WP_Query $query ) {
 		}
 
 		if ( $wants_translations ) {
-			$meta_query = $query->get( 'meta_query', array() );
+			$meta_query   = $query->get( 'meta_query', array() );
 			$meta_query[] = array(
 				'key'   => 'wpop_is_translation',
 				'value' => 1,
@@ -385,21 +402,18 @@ function handle_pattern_list_table_views( WP_Query $query ) {
 /**
  * More post states for the Patterns list table.
  *
- * @param array   $post_states
- * @param WP_Post $post
+ * @param array   $post_states Post state labels.
+ * @param WP_Post $post        Post being processed.
  *
  * @return array
  */
 function display_post_states( $post_states, $post ) {
-	if ( isset( $_REQUEST['post_status'] ) ) {
-		$post_status = $_REQUEST['post_status'];
-	} else {
-		$post_status = '';
-	}
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only list table filter, compared against registered statuses.
+	$post_status = isset( $_REQUEST['post_status'] ) ? sanitize_key( wp_unslash( $_REQUEST['post_status'] ) ) : '';
 
 	if (
 		$post->post_status !== $post_status &&
-		in_array( $post->post_status, [ UNLISTED_STATUS, SPAM_STATUS ] )
+		in_array( $post->post_status, array( UNLISTED_STATUS, SPAM_STATUS ), true )
 	) {
 		$post_states[ $post->post_status ] = get_post_status_object( $post->post_status )->label;
 	}
@@ -426,7 +440,7 @@ function add_row_actions( $actions, $post ) {
 	$actions       = array_intersect_key( $actions, array_fill_keys( array( 'edit', 'view' ), true ) );
 
 	$edit_url = add_query_arg( 'post_type', PATTERN, 'edit.php' );
-	$title = _draft_or_post_title();
+	$title    = _draft_or_post_title();
 
 	if ( PENDING_STATUS === $post->post_status || SPAM_STATUS === $post->post_status ) {
 		$publish_url = add_query_arg(
@@ -439,10 +453,10 @@ function add_row_actions( $actions, $post ) {
 
 		$actions['publish'] = sprintf(
 			'<a href="%s" aria-label="%s">%s</a>',
-			$publish_url,
+			esc_url( $publish_url ),
 			/* translators: %s: Post title. */
 			esc_attr( sprintf( __( 'Publish &#8220;%s&#8221;', 'wporg-patterns' ), $title ) ),
-			_x( 'Publish', 'verb', 'wporg-patterns' )
+			esc_html_x( 'Publish', 'verb', 'wporg-patterns' )
 		);
 	}
 
@@ -457,10 +471,10 @@ function add_row_actions( $actions, $post ) {
 
 		$actions['unlist'] = sprintf(
 			'<a href="%s" aria-label="%s">%s</a>',
-			$unlist_url,
+			esc_url( $unlist_url ),
 			/* translators: %s: Post title. */
 			esc_attr( sprintf( __( 'Remove &#8220;%s&#8221; from the directory', 'wporg-patterns' ), $title ) ),
-			_x( 'Unlist', 'verb', 'wporg-patterns' )
+			esc_html_x( 'Unlist', 'verb', 'wporg-patterns' )
 		);
 	}
 
@@ -475,10 +489,10 @@ function add_row_actions( $actions, $post ) {
 
 		$actions['spam'] = sprintf(
 			'<a href="%s" aria-label="%s">%s</a>',
-			$spam_url,
+			esc_url( $spam_url ),
 			/* translators: %s: Post title. */
 			esc_attr( sprintf( __( 'Mark &#8220;%s&#8221; as spam', 'wporg-patterns' ), $title ) ),
-			_x( 'Spam', 'verb', 'wporg-patterns' )
+			esc_html_x( 'Spam', 'verb', 'wporg-patterns' )
 		);
 	}
 
@@ -488,7 +502,7 @@ function add_row_actions( $actions, $post ) {
 /**
  * Define bulk actions for the pattern list table.
  *
- * @param array $actions
+ * @param array $actions Available actions.
  *
  * @return array
  */
@@ -507,9 +521,9 @@ function add_bulk_actions( $actions ) {
 /**
  * Execute bulk actions for the patterns list table.
  *
- * @param string $sendback
- * @param string $doaction
- * @param array  $post_ids
+ * @param string $sendback Redirect URL.
+ * @param string $doaction Selected bulk action.
+ * @param array  $post_ids Selected post IDs.
  *
  * @return mixed|string
  */

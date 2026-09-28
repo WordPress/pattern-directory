@@ -4,6 +4,8 @@
  * Description: Creates a directory to manage block patterns.
  * Plugin URI:  https://wordpress.org/patterns/
  * Text Domain: wporg-patterns
+ *
+ * @package WordPressdotorg\Pattern_Directory
  */
 
 namespace WordPressdotorg\Pattern_Directory;

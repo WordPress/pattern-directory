@@ -8,7 +8,7 @@
 export function toggleFeature( feature ) {
 	return {
 		type: 'TOGGLE_FEATURE',
-		feature: feature,
+		feature,
 	};
 }
 
@@ -22,7 +22,7 @@ export function toggleFeature( feature ) {
 export function setPreviewDeviceType( deviceType ) {
 	return {
 		type: 'SET_PREVIEW_DEVICE_TYPE',
-		deviceType: deviceType,
+		deviceType,
 	};
 }
 
@@ -41,7 +41,7 @@ export function setPreviewDeviceType( deviceType ) {
 export function setIsInserterOpened( value ) {
 	return {
 		type: 'SET_IS_INSERTER_OPENED',
-		value: value,
+		value,
 	};
 }
 
@@ -55,7 +55,7 @@ export function setIsInserterOpened( value ) {
 export function updateSettings( settings ) {
 	return {
 		type: 'UPDATE_SETTINGS',
-		settings: settings,
+		settings,
 	};
 }
 
@@ -68,6 +68,6 @@ export function updateSettings( settings ) {
 export function setIsListViewOpened( isOpen ) {
 	return {
 		type: 'SET_IS_LIST_VIEW_OPENED',
-		isOpen: isOpen,
+		isOpen,
 	};
 }

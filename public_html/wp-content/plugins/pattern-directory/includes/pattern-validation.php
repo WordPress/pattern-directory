@@ -1,15 +1,184 @@
 <?php
+/**
+ * Pattern validation for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Pattern_Validation;
-use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 
 use WordPressdotorg\Pattern_Translations\Pattern as Translations_Pattern;
 use WordPressdotorg\Pattern_Translations\PatternParser as Translations_PatternParser;
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\is_block_allowed_in_pattern;
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content;
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\get_moderated_status;
+use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\has_reached_flag_threshold;
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 
-add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content', 10, 2 );
+/**
+ * The rendered text fields, the ones the directory outputs and so has to check.
+ */
+const RENDERED_FIELDS = array( 'post_content', 'post_title', 'post_excerpt' );
+
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\reject_control_characters', 5, 2 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_content' );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_context' );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_attributes' );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_directives', 10, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_status', 11, 2 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_parent', 11, 2 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_flag_reason', 11, 2 );
+// After the specific checks, so a submission they can name gets their message; this catches what they cannot see.
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\reject_unstable_blocks', 15 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_against_spam', 20, 2 );
+add_action( 'transition_post_status', __NAMESPACE__ . '\note_spam_status', 10, 3 );
+
+/**
+ * The ASCII control characters (bytes 0-31), minus the three that are ordinary whitespace: tab (9), line
+ * feed (10) and carriage return (13). So: 0-8, 11, 12 and 14-31. It is the set `wp_kses_no_null()` deletes
+ * on save.
+ */
+const CONTROL_CHARACTERS = '/[\x00-\x08\x0B\x0C\x0E-\x1F]/';
+
+/**
+ * Refuse a submission that carries a control character in anything the directory renders.
+ *
+ * No legitimate pattern contains one, and the save filters delete them, so a submission that carries one
+ * is not stored as it was checked. Refusing it keeps the two the same without rewriting the submission.
+ *
+ * @param object|\WP_Error $prepared_post Prepared post or a preceding validation error.
+ * @param \WP_REST_Request $request       Request being validated.
+ * @return object|\WP_Error The post, or an error if a rendered value carries a control character.
+ */
+function reject_control_characters( $prepared_post, $request ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	$values = array( $request['meta'] ?? null );
+	foreach ( RENDERED_FIELDS as $field ) {
+		$values[] = $prepared_post->$field ?? null;
+	}
+
+	if ( value_has_control_characters( $values ) ) {
+		return new \WP_Error(
+			'rest_pattern_control_characters',
+			__( 'Pattern content contains invisible control characters, usually from text pasted from another application. Retype or re-paste the affected text.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	return $prepared_post;
+}
+
+/**
+ * Whether a value, or anything nested in one, carries a control character.
+ *
+ * Meta is held to this too: the markers downstream are matched as substrings, so a NUL inside `data-wp-`
+ * passes `content_has_block_directives()` and the storage filters then delete it.
+ *
+ * @param mixed $value A submitted value, possibly nested.
+ * @return bool Whether a control character is present.
+ */
+function value_has_control_characters( $value ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $item ) {
+			if ( value_has_control_characters( $item ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	return is_string( $value ) && 1 === preg_match( CONTROL_CHARACTERS, $value );
+}
+
+/**
+ * Refuse content that does not parse to the same block tree once the save filters have run over it.
+ *
+ * Every validator below parses the content as submitted, but `wp_insert_post()` passes it through
+ * `content_save_pre` first, and for most submitters that rewrites markup. A block, or a nesting, that only
+ * exists after the rewrite is never checked. Rather than list the rewrites that can do that, compute the
+ * bytes that will be stored and require both parses to give the same blocks, in the same order and nesting.
+ *
+ * This runs `content_save_pre` once here and `wp_insert_post()` runs it again; core's callbacks are pure,
+ * so the second pass gives the same bytes. Attributes are deliberately not compared: the save filters
+ * entity-normalise string attributes (`&` to `&amp;`), which would refuse ordinary content, and they only
+ * ever remove from a value, so what the attribute validators saw is never weaker than what is stored.
+ *
+ * @param object|\WP_Error $prepared_post Prepared post or a preceding validation error.
+ * @return object|\WP_Error The post, or an error if saving would change its blocks.
+ */
+function reject_unstable_blocks( $prepared_post ) {
+	if ( is_wp_error( $prepared_post ) || ! isset( $prepared_post->post_content ) ) {
+		return $prepared_post;
+	}
+
+	$submitted = $prepared_post->post_content;
+	// The same call `wp_insert_post()` makes, on the slashed value it receives. The `db` context never reads the post ID.
+	$stored = wp_unslash( sanitize_post_field( 'post_content', wp_slash( $submitted ), 0, 'db' ) );
+
+	if ( block_shape( parse_blocks( $submitted ) ) !== block_shape( parse_blocks( $stored ) ) ) {
+		return new \WP_Error(
+			'rest_pattern_unstable_blocks',
+			__( 'Pattern content contains block markup that would change when saved. Copy the blocks into a new pattern and try again.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	return $prepared_post;
+}
+
+/**
+ * The block names of a parsed tree with their nesting, in document order. Text between blocks is skipped.
+ *
+ * Nested arrays compare with `!==` recursively and in order, so two trees are equal only if every block
+ * sits in the same place.
+ *
+ * @param array $blocks Parsed blocks.
+ * @return array Each block as `array( name, children )`.
+ */
+function block_shape( $blocks ) {
+	$shape = array();
+	foreach ( $blocks as $block ) {
+		if ( null === $block['blockName'] ) {
+			continue;
+		}
+		$shape[] = array( $block['blockName'], block_shape( $block['innerBlocks'] ) );
+	}
+
+	return $shape;
+}
+
+/**
+ * A parsed tree flattened to one dimension, nested blocks included.
+ *
+ * @param array $blocks Parsed blocks.
+ * @return array Every block in the tree.
+ */
+function flatten_blocks( $blocks ) {
+	$queue     = $blocks;
+	$flattened = array();
+
+	while ( $queue ) {
+		$block = array_shift( $queue );
+
+		// The editor's linebreaks between blocks parse as nameless whitespace-only blocks: separators, not content.
+		if ( is_null( $block['blockName'] ) && '' === trim( $block['innerHTML'] ) ) {
+			continue;
+		}
+
+		array_push( $flattened, $block );
+		foreach ( $block['innerBlocks'] as $inner_block ) {
+			array_push( $queue, $inner_block );
+		}
+	}
+
+	return $flattened;
+}
 
 /**
  * Strip out basic HTML to get at the manually-entered content in block content.
@@ -34,14 +203,14 @@ function strip_basic_html( $html ) {
  * @return bool Whether the block has been edited.
  */
 function is_not_empty_block( $block ) {
-	$registry = \WP_Block_Type_Registry::get_instance();
+	$registry   = \WP_Block_Type_Registry::get_instance();
 	$block_type = $registry->get_registered( $block['blockName'] );
 
 	// Most dynamic blocks don't need custom content, but there are some
 	// exceptions that should go through the rest of the checks.
 	if (
 		$block_type->is_dynamic() &&
-		! in_array( $block['blockName'], array( 'core/image' ) )
+		! in_array( $block['blockName'], array( 'core/image' ), true )
 	) {
 		return true;
 	}
@@ -55,15 +224,15 @@ function is_not_empty_block( $block ) {
 	}
 
 	// Exceptions - these contain no content and maybe no attributes.
-	$allowed_empty = [ 'core/separator', 'core/spacer' ];
-	if ( in_array( $block['blockName'], $allowed_empty ) ) {
+	$allowed_empty = array( 'core/separator', 'core/spacer' );
+	if ( in_array( $block['blockName'], $allowed_empty, true ) ) {
 		return true;
 	}
 
 	// Check if the attributes are different from the default attributes.
-	$block_attrs = $block_type->prepare_attributes_for_render( $block['attrs'] );
+	$block_attrs   = $block_type->prepare_attributes_for_render( $block['attrs'] );
 	$default_attrs = $block_type->prepare_attributes_for_render( array() );
-	if ( $block_attrs != $default_attrs ) {
+	if ( $block_attrs != $default_attrs ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual -- Attribute order and equivalent numeric values do not constitute edits.
 		return true;
 	}
 
@@ -85,8 +254,11 @@ function is_not_empty_block( $block ) {
 
 /**
  * Validate the pattern content.
+ *
+ * @param object|\WP_Error $prepared_post Prepared post or a preceding validation error.
+ * @return object|\WP_Error Validated post or a validation error.
  */
-function validate_content( $prepared_post, $request ) {
+function validate_content( $prepared_post ) {
 	if ( is_wp_error( $prepared_post ) ) {
 		return $prepared_post;
 	}
@@ -105,29 +277,18 @@ function validate_content( $prepared_post, $request ) {
 		);
 	}
 
-	// The editor adds in linebreaks between blocks, but parse_blocks thinks those are invalid blocks.
-	$content = str_replace( "\n\n", '', $content );
-	$blocks = parse_blocks( $content );
-	$blocks_queue = $blocks;
-	$all_blocks = array();
-
-	// Loop over all the nested blocks to flatten the block list into 1 dimension.
-	while ( count( $blocks_queue ) > 0 ) { // phpcs:ignore -- inline count OK.
-		$block = array_shift( $blocks_queue );
-		array_push( $all_blocks, $block );
-		if ( ! empty( $block['innerBlocks'] ) ) {
-			foreach ( $block['innerBlocks'] as $inner_block ) {
-				array_push( $blocks_queue, $inner_block );
-			}
-		}
-	}
+	// `reject_unstable_blocks()` refuses, further down the chain, any content whose stored form parses to a different tree.
+	$all_blocks = flatten_blocks( parse_blocks( $content ) );
 
 	// Check that each block in the list has a blockName and is registered.
-	$registry = \WP_Block_Type_Registry::get_instance();
-	$invalid_blocks = array_filter( $all_blocks, function( $block ) use ( $registry ) {
-		$block_type = $registry->get_registered( $block['blockName'] );
-		return is_null( $block['blockName'] ) || is_null( $block_type );
-	} );
+	$registry       = \WP_Block_Type_Registry::get_instance();
+	$invalid_blocks = array_filter(
+		$all_blocks,
+		function ( $block ) use ( $registry ) {
+			$block_type = $registry->get_registered( $block['blockName'] );
+			return is_null( $block['blockName'] ) || is_null( $block_type );
+		}
+	);
 
 	if ( count( $invalid_blocks ) ) {
 		return new \WP_Error(
@@ -137,7 +298,38 @@ function validate_content( $prepared_post, $request ) {
 		);
 	}
 
-	// Next, filter out any empty blocks
+	// The editor hiding a block is a UI affordance, not a boundary; enforce the same policy server-side.
+	$disallowed_blocks = array_filter(
+		$all_blocks,
+		function ( $block ) {
+			return ! is_null( $block['blockName'] ) && ! is_block_allowed_in_pattern( $block['blockName'] );
+		}
+	);
+
+	if ( count( $disallowed_blocks ) ) {
+		return new \WP_Error(
+			'rest_pattern_disallowed_blocks',
+			__( 'Pattern content contains blocks that are not allowed. Patterns shared on the Pattern Directory can only use core blocks.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	// `strip_shortcodes()` only matches a registered tag right after a literal `[`, which each form can rejoin.
+	$stored = wp_unslash( sanitize_post_field( 'post_content', wp_slash( $content ), 0, 'db' ) );
+
+	foreach ( array( $content, $stored, decode_pattern_content( $stored ) ) as $markup ) {
+		$attributes = (string) wp_json_encode( wp_list_pluck( flatten_blocks( parse_blocks( $markup ) ), 'attrs' ) );
+
+		if ( strip_shortcodes( $markup ) !== $markup || strip_shortcodes( $attributes ) !== $attributes ) {
+			return new \WP_Error(
+				'rest_pattern_shortcode',
+				__( 'Pattern content cannot contain shortcodes.', 'wporg-patterns' ),
+				array( 'status' => 400 )
+			);
+		}
+	}
+
+	// Next, filter out any empty blocks.
 	$real_blocks = array_filter( $all_blocks, __NAMESPACE__ . '\is_not_empty_block' );
 
 	// Check that we have at least one non-empty block.
@@ -171,20 +363,320 @@ function validate_content( $prepared_post, $request ) {
 }
 
 /**
+ * Reject blocks used outside the parent or ancestor context they are registered for.
+ *
+ * Out of context, such blocks expose attributes their parent should populate.
+ *
+ * @param object $prepared_post The post object about to be inserted.
+ *
+ * @return object|\WP_Error The post object, or an error if a block is used out of context.
+ */
+function validate_block_context( $prepared_post ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	// No content on the request means this is an update to an existing pattern's other fields.
+	if ( ! isset( $prepared_post->post_content ) ) {
+		return $prepared_post;
+	}
+
+	$registry = \WP_Block_Type_Registry::get_instance();
+	$blocks   = parse_blocks( $prepared_post->post_content );
+
+	// A pattern is inserted into post content, so its top level sits in a `core/post-content` context.
+	if ( ! block_context_is_valid( $blocks, array( 'core/post-content' ), $registry ) ) {
+		return new \WP_Error(
+			'rest_pattern_invalid_block_context',
+			__( 'Pattern content contains a block used outside the block it belongs to.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	return $prepared_post;
+}
+
+/**
+ * Recursively check that every block satisfies its registered `parent` and `ancestor` constraints.
+ *
+ * `parent` is matched against all ancestors, not just the direct parent: the editor also accepts blocks
+ * via `allowedBlocks` declared in editor JavaScript the server cannot see (e.g. a submenu's links).
+ *
+ * @param array                   $blocks    Parsed blocks at the current depth.
+ * @param string[]                $ancestors Block names of this level's ancestors, outermost first.
+ * @param \WP_Block_Type_Registry $registry  The block type registry.
+ *
+ * @return bool Whether every block in the tree is used in a valid context.
+ */
+function block_context_is_valid( $blocks, $ancestors, $registry ) {
+	foreach ( $blocks as $block ) {
+		// Freeform gaps parse to a null name; no constraint to check.
+		if ( empty( $block['blockName'] ) ) {
+			continue;
+		}
+
+		$block_type = $registry->get_registered( $block['blockName'] );
+		if ( is_null( $block_type ) ) {
+			continue;
+		}
+
+		if ( ! empty( $block_type->parent ) && ! array_intersect( (array) $block_type->parent, $ancestors ) ) {
+			return false;
+		}
+
+		if ( ! empty( $block_type->ancestor ) && ! array_intersect( (array) $block_type->ancestor, $ancestors ) ) {
+			return false;
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			$child_ancestors   = $ancestors;
+			$child_ancestors[] = $block['blockName'];
+			if ( ! block_context_is_valid( $block['innerBlocks'], $child_ancestors, $registry ) ) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Reject executable URL schemes carried in block attributes, which are JSON in the block-delimiter
+ * comment and therefore never sanitised by KSES.
+ *
+ * @param object $prepared_post The post object about to be inserted.
+ *
+ * @return object|\WP_Error The post object, or an error if an attribute carries a script URL.
+ */
+function validate_block_attributes( $prepared_post ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	if ( ! isset( $prepared_post->post_content ) ) {
+		return $prepared_post;
+	}
+
+	if ( blocks_have_unsafe_attribute( parse_blocks( $prepared_post->post_content ) ) ) {
+		return new \WP_Error(
+			'rest_pattern_unsafe_attribute',
+			__( 'Pattern content contains a block attribute with an unsafe URL.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	return $prepared_post;
+}
+
+/**
+ * Recursively test whether any block in the tree carries an attribute with a script URL.
+ *
+ * @param array $blocks Parsed blocks at the current depth.
+ *
+ * @return bool Whether any block attribute resolves to a script protocol.
+ */
+function blocks_have_unsafe_attribute( $blocks ) {
+	foreach ( $blocks as $block ) {
+		if ( isset( $block['attrs'] ) && attribute_has_unsafe_scheme( $block['attrs'] ) ) {
+			return true;
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) && blocks_have_unsafe_attribute( $block['innerBlocks'] ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Whether a block attribute value carries a URL scheme WordPress does not allow.
+ *
+ * Reads the scheme as a browser would (entities decoded, ignored characters stripped), but only from
+ * values under a URL-carrying key, so text like a "JavaScript:"-prefixed label is not refused. The
+ * scheme is matched against `wp_allowed_protocols()`, so `javascript:`, `data:`, and any other
+ * protocol KSES itself rejects are refused, while relative and anchor values pass.
+ *
+ * @param mixed $value  A block attribute value, or a nested part of one.
+ * @param bool  $is_url Whether the value sits under a URL-carrying key. List items inherit it.
+ *
+ * @return bool Whether the value carries a disallowed URL scheme.
+ */
+function attribute_has_unsafe_scheme( $value, $is_url = false ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $key => $item ) {
+			$item_is_url = is_string( $key ) ? (bool) preg_match( '/url|href|src|link/i', $key ) : $is_url;
+			if ( attribute_has_unsafe_scheme( $item, $item_is_url ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	if ( ! $is_url || ! is_string( $value ) || '' === $value ) {
+		return false;
+	}
+
+	// Browsers decode numeric character references even without the trailing semicolon; `html_entity_decode()` never does.
+	$decoded = preg_replace_callback(
+		'/&#(?:[Xx]([0-9A-Fa-f]+)|([0-9]+));?/',
+		static function ( $matches ) {
+			$codepoint = '' !== $matches[1] ? hexdec( $matches[1] ) : (int) $matches[2];
+			return $codepoint > 0 && $codepoint < 0x80 ? chr( $codepoint ) : "\u{FFFD}";
+		},
+		$value
+	);
+
+	// ENT_HTML5 so named entities like `&colon;` decode the same way a browser decodes them in an href.
+	$decoded = html_entity_decode( $decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	$colon   = strpos( $decoded, ':' );
+	if ( false === $colon ) {
+		return false;
+	}
+
+	// A browser ignores ASCII whitespace and control characters when reading a scheme, so strip them first.
+	$scheme = strtolower( preg_replace( '/[\x00-\x20]+/', '', substr( $decoded, 0, $colon ) ) );
+
+	// A colon that follows anything but a valid scheme token belongs to a relative path or anchor, not a scheme.
+	if ( '' === $scheme || preg_match( '/[^a-z0-9.+-]/', $scheme ) ) {
+		return false;
+	}
+
+	return ! in_array( $scheme, wp_allowed_protocols(), true );
+}
+
+/**
+ * Reject Interactivity API `data-wp-*` directives, in a block's HTML, a block attribute or post meta.
+ *
+ * KSES preserves them wherever they sit, so neither core sanitisation nor the URL-scheme check above
+ * catches them.
+ *
+ * @param object           $prepared_post The post object about to be inserted.
+ * @param \WP_REST_Request $request       Request being validated.
+ *
+ * @return object|\WP_Error The post object, or an error if the content carries a directive.
+ */
+function validate_block_directives( $prepared_post, $request ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	$has_directive = false;
+
+	// Every field the directory renders, not just the one the pattern editor writes.
+	foreach ( RENDERED_FIELDS as $field ) {
+		if ( isset( $prepared_post->$field ) && content_has_block_directives( $prepared_post->$field ) ) {
+			$has_directive = true;
+			break;
+		}
+	}
+
+	// Attribute JSON sits in the delimiter comment, so the scan above never reads it as a tag.
+	if ( ! $has_directive && isset( $prepared_post->post_content ) ) {
+		$has_directive = blocks_have_directive_attribute( parse_blocks( $prepared_post->post_content ) );
+	}
+
+	/*
+	 * Meta never reaches `$prepared_post`, and `render_block_core_footnotes()` emits `footnotes` through
+	 * `wp_kses_post()`, which keeps `data-*`.
+	 */
+	if ( ! $has_directive && is_array( $request['meta'] ?? null ) ) {
+		$has_directive = attribute_has_directive( $request['meta'] );
+	}
+
+	if ( $has_directive ) {
+		return new \WP_Error(
+			'rest_pattern_interactivity_directive',
+			__( 'Patterns cannot contain interactivity directives.', 'wporg-patterns' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	return $prepared_post;
+}
+
+/**
+ * Recursively test whether any block in the tree carries a directive in an attribute value.
+ *
+ * @param array $blocks Parsed blocks at the current depth.
+ *
+ * @return bool Whether any block attribute carries a directive.
+ */
+function blocks_have_directive_attribute( $blocks ) {
+	foreach ( $blocks as $block ) {
+		if ( isset( $block['attrs'] ) && attribute_has_directive( $block['attrs'] ) ) {
+			return true;
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) && blocks_have_directive_attribute( $block['innerBlocks'] ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Whether a block attribute value carries an Interactivity API directive.
+ *
+ * @param mixed $value A block attribute value, or a nested part of one.
+ *
+ * @return bool Whether the value carries a directive.
+ */
+function attribute_has_directive( $value ) {
+	if ( is_array( $value ) ) {
+		foreach ( $value as $item ) {
+			if ( attribute_has_directive( $item ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	return is_string( $value ) && content_has_block_directives( $value );
+}
+
+/**
+ * Whether the HTML carries an Interactivity API `data-wp-*` marker.
+ *
+ * A pattern may not carry one at all, in a tag or anywhere else, so the marker itself is the test.
+ *
+ * Reading it as markup instead would be narrower than the rule. `WP_HTML_Tag_Processor` does not
+ * descend into a raw-text or RCDATA element, so a tag inside one is invisible to it, and scanning the
+ * `wp_kses_post()` form as well only helps where KSES removes the element that did the hiding. It does
+ * that for `<script>` and `<style>`, and not for `<title>` or `<textarea>`, which it keeps: those hold
+ * their contents as text, so neither pass ever reads the tag. A substring test has no such blind spot.
+ *
+ * @param string $html The HTML to scan.
+ *
+ * @return bool Whether a directive is present.
+ */
+function content_has_block_directives( $html ) {
+	return false !== stripos( $html, 'data-wp-' );
+}
+
+/**
  * Validate the pattern title.
+ *
+ * @param object|\WP_Error $prepared_post Prepared post or a preceding validation error.
+ * @param \WP_REST_Request $request       Request being validated.
+ * @return object|\WP_Error Validated post or a validation error.
  */
 function validate_title( $prepared_post, $request ) {
 	if ( is_wp_error( $prepared_post ) ) {
 		return $prepared_post;
 	}
 
-	$status = isset( $request['status'] ) ? $request['status'] : get_post_status( $prepared_post->ID );
+	$post   = isset( $prepared_post->ID ) ? get_post( $prepared_post->ID ) : null;
+	$status = isset( $request['status'] ) ? $request['status'] : ( $post ? $post->post_status : '' );
+
 	// Bypass this validation for drafts.
 	if ( 'draft' === $status || 'auto-draft' === $status ) {
 		return $prepared_post;
 	}
 
-	$title = isset( $request['title'] ) ? $request['title'] : get_the_title( $prepared_post->ID );
+	$title = isset( $request['title'] ) ? $request['title'] : ( $post ? $post->post_title : '' );
 
 	// A title exists, but is empty -- invalid.
 	if ( isset( $title ) && empty( trim( $title ) ) ) {
@@ -209,20 +701,41 @@ function validate_title( $prepared_post, $request ) {
 /**
  * Validate the pattern status.
  *
- * Ensures patterns created via the API have either a non-public status (draft, unlisted),
- * or they use the chosen status set in /wp-admin/options-general.php?page=wporg-pattern-creator.
+ * Restrict author submissions to drafts, pending review, or the configured default status.
+ * Only moderators can change moderation statuses or republish patterns at the report threshold,
+ * including legacy removals left in `pending`.
+ *
+ * @param object|\WP_Error $prepared_post Prepared post or a preceding validation error.
+ * @param \WP_REST_Request $request       Request being validated.
+ * @return object|\WP_Error Validated post or a validation error.
  */
 function validate_status( $prepared_post, $request ) {
 	if ( is_wp_error( $prepared_post ) ) {
 		return $prepared_post;
 	}
 
-	$post_type      = get_post_type_object( POST_TYPE );
-	$target_status  = isset( $request['status'] ) ? $request['status'] : '';
-	$current_status = get_post_status( $prepared_post->ID );
+	$post_type     = get_post_type_object( POST_TYPE );
+	$target_status = isset( $request['status'] ) ? $request['status'] : '';
 
-	// Drafts or unlisted patterns are OK.
-	if ( in_array( $target_status, [ 'draft', 'auto-draft', UNLISTED_STATUS ] ) ) {
+	// Read through the trash: a trashed pattern still carries the status the moderator set.
+	$current_status = isset( $prepared_post->ID ) ? get_moderated_status( $prepared_post->ID ) : '';
+
+	// `unlisted` and spam are moderator-set; authors can't leave them. Must stay above the early returns below.
+	if (
+		in_array( $current_status, array( SPAM_STATUS, UNLISTED_STATUS ), true ) &&
+		'' !== $target_status &&
+		$current_status !== $target_status &&
+		! current_user_can( $post_type->cap->edit_others_posts )
+	) {
+		return new \WP_Error(
+			'rest_pattern_cannot_change_status',
+			__( 'Only a directory moderator can change the status of this pattern.', 'wporg-patterns' ),
+			array( 'status' => 403 )
+		);
+	}
+
+	// Drafts are OK.
+	if ( in_array( $target_status, array( 'draft', 'auto-draft' ), true ) ) {
 		return $prepared_post;
 	}
 
@@ -236,6 +749,14 @@ function validate_status( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
+	if ( 'publish' === $target_status && isset( $prepared_post->ID ) && has_reached_flag_threshold( $prepared_post->ID ) ) {
+		return new \WP_Error(
+			'rest_pattern_under_review',
+			__( 'This pattern has been reported, so only a directory moderator can publish it again.', 'wporg-patterns' ),
+			array( 'status' => 403 )
+		);
+	}
+
 	$default_status = get_option( 'wporg-pattern-default_status', 'publish' );
 	$valid_states   = array_unique( array( 'pending', SPAM_STATUS, $default_status ) );
 
@@ -244,6 +765,7 @@ function validate_status( $prepared_post, $request ) {
 		return new \WP_Error(
 			'rest_pattern_invalid_status',
 			sprintf(
+				/* translators: %s: Allowed post statuses. */
 				__( 'Invalid post status. Status must be %s.', 'wporg-patterns' ),
 				$default_status
 			),
@@ -251,14 +773,54 @@ function validate_status( $prepared_post, $request ) {
 		);
 	}
 
-	// Do not allow for non-privledged users to move a spam post to another status.
-	if ( SPAM_STATUS === $current_status && SPAM_STATUS !== $target_status ) {
+	return $prepared_post;
+}
+
+/**
+ * Validate the pattern's parent.
+ *
+ * `parent` links a translated pattern to its English original and is written only by the translation cron,
+ * never by a submitter. Core accepts it over REST because the field is in the schema, and validates only that
+ * the id names an existing post — not its type, and not the caller's relationship to it. Left open, an author
+ * can point their own submission at any published pattern and have the translation job adopt it.
+ *
+ * @param object           $prepared_post The post object about to be inserted.
+ * @param \WP_REST_Request $request       The request.
+ *
+ * @return object|\WP_Error The post object, or an error if the parent is not the caller's to set.
+ */
+function validate_parent( $prepared_post, $request ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	if ( ! isset( $request['parent'] ) ) {
+		return $prepared_post;
+	}
+
+	$existing       = isset( $prepared_post->ID ) ? get_post( $prepared_post->ID ) : null;
+	$current_parent = $existing ? (int) $existing->post_parent : 0;
+	$target_parent  = (int) $request['parent'];
+
+	// Re-sending the stored value isn't a write.
+	if ( $target_parent === $current_parent ) {
+		return $prepared_post;
+	}
+
+	$post_type = get_post_type_object( POST_TYPE );
+	if ( ! current_user_can( $post_type->cap->edit_others_posts ) ) {
 		return new \WP_Error(
-			'rest_pattern_invalid_status',
-			sprintf(
-				__( 'Invalid post status. Status must be %s.', 'wporg-patterns' ),
-				SPAM_STATUS
-			),
+			'rest_pattern_cannot_set_parent',
+			__( 'Only a directory moderator can set the parent of a pattern.', 'wporg-patterns' ),
+			array( 'status' => 403 )
+		);
+	}
+
+	// A moderator's value still has to name another pattern.
+	if ( $target_parent && POST_TYPE !== get_post_type( $target_parent ) ) {
+		return new \WP_Error(
+			'rest_pattern_invalid_parent',
+			__( 'The parent of a pattern must be another pattern.', 'wporg-patterns' ),
 			array( 'status' => 400 )
 		);
 	}
@@ -267,57 +829,198 @@ function validate_status( $prepared_post, $request ) {
 }
 
 /**
+ * Reserve the flag-reason taxonomy on a pattern to moderators.
+ *
+ * It records why a moderator removed the pattern. Core's assign-terms check walks the submitted term ids,
+ * so an empty array satisfies it vacuously and then clears the taxonomy.
+ *
+ * @param object           $prepared_post The post object about to be inserted.
+ * @param \WP_REST_Request $request       The request.
+ *
+ * @return object|\WP_Error The post object, or an error if the reason is not the caller's to set.
+ */
+function validate_flag_reason( $prepared_post, $request ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	$taxonomy = get_taxonomy( FLAG_REASON );
+	$base     = ( $taxonomy && ! empty( $taxonomy->rest_base ) ) ? $taxonomy->rest_base : FLAG_REASON;
+
+	if ( ! isset( $request[ $base ] ) || current_user_can( get_post_type_object( POST_TYPE )->cap->edit_others_posts ) ) {
+		return $prepared_post;
+	}
+
+	$stored = isset( $prepared_post->ID )
+		? wp_get_object_terms( $prepared_post->ID, FLAG_REASON, array( 'fields' => 'ids' ) )
+		: array();
+
+	$stored    = is_wp_error( $stored ) ? array() : wp_parse_id_list( $stored );
+	$submitted = wp_parse_id_list( $request[ $base ] );
+	sort( $stored );
+	sort( $submitted );
+
+	// Re-sending the stored terms isn't a write. Clearing them is, which is what has to be refused.
+	if ( $submitted === $stored ) {
+		return $prepared_post;
+	}
+
+	return new \WP_Error(
+		'rest_pattern_cannot_set_flag_reason',
+		__( 'Only a directory moderator can change why a pattern was removed.', 'wporg-patterns' ),
+		array( 'status' => 403 )
+	);
+}
+
+/**
  * Validate the pattern doesn't appear to be spam.
+ *
+ * @param object|\WP_Error $prepared_post Prepared post or a preceding validation error.
+ * @param \WP_REST_Request $request       Request being validated.
+ * @return object|\WP_Error Validated post or a validation error.
  */
 function validate_against_spam( $prepared_post, $request ) {
 	if ( is_wp_error( $prepared_post ) ) {
 		return $prepared_post;
 	}
 
-	$target_status = isset( $request['status'] ) ? $request['status'] : '';
+	/*
+	 * `ID` is only set on an update: `WP_REST_Posts_Controller::prepare_item_for_database()` adds it when the
+	 * request names an existing post, so on a create there is no stored post to read a status from.
+	 */
+	$post           = isset( $prepared_post->ID ) ? get_post( $prepared_post->ID ) : null;
+	$current_status = $post ? $post->post_status : '';
 
-	// Run spam checks for publish & pending patterns.
+	/*
+	 * An update that omits `status` leaves the pattern at the status it already has, so resolve to that
+	 * rather than to nothing. Reading it as "no status" is what let an author publish clean content and then
+	 * swap in the real payload with a status-less edit that never reached Akismet.
+	 */
+	$target_status = isset( $request['status'] ) ? $request['status'] : $current_status;
+
+	// Only patterns that are, or are becoming, publicly visible are worth the check.
 	if ( 'publish' !== $target_status && 'pending' !== $target_status ) {
 		return $prepared_post;
 	}
 
-	$post = get_post( $prepared_post->ID );
+	/*
+	 * An autosave that names no status can't make anything public: the controller either files it as a
+	 * revision, throwing the verdict away, or updates the author's own draft while leaving its status alone.
+	 * One that does name a status can publish a draft in place, so it still gets checked.
+	 */
+	if ( ! isset( $request['status'] ) && '/autosaves' === substr( (string) $request->get_route(), -10 ) ) {
+		return $prepared_post;
+	}
+
+	// Moderators are trusted, the same way `validate_status()` trusts them.
+	if ( current_user_can( get_post_type_object( POST_TYPE )->cap->edit_others_posts ) ) {
+		return $prepared_post;
+	}
 
 	$pattern = array(
-		'ID'          => $post->ID,
-		'post_name'   => $post->post_name,
-		'post_author' => $post->post_author,
-		'title'       => $prepared_post->post_title ?? $post->post_title,
-		'content'     => $prepared_post->post_content ?? $post->post_content,
-		'description' => $request['meta']['wpop_description'] ?? ( $post->wpop_description ?: '' ),
-		'keywords'    => $request['meta']['wpop_keywords'] ?? ( $post->wpop_keywords ?: '' ),
+		'ID'          => $post->ID ?? 0,
+		'post_name'   => $post->post_name ?? '',
+		'post_author' => $post->post_author ?? get_current_user_id(),
+		'title'       => $prepared_post->post_title ?? ( $post->post_title ?? '' ),
+		'content'     => $prepared_post->post_content ?? ( $post->post_content ?? '' ),
+		'description' => $request['meta']['wpop_description'] ?? ( $post ? ( $post->wpop_description ?: '' ) : '' ),
+		'keywords'    => $request['meta']['wpop_keywords'] ?? ( $post ? ( $post->wpop_keywords ?: '' ) : '' ),
 	);
 
 	list( $is_spam, $spam_reason ) = check_for_spam( $pattern );
 
-	// If it's been detected as spam, flag it as pending-review.
 	if ( $is_spam ) {
-		$prepared_post->post_status = SPAM_STATUS;
-
-		// Add a note explaining why this post is in pending, if it's due to spam.
-		if ( function_exists( '\WordPressdotorg\InternalNotes\create_note' ) ) {
-			\WordPressdotorg\InternalNotes\create_note(
-				$prepared_post->ID,
-				array(
-					'post_author'  => get_user_by( 'login', 'wordpressdotorg' )->ID ?? 0,
-					'post_excerpt' => $spam_reason,
-				)
+		// Demoting an existing pattern on a heuristic is unrecoverable for its author, so refuse the edit.
+		if ( in_array( $current_status, array( 'publish', 'pending' ), true ) ) {
+			return new \WP_Error(
+				'rest_pattern_spam_detected',
+				__( 'These changes were caught by the spam filter, so they have not been saved. Your pattern is unchanged.', 'wporg-patterns' ),
+				array( 'status' => 400 )
 			);
 		}
+
+		// Anything not yet public goes to the moderation queue as before.
+		$prepared_post->post_status = SPAM_STATUS;
+		spam_reason( $prepared_post->ID ?? 0, $spam_reason );
 	}
 
 	return $prepared_post;
 }
 
 /**
+ * Hold the reason a pattern was flagged as spam, until its status is actually saved.
+ *
+ * `validate_against_spam()` decides before anything is written, and that decision can be discarded, so the
+ * note has to wait. Keyed by pattern because a single request can write more than one -- a `batch/v1`
+ * envelope, a WP-CLI import loop -- and one pattern's reason must not be noted against another. Reading
+ * consumes, so an unconsumed reason can't leak into a later write.
+ *
+ * @param int         $pattern_id The pattern the reason belongs to, 0 while it is still being created.
+ * @param string|null $reason     Reason to store, or null to read and consume the stored one.
+ *
+ * @return string The stored reason, or '' if there isn't one for this pattern.
+ */
+function spam_reason( $pattern_id, $reason = null ) {
+	static $reasons = array();
+
+	$key = (int) $pattern_id;
+
+	if ( null !== $reason ) {
+		$reasons[ $key ] = $reason;
+
+		return $reason;
+	}
+
+	if ( ! isset( $reasons[ $key ] ) ) {
+		return '';
+	}
+
+	$stored = $reasons[ $key ];
+	unset( $reasons[ $key ] );
+
+	return $stored;
+}
+
+/**
+ * Record why a pattern was quarantined, once that status has actually been saved.
+ *
+ * @param string   $new_status The status the pattern moved to.
+ * @param string   $old_status The status it moved from.
+ * @param \WP_Post $post       The pattern.
+ *
+ * @return void
+ */
+function note_spam_status( $new_status, $old_status, $post ) {
+	if ( POST_TYPE !== $post->post_type || SPAM_STATUS !== $new_status || $new_status === $old_status ) {
+		return;
+	}
+
+	$reason = spam_reason( $post->ID );
+
+	// A pattern flagged as it was created had no ID to record against.
+	if ( ! $reason && in_array( $old_status, array( 'new', 'auto-draft' ), true ) ) {
+		$reason = spam_reason( 0 );
+	}
+
+	if ( ! $reason ) {
+		return;
+	}
+
+	if ( function_exists( '\WordPressdotorg\InternalNotes\create_note' ) ) {
+		\WordPressdotorg\InternalNotes\create_note(
+			$post->ID,
+			array(
+				'post_author'  => get_user_by( 'login', 'wordpressdotorg' )->ID ?? 0,
+				'post_excerpt' => $reason,
+			)
+		);
+	}
+}
+
+/**
  * Helper function to check for spam.
  *
- * @param array $post
+ * @param array $post Post being processed.
  * @return array {
  *    @type boolean $is_spam
  *    @type string  $spam_reason
@@ -357,7 +1060,7 @@ function check_for_spam( $post ) {
 
 	// Treat Paragraph-only submissions as likely spam.
 	if ( ! $is_spam ) {
-		// Only fetches the top-level of blocks, we're only
+		// Only top-level paragraph blocks trigger this heuristic.
 		$block_names_in_use = array_filter(
 			array_unique(
 				wp_list_pluck(
@@ -383,8 +1086,7 @@ function check_for_spam( $post ) {
 		$akismet_payload = array(
 			'comment_post_ID'      => 0,
 			'comment_type'         => 'pattern_submission',
-			// Disabled as logged in users get bonus points I think, which we don't want.
-			// 'user_ID'           => get_current_user_id(),
+			// Omit user_ID so Akismet does not give logged-in authors preferential treatment.
 			'comment_author'       => $author->display_name ?: $author->user_login,
 			'comment_author_email' => $author->user_email,
 			'comment_author_url'   => '',
@@ -420,10 +1122,18 @@ function check_for_spam( $post ) {
 /**
  * Helper function to check for a valid pattern title.
  *
- * @param string $title
+ * @param string $title Pattern title.
  * @return boolean
  */
 function is_title_valid( $title ) {
+	if ( strip_shortcodes( $title ) !== $title || wp_strip_all_tags( $title ) !== $title ) {
+		return false;
+	}
+
+	if ( content_has_block_directives( $title ) ) {
+		return false;
+	}
+
 	// Check title against a list of disallowed words.
 	// Note the space after `test ` to avoid matching "testimonial".
 	$disallow_list = array( 'test ', 'testing', 'my pattern', 'wordpress', 'example' );

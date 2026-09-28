@@ -1,4 +1,9 @@
 <?php
+/**
+ * Notifications for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Notifications;
 
@@ -18,7 +23,6 @@ const UNLISTED_DETAIL_META = '_wporg_unlist_reason_detail';
  * Actions and filters.
  */
 add_action( 'wp_after_insert_post', __NAMESPACE__ . '\trigger_notifications', 20, 4 );
-add_action( 'wporg_unlist_pattern', __NAMESPACE__ . '\notify_pattern_flagged' );
 add_action( 'init', __NAMESPACE__ . '\register_unlisted_meta' );
 
 /**
@@ -40,7 +44,7 @@ function register_unlisted_meta() {
 			'single'            => true,
 			'show_in_rest'      => true,
 			'sanitize_callback' => 'sanitize_textarea_field',
-			'auth_callback'     => function( $allowed, $meta_key, $object_id ) {
+			'auth_callback'     => function ( $allowed, $meta_key, $object_id ) {
 				return current_user_can( 'edit_post', $object_id );
 			},
 		)
@@ -63,8 +67,9 @@ function trigger_notifications( $post_id, $post, $update, $post_before ) {
 		return;
 	}
 
-	// Skip notifications on translated patterns.
-	if ( 'en_US' !== get_post_meta( $post_id, 'wpop_locale', true ) ) {
+	// A missing locale identifies an English original.
+	$locale = get_post_meta( $post_id, 'wpop_locale', true );
+	if ( $locale && 'en_US' !== $locale ) {
 		return;
 	}
 
@@ -78,7 +83,7 @@ function trigger_notifications( $post_id, $post, $update, $post_before ) {
 		return;
 	}
 
-	if ( 'publish' === $new_status && in_array( $old_status, array( 'pending', SPAM_STATUS, UNLISTED_STATUS ) ) ) {
+	if ( 'publish' === $new_status && in_array( $old_status, array( 'pending', SPAM_STATUS, UNLISTED_STATUS ), true ) ) {
 		notify_pattern_approved( $post );
 	} elseif ( SPAM_STATUS === $new_status ) {
 		notify_pattern_flagged( $post );
@@ -90,7 +95,7 @@ function trigger_notifications( $post_id, $post, $update, $post_before ) {
 /**
  * Notify when a pattern has been approved.
  *
- * @param \WP_Post $post
+ * @param \WP_Post $post Post being processed.
  *
  * @return void
  */
@@ -104,7 +109,7 @@ function notify_pattern_approved( $post ) {
 	$locale = get_user_locale( $author );
 
 	$pattern_title = get_the_title( $post );
-	$pattern_url = get_permalink( $post );
+	$pattern_url   = get_permalink( $post );
 
 	if ( $locale ) {
 		switch_to_locale( $locale );
@@ -113,12 +118,15 @@ function notify_pattern_approved( $post ) {
 	$subject = esc_html__( 'Pattern published', 'wporg-patterns' );
 
 	$message = sprintf(
-		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Pattern URL;
-		esc_html__( 'Hello!
+		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Pattern URL.
+		esc_html__(
+			'Hello!
 
 Thank you for submitting your pattern, %1$s. It is now live in the Block Pattern Directory!
 
-%2$s', 'wporg-patterns' ),
+%2$s',
+			'wporg-patterns'
+		),
 		esc_html( $pattern_title ),
 		esc_url_raw( $pattern_url )
 	);
@@ -133,12 +141,9 @@ Thank you for submitting your pattern, %1$s. It is now live in the Block Pattern
 /**
  * Notify when a pattern has been unpublished for review.
  *
- * This is called either when the status transitions into "spam", or when a post
- * crosses the flag threshold.
+ * Sent on the review status transition for both spam detection and user reports.
  *
- * @param \WP_Post $post
- *
- * @return void
+ * @param \WP_Post $post Post being processed.
  */
 function notify_pattern_flagged( $post ) {
 	$author = get_user_by( 'id', $post->post_author );
@@ -157,32 +162,34 @@ function notify_pattern_flagged( $post ) {
 
 	$reason = '';
 
-	if ( SPAM_STATUS === $post->post_status ) {
-		$spam_term = get_term_by( 'slug', '4-spam', REASON );
-		$reason = wp_strip_all_tags( $spam_term->description );
-	} else {
-		$flags = get_posts( array(
-			'post_type' => FLAG,
+	// Reports carry their own reasons; the spam term covers the removals that leave no flags behind.
+	$flags = get_posts(
+		array(
+			'post_type'   => FLAG,
 			'post_parent' => $post->ID,
 			'post_status' => PENDING_STATUS,
-		) );
-		if ( ! empty( $flags ) ) {
-			$reasons = array();
-			foreach ( $flags as $flag ) {
-				$terms = get_the_terms( $flag, REASON );
-				if ( is_array( $terms ) ) {
-					$reasons = array_merge( $reasons, $terms );
-				}
+		)
+	);
+
+	if ( ! empty( $flags ) ) {
+		$reasons = array();
+		foreach ( $flags as $flag ) {
+			$terms = get_the_terms( $flag, REASON );
+			if ( is_array( $terms ) ) {
+				$reasons = array_merge( $reasons, $terms );
 			}
-			$reasons = array_map(
-				function( \WP_Term $reason ) {
-					return wp_strip_all_tags( $reason->description );
-				},
-				$reasons
-			);
-			$reasons = array_unique( $reasons );
-			$reason = trim( implode( "\n", $reasons ) );
 		}
+		$reasons = array_map(
+			function ( \WP_Term $reason ) {
+				return wp_strip_all_tags( $reason->description );
+			},
+			$reasons
+		);
+		$reasons = array_unique( $reasons );
+		$reason  = trim( implode( "\n", $reasons ) );
+	} elseif ( SPAM_STATUS === $post->post_status ) {
+		$spam_term = get_term_by( 'slug', '4-spam', REASON );
+		$reason    = $spam_term ? wp_strip_all_tags( $spam_term->description ) : '';
 	}
 
 	if ( ! $reason ) {
@@ -192,14 +199,17 @@ function notify_pattern_flagged( $post ) {
 	$subject = esc_html__( 'Pattern being reviewed', 'wporg-patterns' );
 
 	$message = sprintf(
-		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Pattern URL;
-		esc_html__( 'Hi there!
+		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Flag reason(s).
+		esc_html__(
+			'Hi there!
 
 Thanks for submitting your pattern. Unfortunately, your pattern, %1$s, has been flagged for review due to the following reason(s):
 
 %2$s
 
-Your pattern has been unpublished from the Block Pattern Directory at this time, and will receive further review. If the pattern meets the guidelines, we will re-publish it to the Block Pattern Directory. Thanks for your patience with us volunteer reviewers!', 'wporg-patterns' ),
+Your pattern has been unpublished from the Block Pattern Directory at this time, and will receive further review. If the pattern meets the guidelines, we will re-publish it to the Block Pattern Directory. Thanks for your patience with us volunteer reviewers!',
+			'wporg-patterns'
+		),
 		esc_html( $pattern_title ),
 		esc_html( $reason )
 	);
@@ -214,7 +224,7 @@ Your pattern has been unpublished from the Block Pattern Directory at this time,
 /**
  * Notify when a pattern has been unlisted.
  *
- * @param \WP_Post $post
+ * @param \WP_Post $post Post being processed.
  *
  * @return void
  */
@@ -234,10 +244,10 @@ function notify_pattern_unlisted( $post ) {
 	}
 
 	$reasons = get_the_terms( $post, REASON );
-	$reason = '';
+	$reason  = '';
 	if ( ! empty( $reasons ) ) {
 		$reason_term = reset( $reasons );
-		$reason = wp_strip_all_tags( $reason_term->description );
+		$reason      = wp_strip_all_tags( $reason_term->description );
 	}
 
 	if ( ! $reason ) {
@@ -253,8 +263,9 @@ function notify_pattern_unlisted( $post ) {
 	$subject = esc_html__( 'Pattern unlisted', 'wporg-patterns' );
 
 	$message = sprintf(
-		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Pattern URL;
-		esc_html__( 'Hello,
+		// translators: Plaintext email message. Note the line breaks. 1. Pattern title; 2. Unlisting reason; 3. Guidelines URL.
+		esc_html__(
+			'Hello,
 
 Your pattern, %1$s, has been unlisted from the Block Pattern Directory due to the following reason:
 
@@ -262,7 +273,9 @@ Your pattern, %1$s, has been unlisted from the Block Pattern Directory due to th
 
 If you would like to resubmit your pattern, please make sure it follows the guidelines:
 
-%3$s', 'wporg-patterns' ),
+%3$s',
+			'wporg-patterns'
+		),
 		esc_html( $pattern_title ),
 		esc_html( $reason ),
 		'https://wordpress.org/patterns/about/'
@@ -278,9 +291,9 @@ If you would like to resubmit your pattern, please make sure it follows the guid
 /**
  * Wrapper for wp_mail.
  *
- * @param string $to
- * @param string $subject
- * @param string $message
+ * @param string $to      Recipient email address.
+ * @param string $subject Email subject.
+ * @param string $message Email body.
  *
  * @return void
  */

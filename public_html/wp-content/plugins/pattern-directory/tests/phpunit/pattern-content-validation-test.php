@@ -1,6 +1,8 @@
 <?php
 /**
  * Test Block Pattern validation.
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, SPAM_STATUS };
@@ -11,20 +13,37 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, SPAM_
  * @group content-validation
  */
 class Pattern_Content_Validation_Test extends WP_UnitTestCase {
+	/**
+	 * Two valid paragraph blocks, the base fixture the data providers and tests build on.
+	 */
+	private const TWO_PARAGRAPHS = "<!-- wp:paragraph -->\n<p>One.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Two.</p>\n<!-- /wp:paragraph -->";
+
+	/**
+	 * Pattern fixture ID.
+	 *
+	 * @var int
+	 */
 	protected static $pattern_id;
+	/**
+	 * Administrator user ID.
+	 *
+	 * @var int
+	 */
 	protected static $user;
 
 	/**
 	 * Setup fixtures that are shared across all tests.
+	 *
+	 * @param WP_UnitTest_Factory $factory Factory for shared test fixtures.
 	 */
 	public static function wpSetUpBeforeClass( $factory ) {
 		self::$pattern_id = $factory->post->create(
 			array(
 				'post_title' => 'Three paragraphs',
-				'post_type' => POST_TYPE,
+				'post_type'  => POST_TYPE,
 			)
 		);
-		self::$user = $factory->user->create(
+		self::$user       = $factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
@@ -35,7 +54,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 * Verify the pattern & API are set up correctly.
 	 */
 	public function test_pattern_directory_api() {
-		$request = new WP_REST_Request( 'GET', '/wp/v2/wporg-pattern/' . self::$pattern_id );
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/wporg-pattern/' . self::$pattern_id );
 		$response = rest_do_request( $request );
 		$this->assertFalse( $response->is_error() );
 	}
@@ -44,13 +63,15 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 * Test valid block content.
 	 *
 	 * @dataProvider data_valid_content
+	 *
+	 * @param string $content Serialized blocks submitted to the REST API.
 	 */
 	public function test_valid_content( $content ) {
 		wp_set_current_user( self::$user );
 
 		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
 		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( json_encode( array( 'content' => $content ) ) );
+		$request->set_body( wp_json_encode( array( 'content' => $content ) ) );
 
 		$response = rest_do_request( $request );
 
@@ -63,7 +84,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function data_valid_content() {
-		$two_paragraphs = "<!-- wp:paragraph -->\n<p>One.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Two.</p>\n<!-- /wp:paragraph -->";
+		$two_paragraphs   = self::TWO_PARAGRAPHS;
 		$three_paragraphs = "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.</p>\n<!-- /wp:paragraph -->";
 
 		return array(
@@ -74,6 +95,10 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 			array( "<!-- wp:group -->\n<div class=\"wp-block-group\">$three_paragraphs</div>\n<!-- /wp:group -->" ),
 			array( "<!-- wp:group {\"layout\":{\"type\":\"flex\",\"justifyContent\":\"space-between\"}} -->\n<div class=\"wp-block-group\"><!-- wp:group -->\n<div class=\"wp-block-group\"><!-- wp:heading -->\n<h2>Heading</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Paragraph</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:group -->\n\n<!-- wp:image {\"id\":null} -->\n<figure class=\"wp-block-image\"><img src=\"./pear.png\" alt=\"\"/></figure>\n<!-- /wp:image --></div>\n<!-- /wp:group -->" ),
 			array( "<!-- wp:columns -->\n<div class=\"wp-block-columns\"><!-- wp:column {\"width\":\"66.66%\"} -->\n<div class=\"wp-block-column\" style=\"flex-basis:66.66%\"><!-- wp:spacer -->\n<div style=\"height:100px\" aria-hidden=\"true\" class=\"wp-block-spacer\"></div>\n<!-- /wp:spacer --></div>\n<!-- /wp:column -->\n\n<!-- wp:column {\"width\":\"33.33%\"} -->\n<div class=\"wp-block-column\" style=\"flex-basis:33.33%\"><!-- wp:spacer {\"height\":\"51px\"} -->\n<div style=\"height:51px\" aria-hidden=\"true\" class=\"wp-block-spacer\"></div>\n<!-- /wp:spacer -->\n\n<!-- wp:paragraph -->\n<p>One</p>\n<!-- /wp:paragraph --></div>\n<!-- /wp:column --></div>\n<!-- /wp:columns -->" ),
+			array( "<!-- wp:navigation -->\n<!-- wp:navigation-link {\"label\":\"Home\",\"url\":\"https://example.com/\"} /-->\n\n<!-- wp:navigation-submenu {\"label\":\"About\",\"url\":\"https://example.com/about\"} -->\n<!-- wp:navigation-link {\"label\":\"Team\",\"url\":\"https://example.com/team\"} /-->\n<!-- /wp:navigation-submenu -->\n<!-- /wp:navigation -->" ),
+			array( "<!-- wp:group {\"metadata\":{\"name\":\"JavaScript: hero section\"}} -->\n<div class=\"wp-block-group\">$three_paragraphs</div>\n<!-- /wp:group -->" ),
+			// A `mailto:` URL is an allowed protocol, and a relative path whose colon follows a non-scheme segment is not a scheme at all.
+			array( "$two_paragraphs\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"url\":\"mailto:hello@example.com\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Mail</a></div>\n<!-- /wp:button -->\n\n<!-- wp:button {\"url\":\"/2024/report:final\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Report</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons -->" ),
 			array( "<!-- wp:query {\"queryId\":1,\"query\":{\"perPage\":3,\"pages\":0,\"offset\":0,\"postType\":\"post\",\"order\":\"desc\",\"orderBy\":\"date\",\"author\":\"\",\"search\":\"\",\"exclude\":[],\"sticky\":\"\",\"inherit\":false}} -->\n<div class=\"wp-block-query\"><!-- wp:post-template -->\n<!-- wp:post-title /-->\n\n<!-- wp:post-date /-->\n\n<!-- wp:post-excerpt /-->\n<!-- /wp:post-template -->\n\n<!-- wp:query-pagination -->\n<!-- wp:query-pagination-previous /-->\n\n<!-- wp:query-pagination-numbers /-->\n\n<!-- wp:query-pagination-next /-->\n<!-- /wp:query-pagination -->\n\n<!-- wp:query-no-results -->\n<!-- wp:paragraph {\"placeholder\":\"Add a text or blocks that will display when the query returns no results.\"} -->\n<p></p>\n<!-- /wp:paragraph -->\n<!-- /wp:query-no-results --></div>\n<!-- /wp:query -->" ),
 		);
 	}
@@ -82,13 +107,16 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 * Test invalid block content.
 	 *
 	 * @dataProvider data_invalid_content
+	 *
+	 * @param string $expected_error_code Expected REST error code.
+	 * @param string $content             Serialized blocks submitted to the REST API.
 	 */
 	public function test_invalid_empty_content( $expected_error_code, $content ) {
 		wp_set_current_user( self::$user );
 
 		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
 		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( json_encode( array( 'content' => $content ) ) );
+		$request->set_body( wp_json_encode( array( 'content' => $content ) ) );
 
 		$response = rest_do_request( $request );
 
@@ -103,7 +131,7 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function data_invalid_content() {
-		$two_paragraphs = "<!-- wp:paragraph -->\n<p>One.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Two.</p>\n<!-- /wp:paragraph -->";
+		$two_paragraphs   = self::TWO_PARAGRAPHS;
 		$three_paragraphs = "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.</p>\n<!-- /wp:paragraph -->";
 
 		return array(
@@ -124,6 +152,78 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 			array( 'rest_pattern_invalid_blocks', "<!-- wp:plugin/fake -->\n<p>This is some content.</p>\n<!-- /wp:plugin/fake -->" ),
 			array( 'rest_pattern_invalid_blocks', "<!-- wp:group -->\n<div class=\"wp-block-group\"><!-- wp:plugin/fake -->\n<p>Fake nested block.</p>\n<!-- /wp:plugin/fake --></div>\n<!-- /wp:group -->" ),
 
+			// Registered core blocks the editor hides from the inserter must be rejected on the server too.
+			array( 'rest_pattern_disallowed_blocks', "$three_paragraphs\n\n<!-- wp:nextpage -->\n<!--nextpage-->\n<!-- /wp:nextpage -->" ),
+			array( 'rest_pattern_disallowed_blocks', "$three_paragraphs\n\n<!-- wp:shortcode -->[gallery]<!-- /wp:shortcode -->" ),
+			array( 'rest_pattern_disallowed_blocks', "<!-- wp:group -->\n<div class=\"wp-block-group\"><!-- wp:shortcode -->[gallery]<!-- /wp:shortcode --></div>\n<!-- /wp:group -->" ),
+			// `core/pattern` splices in another pattern by slug on render, the indirection `core/block` is blocked for.
+			array( 'rest_pattern_disallowed_blocks', "$three_paragraphs\n\n<!-- wp:pattern {\"slug\":\"core/example\"} /-->" ),
+			// A `\n\n` inside a delimiter still parses in stored content; normalising it away must not hide the block.
+			array( 'rest_pattern_disallowed_blocks', "$three_paragraphs\n\n<!-- wp:group -->\n<div class=\"wp-block-group\"><!-- wp:shortcode\n\n-->[gallery]<!-- /wp:shortcode\n\n--></div>\n<!-- /wp:group -->" ),
+
+			// Interactivity directives in a block's HTML would drive a trusted store from submitted markup.
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></p>\n<!-- /wp:paragraph -->" ),
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:image -->\n<figure class=\"wp-block-image\"><img data-wp-bind--src=\"context.href\" alt=\"\"/></figure>\n<!-- /wp:image -->" ),
+
+			/*
+			 * The rows below put the directive somewhere a check that read the content as markup would not
+			 * have found it. An element whose contents are text -- raw-text or RCDATA -- hides the tag from
+			 * `WP_HTML_Tag_Processor`, and nesting or leaving one unclosed hides it further.
+			 */
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.<style><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></style></p>\n<!-- /wp:paragraph -->" ),
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.<xmp><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></xmp></p>\n<!-- /wp:paragraph -->" ),
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.<noembed><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></noembed></p>\n<!-- /wp:paragraph -->" ),
+			// An unclosed one stops the tokenizer reporting at all, and nesting hides the wrapper from itself.
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.<script><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></p>\n<!-- /wp:paragraph -->" ),
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Three.<style><style><style><span data-wp-interactive=\"wporg/patterns\" data-wp-init=\"actions.go\">x</span></style></p>\n<!-- /wp:paragraph -->" ),
+
+			// The same `<script>`, inside `<svg>`, closed and unclosed.
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:html -->\n<svg><script><a href=\"#\" data-wp-interactive=\"core/query\" data-wp-context='{\"url\":\"javascript:alert(1)\"}' data-wp-bind--href=\"context.url\">x</a></svg>\n<!-- /wp:html -->" ),
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:html -->\n<svg><script><a href=\"#\" data-wp-interactive=\"core/query\" data-wp-bind--href=\"context.url\">x</a></script></svg>\n<!-- /wp:html -->" ),
+
+			/*
+			 * `<title>` and `<textarea>` hold their contents as text like `<script>` does, but KSES keeps
+			 * both elements, so sanitising the markup first does not expose the tag the way it does for a
+			 * wrapper KSES removes. Nothing that reads these as markup sees the directive at all.
+			 */
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:html -->\n<title><a href=\"#\" data-wp-interactive=\"wporg/patterns\" data-wp-bind--href=\"context.url\">x</a></title>\n<!-- /wp:html -->" ),
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:html -->\n<textarea><a href=\"#\" data-wp-interactive=\"wporg/patterns\" data-wp-bind--href=\"context.url\">x</a></textarea>\n<!-- /wp:html -->" ),
+			// The marker in ordinary text, with no tag anywhere near it.
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:paragraph -->\n<p>Bind it with data-wp-bind--href.</p>\n<!-- /wp:paragraph -->" ),
+
+			// A block delimiter is a comment, so the directive in its attribute JSON is not a tag either.
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:categories {\"displayAsDropdown\":true,\"showLabel\":true,\"label\":\"<span data-wp-interactive=\\u0022wporg/patterns\\u0022 data-wp-init=\\u0022actions.go\\u0022>x</span>\"} /-->" ),
+			// The same attribute with its angle brackets JSON-escaped, so the stored delimiter holds no markup.
+			array( 'rest_pattern_interactivity_directive', "$two_paragraphs\n\n<!-- wp:categories {\"displayAsDropdown\":true,\"showLabel\":true,\"label\":\"\\u003cspan data-wp-interactive=\\u0022wporg/patterns\\u0022 data-wp-init=\\u0022actions.go\\u0022\\u003ex\\u003c/span\\u003e\"} /-->" ),
+
+			// A parent-only block (`core/page-list-item` belongs to `core/page-list`) used standalone is out
+			// of context. The second also carries a script URL, but the context check rejects it first.
+			array( 'rest_pattern_invalid_block_context', "$two_paragraphs\n\n<!-- wp:page-list-item {\"label\":\"Featured\"} /-->" ),
+			array( 'rest_pattern_invalid_block_context', "$two_paragraphs\n\n<!-- wp:page-list-item {\"link\":\"javascript:alert(1)\"} /-->" ),
+			// A script URL in a validly-placed block's attribute, which bypasses HTML sanitisation.
+			array( 'rest_pattern_unsafe_attribute', "$two_paragraphs\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"url\":\"javascript:alert(1)\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Go</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons -->" ),
+			// Same, with a control character inside the scheme that a browser would still resolve.
+			array( 'rest_pattern_unsafe_attribute', "$two_paragraphs\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"url\":\"java\\tscript:alert(1)\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Go</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons -->" ),
+			// Same, with an HTML-entity colon that decodes before the scheme is read.
+			array( 'rest_pattern_unsafe_attribute', "$two_paragraphs\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"url\":\"javascript&#58;alert(1)\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Go</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons -->" ),
+			// Same, with an HTML5 named-entity colon, which browsers also decode in an href.
+			array( 'rest_pattern_unsafe_attribute', "$two_paragraphs\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"url\":\"javascript&colon;alert(1)\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Go</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons -->" ),
+			// Same, with a numeric colon reference missing its semicolon, which browsers still decode.
+			array( 'rest_pattern_unsafe_attribute', "$two_paragraphs\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"url\":\"javascript&#58alert(1)\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Go</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons -->" ),
+			// Same, hex form without a semicolon, stopping at the first non-hex character.
+			array( 'rest_pattern_unsafe_attribute', "$two_paragraphs\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"url\":\"javascript&#x3a%61lert(1)\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Go</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons -->" ),
+			// A `data:` URL, allowed by neither `wp_allowed_protocols()` nor the block editor.
+			array( 'rest_pattern_unsafe_attribute', "$two_paragraphs\n\n<!-- wp:buttons -->\n<div class=\"wp-block-buttons\"><!-- wp:button {\"url\":\"data:text/html,<script>alert(1)</script>\"} -->\n<div class=\"wp-block-button\"><a class=\"wp-block-button__link wp-element-button\">Go</a></div>\n<!-- /wp:button --></div>\n<!-- /wp:buttons -->" ),
+
+			array( 'rest_pattern_shortcode', "$three_paragraphs\n\n<!-- wp:paragraph -->\n<p>PROBE [caption id=c width=1 caption=x]body[/caption]</p>\n<!-- /wp:paragraph -->" ),
+			// The C escapes `shortcode_parse_atts()` decodes never reach a callback; the tag is refused first.
+			array( 'rest_pattern_shortcode', "$three_paragraphs\n\n<!-- wp:paragraph -->\n<p>[caption id=c width=1 caption=x\\x3cspan\\x3ex\\x3c/span\\x3e]body[/caption]</p>\n<!-- /wp:paragraph -->" ),
+			// `decode_pattern_content()` strips `"ref":<n>` on `the_post`, rejoining the tag name.
+			array( 'rest_pattern_shortcode', "$three_paragraphs\n\n<!-- wp:paragraph -->\n<p>PROBE [cap\"ref\":1tion id=c width=1 caption=hello]body[/caption]</p>\n<!-- /wp:paragraph -->" ),
+
+			// `parse_blocks()` turns `\u005b` in the delimiter's attribute JSON into a bracket the page renders.
+			array( 'rest_pattern_shortcode', "$three_paragraphs\n\n<!-- wp:categories {\"displayAsDropdown\":true,\"showLabel\":true,\"label\":\"\\u005bcaption id=c width=1 caption=hello\\u005d\"} /-->" ),
+
 			// Only 2 paragraphs.
 			array( 'rest_pattern_insufficient_blocks', $two_paragraphs ),
 			// Single group with a heading.
@@ -137,18 +237,115 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A `wporg/*` block is registered globally but must never be accepted in a pattern.
+	 *
+	 * This is the entry point the reported moderator-XSS and cross-blog-disclosure chains relied on:
+	 * the editor hides `wporg/*` blocks, but the server accepted any registered block.
+	 */
+	public function test_wporg_blocks_are_disallowed() {
+		register_block_type( 'wporg/test-block', array( 'apiVersion' => 2 ) );
+
+		try {
+			wp_set_current_user( self::$user );
+
+			$content = self::TWO_PARAGRAPHS . "\n\n<!-- wp:wporg/test-block /-->";
+
+			$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
+			$request->set_header( 'content-type', 'application/json' );
+			$request->set_body( wp_json_encode( array( 'content' => $content ) ) );
+
+			$response = rest_do_request( $request );
+
+			$this->assertTrue( $response->is_error() );
+			$this->assertSame( 'rest_pattern_disallowed_blocks', $response->get_data()['code'] );
+		} finally {
+			unregister_block_type( 'wporg/test-block' );
+		}
+	}
+
+	/**
+	 * Content the save filters would rewrite is refused, so what the validators checked is what the row holds.
+	 *
+	 * @dataProvider data_content_rewritten_on_save
+	 *
+	 * @param string $expected_error_code The error the submission is refused with.
+	 * @param string $content             Content that saving would turn into something else.
+	 */
+	public function test_content_rewritten_on_save_is_refused( $expected_error_code, $content ) {
+		// Members have their content filtered on save; that is the path the checks have to match.
+		$member         = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		$member_pattern = self::factory()->post->create(
+			array(
+				'post_type'   => POST_TYPE,
+				'post_author' => $member,
+				'post_status' => 'draft',
+			)
+		);
+		wp_set_current_user( $member );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . $member_pattern );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'content' => $content ) ) );
+
+		$response = rest_do_request( $request );
+
+		$this->assertTrue( $response->is_error() );
+		$this->assertSame( $expected_error_code, $response->get_data()['code'] );
+	}
+
+	/**
+	 * Content whose blocks, or their nesting, are not what they would be once saved.
+	 *
+	 * @return array
+	 */
+	public function data_content_rewritten_on_save() {
+		$in_paragraph = function ( $markup ) {
+			return self::TWO_PARAGRAPHS . "\n\n<!-- wp:paragraph -->\n<p>Three $markup</p>\n<!-- /wp:paragraph -->";
+		};
+
+		return array(
+			// `strip_shortcodes()` stops matching a tag name at `<`; KSES deletes the element and rejoins it.
+			'shortcode split by a deleted tag'  => array( 'rest_pattern_shortcode', $in_paragraph( '[cap<script></script>tion id=c width=1 caption=x]body[/caption]' ) ),
+			'control character in a name'       => array( 'rest_pattern_control_characters', $in_paragraph( "<!-- wp:wpor\x00g/modal {\"a\":\"b\"} /-->" ) ),
+			'control character in a marker'     => array( 'rest_pattern_control_characters', $in_paragraph( "<!-- wp:wporg/modal \x01/-->" ) ),
+			'extra dash on the closer'          => array( 'rest_pattern_unstable_blocks', $in_paragraph( '<!-- wp:wporg/modal /--->' ) ),
+			'two extra dashes'                  => array( 'rest_pattern_unstable_blocks', $in_paragraph( '<!-- wp:wporg/modal /---->' ) ),
+			'container with extra dashes'       => array( 'rest_pattern_unstable_blocks', $in_paragraph( '<!-- wp:wporg/modal ---><!-- /wp:wporg/modal --->' ) ),
+			// Same names in the same order, but the extra dash on the closing delimiter un-nests what follows it.
+			'extra dash on a closing delimiter' => array(
+				'rest_pattern_unstable_blocks',
+				"<!-- wp:query {\"query\":{\"perPage\":2}} -->\n<div class=\"wp-block-query\">\n<!-- /wp:query --->\n<!-- wp:post-template -->\n<!-- wp:post-title /-->\n<!-- /wp:post-template -->\n</div>\n<!-- /wp:query -->",
+			),
+		);
+	}
+
+	/**
 	 * Test a block that's detected as spam should be pending.
 	 */
 	public function test_spam_should_be_pending() {
-		wp_set_current_user( self::$user );
+		// Spam checks exempt moderators, so act as a member on their own pattern.
+		$member         = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		$member_pattern = self::factory()->post->create(
+			array(
+				'post_title'  => 'Member pattern',
+				'post_type'   => POST_TYPE,
+				'post_author' => $member,
+				'post_status' => 'draft',
+			)
+		);
+		wp_set_current_user( $member );
 
-		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . $member_pattern );
 		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( json_encode( array(
-			'title'   => 'Spam Check',
-			'content' => "<!-- wp:heading -->\n<h2 id=\"spam-check\">Spam Check.</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Paragraph: PatternDirectorySpamTest</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Third block.</p>\n<!-- /wp:paragraph -->",
-			'status'  => 'publish',
-		) ) );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'title'   => 'Spam Check',
+					'content' => "<!-- wp:heading -->\n<h2 id=\"spam-check\">Spam Check.</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>Paragraph: PatternDirectorySpamTest</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Third block.</p>\n<!-- /wp:paragraph -->",
+					'status'  => 'publish',
+				)
+			)
+		);
 
 		$response = rest_do_request( $request );
 		$this->assertFalse( $response->is_error() );
@@ -158,18 +355,108 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that paragraph-only posts should be detected as spam.
+	 * A directive in submitted meta is refused, like one in a rendered post field.
+	 *
+	 * @dataProvider data_meta_with_directive
+	 *
+	 * @param array $meta The `meta` payload submitted alongside valid content.
 	 */
-	public function test_only_paragraphs_are_spam() {
+	public function test_directive_in_meta_is_refused( $meta ) {
 		wp_set_current_user( self::$user );
 
 		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
 		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( json_encode( array(
-			'title'   => 'Spam Check',
-			'content' => "<!-- wp:paragraph -->\n<p>Paragraph one.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph two.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph three.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph four.</p>\n<!-- /wp:paragraph -->",
-			'status'  => 'publish',
-		) ) );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'content' => self::TWO_PARAGRAPHS . "\n\n<!-- wp:footnotes /-->",
+					'meta'    => $meta,
+				)
+			)
+		);
+
+		$response = rest_do_request( $request );
+
+		$this->assertTrue( $response->is_error() );
+		$this->assertSame( 'rest_pattern_interactivity_directive', $response->get_data()['code'] );
+	}
+
+	/**
+	 * Meta payloads carrying a directive.
+	 *
+	 * @return array
+	 */
+	public function data_meta_with_directive() {
+		$island = '<span data-wp-interactive=\'{"namespace":"probe"}\' data-wp-context=\'{"u":"javascript:alert(1)"}\'><a data-wp-bind--href="context.u">note</a></span>';
+
+		return array(
+			'footnotes'         => array(
+				array(
+					'footnotes' => wp_json_encode(
+						array(
+							array(
+								'id'      => 'fn1',
+								'content' => $island,
+							),
+						)
+					),
+				),
+			),
+			'directive marker'  => array( array( 'footnotes' => '[{"id":"fn1","content":"data-wp-bind--href"}]' ) ),
+			'a plugin meta key' => array( array( 'wpop_description' => "A hero band. $island" ) ),
+			'a list-valued key' => array( array( 'wpop_block_types' => array( 'core/group', $island ) ) ),
+		);
+	}
+
+	/**
+	 * Meta with no directive still saves, so the check is not refusing every submission.
+	 */
+	public function test_meta_without_a_directive_is_accepted() {
+		wp_set_current_user( self::$user );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . self::$pattern_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'content' => self::TWO_PARAGRAPHS . "\n\n<!-- wp:footnotes /-->",
+					'meta'    => array( 'footnotes' => '[{"id":"fn1","content":"An ordinary <em>note</em>."}]' ),
+				)
+			)
+		);
+
+		$response = rest_do_request( $request );
+
+		$this->assertFalse( $response->is_error() );
+	}
+
+	/**
+	 * Test that paragraph-only posts should be detected as spam.
+	 */
+	public function test_only_paragraphs_are_spam() {
+		// Spam checks exempt moderators, so act as a member on their own pattern.
+		$member         = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		$member_pattern = self::factory()->post->create(
+			array(
+				'post_title'  => 'Member pattern',
+				'post_type'   => POST_TYPE,
+				'post_author' => $member,
+				'post_status' => 'draft',
+			)
+		);
+		wp_set_current_user( $member );
+
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . $member_pattern );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'title'   => 'Spam Check',
+					'content' => "<!-- wp:paragraph -->\n<p>Paragraph one.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph two.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph three.</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:paragraph -->\n<p>Paragraph four.</p>\n<!-- /wp:paragraph -->",
+					'status'  => 'publish',
+				)
+			)
+		);
 
 		$response = rest_do_request( $request );
 		$this->assertFalse( $response->is_error() );

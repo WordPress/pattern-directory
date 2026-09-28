@@ -12,9 +12,9 @@ import * as selectors from './selectors';
 import { STORE_NAME } from './constants';
 
 export const storeConfig = {
-	reducer: reducer,
-	actions: actions,
-	selectors: selectors,
+	reducer,
+	actions,
+	selectors,
 	persist: [ 'preferences' ],
 };
 

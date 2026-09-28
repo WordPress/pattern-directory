@@ -18,12 +18,12 @@ export async function fetchImages( { searchTerm, page = 1 } ) {
 	const path = addQueryArgs( '/wporg/v1/openverse/search', {
 		search: searchTerm,
 		per_page: PER_PAGE,
-		page: page,
+		page,
 	} );
 
 	try {
 		const response = await apiFetch( {
-			path: path,
+			path,
 			parse: false,
 		} );
 

@@ -1,9 +1,14 @@
 <?php
-// phpcs:disable WordPress.Files.FileName -- Allow underscore for pattern partial.
 /**
+ * Render the footer pattern component.
+ *
  * Title: Footer
  * Slug: wporg-pattern-directory-2024/footer
  * Inserter: no
+ *
+ * @package WordPress\Pattern_Directory
+ *
+ * phpcs:disable WordPress.Files.FileName -- Allow underscore for pattern partial.
  */
 
 ?>

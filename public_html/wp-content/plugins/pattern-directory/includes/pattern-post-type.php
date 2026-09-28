@@ -1,4 +1,9 @@
 <?php
+/**
+ * Pattern post type for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory\Pattern_Post_Type;
 
@@ -16,17 +21,22 @@ add_action( 'rest_api_init', __NAMESPACE__ . '\register_rest_fields' );
 add_action( 'init', __NAMESPACE__ . '\register_post_statuses' );
 add_action( 'transition_post_status', __NAMESPACE__ . '\status_transitions', 10, 3 );
 add_action( 'post_updated', __NAMESPACE__ . '\update_contains_block_types_meta' );
+add_action( 'rest_after_insert_' . POST_TYPE, __NAMESPACE__ . '\update_contains_block_types_meta' );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\enqueue_editor_assets' );
 add_filter( 'allowed_block_types_all', __NAMESPACE__ . '\remove_disallowed_blocks', 10, 2 );
 add_action( 'enqueue_block_editor_assets', __NAMESPACE__ . '\disable_block_directory', 0 );
 add_filter( 'rest_' . POST_TYPE . '_collection_params', __NAMESPACE__ . '\filter_patterns_collection_params' );
 add_filter( 'rest_' . POST_TYPE . '_query', __NAMESPACE__ . '\filter_patterns_rest_query', 10, 2 );
 add_filter( 'user_has_cap', __NAMESPACE__ . '\set_pattern_caps' );
+add_filter( 'map_meta_cap', __NAMESPACE__ . '\protect_moderated_patterns', 10, 4 );
 add_filter( 'posts_orderby', __NAMESPACE__ . '\filter_orderby_locale', 10, 2 );
 add_action( 'init', __NAMESPACE__ . '\add_preview_endpoint' );
 add_action( 'setup_theme', __NAMESPACE__ . '\setup_preview_theme', 1 );
+add_filter( 'request', __NAMESPACE__ . '\limit_preview_query_var' );
 add_action( 'template_include', __NAMESPACE__ . '\load_pattern_preview', 100 );
 add_filter( 'jetpack_sitemap_post_types', __NAMESPACE__ . '\jetpack_sitemap_post_types' );
+remove_filter( 'the_content', 'do_shortcode', 11 );
+add_filter( 'the_content', __NAMESPACE__ . '\do_shortcode_except_in_patterns', 11 );
 
 /**
  * Registers post types and associated taxonomies, meta data, etc.
@@ -83,8 +93,8 @@ function register_post_type_data() {
 			'rewrite'           => array(
 				'slug' => 'categories',
 			),
-			'query_var' => 'pattern-categories',
-			'capabilities' => array(
+			'query_var'         => 'pattern-categories',
+			'capabilities'      => array(
 				'assign_terms' => 'edit_patterns',
 				'edit_terms'   => 'edit_patterns',
 			),
@@ -103,12 +113,13 @@ function register_post_type_data() {
 			'rewrite'           => array(
 				'slug' => 'pattern-keywords',
 			),
-			'capabilities' => array(
-				'assign_terms' => 'edit_patterns',
-				'edit_terms'   => 'edit_patterns',
+			// Keywords are moderator-only (the `core` term feeds Core's pattern distribution), unlike categories.
+			'capabilities'      => array(
+				'assign_terms' => 'edit_others_patterns',
+				'edit_terms'   => 'edit_others_patterns',
 			),
 
-			'labels' => array(
+			'labels'            => array(
 				'name'                       => _x( 'Keywords (Internal)', 'taxonomy general name', 'wporg-patterns' ),
 				'singular_name'              => _x( 'Keyword', 'taxonomy singular name', 'wporg-patterns' ),
 				'search_items'               => __( 'Search Keywords', 'wporg-patterns' ),
@@ -197,7 +208,7 @@ function register_post_type_data() {
 			'type'              => 'string',
 			'description'       => 'A list of block types this pattern supports for transforms.',
 			'single'            => false,
-			'sanitize_callback' => function( $value, $key, $type ) {
+			'sanitize_callback' => function ( $value ) {
 				return preg_replace( '/[^a-z0-9-\/]/', '', $value );
 			},
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
@@ -216,7 +227,7 @@ function register_post_type_data() {
 			'type'              => 'string',
 			'description'       => 'The language used when creating this pattern.',
 			'single'            => true,
-			'sanitize_callback' => function( $value ) {
+			'sanitize_callback' => function ( $value ) {
 				if ( ! in_array( $value, array_keys( get_locales() ), true ) ) {
 					return 'en_US';
 				}
@@ -246,7 +257,7 @@ function register_post_type_data() {
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
 			'show_in_rest'      => array(
 				'schema' => array(
-					'type'     => 'string',
+					'type' => 'string',
 				),
 			),
 		)
@@ -264,7 +275,7 @@ function register_post_type_data() {
 			'auth_callback'     => __NAMESPACE__ . '\can_edit_this_pattern',
 			'show_in_rest'      => array(
 				'schema' => array(
-					'type'     => 'string',
+					'type' => 'string',
 				),
 			),
 		)
@@ -291,16 +302,16 @@ function register_rest_fields() {
 		POST_TYPE,
 		'category_slugs',
 		array(
-			'get_callback' => function() {
+			'get_callback' => function () {
 				$slugs = wp_list_pluck( wp_get_object_terms( get_the_ID(), 'wporg-pattern-category' ), 'slug' );
 				$slugs = array_map( 'sanitize_title', $slugs );
-				$slugs = array_diff( $slugs, [ 'featured' ] );
+				$slugs = array_diff( $slugs, array( 'featured' ) );
 				$slugs = array_values( $slugs );
 
 				return $slugs;
 			},
 
-			'schema' => array(
+			'schema'       => array(
 				'type'  => 'array',
 				'items' => array(
 					'type' => 'string',
@@ -314,13 +325,13 @@ function register_rest_fields() {
 		POST_TYPE,
 		'keyword_slugs',
 		array(
-			'get_callback' => function() {
+			'get_callback' => function () {
 				$slugs = wp_list_pluck( wp_get_object_terms( get_the_ID(), 'wporg-pattern-keyword' ), 'slug' );
 
 				return array_map( 'sanitize_title', $slugs );
 			},
 
-			'schema' => array(
+			'schema'       => array(
 				'type'  => 'array',
 				'items' => array(
 					'type' => 'string',
@@ -340,13 +351,19 @@ function register_rest_fields() {
 		POST_TYPE,
 		'pattern_content',
 		array(
-			'get_callback' => function( $response_data ) {
+			'get_callback' => function ( $response_data ) {
 				$pattern = get_post( $response_data['id'] );
+
+				// Only ever expose pattern content; a mismatched type means the id resolved in the wrong context.
+				if ( ! $pattern || POST_TYPE !== $pattern->post_type ) {
+					return '';
+				}
+
 				return decode_pattern_content( $pattern->post_content );
 			},
 
-			'schema' => array(
-				'type'  => 'string',
+			'schema'       => array(
+				'type' => 'string',
 			),
 		)
 	);
@@ -358,11 +375,11 @@ function register_rest_fields() {
 		POST_TYPE,
 		'favorite_count',
 		array(
-			'get_callback' => function() {
+			'get_callback' => function () {
 				return get_favorite_count( get_the_ID() );
 			},
 
-			'schema' => array(
+			'schema'       => array(
 				'type'    => 'integer',
 				'default' => 0,
 			),
@@ -376,7 +393,7 @@ function register_rest_fields() {
 		POST_TYPE,
 		'author_meta',
 		array(
-			'get_callback' => function( $post ) {
+			'get_callback' => function ( $post ) {
 				return array(
 					'name'   => esc_html( get_the_author_meta( 'display_name', $post['author'] ) ),
 					'url'    => esc_url( home_url( '/author/' . get_the_author_meta( 'user_nicename', $post['author'] ) ) ),
@@ -384,17 +401,17 @@ function register_rest_fields() {
 				);
 			},
 
-			'schema' => array(
-				'type'  => 'object',
+			'schema'       => array(
+				'type'       => 'object',
 				'properties' => array(
-					'name' => array(
-						'type'  => 'string',
+					'name'   => array(
+						'type' => 'string',
 					),
-					'url' => array(
-						'type'  => 'string',
+					'url'    => array(
+						'type' => 'string',
 					),
 					'avatar' => array(
-						'type'  => 'string',
+						'type' => 'string',
 					),
 				),
 			),
@@ -420,34 +437,34 @@ function register_rest_fields() {
 		POST_TYPE,
 		'unlisted_reason',
 		array(
-			'get_callback' => function() {
+			'get_callback' => function () {
 				$reasons = wp_get_object_terms( get_the_ID(), FLAG_REASON );
 				if ( count( $reasons ) > 0 ) {
 					$reason = array_shift( $reasons );
 					return array(
-						'term_id' => absint( $reason->term_id ),
-						'name' => esc_attr( $reason->name ),
-						'slug' => esc_attr( $reason->slug ),
+						'term_id'     => absint( $reason->term_id ),
+						'name'        => esc_attr( $reason->name ),
+						'slug'        => esc_attr( $reason->slug ),
 						'description' => wp_kses_post( $reason->description ),
 					);
 				}
 
 				return array();
 			},
-			'schema' => array(
-				'type'  => 'object',
+			'schema'       => array(
+				'type'       => 'object',
 				'properties' => array(
-					'term_id' => array(
-						'type'  => 'number',
+					'term_id'     => array(
+						'type' => 'number',
 					),
-					'name' => array(
-						'type'  => 'string',
+					'name'        => array(
+						'type' => 'string',
 					),
-					'slug' => array(
-						'type'  => 'string',
+					'slug'        => array(
+						'type' => 'string',
 					),
 					'description' => array(
-						'type'  => 'string',
+						'type' => 'string',
 					),
 				),
 			),
@@ -465,6 +482,7 @@ function register_post_statuses() {
 		UNLISTED_STATUS,
 		array(
 			'label'                  => _x( 'Unlisted', 'post status', 'wporg-patterns' ),
+			/* translators: %s: Number of patterns. */
 			'label_count'            => _nx_noop(
 				'Unlisted <span class="count">(%s)</span>',
 				'Unlisted <span class="count">(%s)</span>',
@@ -481,6 +499,7 @@ function register_post_statuses() {
 		SPAM_STATUS,
 		array(
 			'label'                  => _x( 'Possible Spam', 'post status', 'wporg-patterns' ),
+			/* translators: %s: Number of patterns. */
 			'label_count'            => _nx_noop(
 				'Possible Spam <span class="count">(%s)</span>',
 				'Possible Spam <span class="count">(%s)</span>',
@@ -497,9 +516,9 @@ function register_post_statuses() {
 /**
  * Do things when certain status transitions happen.
  *
- * @param string   $new_status
- * @param string   $old_status
- * @param \WP_Post $post
+ * @param string   $new_status New post status.
+ * @param string   $old_status Previous post status.
+ * @param \WP_Post $post       Post being processed.
  *
  * @return void
  */
@@ -508,8 +527,8 @@ function status_transitions( $new_status, $old_status, $post ) {
 		return;
 	}
 
-	// If a pattern gets relisted, remove the reason that it was originally unlisted.
-	if ( UNLISTED_STATUS === $old_status && UNLISTED_STATUS !== $new_status ) {
+	// A reason preserved in the trash must also be cleared when the pattern is restored as a draft.
+	if ( in_array( $old_status, array( UNLISTED_STATUS, 'trash' ), true ) && UNLISTED_STATUS !== $new_status && 'trash' !== $new_status ) {
 		wp_delete_object_term_relationships( $post->ID, array( FLAG_REASON ) );
 	}
 }
@@ -517,10 +536,15 @@ function status_transitions( $new_status, $old_status, $post ) {
 /**
  * Given a post ID, parse out the block types and update the `wpop_contains_block_types` meta field.
  *
- * @param int $pattern_id Pattern ID.
+ * @param int|\WP_Post $pattern_id Pattern ID, or the pattern itself.
  */
 function update_contains_block_types_meta( $pattern_id ) {
-	$pattern    = get_post( $pattern_id );
+	// `rest_after_insert_*` passes a post object where `post_updated` passes an ID.
+	$pattern = get_post( $pattern_id );
+	if ( ! $pattern ) {
+		return;
+	}
+
 	$blocks     = parse_blocks( $pattern->post_content );
 	$all_blocks = _flatten_blocks( $blocks );
 
@@ -531,7 +555,7 @@ function update_contains_block_types_meta( $pattern_id ) {
 	sort( $block_names );
 	$used_blocks = implode( ',', $block_names );
 
-	update_post_meta( $pattern_id, 'wpop_contains_block_types', $used_blocks );
+	update_post_meta( $pattern->ID, 'wpop_contains_block_types', $used_blocks );
 }
 
 /**
@@ -540,9 +564,9 @@ function update_contains_block_types_meta( $pattern_id ) {
  * This is a callback for the `auth_{$object_type}_meta_{$meta_key}` filter, and it's used to authorize access to
  * modifying post meta keys via the REST API.
  *
- * @param bool   $allowed
- * @param string $meta_key
- * @param int    $pattern_id
+ * @param bool   $allowed    Whether access is allowed.
+ * @param string $meta_key   Metadata key.
+ * @param int    $pattern_id Pattern ID.
  *
  * @return bool
  */
@@ -560,7 +584,7 @@ function enqueue_editor_assets() {
 		return;
 	}
 
-	$dir = dirname( dirname( __FILE__ ) );
+	$dir = dirname( __DIR__ );
 
 	$script_asset_path = "$dir/build/pattern-post-type.asset.php";
 	if ( ! file_exists( $script_asset_path ) ) {
@@ -570,7 +594,7 @@ function enqueue_editor_assets() {
 	$script_asset = require $script_asset_path;
 	wp_enqueue_script(
 		'wporg-pattern-post-type',
-		plugins_url( 'build/pattern-post-type.js', dirname( __FILE__ ) ),
+		plugins_url( 'build/pattern-post-type.js', __DIR__ ),
 		$script_asset['dependencies'],
 		$script_asset['version'],
 		true
@@ -588,10 +612,48 @@ function enqueue_editor_assets() {
 
 	wp_enqueue_style(
 		'wporg-pattern-post-type',
-		plugins_url( 'build/pattern-post-type.css', dirname( __FILE__ ) ),
+		plugins_url( 'build/pattern-post-type.css', __DIR__ ),
 		array(),
 		$script_asset['version'],
 	);
+}
+
+/**
+ * Core block types that don't belong in shared patterns.
+ *
+ * Shared by the editor's `allowed_block_types_all` filter and the REST validator, so the two reject the
+ * same block types instead of drifting apart.
+ */
+const DISALLOWED_BLOCK_TYPES = array(
+	'core/freeform', // Classic block.
+	'core/legacy-widget',
+	'core/more',
+	'core/nextpage',
+	'core/block', // Reusable blocks.
+	'core/pattern', // Splices in another registered pattern by slug on render.
+	'core/shortcode',
+	'core/template-part',
+);
+
+/**
+ * Whether a block type may be used in a submitted pattern.
+ *
+ * `wporg/*` blocks (Global Header & Footer and the like) and the disallowed core blocks are removed by
+ * the editor's `allowed_block_types_all` filter. A registered block is not an authorised one, so the REST
+ * validator applies this same predicate to reject them on the server too.
+ *
+ * @param string $block_type The block type name.
+ *
+ * @return bool Whether the block is allowed in patterns.
+ */
+function is_block_allowed_in_pattern( $block_type ) {
+	$block_type = (string) $block_type;
+
+	if ( str_starts_with( $block_type, 'wporg/' ) ) {
+		return false;
+	}
+
+	return ! in_array( $block_type, DISALLOWED_BLOCK_TYPES, true );
 }
 
 /**
@@ -603,32 +665,13 @@ function enqueue_editor_assets() {
  * @return bool|array A (possibly) filtered list of block types.
  */
 function remove_disallowed_blocks( $allowed_block_types, $block_editor_context ) {
-	$disallowed_block_types = array(
-		// Remove blocks that don't make sense in Block Patterns
-		'core/freeform', // Classic block
-		'core/legacy-widget',
-		'core/more',
-		'core/nextpage',
-		'core/block', // Reusable blocks
-		'core/shortcode',
-		'core/template-part',
-	);
-
 	if ( isset( $block_editor_context->post ) && POST_TYPE === $block_editor_context->post->post_type ) {
-		// This can be true if all block types are allowed, so to filter them we
-		// need to get the list of all registered blocks first.
+		// `true` means every registered block is allowed, so expand it before filtering.
 		if ( true === $allowed_block_types ) {
 			$allowed_block_types = array_keys( WP_Block_Type_Registry::get_instance()->get_all_registered() );
 		}
-		$allowed_block_types = array_diff( $allowed_block_types, $disallowed_block_types );
 
-		// Remove the "WordPress.org" blocks, like Global Header & Global Footer.
-		$allowed_block_types = array_filter(
-			$allowed_block_types,
-			function ( $block_type ) {
-				return 'wporg/' !== substr( $block_type, 0, 6 );
-			}
-		);
+		$allowed_block_types = array_filter( $allowed_block_types, __NAMESPACE__ . '\is_block_allowed_in_pattern' );
 	}
 
 	return is_array( $allowed_block_types ) ? array_values( $allowed_block_types ) : $allowed_block_types;
@@ -665,7 +708,7 @@ function filter_patterns_collection_params( $query_params ) {
 	$query_params['author_name'] = array(
 		'description'       => __( 'Limit result set to patterns by a single author.', 'wporg-patterns' ),
 		'type'              => 'string',
-		'validate_callback' => function( $value ) {
+		'validate_callback' => function ( $value ) {
 			$user = get_user_by( 'slug', $value );
 			return (bool) $user;
 		},
@@ -703,6 +746,52 @@ function filter_patterns_collection_params( $query_params ) {
 }
 
 /**
+ * Scope a non-public patterns query to the caller's own patterns.
+ *
+ * @param array            $args    Array of arguments to be passed to WP_Query.
+ * @param \WP_REST_Request $request The REST API request.
+ *
+ * @return array The arguments, restricted to the current user where the request reaches past public data.
+ */
+function restrict_collection_to_own_patterns( $args, $request ) {
+	if ( current_user_can( get_post_type_object( POST_TYPE )->cap->edit_others_posts ) ) {
+		return $args;
+	}
+
+	$statuses   = array_filter( (array) ( $request['status'] ?? array() ) );
+	$non_public = array_diff( $statuses, get_post_stati( array( 'public' => true ) ) );
+
+	if ( ! $non_public && 'edit' !== $request['context'] ) {
+		return $args;
+	}
+
+	$user_id  = get_current_user_id();
+	$wanted   = wp_parse_id_list( $args['author__in'] ?? array() );
+	$excluded = wp_parse_id_list( $args['author__not_in'] ?? array() );
+
+	// A bare `author`, which `author_name` also resolves to, is a list where a negative id excludes.
+	foreach ( wp_parse_list( $args['author'] ?? array() ) as $author ) {
+		$author = (int) $author;
+		if ( $author > 0 ) {
+			$wanted[] = $author;
+		} elseif ( $author < 0 ) {
+			$excluded[] = absint( $author );
+		}
+	}
+
+	if ( in_array( $user_id, $excluded, true ) || ( $wanted && ! in_array( $user_id, $wanted, true ) ) ) {
+		$args['post__in'] = array( 0 );
+	}
+
+	$args['author']         = $user_id;
+	$args['author__in']     = array( $user_id );
+	$args['author__not_in'] = array();
+	unset( $args['author_name'] );
+
+	return $args;
+}
+
+/**
  * Filter the arguments passed to the pattern query in the API.
  *
  * @param array           $args    Array of arguments to be passed to WP_Query.
@@ -718,7 +807,7 @@ function filter_patterns_rest_query( $args, $request ) {
 		$args['meta_query']['orderby_locale'] = array(
 			'key'     => 'wpop_locale',
 			'compare' => 'IN',
-			// Order in value determines result order
+			// Order in value determines result order.
 			'value'   => array( $locale, 'en_US' ),
 		);
 	}
@@ -744,7 +833,7 @@ function filter_patterns_rest_query( $args, $request ) {
 				'terms'    => 'core',
 				'operator' => 'IN',
 			);
-		} else if ( 'community' === $request['curation'] ) {
+		} elseif ( 'community' === $request['curation'] ) {
 			// Patterns without the core keyword.
 			$args['tax_query']['core_keyword'] = array(
 				'taxonomy' => 'wporg-pattern-keyword',
@@ -757,7 +846,7 @@ function filter_patterns_rest_query( $args, $request ) {
 
 	$orderby = $request->get_param( 'orderby' );
 	if ( 'favorite_count' === $orderby ) {
-		$args['orderby'] = 'meta_value_num';
+		$args['orderby']  = 'meta_value_num';
 		$args['meta_key'] = 'wporg-pattern-favorites';
 	}
 
@@ -769,7 +858,7 @@ function filter_patterns_rest_query( $args, $request ) {
 		// $version is the full WP version, for example `6.0.2` or `6.2-alpha-54642-src`.
 		// Parse out just the major version section, `6.0` or `6.2`, respectively,
 		// so that the math comparison works.
-		$major_version = $matches[0];
+		$major_version                 = $matches[0];
 		$args['meta_query']['version'] = array(
 			// Fetch patterns with no version info, or only those with a lower
 			// or equal version.
@@ -788,15 +877,29 @@ function filter_patterns_rest_query( $args, $request ) {
 
 	$allowed_blocks = $request->get_param( 'allowed_blocks' );
 	if ( $allowed_blocks ) {
-		// Only return a pattern if all contained blocks are in the allowed blocks list.
-		$args['meta_query']['allowed_blocks'] = array(
-			'key'     => 'wpop_contains_block_types',
-			'compare' => 'REGEXP',
-			'value'   => '^((' . implode( '|', $allowed_blocks ) . '),?)+$',
+		// Restrict to valid block names so arbitrary regex can't be injected into the REGEXP compare below.
+		$allowed_blocks = array_filter(
+			(array) $allowed_blocks,
+			function ( $block_name ) {
+				return is_string( $block_name ) && preg_match( '#^[a-z0-9-]+/[a-z0-9-]+$#', $block_name );
+			}
 		);
+
+		if ( $allowed_blocks ) {
+			// Only return patterns whose blocks are all in the allowed list.
+			$args['meta_query']['allowed_blocks'] = array(
+				'key'     => 'wpop_contains_block_types',
+				'compare' => 'REGEXP',
+				'value'   => '^((' . implode( '|', $allowed_blocks ) . '),?)+$',
+			);
+		} else {
+			// Every requested block name was invalid; match no patterns.
+			$args['post__in'] = array( 0 );
+		}
 	}
 
-	return $args;
+	// Last: this pins `author`, which the `author_name` branch above would otherwise overwrite.
+	return restrict_collection_to_own_patterns( $args, $request );
 }
 
 /**
@@ -815,7 +918,7 @@ function filter_orderby_locale( $orderby, $query ) {
 		$table_alias = $query->meta_query->get_clauses()['orderby_locale']['alias'];
 
 		$field_placeholders = implode( ', ', array_pad( array(), count( $values ), '%s' ) );
-		$locale_orderby     = $wpdb->prepare( "FIELD( {$table_alias}.meta_value, {$field_placeholders} ) DESC", $values ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$locale_orderby     = $wpdb->prepare( "FIELD( {$table_alias}.meta_value, {$field_placeholders} ) DESC", $values ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Placeholders are generated above; the alias comes from WP_Meta_Query.
 
 		// Order by matching the locale first, and then the queries order.
 		$orderby = "{$locale_orderby}, {$orderby}";
@@ -827,7 +930,7 @@ function filter_orderby_locale( $orderby, $query ) {
 /**
  * Get the post object of a block pattern, or false if it's not a pattern or not found.
  *
- * @param int|WP_Post $post
+ * @param int|WP_Post $post Post being processed.
  *
  * @return WP_Post|false
  */
@@ -851,13 +954,17 @@ function get_block_pattern( $post ) {
  * @return array
  */
 function set_pattern_caps( $user_caps ) {
+	if ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) {
+		return $user_caps;
+	}
+
 	// Set corresponding caps for all roles.
 	$cap_args = array(
 		'capability_type' => array( 'pattern', 'patterns' ),
 		'capabilities'    => array(),
 		'map_meta_cap'    => true,
 	);
-	$cap_map = (array) get_post_type_capabilities( (object) $cap_args );
+	$cap_map  = (array) get_post_type_capabilities( (object) $cap_args );
 
 	// Users should have the same permissions for patterns as posts, for example,
 	// if they have `edit_posts`, they should be granted `edit_patterns`, and so on.
@@ -869,16 +976,72 @@ function set_pattern_caps( $user_caps ) {
 
 	// Set caps to allow for front end pattern creation.
 	if ( is_user_logged_in() && ! is_admin() ) {
-		$user_caps['read']                       = true;
-		$user_caps['publish_patterns']           = true;
-		$user_caps['edit_patterns']              = true;
-		$user_caps['edit_published_patterns']    = true;
-		$user_caps['delete_patterns']            = true;
-		$user_caps['delete_published_patterns']  = true;
+		$user_caps['read']                      = true;
+		$user_caps['publish_patterns']          = true;
+		$user_caps['edit_patterns']             = true;
+		$user_caps['edit_published_patterns']   = true;
+		$user_caps['delete_patterns']           = true;
+		$user_caps['delete_published_patterns'] = true;
 		// Note that `edit_others_patterns` & `delete_others_patterns` are separate capabilities.
 	}
 
 	return $user_caps;
+}
+
+/**
+ * The status a moderator last set on a pattern, read through the trash.
+ *
+ * Trashing moves the previous status into `_wp_trash_meta_status`, so a check that reads only
+ * `post_status` stops seeing a moderator's decision the moment the pattern is trashed.
+ *
+ * @param int|\WP_Post $post The pattern.
+ *
+ * @return string The pattern's status, or the status it held before it was trashed.
+ */
+function get_moderated_status( $post ) {
+	$pattern = get_post( $post );
+	if ( ! $pattern ) {
+		return '';
+	}
+
+	if ( 'trash' !== $pattern->post_status ) {
+		return $pattern->post_status;
+	}
+
+	return (string) get_post_meta( $pattern->ID, '_wp_trash_meta_status', true );
+}
+
+/**
+ * Reserve deletion of a moderator-removed pattern to moderators.
+ *
+ * An author can untrash what they trashed, so refusing the status change is not enough: trashing itself
+ * takes the pattern out of the moderation queue and hides the status the moderator set.
+ *
+ * @param string[] $caps    Primitive capabilities required of the user.
+ * @param string   $cap     The capability being checked.
+ * @param int      $user_id The user ID.
+ * @param array    $args    Context, with the object ID at index 0.
+ *
+ * @return string[] The filtered primitive capabilities.
+ */
+function protect_moderated_patterns( $caps, $cap, $user_id, $args ) {
+	if ( 'delete_post' !== $cap || empty( $args[0] ) ) {
+		return $caps;
+	}
+
+	$pattern = get_post( $args[0] );
+	if ( ! $pattern || POST_TYPE !== $pattern->post_type ) {
+		return $caps;
+	}
+
+	if ( ! in_array( get_moderated_status( $pattern ), array( SPAM_STATUS, UNLISTED_STATUS ), true ) ) {
+		return $caps;
+	}
+
+	// Add to what deletion already required rather than replacing it.
+	$caps[] = get_post_type_object( POST_TYPE )->cap->edit_others_posts;
+
+	return $caps;
 }
 
 /**
@@ -891,39 +1054,97 @@ function add_preview_endpoint() {
 }
 
 /**
+ * Whether the request is for the pattern preview.
+ *
+ * The preview is the pretty `/view/` endpoint or, for permalinks that are not pretty, `?view=1`; `?view=true`
+ * is kept from the earlier check. The theme switch runs at `setup_theme`, before the query is parsed, so it
+ * can only read the URL, and every later reader of the `view` query var must reach the same answer from the
+ * same input. That is why this is the one place the decision is made: `setup_preview_theme()` asks it, and
+ * `limit_preview_query_var()` drops the query var whenever it says no.
+ *
+ * @return bool Whether the request is a preview.
+ */
+function is_preview_request() {
+	// Parsed and compared, never output or stored, so read as sent: a sanitiser would drop bytes `WP` keeps.
+	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '/';
+	$parts       = (array) wp_parse_url( $request_uri );
+	$path        = $parts['path'] ?? '';
+	$query       = $parts['query'] ?? '';
+
+	if ( preg_match( '#/view/$#', $path ) ) {
+		return true;
+	}
+
+	wp_parse_str( $query, $args );
+
+	return isset( $args['view'] ) && in_array( $args['view'], array( '1', 'true' ), true );
+}
+
+/**
+ * Keep the `view` query var only on requests that are previews.
+ *
+ * `WP::parse_request()` fills the endpoint's query var from the URL query, the POST body or the rewrite
+ * match, so `?view=`, `?view=2` and `/view/anything/` all set it, and everything that reads the var
+ * (`load_pattern_preview()`, the theme's query tweaks, the creator's site-data mocks) only tests whether
+ * it is set. `setup_preview_theme()` has already run at `setup_theme` and switched the theme if, and only
+ * if, `is_preview_request()` said so. Asking `is_preview_request()` again here and dropping the var when
+ * it says no means a request is a preview everywhere or nowhere: the theme cannot stay on the directory
+ * while the preview template still renders.
+ *
+ * @param array $query_vars The parsed query vars.
+ * @return array The query vars, without `view` unless the request is a preview.
+ */
+function limit_preview_query_var( $query_vars ) {
+	if ( isset( $query_vars['view'] ) && ! is_preview_request() ) {
+		unset( $query_vars['view'] );
+	}
+
+	return $query_vars;
+}
+
+/**
  * When viewing a `view` page, set up the preview theme.
  *
- * This should switch the theme to twentytwentyone, with a white background,
+ * This should switch the theme to twentytwentythree, with a white background,
  * and inject the image placeholder workaround.
  */
 function setup_preview_theme() {
-	// query_vars are not set yet, so just check the URL.
-	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '/';
-
-	// Match pretty & non-pretty permalinks for unpublished patterns.
-	if ( preg_match( '#/view/$#', $request_uri ) || preg_match( '#[?&]view=[1|true]#', $request_uri ) ) {
+	// query_vars are not set yet, so the decision has to come from the URL.
+	if ( is_preview_request() ) {
 		add_filter( 'show_admin_bar', '__return_false', 2000 );
+		add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\enqueue_preview_assets' );
 
-		add_filter( 'template', function() {
-			if ( 'local' === wp_get_environment_type() ) {
-				return 'twentytwentythree';
-			} else {
-				return 'core/twentytwentythree';
+		add_filter(
+			'template',
+			function () {
+				if ( 'local' === wp_get_environment_type() ) {
+					return 'twentytwentythree';
+				} else {
+					return 'core/twentytwentythree';
+				}
 			}
-		} );
+		);
 
-		add_filter( 'stylesheet', function() {
-			if ( 'local' === wp_get_environment_type() ) {
-				return 'twentytwentythree';
-			} else {
-				return 'core/twentytwentythree';
+		add_filter(
+			'stylesheet',
+			function () {
+				if ( 'local' === wp_get_environment_type() ) {
+					return 'twentytwentythree';
+				} else {
+					return 'core/twentytwentythree';
+				}
 			}
-		} );
+		);
 
-		add_filter( 'wp_enqueue_scripts', function() {
-			wp_deregister_style( 'wp4-styles' );
-			wp_deregister_style( 'wporg-global-header-footer' );
-		}, 201 );
+		add_filter(
+			'wp_enqueue_scripts',
+			function () {
+				wp_deregister_style( 'wp4-styles' );
+				wp_deregister_style( 'wporg-global-header-footer' );
+			},
+			201
+		);
 
 		add_filter( 'render_block_core/gallery', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
 		add_filter( 'render_block_core/image', __NAMESPACE__ . '\inject_placeholder_svg', 10, 2 );
@@ -934,6 +1155,52 @@ function setup_preview_theme() {
 }
 
 /**
+ * Enqueue the preview's own assets.
+ *
+ * The frame is sandboxed without `allow-same-origin`, so the embedding page cannot measure it and the
+ * preview has to report its height itself.
+ */
+function enqueue_preview_assets() {
+	$asset_path = dirname( __DIR__ ) . '/build/preview-height.asset.php';
+
+	// A missing build costs the frame its height, not its content, so let the preview render without it.
+	if ( ! file_exists( $asset_path ) ) {
+		return;
+	}
+
+	$asset = require $asset_path;
+
+	wp_enqueue_script(
+		'wporg-pattern-preview-height',
+		plugins_url( 'build/preview-height.js', __DIR__ ),
+		$asset['dependencies'],
+		$asset['version'],
+		true
+	);
+}
+
+/**
+ * Expand shortcodes in place of core's `do_shortcode()`, leaving a pattern's own content alone.
+ *
+ * `validate_content()` reads stored bytes; this reads what block rendering produced, which rows stored
+ * before that rule never passed. Skipping expansion rather than escaping keeps those bytes faithful, and
+ * the global post is the only scope `the_content` offers.
+ *
+ * @param string $content The rendered post content.
+ *
+ * @return string The content, with shortcodes expanded unless it belongs to a pattern.
+ */
+function do_shortcode_except_in_patterns( $content ) {
+	$post = get_post();
+
+	if ( $post && POST_TYPE === $post->post_type ) {
+		return $content;
+	}
+
+	return do_shortcode( $content );
+}
+
+/**
  * Inject the placehodler SVG if we find an empty media block.
  *
  * @param string $block_content The block content.
@@ -941,7 +1208,7 @@ function setup_preview_theme() {
  * @return string The updated block content.
  */
 function inject_placeholder_svg( $block_content, $block ) {
-	$svg = '<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" preserveAspectRatio="none">';
+	$svg  = '<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" preserveAspectRatio="none">';
 	$svg .= '<rect width="60" height="60" fill="currentColor" fill-opacity="0.1" />';
 	$svg .= '<path vector-effect="non-scaling-stroke" d="M60 60 0 0" stroke="currentColor" stroke-width="1" stroke-opacity="0.25" />';
 	$svg .= '</svg>';
@@ -949,7 +1216,7 @@ function inject_placeholder_svg( $block_content, $block ) {
 	// Image block, find img without `src` or with wmark.png (logo), replace with svg.
 	if ( preg_match( '/<img([^>]*)\/?>/', $block_content, $match ) ) {
 		if ( ! str_contains( $match[1], 'src=' ) || str_contains( $match[1], 'wmark.png' ) ) {
-			$new_content = str_replace( '<svg ', '<svg ' . $match[1], $svg );
+			$new_content   = str_replace( '<svg ', '<svg ' . $match[1], $svg );
 			$block_content = str_replace( $match[0], $new_content, $block_content );
 			return $block_content;
 		}
@@ -959,15 +1226,15 @@ function inject_placeholder_svg( $block_content, $block ) {
 	if ( 'core/media-text' === $block['blockName'] || 'core/video' === $block['blockName'] ) {
 		// Find empty `<figure …></figure>`, inject svg into figure.
 		if ( preg_match( '/(<figure[^>]*>)(<\/figure>)/', $block_content, $match ) ) {
-			$new_content = $match[1] . $svg . $match[2];
+			$new_content   = $match[1] . $svg . $match[2];
 			$block_content = str_replace( $match[0], $new_content, $block_content );
 		}
 	}
 
 	// Gallery, find empty `<figure …></figure>`, inject 3 fake image blocks into figure.
 	if ( 'core/gallery' === $block['blockName'] && preg_match( '/(<figure[^>]*>)(<\/figure>)/', $block_content, $match ) ) {
-		$image = '<figure class="wp-block-image">' . $svg . '</figure>';
-		$new_content = $match[1] . str_repeat( $image, 3 ) . $match[2];
+		$image         = '<figure class="wp-block-image">' . $svg . '</figure>';
+		$new_content   = $match[1] . str_repeat( $image, 3 ) . $match[2];
 		$block_content = str_replace( $match[0], $new_content, $block_content );
 	}
 
@@ -976,6 +1243,9 @@ function inject_placeholder_svg( $block_content, $block ) {
 
 /**
  * If this is the `view` query, use our version of the `template-canvas.php`.
+ *
+ * @param string $template Selected template path.
+ * @return string Preview template path or the original template.
  */
 function load_pattern_preview( $template ) {
 	global $wp_query;
@@ -992,13 +1262,17 @@ function load_pattern_preview( $template ) {
  */
 add_action(
 	'the_post',
-	function( $post ) {
-		$post->post_content = decode_pattern_content( $post->post_content );
+	function ( $post ) {
+		if ( POST_TYPE === $post->post_type ) {
+			$post->post_content = decode_pattern_content( $post->post_content );
+		}
 	}
 );
 
 /**
  * Process post content, replacing broken encoding & removing refs.
+ *
+ * Note that the creator persists the normalization this does, via the pattern_content REST field.
  *
  * Some image URLs have &s, which are double-encoded and sanitized to become malformed,
  * for example, `https://img.rawpixel.com/s3fs-private/rawpixel_images/website_content/a010-markuss-0964.jpg?w=1200\u0026amp;h=1200\u0026amp;fit=clip\u0026amp;crop=default\u0026amp;dpr=1\u0026amp;q=75\u0026amp;vib=3\u0026amp;con=3\u0026amp;usm=15\u0026amp;cs=srgb\u0026amp;bg=F4F4F3\u0026amp;ixlib=js-2.2.1\u0026amp;s=7d494bd5db8acc2a34321c15ed18ace5`.
@@ -1009,9 +1283,9 @@ add_action(
  */
 function decode_pattern_content( $content ) {
 	// Sometimes the initial `\` is missing, so look for both versions.
-	$content = str_replace( [ '\u0026amp;', 'u0026amp;' ], '&', $content );
-	// Remove `ref` from all content.
-	$content = preg_replace( '/"ref":\d+,?/', '', $content );
+	$content = str_replace( array( '\u0026amp;', 'u0026amp;' ), '&', $content );
+	// Remove `ref` from all content, taking the comma from whichever side of the key it sits on.
+	$content = preg_replace( '/"ref":\d+,|,?"ref":\d+/', '', $content );
 	return $content;
 }
 
@@ -1023,7 +1297,7 @@ function decode_pattern_content( $content ) {
  * @return string
  */
 function get_pattern_unlisted_reason( $post_id ) {
-	$reasons = wp_get_object_terms( get_the_ID(), FLAG_REASON );
+	$reasons = wp_get_object_terms( $post_id, FLAG_REASON );
 	if ( count( $reasons ) > 0 ) {
 		$reason = array_shift( $reasons );
 		return $reason->description;

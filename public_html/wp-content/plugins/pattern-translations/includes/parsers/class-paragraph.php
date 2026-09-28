@@ -1,13 +1,28 @@
 <?php
+/**
+ * Block translation parser helpers.
+ *
+ * @package WordPressdotorg\Pattern_Translations
+ */
+
 namespace WordPressdotorg\Pattern_Translations\Parsers;
 
+/**
+ * Translate Paragraph block content.
+ */
 class Paragraph implements BlockParser {
 	use GetSetAttribute;
 
-	public function to_strings( array $block ) : array {
+	/**
+	 * Extract translatable block strings.
+	 *
+	 * @param array $block Parsed block.
+	 * @return array Extracted strings.
+	 */
+	public function to_strings( array $block ): array {
 		$strings = $this->get_attribute( 'placeholder', $block );
 
-		$matches = [];
+		$matches = array();
 
 		if ( preg_match( '/<p[^>]*>(.+)<\/p>/is', $block['innerHTML'], $matches ) ) {
 			if ( ! empty( $matches[1] ) ) {
@@ -18,8 +33,16 @@ class Paragraph implements BlockParser {
 		return $strings;
 	}
 
-	// todo: this needs a fix to properly rebuild innerContent - see ParagraphParserTest
-	public function replace_strings( array $block, array $replacements ) : array {
+	/**
+	 * Replace translated strings in a block.
+	 *
+	 * @todo This needs a fix to properly rebuild innerContent - see ParagraphParserTest.
+	 *
+	 * @param array $block        Parsed block.
+	 * @param array $replacements Translations keyed by original string.
+	 * @return array Updated block.
+	 */
+	public function replace_strings( array $block, array $replacements ): array {
 		$this->set_attribute( 'placeholder', $block, $replacements );
 
 		$html = $block['innerHTML'];
@@ -32,7 +55,7 @@ class Paragraph implements BlockParser {
 		}
 
 		$block['innerHTML']    = $html;
-		$block['innerContent'] = [ $html ];
+		$block['innerContent'] = array( $html );
 
 		return $block;
 	}

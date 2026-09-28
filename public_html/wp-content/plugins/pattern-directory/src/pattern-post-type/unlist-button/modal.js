@@ -61,7 +61,7 @@ const UnlistModal = ( { onClose, onSubmit } ) => {
 			onSuccess: ( reasonList = [] ) => {
 				dispatch( {
 					status: 'REASONS_RECIEVED',
-					reasonList: reasonList,
+					reasonList,
 				} );
 			},
 			onFailure: ( err ) => {

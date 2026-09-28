@@ -1,13 +1,28 @@
 <?php
+/**
+ * Block translation parser helpers.
+ *
+ * @package WordPressdotorg\Pattern_Translations
+ */
+
 namespace WordPressdotorg\Pattern_Translations\Parsers;
 
+/**
+ * Translate Button block content.
+ */
 class Button implements BlockParser {
 	use DomUtils;
 	use SwapTags;
 	use GetSetAttribute;
 	use TextNodesXPath;
 
-	public function to_strings( array $block ) : array {
+	/**
+	 * Extract translatable block strings.
+	 *
+	 * @param array $block Parsed block.
+	 * @return array Extracted strings.
+	 */
+	public function to_strings( array $block ): array {
 		$strings = $this->get_attribute( 'placeholder', $block );
 
 		$encoded_html = $this->encode_tags( $block['innerHTML'] );
@@ -24,7 +39,14 @@ class Button implements BlockParser {
 		return $strings;
 	}
 
-	public function replace_strings( array $block, array $replacements ) : array {
+	/**
+	 * Replace translated strings in a block.
+	 *
+	 * @param array $block        Parsed block.
+	 * @param array $replacements Translations keyed by original string.
+	 * @return array Updated block.
+	 */
+	public function replace_strings( array $block, array $replacements ): array {
 		$this->set_attribute( 'placeholder', $block, $replacements );
 
 		$encoded_html = $this->encode_tags( $block['innerHTML'] );
@@ -45,9 +67,9 @@ class Button implements BlockParser {
 			}
 		}
 
-		$decoded_html = $this->decode_tags( $this->removeHtml( $dom->saveHTML() ) );
+		$decoded_html          = $this->decode_tags( $this->remove_html( $dom->saveHTML() ) );
 		$block['innerHTML']    = $decoded_html;
-		$block['innerContent'] = [ $decoded_html ];
+		$block['innerContent'] = array( $decoded_html );
 
 		return $block;
 	}

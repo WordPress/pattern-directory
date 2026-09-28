@@ -52,7 +52,7 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 	// Set up a debounced search term, so we don't query constantly while someone is typing.
 	useEffect( () => {
 		setDebouncedSearchTerm( searchTerm );
-	}, [ searchTerm ] );
+	}, [ searchTerm, setDebouncedSearchTerm ] );
 
 	// When the search changes, reset back to page 1, and trigger a search.
 	useEffect( () => {
@@ -68,7 +68,7 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 			return;
 		}
 
-		fetchImages( { searchTerm: debouncedSearchTerm, page: page } )
+		fetchImages( { searchTerm: debouncedSearchTerm, page } )
 			.then( ( data ) => {
 				setError( null );
 				setResults( data.results, data.total, data.totalPages );
@@ -91,7 +91,7 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 		}
 
 		onClose();
-	}, [ selected, multiple ] );
+	}, [ selected, multiple, onSelect, onClose ] );
 
 	const onClick = useCallback(
 		( newValue ) => {
@@ -166,7 +166,7 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 			<h1 className="pattern-openverse__title">
 				{ debouncedSearchTerm.length
 					? sprintf(
-							/* translators: %d: number of results. %s: media search query */
+							/* translators: %1$s: number of results. %2$s: media search query */
 							_n(
 								'%1$s result found for "%2$s"',
 								'%1$s results found for "%2$s"',
@@ -177,7 +177,7 @@ export default function OpenverseGrid( { searchTerm, onClose, onSelect, multiple
 							debouncedSearchTerm
 					  )
 					: sprintf(
-							/* translators: %d: number of results. */
+							/* translators: %1$s: number of results. */
 							_n( '%1$s result found', '%1$s results found', total, 'wporg-patterns' ),
 							new Intl.NumberFormat().format( total )
 					  ) }

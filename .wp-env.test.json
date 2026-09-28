@@ -1,0 +1,34 @@
+{
+	"config": {
+		"WP_DEBUG": true,
+		"SCRIPT_DEBUG": true,
+		"WP_DEBUG_LOG": "/tmp/wp-errors.log",
+		"FS_METHOD": "direct",
+		"WP_ENVIRONMENT_TYPE": false
+	},
+	"core": "https://wordpress.org/nightly-builds/wordpress-latest.zip",
+	"phpVersion": "8.4",
+	"port": 8889,
+	"testsEnvironment": false,
+	"plugins": [
+		"./public_html/wp-content/plugins/pattern-directory",
+		"./public_html/wp-content/plugins/pattern-creator",
+		"./public_html/wp-content/plugins/pattern-translations",
+		"https://downloads.wordpress.org/plugin/gutenberg.zip",
+		"https://downloads.wordpress.org/plugin/wordpress-importer.zip",
+		"https://downloads.wordpress.org/plugin/stream.zip",
+		"WordPress/wporg-internal-notes#build"
+	],
+	"themes": [
+		"./public_html/wp-content/themes/wporg-pattern-directory-2024",
+		"WordPress/wporg-parent-2021#build"
+	],
+	"mappings": {
+		"wp-content/mu-plugins/0-sandbox.php": "./.wp-env/0-sandbox.php",
+		"wp-content/mu-plugins/wporg-locales.php": "./.wp-env/wporg-locales.php",
+		"wp-content/mu-plugins/wporg-mu-plugins": "WordPress/wporg-mu-plugins#build",
+		"wp-content/tests": "./public_html/wp-content/tests",
+		"wp-content/uploads/data": "./.wp-env/data",
+		"vendor": "./vendor"
+	}
+}

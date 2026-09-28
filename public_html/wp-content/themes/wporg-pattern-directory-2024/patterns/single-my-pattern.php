@@ -3,13 +3,18 @@
  * Title: Single pattern
  * Slug: wporg-pattern-directory-2024/single-my-pattern
  * Inserter: no
+ *
+ * @package WordPress\Pattern_Directory
  */
 
-$action_status = isset( $_GET['status'] ) ? $_GET['status'] : false;
-$notice = '';
-$notice_type = 'warning';
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only notice flag set by our own redirect; nothing is written here.
+$action_status = isset( $_GET['status'] ) ? sanitize_key( wp_unslash( $_GET['status'] ) ) : false;
+$notice        = '';
+$notice_type   = 'warning';
 if ( 'draft-failed' === $action_status ) {
 	$notice = __( 'Your pattern could not be updated, please try again.', 'wporg-patterns' );
+} elseif ( 'draft-not-allowed' === $action_status ) {
+	$notice = __( 'Only a directory moderator can change the status of this pattern.', 'wporg-patterns' );
 }
 
 ?>
@@ -24,9 +29,9 @@ if ( 'draft-failed' === $action_status ) {
 		</div>
 	</div>
 	<!-- /wp:wporg/notice -->
-	<?php else : ?>
-	<!-- wp:wporg/status-notice /-->
 	<?php endif; ?>
+
+	<!-- wp:wporg/status-notice /-->
 
 	<!-- wp:post-title {"level":1,"fontSize":"heading-3"} /-->
 
@@ -63,9 +68,7 @@ if ( 'draft-failed' === $action_status ) {
 			<div class="wp-block-button is-style-toggle is-small"><a href="[pattern_edit_link]" class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Edit', 'wporg-patterns' ); ?></a></div>
 			<!-- /wp:button -->
 
-			<!-- wp:button {"className":"is-style-toggle is-small is-draft-button"} -->
-			<div class="wp-block-button is-style-toggle is-small is-draft-button"><a href="[pattern_draft_link]" class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Revert to draft', 'wporg-patterns' ); ?></a></div>
-			<!-- /wp:button -->
+			<!-- wp:wporg/draft-button /-->
 
 			<!-- wp:wporg/delete-button /-->
 		</div>

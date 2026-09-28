@@ -1,6 +1,4 @@
 <?php
-// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
-
 /**
  * Mark submitted patterns to be distributed in core.
  *
@@ -14,6 +12,11 @@
  *
  * The `block_types` arg corresponds to the `blockTypes` in pattern registration,
  * used for suggestions on given block types. This is optional.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ *
+ * phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI output is plain text.
+ * phpcs:disable WordPress.WP.AlternativeFunctions -- Native functions are needed for CLI bootstrap and streams.
  */
 
 namespace WordPressdotorg\Pattern_Directory;
@@ -39,7 +42,7 @@ if ( ! empty( $opts['block_types'] ) ) {
 	$opts['block_types'] = array();
 }
 
-// Bootstrap WordPress
+// Bootstrap WordPress.
 $_SERVER['HTTP_HOST']   = parse_url( $opts['url'], PHP_URL_HOST );
 $_SERVER['REQUEST_URI'] = parse_url( $opts['url'], PHP_URL_PATH );
 
@@ -56,11 +59,13 @@ $wporg_user_id = '5911429';
 if ( $pattern ) {
 	$pattern_id = $pattern->ID;
 
-	// Update author
-	$result = wp_update_post( array(
-		'ID'          => $pattern_id,
-		'post_author' => $wporg_user_id,
-	) );
+	// Update author.
+	$result = wp_update_post(
+		array(
+			'ID'          => $pattern_id,
+			'post_author' => $wporg_user_id,
+		)
+	);
 	if ( is_wp_error( $result ) ) {
 		echo "Error updating author:\n";
 		echo $result->get_error_message() . "\n";
@@ -77,7 +82,7 @@ if ( $pattern ) {
 		echo "Updated locale.\n";
 	}
 
-	// Add `blockTypes` meta
+	// Add `blockTypes` meta.
 	if ( count( $opts['block_types'] ) ) {
 		delete_post_meta( $pattern_id, 'wpop_block_types' );
 
@@ -101,7 +106,7 @@ if ( $pattern ) {
 		echo "Updated version.\n";
 	}
 
-	// Add core tag
+	// Add core tag.
 	$result = wp_set_post_terms( $pattern_id, 'core', 'wporg-pattern-keyword', false );
 	if ( is_wp_error( $result ) ) {
 		echo "Error updating post terms:\n";

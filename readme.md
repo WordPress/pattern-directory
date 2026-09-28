@@ -3,12 +3,26 @@
 ## Prerequisites
 - Docker
 - Node/NPM
-- Composer
+- Composer (only for linting and PHPUnit — the environment itself no longer needs it)
 
 ## Setup
 1. `npm install`
 2. `npm run create`
 3. Visit site at `localhost:8888`
+
+`wp-env` fetches every dependency directly: WordPress core, the directory plugins and theme, Gutenberg, and the `wporg-mu-plugins` build (which provides the global header and footer). No Composer step is required to build the site.
+
+### Optional: locale data
+
+The GlotPress/WordPress locales live in the meta repository's `pub` mu-plugin, which has no `wp-env` source. The environment boots without it; the locale switcher and locale-aware REST endpoints simply no-op. To enable them, check out [`WordPress/wordpress.org`](https://github.com/WordPress/wordpress.org) and map `pub` in a (git-ignored) `.wp-env.override.json`:
+
+```json
+{
+	"mappings": {
+		"wp-content/mu-plugins/pub": "../wordpress.org/public_html/wp-content/mu-plugins/pub"
+	}
+}
+```
 
 ### Stopping & Starting Environment
 
@@ -59,10 +73,23 @@ The available workspaces are:
 
 ### Linting
 
-This project has eslint, stylelint, and phpcs set up for linting the code. This ensures all developers are working from the same style. To check your code before pushing it to the repo, run
+This project has eslint, stylelint, and phpcs set up for linting the code. This ensures all developers are working from the same style. phpcs comes from Composer, so run `composer install` once first. To check your code before pushing it to the repo, run
 
 	npm run lint:css --workspaces
 	npm run lint:js --workspaces
 	composer run lint
 
 These checks will also be run automatically on each PR.
+
+### PHP unit tests
+
+PHPUnit is installed with `composer install`. The test suite runs in its own `wp-env` instance, defined by `.wp-env.test.json` and served at `localhost:8889`, so it can run alongside the development environment. Start the test instance once, then run the tests:
+
+	npm run test:env start
+	npm run test:php
+
+`npm run test:env` accepts all the usual `wp-env` commands (`stop`, `destroy`, `run cli ...`) and targets the test instance.
+
+To run a single test or test class, pass PHPUnit's `--filter`:
+
+	npm run test:php -- --filter <TestNameOrMethod>

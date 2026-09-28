@@ -1,18 +1,73 @@
 <?php
-namespace WordPressdotorg\Pattern_Translations;
-use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
-use GlotPress_Translate_Bridge;
+/**
+ * Pattern data and translation helpers.
+ *
+ * @package WordPressdotorg\Pattern_Translations
+ */
 
+namespace WordPressdotorg\Pattern_Translations;
+
+use GlotPress_Translate_Bridge;
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+
+/**
+ * Pattern content and translation metadata.
+ */
 class Pattern {
+	/**
+	 * Pattern post ID.
+	 *
+	 * @var int|null
+	 */
 	public $ID = null;
+	/**
+	 * Pattern title.
+	 *
+	 * @var string
+	 */
 	public $title = '';
+	/**
+	 * Pattern slug.
+	 *
+	 * @var string
+	 */
 	public $name = '';
+	/**
+	 * Pattern description.
+	 *
+	 * @var string
+	 */
 	public $description = '';
+	/**
+	 * Serialized pattern content.
+	 *
+	 * @var string
+	 */
 	public $html = '';
+	/**
+	 * Original pattern permalink.
+	 *
+	 * @var string|false
+	 */
 	public $source_url = '';
+	/**
+	 * Comma-separated pattern keywords.
+	 *
+	 * @var string
+	 */
 	public $keywords = '';
 
+	/**
+	 * Pattern locale.
+	 *
+	 * @var string
+	 */
 	public $locale = 'en_US';
+	/**
+	 * Original untranslated pattern.
+	 *
+	 * @var Pattern|false
+	 */
 	public $parent = false;
 
 	/**
@@ -44,7 +99,7 @@ class Pattern {
 
 		$parser = new PatternParser( $translated );
 
-		$translations = [];
+		$translations = array();
 		$translated   = false;
 		foreach ( $parser->to_strings() as $string ) {
 			$translations[ $string ] = apply_filters( 'gettext', GlotPress_Translate_Bridge::translate( $string, GLOTPRESS_PROJECT ), 'wporg-pattern' );
@@ -65,27 +120,55 @@ class Pattern {
 		$translated         = $parser->replace_strings_with_kses( $translations );
 		$translated->locale = $locale;
 		// Reset the ID.
-		$translated->ID     = 0;
+		$translated->ID = 0;
 
-		// Find the actual post ID of the translated pattern
-		$children = get_posts( [
-			'post_parent' => $parent->ID,
-			'post_type'   => POST_TYPE,
-			'post_status' => 'any',
-			'meta_query'  => [
-				[
-					'key'   => 'wpop_locale',
-					'value' => $locale,
-				],
-			],
-		] );
-		if ( $children ) {
-			$post = array_shift( $children );
-			$translated->ID   = $post->ID;
-			$translated->name = $post->post_name; // ???
+		$existing = self::find_existing_translation( (int) $parent->ID, $locale );
+		if ( $existing ) {
+			$translated->ID   = $existing->ID;
+			$translated->name = $existing->post_name; // Preserve the existing translation's slug.
 		}
 
 		return $translated;
+	}
+
+	/**
+	 * Find the pattern this pipeline previously created as the $locale translation of $parent_id.
+	 *
+	 * `post_parent` and `wpop_locale` are both writable by any submitter on their own pattern, so the pair
+	 * alone is an attacker-controlled claim rather than an identification. `wpop_is_translation` is written
+	 * only by `create_or_update_translated_pattern()` and is not exposed over REST, so requiring it keeps the
+	 * job from adopting a user's own post and overwriting it with the parent's author and status.
+	 *
+	 * @param int    $parent_id The English original's post ID.
+	 * @param string $locale    The locale to find the existing translation for.
+	 *
+	 * @return \WP_Post|null The existing translation, or null if this pipeline has not created one.
+	 */
+	public static function find_existing_translation( int $parent_id, string $locale ): ?\WP_Post {
+		if ( $parent_id <= 0 ) {
+			return null;
+		}
+
+		$children = get_posts(
+			array(
+				'post_parent' => $parent_id,
+				'post_type'   => POST_TYPE,
+				'post_status' => 'any',
+				'meta_query'  => array(
+					'relation' => 'AND',
+					array(
+						'key'   => 'wpop_locale',
+						'value' => $locale,
+					),
+					array(
+						'key'   => 'wpop_is_translation',
+						'value' => 1,
+					),
+				),
+			)
+		);
+
+		return $children ? array_shift( $children ) : null;
 	}
 
 	/**
@@ -94,7 +177,7 @@ class Pattern {
 	 * @param \WP_Post $post The post object.
 	 * @return Pattern The Pattern object.
 	 */
-	public static function from_post( \WP_Post $post ) : Pattern {
+	public static function from_post( \WP_Post $post ): Pattern {
 		$pattern              = new Pattern();
 		$pattern->ID          = $post->ID;
 		$pattern->title       = $post->post_title;
@@ -114,24 +197,23 @@ class Pattern {
 	 * @param array $args The WP_Query args.
 	 * @return array An array of Pattern objects.
 	 */
-	public static function get_patterns( array $args = [] ) : array {
-		$defaults = [
+	public static function get_patterns( array $args = array() ): array {
+		$defaults = array(
 			'post_type'      => POST_TYPE,
-			// Note: This must be set for cli context, in isolated test context this is defaulted to 'publish'
-			// Prevents unexpected patterns in translations
+			// Explicit status prevents non-public patterns from entering CLI exports.
 			'post_status'    => 'publish',
 			'posts_per_page' => -1,
-			'orderby'        => [
+			'orderby'        => array(
 				'post_date' => 'DESC',
-			],
+			),
 			// Only select en_US patterns.
-			'meta_query' => [
-				[
+			'meta_query'     => array(
+				array(
 					'key'   => 'wpop_locale',
 					'value' => 'en_US',
-				],
-			],
-		];
+				),
+			),
+		);
 
 		$options = wp_parse_args( $args, $defaults );
 
@@ -141,7 +223,7 @@ class Pattern {
 		wp_reset_postdata();
 
 		if ( 'ids' !== $query->get( 'fields' ) ) {
-			$patterns = array_map( [ self::class, 'from_post' ], $patterns );
+			$patterns = array_map( array( self::class, 'from_post' ), $patterns );
 		}
 
 		return $patterns;

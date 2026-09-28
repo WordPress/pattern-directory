@@ -1,24 +1,32 @@
 <?php
+/**
+ * Pattern Directory theme setup.
+ *
+ * @package WordPress\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Theme\Pattern_Directory_2024;
 
 use function WordPressdotorg\Pattern_Directory\Favorite\{get_favorites, get_favorite_count};
-use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
+use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\flag_details_to_html;
+use function WordPressdotorg\Theme\Pattern_Directory_2024\Block_Config\get_applied_filter_list;
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\POST_TYPE as FLAG_POST_TYPE;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\PENDING_STATUS;
-use function WordPressdotorg\Theme\Pattern_Directory_2024\Block_Config\get_applied_filter_list;
+use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
 
-// Block files
-require_once( __DIR__ . '/src/blocks/copy-button/index.php' );
-require_once( __DIR__ . '/src/blocks/delete-button/index.php' );
-require_once( __DIR__ . '/src/blocks/pattern-preview/index.php' );
-require_once( __DIR__ . '/src/blocks/pattern-thumbnail/index.php' );
-require_once( __DIR__ . '/src/blocks/post-status/index.php' );
-require_once( __DIR__ . '/src/blocks/report-pattern/index.php' );
-require_once( __DIR__ . '/src/blocks/status-notice/index.php' );
+// Block files.
+require_once __DIR__ . '/src/blocks/copy-button/index.php';
+require_once __DIR__ . '/src/blocks/delete-button/index.php';
+require_once __DIR__ . '/src/blocks/draft-button/index.php';
+require_once __DIR__ . '/src/blocks/pattern-preview/index.php';
+require_once __DIR__ . '/src/blocks/pattern-thumbnail/index.php';
+require_once __DIR__ . '/src/blocks/post-status/index.php';
+require_once __DIR__ . '/src/blocks/report-pattern/index.php';
+require_once __DIR__ . '/src/blocks/status-notice/index.php';
 
-require_once( __DIR__ . '/inc/block-config.php' );
-require_once( __DIR__ . '/inc/shortcodes.php' );
+require_once __DIR__ . '/inc/block-config.php';
+require_once __DIR__ . '/inc/shortcodes.php';
 
 /**
  * Actions and filters.
@@ -37,7 +45,7 @@ add_filter( 'frontpage_template_hierarchy', __NAMESPACE__ . '\use_archive_templa
 
 add_action(
 	'init',
-	function() {
+	function () {
 		// Don't swap author link with w.org profile link.
 		remove_all_filters( 'author_link' );
 
@@ -66,22 +74,40 @@ function enqueue_assets() {
  *
  * Available actions:
  * - draft: Update the current post to a draft.
+ * - report: Flag the current post for moderation.
  */
 function do_pattern_actions() {
 	if ( ! is_singular( POST_TYPE ) ) {
 		return;
 	}
 
-	$action = isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : false;
-	$nonce = isset( $_REQUEST['_wpnonce'] ) ? $_REQUEST['_wpnonce'] : false;
+	// Both actions change state, so a request the browser makes on its own (a link, an image) must not reach them.
+	if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
+		return;
+	}
+
+	$action  = isset( $_POST['action'] ) ? sanitize_key( wp_unslash( $_POST['action'] ) ) : false;
+	$nonce   = isset( $_POST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : false;
 	$post_id = get_the_ID();
 
 	if ( 'draft' === $action ) {
+		$pattern_type = get_post_type_object( POST_TYPE );
+
+		// `unlisted` and spam are moderator-set, and this path bypasses `validate_status()`.
+		$is_moderator_status = in_array( get_post_status( $post_id ), array( SPAM_STATUS, UNLISTED_STATUS ), true ) &&
+			! current_user_can( $pattern_type->cap->edit_others_posts );
+
 		if ( wp_verify_nonce( $nonce, 'draft-' . $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
+			if ( $is_moderator_status ) {
+				// Tell the author why, rather than reloading the page with the action still in the URL.
+				wp_safe_redirect( add_query_arg( array( 'status' => 'draft-not-allowed' ), get_the_permalink() ) );
+				return;
+			}
+
 			// Draft the post.
 			$success = wp_update_post(
 				array(
-					'ID' => $post_id,
+					'ID'          => $post_id,
 					'post_status' => 'draft',
 				)
 			);
@@ -99,31 +125,47 @@ function do_pattern_actions() {
 				wp_safe_redirect( $url );
 			}
 		}
-	} else if ( 'report' === $action ) {
+	} elseif ( 'report' === $action ) {
 		if ( wp_verify_nonce( $nonce, 'report-' . $post_id ) && current_user_can( 'read' ) ) {
-			$existing = new \WP_Query( array(
-				'post_type'   => FLAG_POST_TYPE,
-				'post_parent' => $post_id,
-				'post_status' => PENDING_STATUS,
-				'author'      => get_current_user_id(),
-			) );
+			$existing = new \WP_Query(
+				array(
+					'post_type'   => FLAG_POST_TYPE,
+					'post_parent' => $post_id,
+					'post_status' => PENDING_STATUS,
+					'author'      => get_current_user_id(),
+				)
+			);
 			if ( $existing->found_posts > 0 ) {
 				wp_safe_redirect( add_query_arg( array( 'status' => 'already-reported' ), get_the_permalink() ) );
 				return;
 			}
 
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- flag_details_to_html() entity-encodes the value.
+			$report_details = isset( $_POST['report-details'] ) ? flag_details_to_html( wp_unslash( $_POST['report-details'] ) ) : '';
+			$report_reason  = isset( $_POST['report-reason'] )
+				? filter_var( wp_unslash( $_POST['report-reason'] ), FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) ) : false;
+
+			if ( '' === $report_details || ! $report_reason || ! term_exists( $report_reason, FLAG_REASON ) ) {
+				// Distinct from `report-failed`, since resubmitting an incomplete form unchanged cannot succeed.
+				wp_safe_redirect( add_query_arg( array( 'status' => 'report-invalid' ), get_the_permalink() ) );
+				return;
+			}
+
 			$success = wp_insert_post(
 				array(
-					'post_type'   => FLAG_POST_TYPE,
-					'post_parent' => $post_id,
-					'post_excerpt'  => sanitize_text_field( $_POST['report-details'] ),
-					'post_status' => PENDING_STATUS,
-					'tax_input'  => array(
-						'wporg-pattern-flag-reason' => intval( $_POST['report-reason'] ),
-					),
-				)
+					'post_type'    => FLAG_POST_TYPE,
+					'post_parent'  => $post_id,
+					'post_excerpt' => wp_slash( $report_details ),
+					'post_status'  => PENDING_STATUS,
+				),
+				false,
+				false // Defer threshold checks and notifications until the report reason is saved.
 			);
+
 			if ( $success ) {
+				wp_set_object_terms( $success, array( $report_reason ), FLAG_REASON );
+				wp_after_insert_post( $success, false, null );
+
 				$args = array(
 					'status' => 'reported',
 				);
@@ -145,7 +187,7 @@ function do_pattern_actions() {
 /**
  * Add custom query parameters.
  *
- * @param array $query_vars
+ * @param array $query_vars Public query variable names.
  *
  * @return array
  */
@@ -175,21 +217,21 @@ function modify_patterns_query( $query ) {
 	}
 
 	if ( $curation ) {
-		$tax_query = isset( $query->tax_query->queries ) ? $query->tax_query->queries : [];
+		$tax_query = isset( $query->tax_query->queries ) ? $query->tax_query->queries : array();
 		if ( 'core' === $curation ) {
 			// Patterns with the core keyword.
 			$tax_query['core_keyword'] = array(
 				'taxonomy' => 'wporg-pattern-keyword',
 				'field'    => 'slug',
-				'terms'    => [ 'core' ],
+				'terms'    => array( 'core' ),
 				'operator' => 'IN',
 			);
-		} else if ( 'community' === $curation ) {
+		} elseif ( 'community' === $curation ) {
 			// Patterns without the core keyword.
 			$tax_query['core_keyword'] = array(
 				'taxonomy' => 'wporg-pattern-keyword',
 				'field'    => 'slug',
-				'terms'    => [ 'core' ],
+				'terms'    => array( 'core' ),
 				'operator' => 'NOT IN',
 			);
 		}
@@ -200,7 +242,7 @@ function modify_patterns_query( $query ) {
 		$orderby = str_replace( '_desc', '', $query->get( 'orderby' ) );
 		$query->set( 'orderby', $orderby );
 		$query->set( 'order', 'desc' );
-	} else if ( str_ends_with( $query->get( 'orderby' ), '_asc' ) ) {
+	} elseif ( str_ends_with( $query->get( 'orderby' ), '_asc' ) ) {
 		$orderby = str_replace( '_asc', '', $query->get( 'orderby' ) );
 		$query->set( 'orderby', $orderby );
 		$query->set( 'order', 'asc' );
@@ -215,14 +257,17 @@ function modify_patterns_query( $query ) {
 		$query->set( 'post_type', array( POST_TYPE ) );
 
 		// The `orderby_locale` meta_query will be transformed into a query orderby by Pattern_Post_Type\filter_orderby_locale().
-		$query->set( 'meta_query', array(
-			'orderby_locale' => array(
-				'key'     => 'wpop_locale',
-				'compare' => 'IN',
-				// Order in value determines result order
-				'value'   => array( get_locale(), 'en_US' ),
-			),
-		) );
+		$query->set(
+			'meta_query',
+			array(
+				'orderby_locale' => array(
+					'key'     => 'wpop_locale',
+					'compare' => 'IN',
+					// Order in value determines result order.
+					'value'   => array( get_locale(), 'en_US' ),
+				),
+			)
+		);
 	}
 }
 
@@ -260,24 +305,24 @@ function modify_query_loop_block_query_vars( $query, $block, $page ) {
 				'terms'    => 'core',
 				'operator' => 'IN',
 			);
-		} else if ( 'community' === $block->context['query']['curation'] ) {
+		} elseif ( 'community' === $block->context['query']['curation'] ) {
 			// Patterns without the core keyword.
 			$query['tax_query']['core_keyword'] = array(
 				'taxonomy' => 'wporg-pattern-keyword',
 				'field'    => 'slug',
-				'terms'    => [ 'core' ],
+				'terms'    => array( 'core' ),
 				'operator' => 'NOT IN',
 			);
 		}
 	}
 
 	if ( isset( $block->context['query']['orderBy'] ) && 'favorite_count' === $block->context['query']['orderBy'] ) {
-		$query['orderby'] = 'meta_value_num';
+		$query['orderby']  = 'meta_value_num';
 		$query['meta_key'] = 'wporg-pattern-favorites';
 	}
 
-	// Query Loops on My Patterns & Favorites pages
-	if ( is_page( [ 'my-patterns', 'favorites' ] ) ) {
+	// Query Loops on My Patterns & Favorites pages.
+	if ( is_page( array( 'my-patterns', 'favorites' ) ) ) {
 		// Get these values from the global wp_query, they're passed via the URL.
 		if ( isset( $wp_query->query['pattern-categories'] ) ) {
 			if ( ! isset( $query['tax_query'] ) || ! is_array( $query['tax_query'] ) ) {
@@ -293,24 +338,24 @@ function modify_query_loop_block_query_vars( $query, $block, $page ) {
 
 		if ( isset( $wp_query->query['orderby'] ) ) {
 			if ( str_ends_with( $wp_query->query['orderby'], '_desc' ) ) {
-				$orderby = str_replace( '_desc', '', $wp_query->query['orderby'] );
+				$orderby          = str_replace( '_desc', '', $wp_query->query['orderby'] );
 				$query['orderby'] = $orderby;
-				$query['order'] = 'desc';
-			} else if ( str_ends_with( $wp_query->query['orderby'], '_asc' ) ) {
-				$orderby = str_replace( '_asc', '', $wp_query->query['orderby'] );
+				$query['order']   = 'desc';
+			} elseif ( str_ends_with( $wp_query->query['orderby'], '_asc' ) ) {
+				$orderby          = str_replace( '_asc', '', $wp_query->query['orderby'] );
 				$query['orderby'] = $orderby;
-				$query['order'] = 'asc';
+				$query['order']   = 'asc';
 			}
 		}
 
 		if ( is_page( 'my-patterns' ) ) {
 			$user_id = get_current_user_id();
 			if ( $user_id ) {
-				$query['post_type'] = 'wporg-pattern';
+				$query['post_type']   = 'wporg-pattern';
 				$query['post_status'] = 'any';
-				$query['author'] = get_current_user_id();
+				$query['author']      = get_current_user_id();
 			} else {
-				$query['post__in'] = [ -1 ];
+				$query['post__in'] = array( -1 );
 			}
 
 			if ( isset( $wp_query->query['status'] ) ) {
@@ -323,7 +368,7 @@ function modify_query_loop_block_query_vars( $query, $block, $page ) {
 			if ( ! empty( $favorites ) ) {
 				$query['post__in'] = get_favorites();
 			} else {
-				$query['post__in'] = [ -1 ];
+				$query['post__in'] = array( -1 );
 			}
 		}
 	}
@@ -333,7 +378,7 @@ function modify_query_loop_block_query_vars( $query, $block, $page ) {
 		'orderby_locale' => array(
 			'key'     => 'wpop_locale',
 			'compare' => 'IN',
-			// Order in value determines result order
+			// Order in value determines result order.
 			'value'   => array( get_locale(), 'en_US' ),
 		),
 	);
@@ -359,16 +404,16 @@ function custom_query_loop_by_id( $query, $block ) {
 
 	$current_post = get_post();
 	if ( 'more-by-author' === $block->context['query']['_id'] && $current_post && $current_post->post_author ) {
-		$query['author'] = $current_post->post_author;
-		$query['post__not_in'] = [ $current_post->ID ];
-		$query['post_type'] = 'wporg-pattern';
+		$query['author']       = $current_post->post_author;
+		$query['post__not_in'] = array( $current_post->ID );
+		$query['post_type']    = 'wporg-pattern';
 	}
 
 	if ( 'empty-favorites' === $block->context['query']['_id'] ) {
 		unset( $query['post__in'] );
 		$query['post_type'] = 'wporg-pattern';
-		$query['orderby'] = 'meta_value_num';
-		$query['meta_key'] = 'wporg-pattern-favorites';
+		$query['orderby']   = 'meta_value_num';
+		$query['meta_key']  = 'wporg-pattern-favorites';
 	}
 
 	return $query;
@@ -397,7 +442,7 @@ function get_patterns_count() {
 
 	// Cache for an hour to avoid extra DB lookup.
 	$cache_key = 'wporg-patterns-count-' . $locale;
-	$ttl = HOUR_IN_SECONDS;
+	$ttl       = HOUR_IN_SECONDS;
 
 	$count = get_transient( $cache_key );
 	if ( ! $count ) {
@@ -422,9 +467,9 @@ function get_patterns_count() {
  */
 function user_has_flagged_pattern() {
 	$args = array(
-		'author' => get_current_user_id(),
+		'author'      => get_current_user_id(),
 		'post_parent' => get_the_ID(),
-		'post_type' => FLAG_POST_TYPE,
+		'post_type'   => FLAG_POST_TYPE,
 		'post_status' => PENDING_STATUS,
 	);
 
@@ -456,7 +501,7 @@ function redirect_term_archives() {
 	if ( count( $terms ) === 1 && ! $is_term_archive ) {
 		$url = get_term_link( $terms[0] );
 		// Pass through search query, curation, sorting values.
-		$query_vars = [ 's', 'curation', 'order', 'orderby' ];
+		$query_vars = array( 's', 'curation', 'order', 'orderby' );
 		foreach ( $query_vars as $query_var ) {
 			if ( isset( $wp_query->query[ $query_var ] ) ) {
 				$url = add_query_arg( $query_var, $wp_query->query[ $query_var ], $url );
@@ -471,37 +516,38 @@ function redirect_term_archives() {
  * Add meta tags for richer social media integrations.
  */
 function add_social_meta_tags() {
-	$og_fields     = [];
+	$og_fields     = array();
 	$default_image = 'https://s.w.org/patterns/files/2024/04/patterns-ogimage.png';
 	$site_title    = function_exists( '\WordPressdotorg\site_brand' ) ? \WordPressdotorg\site_brand() : 'WordPress.org';
 
 	if ( is_front_page() || is_home() ) {
-		$og_fields = [
+		$og_fields = array(
 			'og:title'       => __( 'Block Pattern Directory', 'wporg-patterns' ),
 			'og:description' => __( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ),
 			'og:site_name'   => $site_title,
 			'og:type'        => 'website',
 			'og:url'         => home_url(),
 			'og:image'       => esc_url( $default_image ),
-		];
-	} else if ( is_tax() && get_queried_object() ) {
-		$og_fields = [
+		);
+	} elseif ( is_tax() && get_queried_object() ) {
+		$og_fields = array(
+			/* translators: %s: Taxonomy term name. */
 			'og:title'       => sprintf( __( 'Block Patterns: %s', 'wporg-patterns' ), esc_attr( single_term_title( '', false ) ) ),
 			'og:description' => __( 'Add a beautifully designed, ready to go layout to any WordPress site with a simple copy/paste.', 'wporg-patterns' ),
 			'og:site_name'   => $site_title,
 			'og:type'        => 'website',
 			'og:url'         => esc_url( get_term_link( get_queried_object_id() ) ),
 			'og:image'       => esc_url( $default_image ),
-		];
-	} else if ( is_singular( POST_TYPE ) ) {
-		$og_fields = [
+		);
+	} elseif ( is_singular( POST_TYPE ) ) {
+		$og_fields = array(
 			'og:title'       => the_title_attribute( array( 'echo' => false ) ),
-			'og:description' => strip_tags( get_post_meta( get_the_ID(), 'wpop_description', true ) ),
+			'og:description' => wp_strip_all_tags( get_post_meta( get_the_ID(), 'wpop_description', true ) ),
 			'og:site_name'   => $site_title,
 			'og:type'        => 'website',
 			'og:url'         => esc_url( get_permalink() ),
 			'og:image'       => esc_url( $default_image ),
-		];
+		);
 		printf( '<meta name="twitter:card" content="summary_large_image">' . "\n" );
 		printf( '<meta name="twitter:site" content="@WordPress">' . "\n" );
 		printf( '<meta name="twitter:image" content="%s" />' . "\n", esc_url( $default_image ) );
@@ -555,8 +601,8 @@ function set_document_title( $title ) {
 
 		// If results are paged and the max number of pages is known.
 		if ( is_paged() && $wp_query->max_num_pages ) {
-			// translators: 1: current page number, 2: total number of pages
 			$title['page'] = sprintf(
+				/* translators: 1: Current page number, 2: Total number of pages. */
 				__( 'Page %1$s of %2$s', 'wporg-patterns' ),
 				get_query_var( 'paged' ),
 				$wp_query->max_num_pages
