@@ -225,6 +225,7 @@ class Pattern_Title_Validation_Test extends WP_UnitTestCase {
 		return array(
 			array( 'Test Pattern', 'Pattern titles cannot include "Test". The title should describe the pattern.' ),
 			array( 'My  Pattern', 'Pattern titles cannot include "My  Pattern". The title should describe the pattern.' ),
+			array( 'My Patterns', 'Pattern titles cannot include "My Patterns". The title should describe the pattern.' ),
 			array( 'WordPress Header', 'Pattern titles cannot include "WordPress". The title should describe the pattern.' ),
 			array( 'Quote <span>markup</span>', 'Pattern titles cannot contain HTML or shortcodes.' ),
 		);

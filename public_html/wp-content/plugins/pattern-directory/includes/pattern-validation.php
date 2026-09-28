@@ -1136,7 +1136,7 @@ function get_title_error( $title ) {
 	}
 
 	// Whole words only, so "Latest Posts" and "Testimonial" are fine.
-	$disallow_list = array( 'test', 'testing', 'my pattern', 'wordpress', 'example' );
+	$disallow_list = array( 'test', 'testing', 'my pattern', 'my patterns', 'wordpress', 'example' );
 
 	foreach ( $disallow_list as $disallowed ) {
 		$pattern = '/\b' . str_replace( ' ', '\s+', preg_quote( $disallowed, '/' ) ) . '\b/iu';
