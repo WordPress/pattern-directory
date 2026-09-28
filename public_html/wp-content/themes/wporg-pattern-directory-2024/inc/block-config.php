@@ -18,7 +18,7 @@ add_filter( 'wporg_query_filter_options_curation', __NAMESPACE__ . '\get_curatio
 add_filter( 'wporg_query_filter_options_sort', __NAMESPACE__ . '\get_sort_options' );
 add_action( 'wporg_query_filter_in_form', __NAMESPACE__ . '\inject_other_filters' );
 add_filter( 'wporg_favorite_button_settings', __NAMESPACE__ . '\get_favorite_settings', 10, 2 );
-add_filter( 'render_block_core/search', __NAMESPACE__ . '\inject_category_search_block' );
+add_filter( 'render_block_core/search', __NAMESPACE__ . '\inject_filters_search_block' );
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
 add_filter( 'render_block_core/query-title', __NAMESPACE__ . '\update_archive_title', 10, 2 );
 add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\update_site_title' );
@@ -315,24 +315,37 @@ function get_favorite_settings( $settings, $post_id ) {
 }
 
 /**
- * Inject the current category into the search form.
+ * Inject the current category, curation, and sorting into the pattern search form.
+ *
+ * Without these, a search resets the filters to their defaults, e.g. searching
+ * from `?curation=all` only returns curated patterns.
  *
  * @param string $block_content Search block markup.
  *
  * @return string
  */
-function inject_category_search_block( $block_content ) {
+function inject_filters_search_block( $block_content ) {
 	global $wp_query;
-	$category_inputs = '';
-	$query_var       = 'pattern-categories';
-	if ( isset( $wp_query->query[ $query_var ] ) ) {
+
+	// Leave other search forms alone, such as the global header search, which submits to wordpress.org/search.
+	$form = new \WP_HTML_Tag_Processor( $block_content );
+	if ( ! $form->next_tag( 'form' ) || untrailingslashit( (string) $form->get_attribute( 'action' ) ) !== untrailingslashit( home_url() ) ) {
+		return $block_content;
+	}
+
+	$filter_inputs = '';
+	$query_vars    = array( 'pattern-categories', 'curation', 'order', 'orderby' );
+	foreach ( $query_vars as $query_var ) {
+		if ( ! isset( $wp_query->query[ $query_var ] ) ) {
+			continue;
+		}
 		$values = (array) $wp_query->query[ $query_var ];
 		foreach ( $values as $value ) {
-			$category_inputs .= sprintf( '<input type="hidden" name="%s" value="%s" />', esc_attr( $query_var ), esc_attr( $value ) );
+			$filter_inputs .= sprintf( '<input type="hidden" name="%s" value="%s" />', esc_attr( $query_var ), esc_attr( $value ) );
 		}
 	}
 
-	return str_replace( '</form>', $category_inputs . '</form>', $block_content );
+	return str_replace( '</form>', $filter_inputs . '</form>', $block_content );
 }
 
 /**
