@@ -18,7 +18,7 @@ add_filter( 'wporg_query_filter_options_curation', __NAMESPACE__ . '\get_curatio
 add_filter( 'wporg_query_filter_options_sort', __NAMESPACE__ . '\get_sort_options' );
 add_action( 'wporg_query_filter_in_form', __NAMESPACE__ . '\inject_other_filters' );
 add_filter( 'wporg_favorite_button_settings', __NAMESPACE__ . '\get_favorite_settings', 10, 2 );
-add_filter( 'render_block_core/search', __NAMESPACE__ . '\inject_filters_search_block' );
+add_filter( 'render_block_core/search', __NAMESPACE__ . '\inject_filters_search_block', 10, 2 );
 add_filter( 'wporg_block_navigation_menus', __NAMESPACE__ . '\add_site_navigation_menus' );
 add_filter( 'render_block_core/query-title', __NAMESPACE__ . '\update_archive_title', 10, 2 );
 add_filter( 'render_block_core/site-title', __NAMESPACE__ . '\update_site_title' );
@@ -321,13 +321,19 @@ function get_favorite_settings( $settings, $post_id ) {
  * from `?curation=all` only returns curated patterns.
  *
  * @param string $block_content Search block markup.
+ * @param array  $block         Parsed search block.
  *
  * @return string
  */
-function inject_filters_search_block( $block_content ) {
+function inject_filters_search_block( $block_content, $block ) {
 	global $wp_query;
 
-	// Leave other search forms alone, such as the global header search, which submits to wordpress.org/search.
+	// Leave other search forms alone. The global header search sets `formAction` to submit to wordpress.org/search,
+	// and checking the attribute doesn't depend on the mu-plugin swapping the action before this filter runs.
+	if ( ! empty( $block['attrs']['formAction'] ) ) {
+		return $block_content;
+	}
+
 	$form = new \WP_HTML_Tag_Processor( $block_content );
 	if ( ! $form->next_tag( 'form' ) || untrailingslashit( (string) $form->get_attribute( 'action' ) ) !== untrailingslashit( home_url() ) ) {
 		return $block_content;
