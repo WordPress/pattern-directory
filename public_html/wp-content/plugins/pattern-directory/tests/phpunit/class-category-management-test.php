@@ -43,6 +43,13 @@ class Category_Management_Test extends WP_UnitTestCase {
 	protected static $category_term_id;
 
 	/**
+	 * Another existing category, used as a parent.
+	 *
+	 * @var int
+	 */
+	protected static $other_category_term_id;
+
+	/**
 	 * Set up shared fixtures.
 	 *
 	 * @param WP_UnitTest_Factory $factory Test factory.
@@ -58,6 +65,14 @@ class Category_Management_Test extends WP_UnitTestCase {
 				'slug'     => 'header',
 			)
 		);
+
+		self::$other_category_term_id = $factory->term->create(
+			array(
+				'taxonomy' => 'wporg-pattern-category',
+				'name'     => 'Footers',
+				'slug'     => 'footer',
+			)
+		);
 	}
 
 	/**
@@ -65,6 +80,7 @@ class Category_Management_Test extends WP_UnitTestCase {
 	 */
 	public static function tear_down_after_class(): void {
 		wp_delete_term( self::$category_term_id, 'wporg-pattern-category' );
+		wp_delete_term( self::$other_category_term_id, 'wporg-pattern-category' );
 		wp_delete_user( self::$moderator );
 		wp_delete_user( self::$member );
 
@@ -123,15 +139,30 @@ class Category_Management_Test extends WP_UnitTestCase {
 	public function test_member_cannot_edit_category(): void {
 		wp_set_current_user( self::$member );
 
-		$response = $this->request( 'POST', '/' . self::$category_term_id, array( 'name' => 'Changed' ) );
+		$response = $this->request(
+			'POST',
+			'/' . self::$category_term_id,
+			array(
+				'name'   => 'Changed',
+				'slug'   => 'changed',
+				'parent' => self::$other_category_term_id,
+			)
+		);
 
 		$this->assertSame( 403, $response->get_status() );
 		$this->assertSame( 'rest_cannot_update', $response->get_data()['code'] );
-		$this->assertSame( 'Headers', get_term( self::$category_term_id )->name );
+
+		$term = get_term( self::$category_term_id );
+		$this->assertSame( 'Headers', $term->name );
+		$this->assertSame( 'header', $term->slug );
+		$this->assertSame( 0, $term->parent );
 	}
 
 	/**
 	 * A member cannot delete a category.
+	 *
+	 * This is a control: deletion falls back to `manage_categories`, not the `edit_terms` mapping, so it passes
+	 * the same way without that mapping. It's here so a later change to either capability can't open it quietly.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\register_post_type_data
 	 */

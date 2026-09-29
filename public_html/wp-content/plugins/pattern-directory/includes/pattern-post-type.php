@@ -115,7 +115,7 @@ function register_post_type_data() {
 			'rewrite'           => array(
 				'slug' => 'pattern-keywords',
 			),
-			// Keywords are moderator-only (the `core` term feeds Core's pattern distribution), to assign as well as to manage.
+			// Keywords are moderator-only to assign as well as to manage: the `core` term feeds Core's pattern distribution.
 			'capabilities'      => array(
 				'assign_terms' => 'edit_others_patterns',
 				'edit_terms'   => 'edit_others_patterns',
