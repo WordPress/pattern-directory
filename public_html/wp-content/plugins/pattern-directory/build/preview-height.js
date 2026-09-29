@@ -1,0 +1,1 @@
+(()=>{const e=document.querySelector(".entry-content");if(e&&window.parent!==window){const t=()=>{window.parent.postMessage({type:"wporg/patterns/preview-height",height:e.clientHeight},"*")};window.addEventListener("message",e=>{"wporg/patterns/preview-height-request"===e.data?.type&&t()}),window.addEventListener("load",t)}})();
