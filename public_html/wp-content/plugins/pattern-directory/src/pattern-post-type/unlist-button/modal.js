@@ -74,7 +74,7 @@ const UnlistModal = ( { onClose, onSubmit } ) => {
 	}, [] );
 
 	const submittedText = __(
-		'The pattern has been unlisted, and your internal note has been saved.',
+		'The pattern has been unlisted, and the author has been notified by email.',
 		'wporg-patterns'
 	);
 
@@ -101,7 +101,7 @@ const UnlistModal = ( { onClose, onSubmit } ) => {
 			note: details ? `UNLISTED: ${ reason.label } — ${ details }` : `UNLISTED: ${ reason.label }`,
 			onSuccess: () => {
 				if ( 'function' === typeof onSubmit ) {
-					onSubmit( selectedOption );
+					onSubmit( selectedOption, details );
 				}
 				dispatch( { status: 'NOTE_RECIEVED' } );
 				speak( submittedText );
@@ -155,9 +155,9 @@ const UnlistModal = ( { onClose, onSubmit } ) => {
 							<Spinner />
 						) }
 						<TextareaControl
-							label={ __( 'Please provide internal details', 'wporg-patterns' ) }
+							label={ __( 'Message to the pattern author', 'wporg-patterns' ) }
 							help={ __(
-								'This note will only be seen by other admins and moderators.',
+								'This message will be emailed to the pattern author, along with the reason selected above.',
 								'wporg-patterns'
 							) }
 							value={ details }
