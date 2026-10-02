@@ -25,7 +25,7 @@ These are npm-workspace commands — most run per-workspace via `--workspaces` o
 - **JS tests:** `npm run test:unit --workspace=wporg-pattern-creator` (Jest via wp-scripts). The directory plugin and theme have no JS tests.
 - Run a single PHP test: `npm run test:php -- --filter <TestNameOrMethod>`.
 
-CI (`.github/workflows/`) runs linters on every PR and PHP+JS unit tests on changes under `public_html/` or to the environment/tooling manifests (`.wp-env.test.json`, `composer.*`, `package*.json`). The default branch is **`trunk`**.
+CI (`.github/workflows/`) runs linters on every PR and PHP+JS unit tests on changes under `public_html/` or to the test tooling (`composer.*`, `package*.json`, the workflow and its `.github/` helpers). CI runs PHPUnit directly against a `wordpress-develop` checkout, not through wp-env. The default branch is **`trunk`**.
 
 ## Workspaces & architecture
 
@@ -39,7 +39,7 @@ Three workspaces, each a standard `@wordpress/scripts` project extending the roo
 
 (`plugins/pattern-translations` is a fourth plugin, not a JS workspace.)
 
-**pattern-directory** is the backbone. Entry point `bootstrap.php` wires up everything via `includes/`: the `wporg-pattern` custom post type and `wporg-pattern-flag` post type, pattern validation, search, favorites, stats, badges, notifications, admin screens, and two REST controllers (`class-rest-flags-controller.php`, `class-rest-favorite-controller.php`). The single JS bundle (`src/pattern-post-type.js`) augments the block-editor admin experience for patterns.
+**pattern-directory** is the backbone. Entry point `bootstrap.php` wires up everything via `includes/`: the `wporg-pattern` custom post type and `wporg-pattern-flag` post type, pattern validation, search, favorites, stats, badges, notifications, admin screens, and two REST controllers (`class-rest-flags-controller.php`, `class-rest-favorite-controller.php`). It builds two JS bundles: `src/pattern-post-type.js` augments the block-editor admin experience for patterns, and `src/preview-height.js` runs inside the sandboxed pattern preview frame and posts its height to the embedding page.
 
 **pattern-creator** is a front-end SPA-style block editor (`pattern-creator.php` enqueues the build of `src/index.js`) letting logged-in users create/edit patterns on the site front end. It uses a `@wordpress/data` store (`src/store`), an `api-middleware` layer, React components, and hooks — a substantial subset of Gutenberg editor packages as dependencies.
 
@@ -47,11 +47,11 @@ Three workspaces, each a standard `@wordpress/scripts` project extending the roo
 
 ### How the pieces fit
 
-The directory plugin owns the pattern data model and APIs; the creator plugin is a front-end client that writes patterns through those APIs; the theme renders the public directory; the translations plugin localizes pattern content. All four share the `WordPressdotorg\Pattern_Directory\*` PHP namespaces and the `wporg-patterns` text domain.
+The directory plugin owns the pattern data model and APIs; the creator plugin is a front-end client that writes patterns through those APIs; the theme renders the public directory; the translations plugin localizes pattern content. Each has its own namespace under `WordPressdotorg\` (`Pattern_Directory`, `Pattern_Creator`, `Pattern_Translations`, `Theme\Pattern_Directory_2024`), and translatable strings use the `wporg-patterns` text domain.
 
 wp-env sources shared WordPress.org infrastructure (`wporg-mu-plugins`, the `wporg-parent-2021` parent theme, `wporg-internal-notes`) plus Gutenberg, Stream, and the WordPress Importer directly via `.wp-env.json` — Composer only provides dev tooling (phpcs, PHPUnit). The meta repository's `pub` mu-plugin (locale data) is optional; see the readme for the `.wp-env.override.json` mapping.
 
 ## Conventions
 
 - WordPress PHP coding standards (`phpcs.xml.dist`); keep PHP 7.4-compatible.
-- Per-project `.editorconfig` and the shared root JS/CSS lint configs govern style — run the linters before pushing; CI enforces them.
+- The shared root JS/CSS lint configs govern style — run the linters before pushing; CI enforces them.
