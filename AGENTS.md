@@ -25,7 +25,7 @@ These are npm-workspace commands — most run per-workspace via `--workspaces` o
 - **JS tests:** `npm run test:unit --workspace=wporg-pattern-creator` (Jest via wp-scripts). The directory plugin and theme have no JS tests.
 - Run a single PHP test: `npm run test:php -- --filter <TestNameOrMethod>`.
 
-CI (`.github/workflows/`) runs linters on every PR and PHP+JS unit tests on changes under `public_html/` or to the test tooling (`composer.*`, `package*.json`, the workflow and its `.github/` helpers). CI runs PHPUnit directly against a `wordpress-develop` checkout, not through wp-env. The default branch is **`trunk`**.
+CI (`.github/workflows/`) runs linters on every PR and PHP+JS unit tests on changes under `public_html/` or to the test tooling (`composer.*`, `package*.json`, the workflow and its `.github/` helpers). CI doesn't use wp-env: PHPUnit runs against the WordPress nightly build, with the test library from a sparse `wordpress-develop` checkout. The default branch is **`trunk`**.
 
 ## Workspaces & architecture
 
