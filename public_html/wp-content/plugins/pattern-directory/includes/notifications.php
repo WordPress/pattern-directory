@@ -28,9 +28,9 @@ add_action( 'init', __NAMESPACE__ . '\register_unlisted_meta' );
 /**
  * Register the post meta used to store the moderator's message to the author.
  *
- * Editable by anyone who can edit the pattern (i.e. moderators), so it can be
- * set from the Unlist modal in the block editor and read back when sending the
- * "pattern unlisted" email.
+ * Only moderators can write it, from the Unlist modal in the block editor. It is
+ * read in the edit context only, so the public API never exposes it, and it is
+ * deleted as soon as the pattern is unlisted.
  *
  * @return void
  */
@@ -42,10 +42,10 @@ function register_unlisted_meta() {
 			'type'              => 'string',
 			'description'       => 'A message from the moderator, included in the email sent to the author when a pattern is unlisted.',
 			'single'            => true,
-			'show_in_rest'      => true,
+			'show_in_rest'      => array( 'schema' => array( 'context' => array( 'edit' ) ) ),
 			'sanitize_callback' => 'sanitize_textarea_field',
-			'auth_callback'     => function ( $allowed, $meta_key, $object_id ) {
-				return current_user_can( 'edit_post', $object_id );
+			'auth_callback'     => function () {
+				return current_user_can( get_post_type_object( PATTERN )->cap->edit_others_posts );
 			},
 		)
 	);
@@ -229,6 +229,11 @@ Your pattern has been unpublished from the Block Pattern Directory at this time,
  * @return void
  */
 function notify_pattern_unlisted( $post ) {
+	// The message is single-use: consume it before anything can bail out, so a
+	// later unlisting doesn't resend it.
+	$detail = get_post_meta( $post->ID, UNLISTED_DETAIL_META, true );
+	delete_post_meta( $post->ID, UNLISTED_DETAIL_META );
+
 	$author = get_user_by( 'id', $post->post_author );
 	if ( ! $author ) {
 		return;
@@ -255,7 +260,6 @@ function notify_pattern_unlisted( $post ) {
 	}
 
 	// Append the moderator's message to the author, if one was provided.
-	$detail = get_post_meta( $post->ID, UNLISTED_DETAIL_META, true );
 	if ( $detail ) {
 		$reason .= "\n\n" . $detail;
 	}

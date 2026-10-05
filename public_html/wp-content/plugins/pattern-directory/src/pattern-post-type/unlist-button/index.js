@@ -3,10 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-// `PluginPostStatusInfo` moved from `@wordpress/edit-post` to `@wordpress/editor`.
-// Import from both and use whichever the running WordPress version provides.
-import { PluginPostStatusInfo as PluginPostStatusInfoFromEditor, store as editorStore } from '@wordpress/editor';
-import { PluginPostStatusInfo as PluginPostStatusInfoFromEditPost } from '@wordpress/edit-post';
+import { PluginPostStatusInfo, store as editorStore } from '@wordpress/editor';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 
@@ -17,23 +14,26 @@ import { UNLISTED_STATUS } from '../settings';
 import UnlistModal from './modal';
 import './unlist.scss';
 
-const PluginPostStatusInfo = PluginPostStatusInfoFromEditor || PluginPostStatusInfoFromEditPost;
-
 export const UnlistButton = () => {
 	const status = useSelect( ( select ) => {
 		const _post = select( editorStore ).getCurrentPost();
 		return _post.status;
 	} );
+	const { didPostSaveRequestFail } = useSelect( editorStore );
 	const { editPost, savePost } = useDispatch( editorStore );
 	const [ showModal, setShowModal ] = useState( false );
 
-	const onSubmit = ( reasonId, details = '' ) => {
+	const onSubmit = async ( reasonId, details = '' ) => {
 		editPost( {
 			status: UNLISTED_STATUS,
 			'wporg-pattern-flag-reason': [ reasonId ],
 			meta: { _wporg_unlist_reason_detail: details },
 		} );
-		savePost();
+		// `savePost` resolves even when the request fails, so check the result.
+		await savePost();
+		if ( didPostSaveRequestFail() ) {
+			throw new Error( __( 'The pattern could not be unlisted. Please try again.', 'wporg-patterns' ) );
+		}
 	};
 
 	const className = status === UNLISTED_STATUS ? 'wporg-patterns-unlist-notice' : 'wporg-patterns-unlist-button';

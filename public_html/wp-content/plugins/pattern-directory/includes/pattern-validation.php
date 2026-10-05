@@ -15,6 +15,7 @@ use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\get_moderated_s
 use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\has_reached_flag_threshold;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
+use const WordPressdotorg\Pattern_Directory\Notifications\UNLISTED_DETAIL_META;
 
 /**
  * The rendered text fields, the ones the directory outputs and so has to check.
@@ -57,7 +58,7 @@ function reject_control_characters( $prepared_post, $request ) {
 		return $prepared_post;
 	}
 
-	$values = array( $request['meta'] ?? null );
+	$values = array( get_rendered_meta( $request ) );
 	foreach ( RENDERED_FIELDS as $field ) {
 		$values[] = $prepared_post->$field ?? null;
 	}
@@ -71,6 +72,24 @@ function reject_control_characters( $prepared_post, $request ) {
 	}
 
 	return $prepared_post;
+}
+
+/**
+ * The submitted meta that the directory may render, and so has to check.
+ *
+ * The moderator's unlisting message is left out: it is only ever sent to the author as a plain-text
+ * email, so checking it would just block the unlisting it travels with.
+ *
+ * @param \WP_REST_Request $request Request being validated.
+ * @return mixed The submitted meta, without the unlisting message.
+ */
+function get_rendered_meta( $request ) {
+	$meta = $request['meta'] ?? null;
+	if ( is_array( $meta ) ) {
+		unset( $meta[ UNLISTED_DETAIL_META ] );
+	}
+
+	return $meta;
 }
 
 /**
@@ -580,8 +599,9 @@ function validate_block_directives( $prepared_post, $request ) {
 	 * Meta never reaches `$prepared_post`, and `render_block_core_footnotes()` emits `footnotes` through
 	 * `wp_kses_post()`, which keeps `data-*`.
 	 */
-	if ( ! $has_directive && is_array( $request['meta'] ?? null ) ) {
-		$has_directive = attribute_has_directive( $request['meta'] );
+	$meta = get_rendered_meta( $request );
+	if ( ! $has_directive && is_array( $meta ) ) {
+		$has_directive = attribute_has_directive( $meta );
 	}
 
 	if ( $has_directive ) {

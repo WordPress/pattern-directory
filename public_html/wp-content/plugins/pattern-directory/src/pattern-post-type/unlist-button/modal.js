@@ -73,10 +73,22 @@ const UnlistModal = ( { onClose, onSubmit } ) => {
 		} );
 	}, [] );
 
-	const submittedText = __(
-		'The pattern has been unlisted, and the author has been notified by email.',
-		'wporg-patterns'
-	);
+	const submittedText = __( 'The pattern has been unlisted.', 'wporg-patterns' );
+
+	const handleError = ( err ) => {
+		dispatch( {
+			status: 'ERROR',
+			message: err.message,
+		} );
+
+		speak(
+			sprintf(
+				/* translators: %s: Error message. */
+				__( 'Error: %s', 'wporg-patterns' ),
+				err.message
+			)
+		);
+	};
 
 	const handleSubmit = ( event ) => {
 		event.preventDefault();
@@ -99,28 +111,20 @@ const UnlistModal = ( { onClose, onSubmit } ) => {
 		sendUnlistedNote( {
 			url: apiUrl,
 			note: details ? `UNLISTED: ${ reason.label } — ${ details }` : `UNLISTED: ${ reason.label }`,
-			onSuccess: () => {
-				if ( 'function' === typeof onSubmit ) {
-					onSubmit( selectedOption, details );
+			onSuccess: async () => {
+				try {
+					if ( 'function' === typeof onSubmit ) {
+						await onSubmit( selectedOption, details );
+					}
+				} catch ( err ) {
+					handleError( err );
+					return;
 				}
 				dispatch( { status: 'NOTE_RECIEVED' } );
 				speak( submittedText );
 				container.current.closest( '[role="dialog"]' ).focus();
 			},
-			onFailure: ( err ) => {
-				dispatch( {
-					status: 'ERROR',
-					message: err.message,
-				} );
-
-				speak(
-					sprintf(
-						/* translators: %s: Error message. */
-						__( 'Error: %s', 'wporg-patterns' ),
-						err.message
-					)
-				);
-			},
+			onFailure: handleError,
 		} );
 	};
 	const handleClose = () => {
