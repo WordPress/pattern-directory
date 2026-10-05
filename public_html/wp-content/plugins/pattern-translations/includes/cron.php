@@ -99,6 +99,11 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 	foreach ( $pattern_ids as $i => $pattern_id ) {
 		$pattern = Pattern::from_post( get_post( $pattern_id ) );
 
+		if ( wp_doing_cron() ) {
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- WP_CLI::log() output isn't captured by Cavalcade; this identifies the pattern if the job runs out of memory.
+			error_log( "Pattern translation import: processing {$pattern_id} ({$pattern->name})." );
+		}
+
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			WP_CLI::log( "{$i}. Processing {$pattern->name} / '{$pattern->title}'.." );
 		}
@@ -130,10 +135,10 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 				 * need to handle. Serving old Translated template is better in this case.
 				 */
 			}
-		}
 
-		// Clear memory-heavy variables after each iteration of Patterns, to avoid object cache memory exhaustion.
-		clear_memory_heavy_variables();
+			// A single pattern across all locales can exhaust memory, so clear after each locale.
+			clear_memory_heavy_variables();
+		}
 	}
 }
 add_action( 'pattern_import_translations_to_directory', __NAMESPACE__ . '\pattern_import_translations_to_directory' );
@@ -142,17 +147,12 @@ add_action( 'pattern_import_translations_to_directory', __NAMESPACE__ . '\patter
  * Clear caches for memory management.
  *
  * @static
- * @global \wpdb            $wpdb
- * @global \WP_Object_Cache $wp_object_cache
+ * @global \wpdb $wpdb
  */
 function clear_memory_heavy_variables() {
-	global $wpdb, $wp_object_cache;
+	global $wpdb;
 
 	$wpdb->queries = array();
 
-	if ( is_object( $wp_object_cache ) ) {
-		$wp_object_cache->cache          = array();
-		$wp_object_cache->group_ops      = array();
-		$wp_object_cache->memcache_debug = array();
-	}
+	wp_cache_flush_runtime();
 }
