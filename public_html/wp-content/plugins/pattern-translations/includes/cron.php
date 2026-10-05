@@ -38,9 +38,7 @@ function pattern_import_to_glotpress() {
 	$patterns = Pattern::get_patterns();
 	$makepot  = new PatternMakepot( $patterns );
 	$result   = $makepot->import( true );
-	if ( defined( 'WP_CLI' ) && WP_CLI ) {
-		WP_CLI::log( $result );
-	}
+	log_message( $result );
 }
 add_action( 'pattern_import_to_glotpress', __NAMESPACE__ . '\pattern_import_to_glotpress' );
 
@@ -70,9 +68,7 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 				$timestamp += $delay;
 			}
 
-			if ( defined( 'WP_CLI' ) && WP_CLI ) {
-				WP_CLI::log( sprintf( 'Queued %d cron jobs of %d Patterns each.', count( $pattern_ids ) / CHUNK_SIZE, CHUNK_SIZE ) );
-			}
+			log_message( sprintf( 'Queued %d cron jobs of %d Patterns each.', count( $pattern_ids ) / CHUNK_SIZE, CHUNK_SIZE ) );
 			return;
 		}
 	}
@@ -92,21 +88,12 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 
 	$locales = get_locales();
 
-	if ( defined( 'WP_CLI' ) && WP_CLI ) {
-		WP_CLI::log( sprintf( 'Processing %d Patterns in %d locales.', count( $pattern_ids ), count( $locales ) ) );
-	}
+	log_message( sprintf( 'Processing %d Patterns in %d locales.', count( $pattern_ids ), count( $locales ) ) );
 
 	foreach ( $pattern_ids as $i => $pattern_id ) {
 		$pattern = Pattern::from_post( get_post( $pattern_id ) );
 
-		if ( wp_doing_cron() ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- WP_CLI::log() output isn't captured by Cavalcade; this identifies the pattern if the job runs out of memory.
-			error_log( "Pattern translation import: processing {$pattern_id} ({$pattern->name})." );
-		}
-
-		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			WP_CLI::log( "{$i}. Processing {$pattern->name} / '{$pattern->title}'.." );
-		}
+		log_message( "{$i}. Processing {$pattern->name} / '{$pattern->title}'.." );
 		foreach ( $locales as $gp_locale ) {
 			$locale = $gp_locale->wp_locale;
 			if ( ! $locale || 'en_US' === $locale ) {
@@ -115,19 +102,15 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 
 			$translated = $pattern->to_locale( $locale );
 			if ( $translated ) {
-				if ( defined( 'WP_CLI' ) && WP_CLI ) {
-					WP_CLI::log( "\t{$locale} - " . ( $translated->ID ? 'Updating' : 'Creating' ) . ' Translated pattern.' );
-				}
+				log_message( "\t{$locale} - " . ( $translated->ID ? 'Updating' : 'Creating' ) . ' Translated pattern.' );
 				$result = create_or_update_translated_pattern( $translated );
 				if ( is_wp_error( $result ) ) {
-					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- cron output isn't reliably captured; the failure has to reach the server log.
+					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- failures need to reach the server log, not only the job output.
 					error_log( "Pattern translation import failed for {$pattern->name} ({$locale}): " . $result->get_error_message() );
-					if ( defined( 'WP_CLI' ) && WP_CLI ) {
-						WP_CLI::log( "\t{$locale} - ERROR: {$result->get_error_message()}" );
-					}
+					log_message( "\t{$locale} - ERROR: {$result->get_error_message()}" );
 				}
-			} elseif ( defined( 'WP_CLI' ) && WP_CLI ) {
-				WP_CLI::log( "\t{$locale} - No Translations exist yet." );
+			} else {
+				log_message( "\t{$locale} - No Translations exist yet." );
 
 				/*
 				 * TODO: Note: There may exist a translated pattern using old strings.
@@ -155,4 +138,19 @@ function clear_memory_heavy_variables() {
 	$wpdb->queries = array();
 
 	wp_cache_flush_runtime();
+}
+
+/**
+ * Output a progress message.
+ *
+ * Cavalcade runs jobs without WP-CLI and records their output, so echo when WP-CLI isn't available.
+ *
+ * @param string $message The message to output.
+ */
+function log_message( $message ) {
+	if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		WP_CLI::log( $message );
+	} else {
+		echo $message . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Plain-text job output.
+	}
 }
