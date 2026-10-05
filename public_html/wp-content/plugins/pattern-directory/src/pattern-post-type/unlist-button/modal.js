@@ -73,10 +73,22 @@ const UnlistModal = ( { onClose, onSubmit } ) => {
 		} );
 	}, [] );
 
-	const submittedText = __(
-		'The pattern has been unlisted, and your internal note has been saved.',
-		'wporg-patterns'
-	);
+	const submittedText = __( 'The pattern has been unlisted.', 'wporg-patterns' );
+
+	const handleError = ( err ) => {
+		dispatch( {
+			status: 'ERROR',
+			message: err.message,
+		} );
+
+		speak(
+			sprintf(
+				/* translators: %s: Error message. */
+				__( 'Error: %s', 'wporg-patterns' ),
+				err.message
+			)
+		);
+	};
 
 	const handleSubmit = ( event ) => {
 		event.preventDefault();
@@ -99,28 +111,20 @@ const UnlistModal = ( { onClose, onSubmit } ) => {
 		sendUnlistedNote( {
 			url: apiUrl,
 			note: details ? `UNLISTED: ${ reason.label } — ${ details }` : `UNLISTED: ${ reason.label }`,
-			onSuccess: () => {
-				if ( 'function' === typeof onSubmit ) {
-					onSubmit( selectedOption );
+			onSuccess: async () => {
+				try {
+					if ( 'function' === typeof onSubmit ) {
+						await onSubmit( selectedOption, details );
+					}
+				} catch ( err ) {
+					handleError( err );
+					return;
 				}
 				dispatch( { status: 'NOTE_RECIEVED' } );
 				speak( submittedText );
 				container.current.closest( '[role="dialog"]' ).focus();
 			},
-			onFailure: ( err ) => {
-				dispatch( {
-					status: 'ERROR',
-					message: err.message,
-				} );
-
-				speak(
-					sprintf(
-						/* translators: %s: Error message. */
-						__( 'Error: %s', 'wporg-patterns' ),
-						err.message
-					)
-				);
-			},
+			onFailure: handleError,
 		} );
 	};
 	const handleClose = () => {
@@ -155,9 +159,9 @@ const UnlistModal = ( { onClose, onSubmit } ) => {
 							<Spinner />
 						) }
 						<TextareaControl
-							label={ __( 'Please provide internal details', 'wporg-patterns' ) }
+							label={ __( 'Message to the pattern author', 'wporg-patterns' ) }
 							help={ __(
-								'This note will only be seen by other admins and moderators.',
+								'This message will be emailed to the pattern author, along with the reason selected above.',
 								'wporg-patterns'
 							) }
 							value={ details }
