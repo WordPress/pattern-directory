@@ -1,15 +1,23 @@
 /* global wporgBlockPattern, wporgLocale */
 /**
+ * External dependencies
+ */
+import { unescape as unescapeString } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { addQueryArgs } from '@wordpress/url';
-import apiFetch from '@wordpress/api-fetch';
 import { Button, CheckboxControl, Modal, TextControl, TextareaControl } from '@wordpress/components';
 import { createInterpolateElement, useEffect, useRef, useState } from '@wordpress/element';
 import { store as editorStore } from '@wordpress/editor';
 import { store as noticesStore } from '@wordpress/notices';
 import { useDispatch, useSelect } from '@wordpress/data';
+
+/**
+ * Internal dependencies
+ */
+import usePatternCategories from '../../hooks/use-pattern-categories';
 
 const ForwardButton = ( { children, disabled, onClick } ) => (
 	<Button className="pattern-modal-publish__button" isPrimary disabled={ disabled } onClick={ onClick }>
@@ -49,26 +57,9 @@ export default function SubmissionModal( { onClose, onSubmit, status } ) {
 	const [ title, setTitle ] = useState( postTitle );
 	const [ description, setDescription ] = useState( meta.wpop_description );
 	const [ selectedCategories, setSelectedCategories ] = useState( postCategories );
-	const [ categories, setCategories ] = useState( [] );
+	const categories = usePatternCategories();
 	const [ currentPage, setCurrentPage ] = useState( 0 );
 	const container = useRef();
-
-	useEffect( () => {
-		apiFetch( {
-			path: addQueryArgs( '/wp/v2/pattern-categories' ),
-		} ).then( ( res ) => {
-			// Filter out the "Featured" category.
-			const terms = res.filter( ( { slug } ) => 'featured' !== slug );
-			setCategories(
-				terms.map( ( i ) => {
-					return {
-						value: i.id,
-						label: i.name,
-					};
-				} )
-			);
-		} );
-	}, [] );
 
 	useEffect( () => {
 		editPost( {
@@ -204,18 +195,18 @@ export default function SubmissionModal( { onClose, onSubmit, status } ) {
 						className="submission-modal__checkbox-list"
 						aria-label={ __( 'Pattern categories', 'wporg-patterns' ) }
 					>
-						{ categories.map( ( i ) => (
-							<li key={ i.value }>
+						{ categories.map( ( term ) => (
+							<li key={ term.id }>
 								<CheckboxControl
-									label={ i.label }
-									value={ i.value }
-									checked={ selectedCategories.includes( i.value ) }
+									label={ unescapeString( term.name ) }
+									value={ term.id }
+									checked={ selectedCategories.includes( term.id ) }
 									onChange={ ( checked ) => {
 										if ( checked ) {
-											setSelectedCategories( [ ...selectedCategories, i.value ] );
+											setSelectedCategories( [ ...selectedCategories, term.id ] );
 										} else {
 											setSelectedCategories(
-												selectedCategories.filter( ( cat ) => cat !== i.value )
+												selectedCategories.filter( ( cat ) => cat !== term.id )
 											);
 										}
 									} }
