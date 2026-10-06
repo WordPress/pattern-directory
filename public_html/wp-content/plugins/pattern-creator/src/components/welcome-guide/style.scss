@@ -1,6 +1,6 @@
 
 .pattern-creator-welcome-guide {
-	max-width: 320px;
+	max-width: 480px;
 }
 
 .pattern-creator-welcome-guide__image {
@@ -46,9 +46,25 @@
 	font-size: 14px;
 }
 
+.pattern-creator-welcome-guide__list {
+	/* Extra left padding keeps the list markers inside the guide's gutter. */
+	margin: 0 0 $grid-unit-20;
+	padding-right: $grid-unit-40;
+	padding-left: $grid-unit-60;
+	list-style: disc;
+	font-size: 14px;
+	text-align: left;
+}
+
+.pattern-creator-welcome-guide__list li {
+	margin-bottom: $grid-unit-05;
+}
+
 .pattern-creator-welcome-guide__link {
 	margin-top: $grid-unit-10;
 	display: block;
+	padding: 0 $grid-unit-40;
+	font-size: 14px;
 }
 
 .pattern-creator-welcome-guide .components-guide__footer > button {
