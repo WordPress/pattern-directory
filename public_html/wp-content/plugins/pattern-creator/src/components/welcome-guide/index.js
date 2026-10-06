@@ -90,14 +90,9 @@ export default function WelcomeGuide() {
 										'wporg-patterns'
 									) }
 								</li>
-								<li>
-									{ __( 'Use only content you have the rights to.', 'wporg-patterns' ) }
-								</li>
+								<li>{ __( 'Use only content you have the rights to.', 'wporg-patterns' ) }</li>
 							</ul>
-							<ExternalLink
-								className="pattern-creator-welcome-guide__link"
-								href={ GUIDELINES_URL }
-							>
+							<ExternalLink className="pattern-creator-welcome-guide__link" href={ GUIDELINES_URL }>
 								{ __( 'Read the full guidelines', 'wporg-patterns' ) }
 							</ExternalLink>
 						</>
