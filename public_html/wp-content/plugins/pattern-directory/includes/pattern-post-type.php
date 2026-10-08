@@ -39,6 +39,45 @@ remove_filter( 'the_content', 'do_shortcode', 11 );
 add_filter( 'the_content', __NAMESPACE__ . '\do_shortcode_except_in_patterns', 11 );
 
 /**
+ * Get the slugs of the categories that authors can assign to a pattern.
+ *
+ * This list mirrors the pattern categories registered by WordPress core. Other terms in the taxonomy
+ * (for example, retired categories like "Columns", or "Featured") are kept on existing patterns, but
+ * are not offered in the pattern creator.
+ *
+ * @see https://github.com/WordPress/wordpress-develop/blob/trunk/src/wp-includes/block-patterns.php
+ *
+ * @return string[] List of term slugs in the `wporg-pattern-category` taxonomy.
+ */
+function get_selectable_category_slugs() {
+	$slugs = array(
+		'about',
+		'audio',
+		'banner',
+		'call-to-action',
+		'contact',
+		'footer',
+		'gallery',
+		'header',
+		'portfolio',
+		'query', // "Posts".
+		'services',
+		'team',
+		'testimonials',
+		'text',
+		'video',
+		'wireframe',
+	);
+
+	/**
+	 * Filters the category slugs that authors can assign to a pattern.
+	 *
+	 * @param string[] $slugs List of term slugs.
+	 */
+	return apply_filters( 'wporg_pattern_selectable_category_slugs', $slugs );
+}
+
+/**
  * Registers post types and associated taxonomies, meta data, etc.
  */
 function register_post_type_data() {

@@ -48,7 +48,7 @@ $modal-height: 375px;
 	display: grid;
 	grid-template-columns: 30% 70%;
 	margin: 0 auto;
-	height: $modal-height;
+	min-height: $modal-height;
 	color: #32373c;
 
 	fieldset {
@@ -101,13 +101,15 @@ h3.submission-modal__title-sidebar {
 }
 
 .submission-modal__checkbox-list {
-	display: grid;
-	grid-template-columns: 50% 50%;
-	grid-gap: $grid-unit-05;
+	// Use columns rather than a grid so the categories read alphabetically down each column.
+	columns: 2;
+	column-gap: $grid-unit-05;
 	margin: 0;
 
 	li {
 		list-style: none;
+		margin-bottom: $grid-unit-05;
+		break-inside: avoid;
 	}
 }
 

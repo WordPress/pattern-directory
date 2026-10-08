@@ -7,7 +7,7 @@ import { find, get, unescape as unescapeString } from 'lodash';
  * WordPress dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { CheckboxControl, TextControl } from '@wordpress/components';
+import { CheckboxControl, Flex, TextControl } from '@wordpress/components';
 import { speak } from '@wordpress/a11y';
 import { store as coreStore } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
@@ -19,18 +19,11 @@ import { useSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import { CATEGORY_SLUG } from '../../store';
+import usePatternCategories from '../../hooks/use-pattern-categories';
 
 /**
  * Module Constants
  */
-const DEFAULT_QUERY = {
-	per_page: -1,
-	orderby: 'name',
-	order: 'asc',
-	_fields: 'id,name,parent,slug',
-	context: 'view',
-};
-
 const MIN_TERMS_COUNT_FOR_FILTER = 8;
 
 const EMPTY_ARRAY = [];
@@ -113,20 +106,14 @@ function PatternCategoriesControl( { selectedTerms = EMPTY_ARRAY, setTerms } ) {
 	const [ filteredTermsTree, setFilteredTermsTree ] = useState( [] );
 	const debouncedSpeak = useDebounce( speak, 500 );
 
-	const { hasAssignAction, availableTerms } = useSelect( ( select ) => {
+	const availableTerms = usePatternCategories();
+	const hasAssignAction = useSelect( ( select ) => {
 		const { getCurrentPost } = select( editorStore );
-		const { getTaxonomy, getEntityRecords } = select( coreStore );
-		const _taxonomy = getTaxonomy( CATEGORY_SLUG );
+		const _taxonomy = select( coreStore ).getTaxonomy( CATEGORY_SLUG );
 
-		const terms = getEntityRecords( 'taxonomy', CATEGORY_SLUG, DEFAULT_QUERY ) || EMPTY_ARRAY;
-
-		return {
-			hasAssignAction: _taxonomy
-				? get( getCurrentPost(), [ '_links', 'wp:action-assign-' + _taxonomy.rest_base ], false )
-				: false,
-			// Filter out the "Featured" category.
-			availableTerms: terms.filter( ( { slug } ) => 'featured' !== slug ),
-		};
+		return _taxonomy
+			? get( getCurrentPost(), [ '_links', 'wp:action-assign-' + _taxonomy.rest_base ], false )
+			: false;
 	}, [] );
 
 	const availableTermsTree = useMemo(
@@ -182,7 +169,7 @@ function PatternCategoriesControl( { selectedTerms = EMPTY_ARRAY, setTerms } ) {
 	const showFilter = availableTerms.length >= MIN_TERMS_COUNT_FOR_FILTER;
 
 	return (
-		<>
+		<Flex direction="column" gap="4">
 			{ showFilter && (
 				<TextControl
 					className="editor-post-taxonomies__hierarchical-terms-filter"
@@ -212,7 +199,7 @@ function PatternCategoriesControl( { selectedTerms = EMPTY_ARRAY, setTerms } ) {
 					);
 				} ) }
 			</div>
-		</>
+		</Flex>
 	);
 }
 

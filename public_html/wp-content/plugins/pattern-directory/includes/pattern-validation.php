@@ -12,6 +12,7 @@ use WordPressdotorg\Pattern_Translations\PatternParser as Translations_PatternPa
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\is_block_allowed_in_pattern;
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content;
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\get_moderated_status;
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\get_selectable_category_slugs;
 use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\has_reached_flag_threshold;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
@@ -30,6 +31,7 @@ add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_block_dir
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_title', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_status', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_parent', 11, 2 );
+add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_categories', 11, 2 );
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\validate_flag_reason', 11, 2 );
 // After the specific checks, so a submission they can name gets their message; this catches what they cannot see.
 add_filter( 'rest_pre_insert_' . POST_TYPE, __NAMESPACE__ . '\reject_unstable_blocks', 15 );
@@ -844,6 +846,55 @@ function validate_parent( $prepared_post, $request ) {
 			__( 'The parent of a pattern must be another pattern.', 'wporg-patterns' ),
 			array( 'status' => 400 )
 		);
+	}
+
+	return $prepared_post;
+}
+
+/**
+ * Limit the categories an author can add to a pattern to the selectable ones.
+ *
+ * The pattern creator only offers `get_selectable_category_slugs()`, but core's assign-terms check allows any
+ * term in the taxonomy, including "Featured". Terms already on the pattern can be re-sent, so older patterns
+ * keep their retired categories. Moderators can assign any category.
+ *
+ * @param object|\WP_Error $prepared_post Prepared post or a preceding validation error.
+ * @param \WP_REST_Request $request       Request being validated.
+ * @return object|\WP_Error The post, or an error if a category isn't selectable.
+ */
+function validate_categories( $prepared_post, $request ) {
+	if ( is_wp_error( $prepared_post ) ) {
+		return $prepared_post;
+	}
+
+	if ( ! isset( $request['pattern-categories'] ) ) {
+		return $prepared_post;
+	}
+
+	$post_type = get_post_type_object( POST_TYPE );
+	if ( current_user_can( $post_type->cap->edit_others_posts ) ) {
+		return $prepared_post;
+	}
+
+	$current_terms = isset( $prepared_post->ID )
+		? wp_get_object_terms( $prepared_post->ID, 'wporg-pattern-category', array( 'fields' => 'ids' ) )
+		: array();
+	if ( is_wp_error( $current_terms ) ) {
+		$current_terms = array();
+	}
+
+	$selectable_slugs = get_selectable_category_slugs();
+	$added_terms      = array_diff( wp_parse_id_list( $request['pattern-categories'] ), $current_terms );
+
+	foreach ( $added_terms as $term_id ) {
+		$term = get_term( $term_id, 'wporg-pattern-category' );
+		if ( ! $term || is_wp_error( $term ) || ! in_array( $term->slug, $selectable_slugs, true ) ) {
+			return new \WP_Error(
+				'rest_pattern_invalid_category',
+				__( 'One or more of the selected categories is not available.', 'wporg-patterns' ),
+				array( 'status' => 400 )
+			);
+		}
 	}
 
 	return $prepared_post;
