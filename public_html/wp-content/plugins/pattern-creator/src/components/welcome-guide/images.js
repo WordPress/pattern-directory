@@ -85,13 +85,13 @@ export const ImageCollectionImage = () => (
 export const GuidelinesImage = () => (
 	<>
 		{ /* Faint geometric field behind the card, matching the other guide pages. */ }
-		<SVG width="100%" height="240" viewBox="0 0 312 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+		<SVG width="100%" height="240" fill="none" xmlns="http://www.w3.org/2000/svg">
 			<defs>
 				<pattern id="wporg-guidelines-background" width="26" height="26" patternUnits="userSpaceOnUse">
 					<path d="M13 5V21M5 13H21" stroke="white" strokeOpacity="0.08" strokeWidth="1.5" />
 				</pattern>
 			</defs>
-			<rect width="312" height="240" fill="url(#wporg-guidelines-background)" />
+			<rect width="100%" height="100%" fill="url(#wporg-guidelines-background)" />
 		</SVG>
 
 		<SVG width="261" height="127" viewBox="0 0 261 127" fill="none" xmlns="http://www.w3.org/2000/svg">
