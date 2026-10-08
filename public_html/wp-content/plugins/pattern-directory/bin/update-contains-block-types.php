@@ -16,6 +16,7 @@
 
 namespace WordPressdotorg\Pattern_Directory;
 
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\get_contains_block_types;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE };
 
 // This script should only be called in a CLI environment.
@@ -79,17 +80,9 @@ $meta_updated = 0;
 
 while ( $query->have_posts() ) {
 	$query->the_post();
-	$pattern    = get_post();
-	$pattern_id = $pattern->ID;
-	$blocks     = parse_blocks( $pattern->post_content );
-	$all_blocks = _flatten_blocks( $blocks );
-
-	// Get the list of block names and convert it to a single string.
-	$block_names = wp_list_pluck( $all_blocks, 'blockName' );
-	$block_names = array_filter( $block_names );
-	$block_names = array_unique( $block_names );
-	sort( $block_names );
-	$used_blocks = implode( ',', $block_names );
+	$pattern     = get_post();
+	$pattern_id  = $pattern->ID;
+	$used_blocks = get_contains_block_types( $pattern->post_content );
 
 	if ( $opts['apply'] ) {
 		$result = update_post_meta( $pattern_id, 'wpop_contains_block_types', $used_blocks );

@@ -586,7 +586,17 @@ function update_contains_block_types_meta( $pattern_id ) {
 		return;
 	}
 
-	$blocks     = parse_blocks( $pattern->post_content );
+	update_post_meta( $pattern->ID, 'wpop_contains_block_types', get_contains_block_types( $pattern->post_content ) );
+}
+
+/**
+ * Block types used in pattern content, as stored in `wpop_contains_block_types`.
+ *
+ * @param string $content Pattern content.
+ * @return string Sorted, comma-separated block names.
+ */
+function get_contains_block_types( $content ) {
+	$blocks     = parse_blocks( $content );
 	$all_blocks = _flatten_blocks( $blocks );
 
 	// Get the list of block names and convert it to a single string.
@@ -594,9 +604,8 @@ function update_contains_block_types_meta( $pattern_id ) {
 	$block_names = array_filter( $block_names ); // Filter out null values (extra line breaks).
 	$block_names = array_unique( $block_names );
 	sort( $block_names );
-	$used_blocks = implode( ',', $block_names );
 
-	update_post_meta( $pattern->ID, 'wpop_contains_block_types', $used_blocks );
+	return implode( ',', $block_names );
 }
 
 /**
