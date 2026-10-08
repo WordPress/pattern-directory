@@ -84,6 +84,7 @@ class Keyword_Assignment_Test extends WP_UnitTestCase {
 			array(
 				'taxonomy' => 'wporg-pattern-category',
 				'name'     => 'Headers',
+				'slug'     => 'header',
 			)
 		);
 	}

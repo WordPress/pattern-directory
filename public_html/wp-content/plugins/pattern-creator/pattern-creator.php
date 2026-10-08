@@ -16,6 +16,7 @@ namespace WordPressdotorg\Pattern_Creator;
 
 use WP_Block_Editor_Context;
 use function WordPressdotorg\MU_Plugins\Global_Header_Footer\{ is_rosetta_site, get_rosetta_name };
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\get_selectable_category_slugs;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 const AUTOSAVE_INTERVAL = 30;
@@ -126,7 +127,8 @@ function pattern_creator_init() {
 			rawurlencode(
 				wp_json_encode(
 					array(
-						'siteUrl' => esc_url( home_url() ),
+						'siteUrl'       => esc_url( home_url() ),
+						'categorySlugs' => get_selectable_category_slugs(),
 					)
 				)
 			)
