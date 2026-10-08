@@ -93,6 +93,8 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 	$translated_locales = get_translated_locales();
 	if ( $translated_locales ) {
 		$locales = array_intersect_key( $locales, array_flip( $translated_locales ) );
+	} else {
+		log_message( 'Could not list the locales with translations, processing all of them.' );
 	}
 
 	log_message( sprintf( 'Processing %d Patterns in %d locales.', count( $pattern_ids ), count( $locales ) ) );
@@ -139,19 +141,18 @@ add_action( 'pattern_import_translations_to_directory', __NAMESPACE__ . '\patter
 /**
  * The WordPress locales with at least one current translation in the patterns GlotPress project.
  *
- * Uses the same conditions and locale mapping as `GlotPress_Translate_Bridge`, so a locale missing here can't
- * translate any string.
+ * Uses the same conditions as `GlotPress_Translate_Bridge`, so a locale missing here can't translate any string.
  *
  * @return string[] WordPress locales, or an empty array if GlotPress isn't available.
  */
 function get_translated_locales() {
 	global $wpdb;
 
-	if ( ! class_exists( 'GP_Locales' ) ) {
+	if ( ! defined( 'GLOTPRESS_TABLE_PREFIX' ) ) {
 		return array();
 	}
 
-	$prefix = defined( 'GLOTPRESS_TABLE_PREFIX' ) ? GLOTPRESS_TABLE_PREFIX : 'gp_';
+	$prefix = GLOTPRESS_TABLE_PREFIX;
 
 	$sets = $wpdb->get_results(
 		$wpdb->prepare(
