@@ -10,6 +10,7 @@
 
 namespace WordPressdotorg\Pattern_Translations;
 
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\get_contains_block_types;
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\is_block_allowed_in_pattern;
 use function WordPressdotorg\Pattern_Directory\Pattern_Validation\content_has_block_directives;
 use function WordPressdotorg\Pattern_Directory\Pattern_Validation\blocks_have_directive_attribute;
@@ -78,11 +79,14 @@ function is_translated_content_allowed( $html ) {
 /**
  * Creates or updates a localised pattern.
  *
- * @param Pattern $pattern The translated pattern to store.
+ * @param Pattern   $pattern The translated pattern to store.
+ * @param bool|null $written Optional. Set to whether the post was written, false when it was already current.
  *
  * @return int|\WP_Error The pattern post ID, or an error if the content is refused or the write fails.
  */
-function create_or_update_translated_pattern( Pattern $pattern ) {
+function create_or_update_translated_pattern( Pattern $pattern, ?bool &$written = null ) {
+	$written = false;
+
 	if ( ! is_translated_content_allowed( $pattern->html ) ) {
 		return new \WP_Error(
 			'pattern_translation_disallowed_content',
@@ -96,22 +100,30 @@ function create_or_update_translated_pattern( Pattern $pattern ) {
 	}
 
 	$args = array(
-		'ID'           => $pattern->ID,
-		'post_type'    => POST_TYPE,
-		'post_title'   => $pattern->title,
-		'post_name'    => $pattern->ID ? $pattern->name : ( $pattern->name . '-' . $pattern->locale ), // TODO: Translate the slug?
-		'post_date'    => $parent->post_date ?? '',
-		'post_content' => $pattern->html,
-		'post_parent'  => $pattern->parent->ID ?? 0,
-		'post_author'  => $parent->post_author ?? 0,
-		'post_status'  => $parent->post_status ?? 'pending',
-		'meta_input'   => array(
+		'ID'                    => $pattern->ID,
+		'post_type'             => POST_TYPE,
+		'post_title'            => $pattern->title,
+		'post_name'             => $pattern->ID ? $pattern->name : ( $pattern->name . '-' . $pattern->locale ), // TODO: Translate the slug?
+		'post_date'             => $parent->post_date ?? '',
+		'post_content'          => $pattern->html,
+		'post_parent'           => $pattern->parent->ID ?? 0,
+		'post_author'           => $parent->post_author ?? 0,
+		'post_status'           => $parent->post_status ?? 'pending',
+		// Edits to these on a translation are undone, as `wp_insert_post()` resets them when they're left out.
+		'post_excerpt'          => '',
+		'post_content_filtered' => '',
+		'post_password'         => '',
+		'menu_order'            => 0,
+		'comment_status'        => 'closed',
+		'ping_status'           => 'closed',
+		'meta_input'            => array(
 			'wpop_description'          => $pattern->description,
 			'wpop_locale'               => $pattern->locale,
 			'wpop_keywords'             => $pattern->keywords,
 			'wpop_viewport_width'       => $parent->wpop_viewport_width ?? '',
 			'wpop_block_types'          => $parent->wpop_block_types ?? '',
-			'wpop_contains_block_types' => $parent->wpop_contains_block_types ?? '',
+			// What the `post_updated` hook derives from the content, so a stale parent value can't force a rewrite every run.
+			'wpop_contains_block_types' => get_contains_block_types( $pattern->html ),
 			'wpop_wp_version'           => $parent->wpop_wp_version ?? '',
 			'wpop_is_translation'       => true,
 		),
@@ -131,15 +143,16 @@ function create_or_update_translated_pattern( Pattern $pattern ) {
 		 * literal backslash, or the `\u002d\u002d` the block serialiser writes for `--`, is stored one backslash short.
 		 */
 		$post_id = wp_insert_post( wp_slash( $args ), true );
+		$written = ! is_wp_error( $post_id );
 	}
 
 	// Copy the terms from the parent if required.
 	if ( $post_id && ! is_wp_error( $post_id ) && $pattern->parent ) {
 		foreach ( array( 'wporg-pattern-category', 'wporg-pattern-keyword' ) as $taxonomy ) {
-			$term_ids = wp_get_object_terms( $pattern->parent->ID, $taxonomy, array( 'fields' => 'ids' ) );
+			$term_ids = get_term_ids( $pattern->parent->ID, $taxonomy );
 
 			// Setting terms, even unchanged ones, invalidates every cached term query on the site.
-			if ( ! is_wp_error( $term_ids ) && same_ids( $term_ids, wp_get_object_terms( $post_id, $taxonomy, array( 'fields' => 'ids' ) ) ) ) {
+			if ( get_term_ids( $post_id, $taxonomy ) === $term_ids ) {
 				continue;
 			}
 
@@ -153,7 +166,7 @@ function create_or_update_translated_pattern( Pattern $pattern ) {
 /**
  * Whether an existing translation already holds what writing $args would store.
  *
- * Title and content go through the save-time filters `wp_insert_post()` applies, and meta through
+ * Post fields go through the save-time filters `wp_insert_post()` applies, and meta through
  * `sanitize_meta()`, so anything a write would change counts as a difference.
  *
  * @param array $args Unslashed `wp_insert_post()` arguments for an existing translation.
@@ -165,21 +178,9 @@ function is_stored_translation_current( array $args ): bool {
 		return false;
 	}
 
-	foreach ( array( 'post_title', 'post_content' ) as $field ) {
-		$stored = wp_unslash( sanitize_post_field( $field, wp_slash( $args[ $field ] ), $post->ID, 'db' ) );
-		if ( $stored !== $post->$field ) {
-			return false;
-		}
-	}
-
-	foreach ( array( 'post_type', 'post_name', 'post_date', 'post_status' ) as $field ) {
-		if ( (string) $args[ $field ] !== $post->$field ) {
-			return false;
-		}
-	}
-
-	foreach ( array( 'post_parent', 'post_author' ) as $field ) {
-		if ( (int) $args[ $field ] !== (int) $post->$field ) {
+	foreach ( array_diff_key( $args, array_flip( array( 'ID', 'meta_input' ) ) ) as $field => $value ) {
+		$stored = wp_unslash( sanitize_post_field( $field, wp_slash( $value ), $post->ID, 'db' ) );
+		if ( (string) $stored !== (string) $post->$field ) {
 			return false;
 		}
 	}
@@ -204,23 +205,22 @@ function is_stored_translation_current( array $args ): bool {
 }
 
 /**
- * Whether two lists hold the same IDs, in any order.
+ * A post's term IDs in a taxonomy, sorted, from the object term cache where possible.
  *
- * @param int[]           $a The first list.
- * @param int[]|\WP_Error $b The second list.
- * @return bool Whether both are lists of the same IDs.
+ * @param int    $post_id  Post ID.
+ * @param string $taxonomy Taxonomy name.
+ * @return int[] The sorted term IDs.
  */
-function same_ids( array $a, $b ): bool {
-	if ( ! is_array( $b ) ) {
-		return false;
+function get_term_ids( int $post_id, string $taxonomy ): array {
+	$terms = get_the_terms( $post_id, $taxonomy );
+	if ( ! is_array( $terms ) ) {
+		return array();
 	}
 
-	$a = array_map( 'intval', $a );
-	$b = array_map( 'intval', $b );
-	sort( $a );
-	sort( $b );
+	$term_ids = array_map( 'intval', wp_list_pluck( $terms, 'term_id' ) );
+	sort( $term_ids );
 
-	return $a === $b;
+	return $term_ids;
 }
 
 /**

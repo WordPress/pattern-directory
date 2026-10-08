@@ -102,12 +102,15 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 
 			$translated = $pattern->to_locale( $locale );
 			if ( $translated ) {
-				log_message( "\t{$locale} - " . ( $translated->ID ? 'Updating' : 'Creating' ) . ' Translated pattern.' );
-				$result = create_or_update_translated_pattern( $translated );
+				$result = create_or_update_translated_pattern( $translated, $written );
 				if ( is_wp_error( $result ) ) {
 					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- failures need to reach the server log, not only the job output.
 					error_log( "Pattern translation import failed for {$pattern->name} ({$locale}): " . $result->get_error_message() );
 					log_message( "\t{$locale} - ERROR: {$result->get_error_message()}" );
+				} elseif ( ! $written ) {
+					log_message( "\t{$locale} - Translated pattern unchanged." );
+				} else {
+					log_message( "\t{$locale} - " . ( $translated->ID ? 'Updated' : 'Created' ) . ' Translated pattern.' );
 				}
 			} else {
 				log_message( "\t{$locale} - No Translations exist yet." );

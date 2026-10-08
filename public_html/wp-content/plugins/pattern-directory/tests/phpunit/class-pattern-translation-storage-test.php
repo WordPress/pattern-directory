@@ -113,9 +113,25 @@ class Pattern_Translation_Storage_Test extends WP_UnitTestCase {
 		$saves     = did_action( 'save_post_' . POST_TYPE );
 		$term_sets = did_action( 'set_object_terms' );
 
-		$this->assertSame( $post_id, create_or_update_translated_pattern( $this->translate( $replacements, $post_id ) ) );
+		$this->assertSame( $post_id, create_or_update_translated_pattern( $this->translate( $replacements, $post_id ), $written ) );
+		$this->assertFalse( $written );
 		$this->assertSame( $saves, did_action( 'save_post_' . POST_TYPE ) );
 		$this->assertSame( $term_sets, did_action( 'set_object_terms' ) );
+	}
+
+	/**
+	 * A stale `wpop_contains_block_types` on the parent doesn't make an updated translation differ forever.
+	 */
+	public function test_stale_parent_block_types_do_not_force_rewrites(): void {
+		update_post_meta( self::$parent_id, 'wpop_contains_block_types', '' );
+
+		$post_id = create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Titre' ) ) );
+		// An update runs the `post_updated` hook, which derives the value from the translation's content.
+		create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Nouveau titre' ), $post_id ) );
+		create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Nouveau titre' ), $post_id ), $written );
+
+		$this->assertFalse( $written );
+		$this->assertSame( 'core/heading', get_post_meta( $post_id, 'wpop_contains_block_types', true ) );
 	}
 
 	/**
@@ -123,9 +139,40 @@ class Pattern_Translation_Storage_Test extends WP_UnitTestCase {
 	 */
 	public function test_changed_string_is_stored(): void {
 		$post_id = create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Titre' ) ) );
-		create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Nouveau titre' ), $post_id ) );
+		create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Nouveau titre' ), $post_id ), $written );
 
+		$this->assertTrue( $written );
 		$this->assertSame( 'Nouveau titre', get_post( $post_id )->post_title );
+	}
+
+	/**
+	 * A change that only touches meta, the translation's own or the parent's, reaches the stored translation.
+	 */
+	public function test_meta_only_changes_are_stored(): void {
+		$post_id = create_or_update_translated_pattern( $this->translate( array( 'Description' => 'Une description' ) ) );
+
+		update_post_meta( self::$parent_id, 'wpop_wp_version', '6.9' );
+		create_or_update_translated_pattern( $this->translate( array( 'Description' => 'Autre description' ), $post_id ) );
+
+		$this->assertSame( 'Autre description', get_post_meta( $post_id, 'wpop_description', true ) );
+		$this->assertSame( '6.9', get_post_meta( $post_id, 'wpop_wp_version', true ) );
+	}
+
+	/**
+	 * Fields the job doesn't translate are still reset when edited on a translation.
+	 */
+	public function test_edited_password_is_reset(): void {
+		$post_id = create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Titre' ) ) );
+		wp_update_post(
+			array(
+				'ID'            => $post_id,
+				'post_password' => 'secret',
+			)
+		);
+
+		create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Titre' ), $post_id ) );
+
+		$this->assertSame( '', get_post( $post_id )->post_password );
 	}
 
 	/**
