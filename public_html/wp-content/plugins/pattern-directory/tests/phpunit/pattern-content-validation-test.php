@@ -5,6 +5,7 @@
  * @package WordPress\Pattern_Directory
  */
 
+use function WordPressdotorg\Pattern_Directory\Pattern_Validation\block_shape;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, SPAM_STATUS };
 
 /**
@@ -272,29 +273,16 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 	 * @param string $content             Content that saving would turn into something else.
 	 */
 	public function test_content_rewritten_on_save_is_refused( $expected_error_code, $content ) {
-		// Members have their content filtered on save; that is the path the checks have to match.
-		$member         = self::factory()->user->create( array( 'role' => 'subscriber' ) );
-		$member_pattern = self::factory()->post->create(
-			array(
-				'post_type'   => POST_TYPE,
-				'post_author' => $member,
-				'post_status' => 'draft',
-			)
-		);
-		wp_set_current_user( $member );
+		$member_pattern = $this->create_member_pattern();
 
-		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . $member_pattern );
-		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( wp_json_encode( array( 'content' => $content ) ) );
-
-		$response = rest_do_request( $request );
+		$response = $this->update_pattern_content( $member_pattern, $content );
 
 		$this->assertTrue( $response->is_error() );
 		$this->assertSame( $expected_error_code, $response->get_data()['code'] );
 	}
 
 	/**
-	 * Content whose blocks, or their nesting, are not what they would be once saved.
+	 * Content that the save filters would rewrite.
 	 *
 	 * @return array
 	 */
@@ -305,18 +293,113 @@ class Pattern_Content_Validation_Test extends WP_UnitTestCase {
 
 		return array(
 			// `strip_shortcodes()` stops matching a tag name at `<`; KSES deletes the element and rejoins it.
-			'shortcode split by a deleted tag'  => array( 'rest_pattern_shortcode', $in_paragraph( '[cap<script></script>tion id=c width=1 caption=x]body[/caption]' ) ),
-			'control character in a name'       => array( 'rest_pattern_control_characters', $in_paragraph( "<!-- wp:wpor\x00g/modal {\"a\":\"b\"} /-->" ) ),
-			'control character in a marker'     => array( 'rest_pattern_control_characters', $in_paragraph( "<!-- wp:wporg/modal \x01/-->" ) ),
-			'extra dash on the closer'          => array( 'rest_pattern_unstable_blocks', $in_paragraph( '<!-- wp:wporg/modal /--->' ) ),
-			'two extra dashes'                  => array( 'rest_pattern_unstable_blocks', $in_paragraph( '<!-- wp:wporg/modal /---->' ) ),
-			'container with extra dashes'       => array( 'rest_pattern_unstable_blocks', $in_paragraph( '<!-- wp:wporg/modal ---><!-- /wp:wporg/modal --->' ) ),
+			'shortcode split by a deleted tag' => array( 'rest_pattern_shortcode', $in_paragraph( '[cap<script></script>tion id=c width=1 caption=x]body[/caption]' ) ),
+			'control character in a name'      => array( 'rest_pattern_control_characters', $in_paragraph( "<!-- wp:wpor\x00g/modal {\"a\":\"b\"} /-->" ) ),
+			'control character in a marker'    => array( 'rest_pattern_control_characters', $in_paragraph( "<!-- wp:wporg/modal \x01/-->" ) ),
+		);
+	}
+
+	/**
+	 * Block markup that saving turns into different blocks is refused.
+	 *
+	 * Older KSES versions normalize a comment closer with extra dashes (`--->`) to `-->`, which turns text the
+	 * parser ignored into a block. Newer versions leave the comment alone, so the rewrite is applied here to
+	 * test the check itself, whichever version runs the suite.
+	 *
+	 * @dataProvider data_unstable_block_markup
+	 *
+	 * @param string $content Content whose blocks change if the comment closers are normalized.
+	 */
+	public function test_unstable_block_markup_is_refused( $content ) {
+		$normalize_comment_closers = function ( $value ) {
+			return preg_replace( '/-{3,}>/', '-->', $value );
+		};
+		add_filter( 'content_save_pre', $normalize_comment_closers, 20 );
+
+		$member_pattern = $this->create_member_pattern();
+		$response       = $this->update_pattern_content( $member_pattern, $content );
+
+		remove_filter( 'content_save_pre', $normalize_comment_closers, 20 );
+
+		$this->assertTrue( $response->is_error() );
+		$this->assertSame( 'rest_pattern_unstable_blocks', $response->get_data()['code'] );
+	}
+
+	/**
+	 * With the real save filters, block markup is either refused or stored with the blocks that were checked.
+	 *
+	 * @dataProvider data_unstable_block_markup
+	 *
+	 * @param string $content Content whose blocks change if the comment closers are normalized.
+	 */
+	public function test_block_markup_is_refused_or_stored_unchanged( $content ) {
+		$member_pattern = $this->create_member_pattern();
+		$response       = $this->update_pattern_content( $member_pattern, $content );
+
+		if ( $response->is_error() ) {
+			$this->assertSame( 'rest_pattern_unstable_blocks', $response->get_data()['code'] );
+			return;
+		}
+
+		$stored = get_post( $member_pattern )->post_content;
+		$this->assertSame( block_shape( parse_blocks( $content ) ), block_shape( parse_blocks( $stored ) ) );
+	}
+
+	/**
+	 * Content whose blocks, or their nesting, change if the comment closers are normalized.
+	 *
+	 * @return array
+	 */
+	public function data_unstable_block_markup() {
+		$in_paragraph = function ( $markup ) {
+			return self::TWO_PARAGRAPHS . "\n\n<!-- wp:paragraph -->\n<p>Three $markup</p>\n<!-- /wp:paragraph -->";
+		};
+
+		return array(
+			'extra dash on the closer'          => array( $in_paragraph( '<!-- wp:wporg/modal /--->' ) ),
+			'two extra dashes'                  => array( $in_paragraph( '<!-- wp:wporg/modal /---->' ) ),
+			'container with extra dashes'       => array( $in_paragraph( '<!-- wp:wporg/modal ---><!-- /wp:wporg/modal --->' ) ),
 			// Same names in the same order, but the extra dash on the closing delimiter un-nests what follows it.
 			'extra dash on a closing delimiter' => array(
-				'rest_pattern_unstable_blocks',
 				"<!-- wp:query {\"query\":{\"perPage\":2}} -->\n<div class=\"wp-block-query\">\n<!-- /wp:query --->\n<!-- wp:post-template -->\n<!-- wp:post-title /-->\n<!-- /wp:post-template -->\n</div>\n<!-- /wp:query -->",
 			),
 		);
+	}
+
+	/**
+	 * Create a draft pattern owned by a member, and act as that member.
+	 *
+	 * Members have their content filtered on save; that is the path the checks have to match.
+	 *
+	 * @return int Pattern ID.
+	 */
+	private function create_member_pattern() {
+		$member         = self::factory()->user->create( array( 'role' => 'subscriber' ) );
+		$member_pattern = self::factory()->post->create(
+			array(
+				'post_type'   => POST_TYPE,
+				'post_author' => $member,
+				'post_status' => 'draft',
+			)
+		);
+		wp_set_current_user( $member );
+
+		return $member_pattern;
+	}
+
+	/**
+	 * Dispatch an update to a pattern's content.
+	 *
+	 * @param int    $pattern_id Pattern ID.
+	 * @param string $content    New content.
+	 * @return WP_REST_Response
+	 */
+	private function update_pattern_content( $pattern_id, $content ) {
+		$request = new WP_REST_Request( 'POST', '/wp/v2/wporg-pattern/' . $pattern_id );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'content' => $content ) ) );
+
+		return rest_do_request( $request );
 	}
 
 	/**
