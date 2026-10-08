@@ -8,7 +8,7 @@ import { unescape as unescapeString } from 'lodash';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, CheckboxControl, Modal, TextControl, TextareaControl } from '@wordpress/components';
+import { Button, CheckboxControl, ExternalLink, Modal, TextControl, TextareaControl } from '@wordpress/components';
 import { createInterpolateElement, useEffect, useRef, useState } from '@wordpress/element';
 import { store as editorStore } from '@wordpress/editor';
 import { store as noticesStore } from '@wordpress/notices';
@@ -101,8 +101,8 @@ export default function SubmissionModal( { onClose, onSubmit, status } ) {
 								'wporg-patterns'
 							),
 							{
-								/* eslint-disable-next-line jsx-a11y/anchor-has-content */
-								a: <a href={ `${ wporgBlockPattern.siteUrl }/about/` } />,
+								// Open in a new tab so following the link doesn't discard the pattern.
+								a: <ExternalLink href={ `${ wporgBlockPattern.siteUrl }/about/` } />,
 							}
 						) }
 					</p>
