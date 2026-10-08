@@ -139,7 +139,8 @@ add_action( 'pattern_import_translations_to_directory', __NAMESPACE__ . '\patter
 /**
  * The WordPress locales with at least one current translation in the patterns GlotPress project.
  *
- * Uses the same conditions as `GlotPress_Translate_Bridge`, so a locale missing here can't translate any string.
+ * Uses the same conditions and locale mapping as `GlotPress_Translate_Bridge`, so a locale missing here can't
+ * translate any string.
  *
  * @return string[] WordPress locales, or an empty array if GlotPress isn't available.
  */
@@ -173,10 +174,10 @@ function get_translated_locales() {
 
 	$wp_locales = array();
 	foreach ( (array) $sets as $set ) {
-		// Variants such as `de/formal` are locales of their own.
-		$gp_locale = \GP_Locales::by_slug( 'default' === $set->slug ? $set->locale : "{$set->locale}/{$set->slug}" );
+		// The inverse of the bridge's lookup: `ca` / `valencia` is `ca_valencia`, though that locale's own slug is `ca-val`.
+		$gp_locale = \GP_Locales::by_slug( $set->locale );
 		if ( $gp_locale && $gp_locale->wp_locale ) {
-			$wp_locales[] = $gp_locale->wp_locale;
+			$wp_locales[] = $gp_locale->wp_locale . ( 'default' === $set->slug ? '' : '_' . $set->slug );
 		}
 	}
 
