@@ -80,7 +80,7 @@ function is_translated_content_allowed( $html ) {
  * Creates or updates a localised pattern.
  *
  * @param Pattern   $pattern The translated pattern to store.
- * @param bool|null $written Optional. Set to whether the post was written.
+ * @param bool|null $written Optional. Set to whether the post or its terms were written.
  *
  * @return int|\WP_Error The pattern post ID, or an error if the content is refused or the write fails.
  */
@@ -117,6 +117,9 @@ function create_or_update_translated_pattern( Pattern $pattern, ?bool &$written 
 		'menu_order'            => 0,
 		'comment_status'        => 'closed',
 		'ping_status'           => 'closed',
+		'to_ping'               => '',
+		'pinged'                => '',
+		'post_mime_type'        => '',
 		'meta_input'            => array(
 			'wpop_description'          => $pattern->description,
 			'wpop_locale'               => $pattern->locale,
@@ -157,7 +160,9 @@ function create_or_update_translated_pattern( Pattern $pattern, ?bool &$written 
 				continue;
 			}
 
-			wp_set_object_terms( $post_id, $term_ids, $taxonomy );
+			if ( ! is_wp_error( wp_set_object_terms( $post_id, $term_ids, $taxonomy ) ) ) {
+				$written = true;
+			}
 		}
 	}
 
@@ -197,8 +202,10 @@ function is_stored_translation_current( array $args ): bool {
 	}
 
 	foreach ( $args['meta_input'] as $key => $value ) {
-		$value  = sanitize_meta( $key, $value, 'post', POST_TYPE );
-		$stored = get_post_meta( $post->ID, $key, false );
+		$value = sanitize_meta( $key, $value, 'post', POST_TYPE );
+
+		// Raw, as `get_post_meta()` returns the registered default when there are no rows.
+		$stored = get_metadata_raw( 'post', $post->ID, $key, false );
 
 		// `update_post_meta()` sets every row of the key, or adds one when there are none.
 		if ( ! is_scalar( $value ) || ! $stored ) {

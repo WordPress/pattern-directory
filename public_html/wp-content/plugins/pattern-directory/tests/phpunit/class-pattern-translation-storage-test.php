@@ -146,16 +146,21 @@ class Pattern_Translation_Storage_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Meta-only changes, from the translation or the parent, are stored.
+	 * A change to only the parent's meta, or only the translated description, is stored.
 	 */
 	public function test_meta_only_changes_are_stored(): void {
 		$post_id = create_or_update_translated_pattern( $this->translate( array( 'Description' => 'Une description' ) ) );
 
 		update_post_meta( self::$parent_id, 'wpop_wp_version', '6.9' );
-		create_or_update_translated_pattern( $this->translate( array( 'Description' => 'Autre description' ), $post_id ) );
+		create_or_update_translated_pattern( $this->translate( array( 'Description' => 'Une description' ), $post_id ), $written );
 
-		$this->assertSame( 'Autre description', get_post_meta( $post_id, 'wpop_description', true ) );
+		$this->assertTrue( $written );
 		$this->assertSame( '6.9', get_post_meta( $post_id, 'wpop_wp_version', true ) );
+
+		create_or_update_translated_pattern( $this->translate( array( 'Description' => 'Autre description' ), $post_id ), $written );
+
+		$this->assertTrue( $written );
+		$this->assertSame( 'Autre description', get_post_meta( $post_id, 'wpop_description', true ) );
 	}
 
 	/**
@@ -176,24 +181,38 @@ class Pattern_Translation_Storage_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Changes to the parent's status and terms reach a translation whose strings did not change.
+	 * A change to only the parent's terms is copied without rewriting the post.
 	 */
-	public function test_parent_changes_are_copied(): void {
+	public function test_parent_term_change_is_copied(): void {
 		$post_id = create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Titre' ) ) );
 
 		$category = self::factory()->term->create( array( 'taxonomy' => 'wporg-pattern-category' ) );
 		wp_set_object_terms( self::$parent_id, array( $category ), 'wporg-pattern-category' );
+
+		$saves = did_action( 'save_post_' . POST_TYPE );
+		create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Titre' ), $post_id ), $written );
+
+		$this->assertTrue( $written );
+		$this->assertSame( $saves, did_action( 'save_post_' . POST_TYPE ) );
+		$this->assertSame( array( $category ), wp_get_object_terms( $post_id, 'wporg-pattern-category', array( 'fields' => 'ids' ) ) );
+	}
+
+	/**
+	 * A change to only the parent's status is copied.
+	 */
+	public function test_parent_status_change_is_copied(): void {
+		$post_id = create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Titre' ) ) );
+
 		wp_update_post(
 			array(
 				'ID'          => self::$parent_id,
 				'post_status' => 'draft',
 			)
 		);
+		create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Titre' ), $post_id ), $written );
 
-		create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Titre' ), $post_id ) );
-
+		$this->assertTrue( $written );
 		$this->assertSame( 'draft', get_post_status( $post_id ) );
-		$this->assertSame( array( $category ), wp_get_object_terms( $post_id, 'wporg-pattern-category', array( 'fields' => 'ids' ) ) );
 	}
 
 	/**

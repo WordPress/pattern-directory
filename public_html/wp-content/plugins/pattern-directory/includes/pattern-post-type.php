@@ -596,7 +596,8 @@ function update_contains_block_types_meta( $pattern_id ) {
  * @return string Sorted, comma-separated block names.
  */
 function get_contains_block_types( $content ) {
-	$all_blocks = _flatten_blocks( parse_blocks( $content ) );
+	$blocks     = parse_blocks( $content );
+	$all_blocks = _flatten_blocks( $blocks );
 
 	// Get the list of block names and convert it to a single string.
 	$block_names = wp_list_pluck( $all_blocks, 'blockName' );
