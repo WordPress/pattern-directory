@@ -58,6 +58,8 @@ export default function SubmissionModal( { onClose, onSubmit, status } ) {
 	const [ description, setDescription ] = useState( meta.wpop_description );
 	const [ selectedCategories, setSelectedCategories ] = useState( postCategories );
 	const categories = usePatternCategories();
+	// Retired categories stay on older patterns but aren't listed, so they can't satisfy the requirement.
+	const hasSelectableCategory = categories.some( ( term ) => selectedCategories.includes( term.id ) );
 	const [ currentPage, setCurrentPage ] = useState( 0 );
 	const container = useRef();
 
@@ -220,7 +222,7 @@ export default function SubmissionModal( { onClose, onSubmit, status } ) {
 				<>
 					<Button onClick={ goBack }>{ __( 'Previous', 'wporg-patterns' ) }</Button>
 					<ForwardButton
-						disabled={ ! selectedCategories.length }
+						disabled={ ! hasSelectableCategory }
 						onClick={ () => {
 							onSubmit();
 							goForward();
