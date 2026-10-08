@@ -590,7 +590,7 @@ function update_contains_block_types_meta( $pattern_id ) {
 }
 
 /**
- * The block types used in pattern content, as stored in the `wpop_contains_block_types` meta field.
+ * Block types used in pattern content, as stored in `wpop_contains_block_types`.
  *
  * @param string $content Pattern content.
  * @return string Sorted, comma-separated block names.

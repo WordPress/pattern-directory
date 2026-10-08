@@ -120,13 +120,13 @@ class Pattern_Translation_Storage_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A stale `wpop_contains_block_types` on the parent doesn't make an updated translation differ forever.
+	 * A stale parent `wpop_contains_block_types` doesn't force rewrites.
 	 */
 	public function test_stale_parent_block_types_do_not_force_rewrites(): void {
 		update_post_meta( self::$parent_id, 'wpop_contains_block_types', '' );
 
 		$post_id = create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Titre' ) ) );
-		// An update runs the `post_updated` hook, which derives the value from the translation's content.
+		// Saving changed strings runs the `post_updated` hook, which recomputes the value.
 		create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Nouveau titre' ), $post_id ) );
 		create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Nouveau titre' ), $post_id ), $written );
 
@@ -146,7 +146,7 @@ class Pattern_Translation_Storage_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A change that only touches meta, the translation's own or the parent's, reaches the stored translation.
+	 * Meta-only changes, from the translation or the parent, are stored.
 	 */
 	public function test_meta_only_changes_are_stored(): void {
 		$post_id = create_or_update_translated_pattern( $this->translate( array( 'Description' => 'Une description' ) ) );

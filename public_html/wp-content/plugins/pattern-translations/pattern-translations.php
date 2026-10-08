@@ -80,7 +80,7 @@ function is_translated_content_allowed( $html ) {
  * Creates or updates a localised pattern.
  *
  * @param Pattern   $pattern The translated pattern to store.
- * @param bool|null $written Optional. Set to whether the post was written, false when it was already current.
+ * @param bool|null $written Optional. Set to whether the post was written.
  *
  * @return int|\WP_Error The pattern post ID, or an error if the content is refused or the write fails.
  */
@@ -109,7 +109,7 @@ function create_or_update_translated_pattern( Pattern $pattern, ?bool &$written 
 		'post_parent'           => $pattern->parent->ID ?? 0,
 		'post_author'           => $parent->post_author ?? 0,
 		'post_status'           => $parent->post_status ?? 'pending',
-		// Edits to these on a translation are undone, as `wp_insert_post()` resets them when they're left out.
+		// Undo edits to fields the job doesn't translate.
 		'post_excerpt'          => '',
 		'post_content_filtered' => '',
 		'post_password'         => '',
@@ -122,7 +122,7 @@ function create_or_update_translated_pattern( Pattern $pattern, ?bool &$written 
 			'wpop_keywords'             => $pattern->keywords,
 			'wpop_viewport_width'       => $parent->wpop_viewport_width ?? '',
 			'wpop_block_types'          => $parent->wpop_block_types ?? '',
-			// What the `post_updated` hook derives from the content, so a stale parent value can't force a rewrite every run.
+			// Matches what the `post_updated` hook stores.
 			'wpop_contains_block_types' => get_contains_block_types( $pattern->html ),
 			'wpop_wp_version'           => $parent->wpop_wp_version ?? '',
 			'wpop_is_translation'       => true,
@@ -133,7 +133,7 @@ function create_or_update_translated_pattern( Pattern $pattern, ?bool &$written 
 		unset( $args['ID'] );
 	}
 
-	// Every write fires the save hooks, and Jetpack Sync sends the whole post for each one.
+	// Each write fires the save hooks, and Jetpack Sync sends the whole post.
 	if ( isset( $args['ID'] ) && is_stored_translation_current( $args ) ) {
 		$post_id = $args['ID'];
 	} else {
@@ -166,8 +166,7 @@ function create_or_update_translated_pattern( Pattern $pattern, ?bool &$written 
 /**
  * Whether an existing translation already holds what writing $args would store.
  *
- * Post fields go through the save-time filters `wp_insert_post()` applies, and meta through
- * `sanitize_meta()`, so anything a write would change counts as a difference.
+ * Values go through the same sanitizing as a write, so any difference it would make counts.
  *
  * @param array $args Unslashed `wp_insert_post()` arguments for an existing translation.
  * @return bool Whether the stored post and meta already match.
@@ -189,7 +188,7 @@ function is_stored_translation_current( array $args ): bool {
 		$value  = sanitize_meta( $key, $value, 'post', POST_TYPE );
 		$stored = get_post_meta( $post->ID, $key, false );
 
-		// `update_post_meta()` writes the value to every row of the key, or adds a row when there is none.
+		// `update_post_meta()` sets every row of the key, or adds one when there are none.
 		if ( ! is_scalar( $value ) || ! $stored ) {
 			return false;
 		}
@@ -205,7 +204,7 @@ function is_stored_translation_current( array $args ): bool {
 }
 
 /**
- * A post's term IDs in a taxonomy, sorted, from the object term cache where possible.
+ * A post's sorted term IDs in a taxonomy, via the object term cache.
  *
  * @param int    $post_id  Post ID.
  * @param string $taxonomy Taxonomy name.
