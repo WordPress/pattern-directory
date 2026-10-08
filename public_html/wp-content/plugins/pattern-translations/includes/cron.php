@@ -11,6 +11,7 @@ use WP_CLI;
 use WordPressdotorg\Pattern_Translations\{ Pattern, PatternMakepot };
 use function WordPressdotorg\Pattern_Translations\create_or_update_translated_pattern;
 use function WordPressdotorg\Locales\get_locales;
+use const WordPressdotorg\Pattern_Translations\GLOTPRESS_PROJECT;
 
 const CHUNK_SIZE = 50;
 
@@ -88,6 +89,12 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 
 	$locales = get_locales();
 
+	// A locale without a single translation can't translate any pattern, so skip it entirely.
+	$translated_locales = get_translated_locales();
+	if ( $translated_locales ) {
+		$locales = array_intersect_key( $locales, array_flip( $translated_locales ) );
+	}
+
 	log_message( sprintf( 'Processing %d Patterns in %d locales.', count( $pattern_ids ), count( $locales ) ) );
 
 	foreach ( $pattern_ids as $i => $pattern_id ) {
@@ -128,6 +135,51 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 	}
 }
 add_action( 'pattern_import_translations_to_directory', __NAMESPACE__ . '\pattern_import_translations_to_directory' );
+
+/**
+ * The WordPress locales with at least one current translation in the patterns GlotPress project.
+ *
+ * Uses the same conditions as `GlotPress_Translate_Bridge`, so a locale missing here can't translate any string.
+ *
+ * @return string[] WordPress locales, or an empty array if GlotPress isn't available.
+ */
+function get_translated_locales() {
+	global $wpdb;
+
+	if ( ! class_exists( 'GP_Locales' ) ) {
+		return array();
+	}
+
+	$prefix = defined( 'GLOTPRESS_TABLE_PREFIX' ) ? GLOTPRESS_TABLE_PREFIX : 'gp_';
+
+	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Dynamic table prefix cannot be passed via placeholders.
+	$sets = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT s.locale, s.slug
+			FROM {$prefix}translation_sets s
+			INNER JOIN {$prefix}projects p ON p.id = s.project_id
+			WHERE p.path = %s AND EXISTS (
+				SELECT 1
+				FROM {$prefix}translations t
+				INNER JOIN {$prefix}originals o ON o.id = t.original_id
+				WHERE t.translation_set_id = s.id AND t.status = 'current' AND o.status = '+active'
+			)",
+			GLOTPRESS_PROJECT
+		)
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+	$wp_locales = array();
+	foreach ( (array) $sets as $set ) {
+		// Variants such as `de/formal` are locales of their own.
+		$gp_locale = \GP_Locales::by_slug( 'default' === $set->slug ? $set->locale : "{$set->locale}/{$set->slug}" );
+		if ( $gp_locale && $gp_locale->wp_locale ) {
+			$wp_locales[] = $gp_locale->wp_locale;
+		}
+	}
+
+	return $wp_locales;
+}
 
 /**
  * Clear caches for memory management.
