@@ -105,6 +105,7 @@ function create_or_update_translated_pattern( Pattern $pattern, ?bool &$written 
 		'post_title'            => $pattern->title,
 		'post_name'             => $pattern->ID ? $pattern->name : ( $pattern->name . '-' . $pattern->locale ), // TODO: Translate the slug?
 		'post_date'             => $parent->post_date ?? '',
+		'post_date_gmt'         => $parent->post_date_gmt ?? '',
 		'post_content'          => $pattern->html,
 		'post_parent'           => $pattern->parent->ID ?? 0,
 		'post_author'           => $parent->post_author ?? 0,
@@ -172,6 +173,8 @@ function create_or_update_translated_pattern( Pattern $pattern, ?bool &$written 
  * @return bool Whether the stored post and meta already match.
  */
 function is_stored_translation_current( array $args ): bool {
+	global $wpdb;
+
 	$post = get_post( $args['ID'] );
 	if ( ! $post ) {
 		return false;
@@ -179,6 +182,15 @@ function is_stored_translation_current( array $args ): bool {
 
 	foreach ( array_diff_key( $args, array_flip( array( 'ID', 'meta_input' ) ) ) as $field => $value ) {
 		$stored = wp_unslash( sanitize_post_field( $field, wp_slash( $value ), $post->ID, 'db' ) );
+
+		// `wp_insert_post()` encodes emoji in these fields when the column can't hold them.
+		if (
+			in_array( $field, array( 'post_title', 'post_content', 'post_excerpt' ), true ) &&
+			in_array( $wpdb->get_col_charset( $wpdb->posts, $field ), array( 'utf8', 'utf8mb3' ), true )
+		) {
+			$stored = wp_encode_emoji( $stored );
+		}
+
 		if ( (string) $stored !== (string) $post->$field ) {
 			return false;
 		}
