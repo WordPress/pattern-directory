@@ -82,7 +82,7 @@ function is_translated_content_allowed( $html ) {
  * @param Pattern   $pattern The translated pattern to store.
  * @param bool|null $written Optional. Set to whether the post or its terms were written.
  *
- * @return int|\WP_Error The pattern post ID, or an error if the content is refused or the write fails.
+ * @return int|\WP_Error The pattern post ID, or an error if the content is refused or a write fails.
  */
 function create_or_update_translated_pattern( Pattern $pattern, ?bool &$written = null ) {
 	$written = false;
@@ -160,9 +160,12 @@ function create_or_update_translated_pattern( Pattern $pattern, ?bool &$written 
 				continue;
 			}
 
-			if ( ! is_wp_error( wp_set_object_terms( $post_id, $term_ids, $taxonomy ) ) ) {
-				$written = true;
+			$result = wp_set_object_terms( $post_id, $term_ids, $taxonomy );
+			if ( is_wp_error( $result ) ) {
+				return $result;
 			}
+
+			$written = true;
 		}
 	}
 
