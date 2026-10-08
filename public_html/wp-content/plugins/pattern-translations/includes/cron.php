@@ -152,22 +152,24 @@ function get_translated_locales() {
 
 	$prefix = defined( 'GLOTPRESS_TABLE_PREFIX' ) ? GLOTPRESS_TABLE_PREFIX : 'gp_';
 
-	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Dynamic table prefix cannot be passed via placeholders.
 	$sets = $wpdb->get_results(
 		$wpdb->prepare(
 			"SELECT s.locale, s.slug
-			FROM {$prefix}translation_sets s
-			INNER JOIN {$prefix}projects p ON p.id = s.project_id
+			FROM %i s
+			INNER JOIN %i p ON p.id = s.project_id
 			WHERE p.path = %s AND EXISTS (
 				SELECT 1
-				FROM {$prefix}translations t
-				INNER JOIN {$prefix}originals o ON o.id = t.original_id
+				FROM %i t
+				INNER JOIN %i o ON o.id = t.original_id
 				WHERE t.translation_set_id = s.id AND t.status = 'current' AND o.status = '+active'
 			)",
-			GLOTPRESS_PROJECT
+			$prefix . 'translation_sets',
+			$prefix . 'projects',
+			GLOTPRESS_PROJECT,
+			$prefix . 'translations',
+			$prefix . 'originals'
 		)
 	);
-	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 	$wp_locales = array();
 	foreach ( (array) $sets as $set ) {
