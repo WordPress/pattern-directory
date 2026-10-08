@@ -152,8 +152,6 @@ function get_translated_locales() {
 		return array();
 	}
 
-	$prefix = GLOTPRESS_TABLE_PREFIX;
-
 	$sets = $wpdb->get_results(
 		$wpdb->prepare(
 			"SELECT s.locale, s.slug
@@ -165,11 +163,11 @@ function get_translated_locales() {
 				INNER JOIN %i o ON o.id = t.original_id
 				WHERE t.translation_set_id = s.id AND t.status = 'current' AND o.status = '+active'
 			)",
-			$prefix . 'translation_sets',
-			$prefix . 'projects',
+			GLOTPRESS_TABLE_PREFIX . 'translation_sets',
+			GLOTPRESS_TABLE_PREFIX . 'projects',
 			GLOTPRESS_PROJECT,
-			$prefix . 'translations',
-			$prefix . 'originals'
+			GLOTPRESS_TABLE_PREFIX . 'translations',
+			GLOTPRESS_TABLE_PREFIX . 'originals'
 		)
 	);
 
