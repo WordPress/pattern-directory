@@ -97,18 +97,76 @@ class Pattern_Translation_Storage_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Storing the same translation again leaves the post and its terms alone, backslashes included.
+	 */
+	public function test_unchanged_translation_is_not_rewritten(): void {
+		$category = self::factory()->term->create( array( 'taxonomy' => 'wporg-pattern-category' ) );
+		wp_set_object_terms( self::$parent_id, array( $category ), 'wporg-pattern-category' );
+
+		$replacements = array(
+			'Title'       => 'Titre \ barre',
+			'Description' => 'Chemin C:\Temp',
+			'Subtitle'    => 'C:\Temp',
+		);
+		$post_id      = create_or_update_translated_pattern( $this->translate( $replacements ) );
+
+		$saves     = did_action( 'save_post_' . POST_TYPE );
+		$term_sets = did_action( 'set_object_terms' );
+
+		$this->assertSame( $post_id, create_or_update_translated_pattern( $this->translate( $replacements, $post_id ) ) );
+		$this->assertSame( $saves, did_action( 'save_post_' . POST_TYPE ) );
+		$this->assertSame( $term_sets, did_action( 'set_object_terms' ) );
+	}
+
+	/**
+	 * A changed translator string reaches the stored translation.
+	 */
+	public function test_changed_string_is_stored(): void {
+		$post_id = create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Titre' ) ) );
+		create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Nouveau titre' ), $post_id ) );
+
+		$this->assertSame( 'Nouveau titre', get_post( $post_id )->post_title );
+	}
+
+	/**
+	 * Changes to the parent's status and terms reach a translation whose strings did not change.
+	 */
+	public function test_parent_changes_are_copied(): void {
+		$post_id = create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Titre' ) ) );
+
+		$category = self::factory()->term->create( array( 'taxonomy' => 'wporg-pattern-category' ) );
+		wp_set_object_terms( self::$parent_id, array( $category ), 'wporg-pattern-category' );
+		wp_update_post(
+			array(
+				'ID'          => self::$parent_id,
+				'post_status' => 'draft',
+			)
+		);
+
+		create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Titre' ), $post_id ) );
+
+		$this->assertSame( 'draft', get_post_status( $post_id ) );
+		$this->assertSame( array( $category ), wp_get_object_terms( $post_id, 'wporg-pattern-category', array( 'fields' => 'ids' ) ) );
+	}
+
+	/**
 	 * Run the parent through the parser with the given translator strings, as the job does.
 	 *
 	 * @param array $replacements Translations keyed by original string.
+	 * @param int   $existing_id  Optional. The stored translation the job would find.
 	 * @return Translations_Pattern The assembled translation.
 	 */
-	protected function translate( array $replacements ): Translations_Pattern {
+	protected function translate( array $replacements, int $existing_id = 0 ): Translations_Pattern {
 		$parent = Translations_Pattern::from_post( get_post( self::$parent_id ) );
 
 		$pattern         = ( new PatternParser( $parent ) )->replace_strings_with_kses( $replacements );
-		$pattern->ID     = 0;
+		$pattern->ID     = $existing_id;
 		$pattern->locale = self::LOCALE;
 		$pattern->parent = $parent;
+
+		if ( $existing_id ) {
+			$pattern->name = get_post( $existing_id )->post_name;
+		}
 
 		return $pattern;
 	}

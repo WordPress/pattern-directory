@@ -121,22 +121,106 @@ function create_or_update_translated_pattern( Pattern $pattern ) {
 		unset( $args['ID'] );
 	}
 
-	/*
-	 * `wp_insert_post()` expects slashed input and unslashes every field, `meta_input` included, before it
-	 * writes. Nothing in $args arrives slashed (GlotPress strings, `get_post()` reads), so without this a
-	 * literal backslash, or the `\u002d\u002d` the block serialiser writes for `--`, is stored one backslash short.
-	 */
-	$post_id = wp_insert_post( wp_slash( $args ), true );
+	// Every write fires the save hooks, and Jetpack Sync sends the whole post for each one.
+	if ( isset( $args['ID'] ) && is_stored_translation_current( $args ) ) {
+		$post_id = $args['ID'];
+	} else {
+		/*
+		 * `wp_insert_post()` expects slashed input and unslashes every field, `meta_input` included, before it
+		 * writes. Nothing in $args arrives slashed (GlotPress strings, `get_post()` reads), so without this a
+		 * literal backslash, or the `\u002d\u002d` the block serialiser writes for `--`, is stored one backslash short.
+		 */
+		$post_id = wp_insert_post( wp_slash( $args ), true );
+	}
 
 	// Copy the terms from the parent if required.
 	if ( $post_id && ! is_wp_error( $post_id ) && $pattern->parent ) {
 		foreach ( array( 'wporg-pattern-category', 'wporg-pattern-keyword' ) as $taxonomy ) {
 			$term_ids = wp_get_object_terms( $pattern->parent->ID, $taxonomy, array( 'fields' => 'ids' ) );
+
+			// Setting terms, even unchanged ones, invalidates every cached term query on the site.
+			if ( ! is_wp_error( $term_ids ) && same_ids( $term_ids, wp_get_object_terms( $post_id, $taxonomy, array( 'fields' => 'ids' ) ) ) ) {
+				continue;
+			}
+
 			wp_set_object_terms( $post_id, $term_ids, $taxonomy );
 		}
 	}
 
 	return $post_id;
+}
+
+/**
+ * Whether an existing translation already holds what writing $args would store.
+ *
+ * Title and content go through the save-time filters `wp_insert_post()` applies, and meta through
+ * `sanitize_meta()`, so anything a write would change counts as a difference.
+ *
+ * @param array $args Unslashed `wp_insert_post()` arguments for an existing translation.
+ * @return bool Whether the stored post and meta already match.
+ */
+function is_stored_translation_current( array $args ): bool {
+	$post = get_post( $args['ID'] );
+	if ( ! $post ) {
+		return false;
+	}
+
+	foreach ( array( 'post_title', 'post_content' ) as $field ) {
+		$stored = wp_unslash( sanitize_post_field( $field, wp_slash( $args[ $field ] ), $post->ID, 'db' ) );
+		if ( $stored !== $post->$field ) {
+			return false;
+		}
+	}
+
+	foreach ( array( 'post_type', 'post_name', 'post_date', 'post_status' ) as $field ) {
+		if ( (string) $args[ $field ] !== $post->$field ) {
+			return false;
+		}
+	}
+
+	foreach ( array( 'post_parent', 'post_author' ) as $field ) {
+		if ( (int) $args[ $field ] !== (int) $post->$field ) {
+			return false;
+		}
+	}
+
+	foreach ( $args['meta_input'] as $key => $value ) {
+		$value  = sanitize_meta( $key, $value, 'post', POST_TYPE );
+		$stored = get_post_meta( $post->ID, $key, false );
+
+		// `update_post_meta()` writes the value to every row of the key, or adds a row when there is none.
+		if ( ! is_scalar( $value ) || ! $stored ) {
+			return false;
+		}
+
+		foreach ( $stored as $row ) {
+			if ( (string) $value !== $row ) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+/**
+ * Whether two lists hold the same IDs, in any order.
+ *
+ * @param int[]           $a The first list.
+ * @param int[]|\WP_Error $b The second list.
+ * @return bool Whether both are lists of the same IDs.
+ */
+function same_ids( array $a, $b ): bool {
+	if ( ! is_array( $b ) ) {
+		return false;
+	}
+
+	$a = array_map( 'intval', $a );
+	$b = array_map( 'intval', $b );
+	sort( $a );
+	sort( $b );
+
+	return $a === $b;
 }
 
 /**
