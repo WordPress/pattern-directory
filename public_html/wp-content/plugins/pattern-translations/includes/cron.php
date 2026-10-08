@@ -11,6 +11,7 @@ use WP_CLI;
 use WordPressdotorg\Pattern_Translations\{ Pattern, PatternMakepot };
 use function WordPressdotorg\Pattern_Translations\create_or_update_translated_pattern;
 use function WordPressdotorg\Locales\get_locales;
+use const WordPressdotorg\Pattern_Translations\GLOTPRESS_PROJECT;
 
 const CHUNK_SIZE = 50;
 
@@ -88,6 +89,14 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 
 	$locales = get_locales();
 
+	// A locale without a single translation can't translate any pattern, so skip it entirely.
+	$translated_locales = get_translated_locales();
+	if ( $translated_locales ) {
+		$locales = array_intersect_key( $locales, array_flip( $translated_locales ) );
+	} else {
+		log_message( 'Could not list the locales with translations, processing all of them.' );
+	}
+
 	log_message( sprintf( 'Processing %d Patterns in %d locales.', count( $pattern_ids ), count( $locales ) ) );
 
 	foreach ( $pattern_ids as $i => $pattern_id ) {
@@ -128,6 +137,51 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 	}
 }
 add_action( 'pattern_import_translations_to_directory', __NAMESPACE__ . '\pattern_import_translations_to_directory' );
+
+/**
+ * The WordPress locales with at least one current translation in the patterns GlotPress project.
+ *
+ * Uses the same conditions as `GlotPress_Translate_Bridge`, so a locale missing here can't translate any string.
+ *
+ * @return string[] WordPress locales, or an empty array if GlotPress isn't available.
+ */
+function get_translated_locales() {
+	global $wpdb;
+
+	if ( ! defined( 'GLOTPRESS_TABLE_PREFIX' ) ) {
+		return array();
+	}
+
+	$sets = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT s.locale, s.slug
+			FROM %i s
+			INNER JOIN %i p ON p.id = s.project_id
+			WHERE p.path = %s AND EXISTS (
+				SELECT 1
+				FROM %i t
+				INNER JOIN %i o ON o.id = t.original_id
+				WHERE t.translation_set_id = s.id AND t.status = 'current' AND o.status = '+active'
+			)",
+			GLOTPRESS_TABLE_PREFIX . 'translation_sets',
+			GLOTPRESS_TABLE_PREFIX . 'projects',
+			GLOTPRESS_PROJECT,
+			GLOTPRESS_TABLE_PREFIX . 'translations',
+			GLOTPRESS_TABLE_PREFIX . 'originals'
+		)
+	);
+
+	$wp_locales = array();
+	foreach ( (array) $sets as $set ) {
+		// The inverse of the bridge's lookup: `ca` / `valencia` is `ca_valencia`, though that locale's own slug is `ca-val`.
+		$gp_locale = \GP_Locales::by_slug( $set->locale );
+		if ( $gp_locale && $gp_locale->wp_locale ) {
+			$wp_locales[] = $gp_locale->wp_locale . ( 'default' === $set->slug ? '' : '_' . $set->slug );
+		}
+	}
+
+	return $wp_locales;
+}
 
 /**
  * Clear caches for memory management.
