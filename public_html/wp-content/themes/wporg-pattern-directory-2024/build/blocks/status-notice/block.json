@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "wporg/status-notice",
+  "version": "0.1.0",
+  "title": "Status Notice",
+  "category": "design",
+  "icon": "",
+  "description": "A notice displaying the current pattern's status.",
+  "textdomain": "wporg",
+  "attributes": {},
+  "supports": {
+    "html": false
+  },
+  "usesContext": [
+    "postId",
+    "postType"
+  ],
+  "editorScript": "file:./index.js",
+  "render": "file:./render.php"
+}
