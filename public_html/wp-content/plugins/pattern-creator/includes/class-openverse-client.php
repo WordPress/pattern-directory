@@ -235,6 +235,15 @@ class Openverse_Client {
 		$ttl       = HOUR_IN_SECONDS;
 
 		$results = get_transient( $cache_key );
+
+		// An empty array is cached briefly after an upstream failure, see below.
+		if ( array() === $results ) {
+			return new WP_Error(
+				'search-request-failed',
+				__( 'The search API provider is currently experiencing an error. Try again in a few seconds', 'wporg-patterns' ) // Publicly facing human-readable error.
+			);
+		}
+
 		if ( false === $results ) {
 			$results = $this->fetch_results();
 			if ( is_wp_error( $results ) ) {
