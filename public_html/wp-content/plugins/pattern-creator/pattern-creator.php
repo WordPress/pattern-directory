@@ -85,6 +85,7 @@ function pattern_creator_init() {
 	wp_deregister_style( 'wporg-style' );
 	// These will have no effect if the styles are not registered.
 	wp_deregister_style( 'wporg-pattern-directory-2024-style' );
+	wp_deregister_style( 'wporg-parent-2021-print' );
 	wp_deregister_style( 'wporg-parent-2021-style' );
 	wp_deregister_style( 'global-styles' );
 
