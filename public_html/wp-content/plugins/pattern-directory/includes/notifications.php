@@ -24,6 +24,23 @@ const UNLISTED_DETAIL_META = '_wporg_unlist_reason_detail';
  */
 add_action( 'wp_after_insert_post', __NAMESPACE__ . '\trigger_notifications', 20, 4 );
 add_action( 'init', __NAMESPACE__ . '\register_unlisted_meta' );
+add_filter( 'rest_prepare_' . PATTERN, __NAMESPACE__ . '\filter_unlisted_meta' );
+
+/**
+ * Keep moderator-only meta out of authors' editor state and subsequent saves.
+ *
+ * @param \WP_REST_Response $response Pattern response.
+ * @return \WP_REST_Response
+ */
+function filter_unlisted_meta( $response ) {
+	if ( ! current_user_can( get_post_type_object( PATTERN )->cap->edit_others_posts ) ) {
+		$data = $response->get_data();
+		unset( $data['meta'][ UNLISTED_DETAIL_META ] );
+		$response->set_data( $data );
+	}
+
+	return $response;
+}
 
 /**
  * Register the post meta used to store the moderator's message to the author.
