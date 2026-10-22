@@ -208,12 +208,17 @@ class Unlist_Message_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Authors can save metadata copied from an edit response, including absent message defaults.
+	 * Authors can save metadata without receiving or modifying moderator messages.
 	 *
+	 * @param string|null $detail Stored moderator message, or null for absent meta.
+	 * @dataProvider moderator_message_provider
 	 * @covers \WordPressdotorg\Pattern_Directory\Notifications\filter_unlisted_meta
 	 */
-	public function test_member_can_save_meta_from_edit_response(): void {
+	public function test_member_can_save_meta_from_edit_response( ?string $detail ): void {
 		wp_set_current_user( self::$member );
+		if ( null !== $detail ) {
+			update_post_meta( self::$pattern_id, UNLISTED_DETAIL_META, $detail );
+		}
 
 		$request = new WP_REST_Request( 'GET', '/wp/v2/' . POST_TYPE . '/' . self::$pattern_id );
 		$request->set_param( 'context', 'edit' );
@@ -228,6 +233,19 @@ class Unlist_Message_Test extends WP_UnitTestCase {
 
 		$this->assertFalse( $response->is_error() );
 		$this->assertSame( 'An updated description.', get_post_meta( self::$pattern_id, 'wpop_description', true ) );
+		$this->assertSame( $detail ?? '', get_post_meta( self::$pattern_id, UNLISTED_DETAIL_META, true ) );
+	}
+
+	/**
+	 * Moderator message states an author may encounter when opening the editor.
+	 *
+	 * @return array
+	 */
+	public function moderator_message_provider(): array {
+		return array(
+			'absent message' => array( null ),
+			'stored message' => array( 'Please revise the pattern.' ),
+		);
 	}
 
 	/**
