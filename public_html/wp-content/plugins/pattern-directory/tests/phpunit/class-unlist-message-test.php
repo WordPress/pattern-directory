@@ -206,6 +206,46 @@ class Unlist_Message_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Authors can save metadata copied from an edit response, including absent message defaults.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Notifications\filter_unlisted_meta
+	 */
+	public function test_member_can_save_meta_from_edit_response(): void {
+		wp_set_current_user( self::$member );
+
+		$request = new WP_REST_Request( 'GET', '/wp/v2/' . POST_TYPE . '/' . self::$pattern_id );
+		$request->set_param( 'context', 'edit' );
+		$response = rest_do_request( $request );
+
+		$this->assertFalse( $response->is_error() );
+		$meta = $response->get_data()['meta'];
+		$this->assertArrayNotHasKey( UNLISTED_DETAIL_META, $meta );
+		$meta['wpop_description'] = 'An updated description.';
+
+		$response = $this->update_pattern( array( 'meta' => $meta ) );
+
+		$this->assertFalse( $response->is_error() );
+		$this->assertSame( 'An updated description.', get_post_meta( self::$pattern_id, 'wpop_description', true ) );
+	}
+
+	/**
+	 * Moderators still receive the field used by the Unlist modal.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Notifications\filter_unlisted_meta
+	 */
+	public function test_moderator_can_read_message_in_edit_context(): void {
+		wp_set_current_user( self::$moderator );
+		update_post_meta( self::$pattern_id, UNLISTED_DETAIL_META, 'Please revise the pattern.' );
+
+		$request = new WP_REST_Request( 'GET', '/wp/v2/' . POST_TYPE . '/' . self::$pattern_id );
+		$request->set_param( 'context', 'edit' );
+		$response = rest_do_request( $request );
+
+		$this->assertFalse( $response->is_error() );
+		$this->assertSame( 'Please revise the pattern.', $response->get_data()['meta'][ UNLISTED_DETAIL_META ] );
+	}
+
+	/**
 	 * The message is never in the public API.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Notifications\register_unlisted_meta
