@@ -13,6 +13,7 @@ use WP_REST_Request;
 use WP_UnitTestCase;
 use WP_UnitTest_Factory;
 use function WordPressdotorg\Pattern_Directory\Notifications\register_unlisted_meta;
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\register_post_type_data;
 use const WordPressdotorg\Pattern_Directory\Notifications\UNLISTED_DETAIL_META;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS };
 
@@ -95,6 +96,7 @@ class Unlist_Message_Test extends WP_UnitTestCase {
 		 * The test case resets post types between classes, which drops their registered meta. Register it
 		 * again, and drop the cached controller and server so the REST schema picks it up.
 		 */
+		register_post_type_data();
 		register_unlisted_meta();
 		get_post_type_object( POST_TYPE )->rest_controller = null;
 		$GLOBALS['wp_rest_server']                         = null;
