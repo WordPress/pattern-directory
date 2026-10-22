@@ -434,11 +434,14 @@ function register_rest_fields() {
 		POST_TYPE,
 		'author_meta',
 		array(
-			'get_callback' => function ( $post ) {
+			'get_callback' => function () {
+				// `$post['author']` is missing when `_fields` doesn't request it, so read it from the post itself.
+				$author_id = (int) get_post_field( 'post_author', get_the_ID() );
+
 				return array(
-					'name'   => esc_html( get_the_author_meta( 'display_name', $post['author'] ) ),
-					'url'    => esc_url( home_url( '/author/' . get_the_author_meta( 'user_nicename', $post['author'] ) ) ),
-					'avatar' => get_avatar_url( $post['author'], array( 'size' => 64 ) ),
+					'name'   => esc_html( get_the_author_meta( 'display_name', $author_id ) ),
+					'url'    => esc_url( home_url( '/author/' . get_the_author_meta( 'user_nicename', $author_id ) ) ),
+					'avatar' => get_avatar_url( $author_id, array( 'size' => 64 ) ),
 				);
 			},
 
