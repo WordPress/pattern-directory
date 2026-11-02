@@ -60,7 +60,7 @@ $is_status_filtered = ! empty( $wp_query->query['status'] );
 
 				<!-- wp:button {"className":"is-style-text is-small is-edit-link","metadata":{"bindings":{"text":{"source":"wporg-pattern/edit-label"},"url":{"source":"wporg-pattern/edit-url"}}}} -->
 				<div class="wp-block-button is-style-text is-small is-edit-link"><a href="#" class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Edit', 'wporg-patterns' ); ?></a></div>
-				<!-- /wp:paragraph -->
+				<!-- /wp:button -->
 			</div>
 			<!-- /wp:group -->
 		</div>
