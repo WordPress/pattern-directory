@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getSettings, isFeatureActive, isInserterOpened, isListViewOpened, isPatternSaveable } from '../selectors';
+import { getSettings, isFeatureActive, isPatternSaveable } from '../selectors';
 
 describe( 'selectors', () => {
 	describe( 'isFeatureActive', () => {
@@ -86,28 +86,6 @@ describe( 'selectors', () => {
 				__experimentalSetIsInserterOpened: setInserterOpened,
 				__experimentalLocalAutosaveInterval: 30,
 			} );
-		} );
-	} );
-
-	describe( 'isInserterOpened', () => {
-		it( 'returns the block inserter panel isOpened state', () => {
-			const state = {
-				blockInserterPanel: true,
-			};
-			expect( isInserterOpened( state ) ).toBe( true );
-			state.blockInserterPanel = false;
-			expect( isInserterOpened( state ) ).toBe( false );
-		} );
-	} );
-
-	describe( 'isListViewOpened', () => {
-		it( 'returns the list view panel isOpened state', () => {
-			const state = {
-				listViewPanel: true,
-			};
-			expect( isListViewOpened( state ) ).toBe( true );
-			state.listViewPanel = false;
-			expect( isListViewOpened( state ) ).toBe( false );
 		} );
 	} );
 

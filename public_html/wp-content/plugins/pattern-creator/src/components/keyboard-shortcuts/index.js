@@ -7,6 +7,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { store as coreStore } from '@wordpress/core-data';
 import { store as interfaceStore } from '@wordpress/interface';
+import { store as editorStore } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -16,13 +17,13 @@ import { SIDEBAR_BLOCK } from '../sidebar/constants';
 import { STORE_NAME } from '../../store/constants';
 
 function KeyboardShortcuts() {
-	const isListViewOpen = useSelect( ( select ) => select( patternStore ).isListViewOpened() );
+	const isListViewOpen = useSelect( ( select ) => select( editorStore ).isListViewOpened() );
 	const isBlockInspectorOpen = useSelect(
 		( select ) => select( interfaceStore ).getActiveComplementaryArea( patternStore.name ) === SIDEBAR_BLOCK,
 		[]
 	);
 	const { redo, undo } = useDispatch( coreStore );
-	const { setIsListViewOpened } = useDispatch( patternStore );
+	const { setIsListViewOpened } = useDispatch( editorStore );
 	const { enableComplementaryArea, disableComplementaryArea } = useDispatch( interfaceStore );
 
 	useShortcut( 'core/edit-site/undo', ( event ) => {

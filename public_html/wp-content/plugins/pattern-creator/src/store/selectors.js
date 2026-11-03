@@ -88,40 +88,6 @@ export const getSettings = createSelector(
 );
 
 /**
- * Returns the current opened/closed state of the inserter panel.
- *
- * @param {Object} state Global application state.
- *
- * @return {boolean} True if the inserter panel should be open; false if closed.
- */
-export function isInserterOpened( state ) {
-	return !! state.blockInserterPanel;
-}
-
-/**
- * Get the insertion point for the inserter.
- *
- * @param {Object} state Global application state.
- *
- * @return {Object} The root client ID and index to insert at.
- */
-export function __experimentalGetInsertionPoint( state ) {
-	const { rootClientId, insertionIndex } = state.blockInserterPanel;
-	return { rootClientId, insertionIndex };
-}
-
-/**
- * Returns the current opened/closed state of the list view panel.
- *
- * @param {Object} state Global application state.
- *
- * @return {boolean} True if the list view panel should be open; false if closed.
- */
-export function isListViewOpened( state ) {
-	return state.listViewPanel;
-}
-
-/**
  * Returns whether the pattern is "saveable".
  *
  * A pattern can be saved if it has content. The other requirements
