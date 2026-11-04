@@ -121,12 +121,12 @@ class PatternMakepot {
 		$po = $this->makepo();
 
 		if ( true === $save ) {
-			// Obsoleting keeps the translations, and importing a string again restores them.
+			// GlotPress obsoletes every original missing from the catalog and has no hook to prevent it.
 			if ( ! $complete ) {
-				add_filter( 'gp_import_project_originals', array( $this, 'extend_imported_originals' ), 10, 3 );
+				$po = self::extend_imported_originals( $po, $project, $this->get_originals_by_key( $project ) );
 			}
+
 			list( $added, $existing, $fuzzied, $obsoleted, $error ) = \GP::$original->import_for_project( $project, $po );
-			remove_filter( 'gp_import_project_originals', array( $this, 'extend_imported_originals' ), 10, 3 );
 
 			$notice = sprintf(
 				'%1$s new strings added, %2$s updated, %3$s fuzzied, and %4$s obsoleted.',
@@ -213,6 +213,30 @@ class PatternMakepot {
 		}
 
 		return $po;
+	}
+
+	/**
+	 * Get the project's active originals, keyed like `GP_Original::import_for_project()` keys them.
+	 *
+	 * @param \GP_Project $project GlotPress project.
+	 * @return \GP_Original[] Active originals keyed by entry key.
+	 */
+	private function get_originals_by_key( $project ): array {
+		$originals_by_key = array();
+
+		foreach ( \GP::$original->by_project_id( $project->id ) as $original ) {
+			$entry = new \Translation_Entry(
+				array(
+					'singular' => $original->singular,
+					'plural'   => $original->plural,
+					'context'  => $original->context,
+				)
+			);
+
+			$originals_by_key[ $entry->key() ] = $original;
+		}
+
+		return $originals_by_key;
 	}
 
 	/**

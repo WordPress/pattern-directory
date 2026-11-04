@@ -117,11 +117,8 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 	public function glotpress_import( $_, $args ) {
 		$patterns = $this->get_patterns_or_exit( $args );
 
-		// The other selectors take precedence over --all-posts, so the import is only complete without them.
-		$complete = isset( $args['all-posts'] ) && ! isset( $args['post'] ) && ! isset( $args['post-ids'] ) && ! isset( $args['post-slugs'] );
-
 		$makepot = new PatternMakepot( $patterns );
-		WP_CLI::log( $makepot->import( isset( $args['save'] ), $complete ) );
+		WP_CLI::log( $makepot->import( isset( $args['save'] ), isset( $args['all-posts'] ) ) );
 		exit( 0 );
 	}
 
@@ -137,6 +134,12 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 		$post_slugs = $args['post-slugs'] ?? false;
 		$all_posts  = isset( $args['all-posts'] );
 		$locale     = $args['locale'] ?? false;
+
+		// Imports treat --all-posts as a complete set, so it can't be silently overridden by another selector.
+		if ( $all_posts && ( false !== $post || false !== $post_ids || false !== $post_slugs ) ) {
+			WP_CLI::error( '--all-posts can\'t be combined with --post, --post-ids or --post-slugs.' );
+			exit( 1 );
+		}
 
 		$query = array();
 
