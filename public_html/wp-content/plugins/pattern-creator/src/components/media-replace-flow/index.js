@@ -1,13 +1,46 @@
 /**
+ * Openverse replacement for core's media replace menu.
+ */
+
+/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { speak } from '@wordpress/a11y';
 import { Dropdown, MenuItem, NavigableMenu, ToolbarButton } from '@wordpress/components';
 import { MediaUpload, store as blockEditorStore, useBlockEditContext } from '@wordpress/block-editor';
 import { createBlock } from '@wordpress/blocks';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { DOWN } from '@wordpress/keycodes';
 import { media as mediaIcon } from '@wordpress/icons';
+
+/**
+ * Gallery settings the gallery gives images added to it, as core's `buildImageAttributes()` does.
+ *
+ * Core only applies them to images it can look up by ID, which Openverse media lack.
+ *
+ * @param {Object} gallery The gallery's attributes.
+ * @param {string} url     The image's URL.
+ * @return {Object} Image block attributes.
+ */
+function getGalleryImageAttributes( gallery, url ) {
+	const { linkTo, linkTarget, sizeSlug, aspectRatio } = gallery;
+
+	// Openverse media have no attachment page, so "attachment" links are left out.
+	const link = {
+		file: { href: url, linkDestination: 'media' },
+		media: { href: url, linkDestination: 'media' },
+		lightbox: { linkDestination: 'none', lightbox: { enabled: true } },
+		none: { linkDestination: 'none' },
+	}[ linkTo ];
+
+	return {
+		...link,
+		linkTarget: linkTarget ? '_blank' : undefined,
+		sizeSlug,
+		aspectRatio: 'auto' === aspectRatio ? undefined : aspectRatio,
+	};
+}
 
 /**
  * Replace or add media from Openverse, in place of core's menu, which offers only uploads and the media library.
@@ -17,18 +50,20 @@ import { media as mediaIcon } from '@wordpress/icons';
  * images, so blocks that take no images only get "Reset".
  *
  * @param {Object}   props
- * @param {string}   props.name         Toggle label.
- * @param {string[]} props.allowedTypes Allowed media types.
- * @param {boolean}  props.multiple     Whether several items can be picked.
- * @param {number[]} props.mediaIds     IDs of the gallery's current media.
- * @param {number}   props.mediaId      ID of the current media.
- * @param {string}   props.mediaURL     URL of the current media.
- * @param {Function} props.onSelect     Called with the picked media.
- * @param {Function} props.onReset      Clears the media, when the block supports it.
- * @param {string}   props.variant      Popover variant.
- * @param {Object}   props.popoverProps Popover props.
- * @param {Function} props.renderToggle Custom toggle renderer.
- * @param {string}   props.className    Dropdown class name.
+ * @param {string}   props.name                  Toggle label.
+ * @param {string[]} props.allowedTypes          Allowed media types.
+ * @param {boolean}  props.multiple              Whether several items can be picked.
+ * @param {number[]} props.mediaIds              IDs of the gallery's current media.
+ * @param {number}   props.mediaId               ID of the current media.
+ * @param {string}   props.mediaURL              URL of the current media.
+ * @param {Function} props.onSelect              Called with the picked media.
+ * @param {Function} props.onReset               Clears the media, when the block supports it.
+ * @param {boolean}  props.useFeaturedImage      Whether the block shows the post's featured image.
+ * @param {Function} props.onToggleFeaturedImage Toggles showing the featured image.
+ * @param {string}   props.variant               Popover variant.
+ * @param {Object}   props.popoverProps          Popover props.
+ * @param {Function} props.renderToggle          Custom toggle renderer.
+ * @param {string}   props.className             Dropdown class name.
  * @return {?Element} The replace menu, or nothing when it would be empty.
  */
 export default function MediaReplaceFlow( {
@@ -40,6 +75,8 @@ export default function MediaReplaceFlow( {
 	mediaURL,
 	onSelect,
 	onReset,
+	useFeaturedImage,
+	onToggleFeaturedImage,
 	variant,
 	popoverProps,
 	renderToggle,
@@ -47,6 +84,7 @@ export default function MediaReplaceFlow( {
 } ) {
 	const { name: blockName, clientId } = useBlockEditContext();
 	const { insertBlocks } = useDispatch( blockEditorStore );
+	const { getBlockAttributes } = useSelect( blockEditorStore );
 	const allowsImages = allowedTypes?.some( ( type ) => 'image' === type || type.startsWith( 'image/' ) );
 	const canReset = !! mediaURL && !! onReset;
 
@@ -54,21 +92,38 @@ export default function MediaReplaceFlow( {
 		return null;
 	}
 
+	/**
+	 * Hands the picked media to the block, or appends it to a gallery.
+	 *
+	 * @param {Object|Object[]} media The picked media.
+	 */
 	const selectMedia = ( media ) => {
 		/*
 		 * The gallery tells new images from the ones it holds by ID, and Openverse media have none, so it would add
 		 * nothing, or swap out images saved without one. Append them instead, as the gallery does with new images.
 		 */
-		if ( 'core/gallery' === blockName ) {
+		if ( multiple && 'core/gallery' === blockName ) {
+			const gallery = getBlockAttributes( clientId );
 			insertBlocks(
-				media.map( ( { url, alt, caption } ) => createBlock( 'core/image', { url, alt, caption } ) ),
+				media.map( ( { url, alt, caption } ) =>
+					createBlock( 'core/image', {
+						...getGalleryImageAttributes( gallery, url ),
+						url,
+						alt,
+						caption,
+					} )
+				),
 				undefined,
 				clientId
 			);
 			return;
 		}
 
+		if ( useFeaturedImage && onToggleFeaturedImage ) {
+			onToggleFeaturedImage();
+		}
 		onSelect( media );
+		speak( __( 'The media file has been replaced', 'wporg-patterns' ) );
 	};
 
 	return (
