@@ -117,8 +117,11 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 	public function glotpress_import( $_, $args ) {
 		$patterns = $this->get_patterns_or_exit( $args );
 
+		// The other selectors take precedence over --all-posts, so the import is only complete without them.
+		$complete = isset( $args['all-posts'] ) && ! isset( $args['post'] ) && ! isset( $args['post-ids'] ) && ! isset( $args['post-slugs'] );
+
 		$makepot = new PatternMakepot( $patterns );
-		WP_CLI::log( $makepot->import( isset( $args['save'] ), isset( $args['all-posts'] ) ) );
+		WP_CLI::log( $makepot->import( isset( $args['save'] ), $complete ) );
 		exit( 0 );
 	}
 
