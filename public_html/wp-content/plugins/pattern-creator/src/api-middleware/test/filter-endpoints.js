@@ -38,6 +38,17 @@ describe( 'filterEndpoints navigation mocks', () => {
 
 		expect( response.headers.get( 'X-WP-Total' ) ).toBe( '1' );
 		expect( response.headers.get( 'X-WP-TotalPages' ) ).toBe( '1' );
+		expect( response.headers.get( 'Allow' ) ).toBe( 'GET' );
 		expect( await response.json() ).toMatchObject( [ { id: 1, content: { raw: PLACEHOLDER_CONTENT } } ] );
+	} );
+
+	it( 'reports the placeholder menu as read-only to permission checks', async () => {
+		const response = await filterEndpoints( {
+			path: '/wp/v2/navigation/42',
+			method: 'OPTIONS',
+			parse: false,
+		} );
+
+		expect( response.headers.get( 'Allow' ) ).toBe( 'GET' );
 	} );
 } );

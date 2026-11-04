@@ -112,14 +112,23 @@ export default async function ( options, next ) {
 
 		options.path = maybeUpdateContext( options.path );
 
-		const isGet = ! options.method || 'GET' === options.method.toUpperCase();
-		const mock = isGet && getMockNavigationResponse( options.path );
+		const method = ( options.method || 'GET' ).toUpperCase();
+		// core-data's `canUser()` sends a raw `OPTIONS` request and reads the `Allow` header.
+		const isPermissionCheck = 'OPTIONS' === method && false === options.parse;
+		const mock = ( 'GET' === method || isPermissionCheck ) && getMockNavigationResponse( options.path );
 		if ( mock ) {
-			// Paginated entity queries ask for the raw `Response` to read the totals.
+			// The placeholder menu is read-only, so no write method may be advertised for it.
+			const allow = { Allow: 'GET' };
+			if ( isPermissionCheck ) {
+				return new Response( null, { headers: allow } );
+			}
+
+			// Entity queries ask for the raw `Response` to read the totals and permissions.
 			if ( false === options.parse ) {
 				const total = String( Array.isArray( mock ) ? mock.length : 1 );
 				return new Response( JSON.stringify( mock ), {
 					headers: {
+						...allow,
 						'Content-Type': 'application/json',
 						'X-WP-Total': total,
 						'X-WP-TotalPages': '1',
