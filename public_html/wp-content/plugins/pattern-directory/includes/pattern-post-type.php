@@ -865,8 +865,8 @@ function filter_patterns_rest_query( $args, $request ) {
 			'value'   => array( $locale, 'en_US' ),
 		);
 
-		// A list of IDs asks for exactly those.
-		if ( empty( $args['post__in'] ) ) {
+		// A list of IDs or slugs asks for exactly those, and a translation's slug differs from its original's.
+		if ( empty( $args['post__in'] ) && empty( $args['post_name__in'] ) ) {
 			$args['hide_translated_originals'] = true;
 		}
 	}
@@ -999,20 +999,34 @@ function filter_orderby_locale( $orderby, $query ) {
 function filter_clauses_translated_originals( $clauses, $query ) {
 	global $wpdb;
 
-	if ( ! $query->get( 'hide_translated_originals' ) || $query->is_search() || empty( $query->meta_query->queries['orderby_locale']['value'] ) ) {
+	if ( ! $query->get( 'hide_translated_originals' ) || $query->is_search() ) {
+		return $clauses;
+	}
+
+	$locale = $query->meta_query->queries['orderby_locale']['value'][0] ?? '';
+
+	// English listings have no translations to swap in.
+	if ( ! is_string( $locale ) || '' === $locale || 'en_US' === $locale ) {
 		return $clauses;
 	}
 
 	/*
-	 * Reusing the query's own JOIN and WHERE drops an original only when its translation passes every filter and
-	 * takes its place. Submitters can set `post_parent` and `wpop_locale` on their own pattern; only the
-	 * translation pipeline sets `wpop_is_translation`.
+	 * Looks each listed row's translation up by `post_parent`, then its meta by `post_id`. The join order and
+	 * indexes are pinned because, left to table statistics, the optimizer can start from the `wpop_is_translation`
+	 * meta that ~97k rows share. The pipeline copies the original's author, status, date, terms and version onto
+	 * its translations, so a translation passes the same filters and is listed instead. Submitters can set
+	 * `post_parent` and `wpop_locale` on their own pattern; only the pipeline sets the marker.
 	 */
-	$clauses['where'] .= " AND {$wpdb->posts}.ID NOT IN (
-		SELECT {$wpdb->posts}.post_parent FROM {$wpdb->posts} {$clauses['join']}
-		INNER JOIN {$wpdb->postmeta} AS translation_marker ON ( translation_marker.post_id = {$wpdb->posts}.ID AND translation_marker.meta_key = 'wpop_is_translation' AND translation_marker.meta_value = '1' )
-		WHERE 1=1 {$clauses['where']} AND {$wpdb->posts}.post_parent > 0
-	)";
+	$clauses['where'] .= $wpdb->prepare(
+		" AND NOT EXISTS (
+			SELECT 1 FROM {$wpdb->posts} AS translation FORCE INDEX ( post_parent )
+			STRAIGHT_JOIN {$wpdb->postmeta} AS translation_marker FORCE INDEX ( post_id ) ON ( translation_marker.post_id = translation.ID AND translation_marker.meta_key = 'wpop_is_translation' AND translation_marker.meta_value = '1' )
+			STRAIGHT_JOIN {$wpdb->postmeta} AS translation_locale FORCE INDEX ( post_id ) ON ( translation_locale.post_id = translation.ID AND translation_locale.meta_key = 'wpop_locale' AND translation_locale.meta_value = %s )
+			WHERE translation.post_parent = {$wpdb->posts}.ID AND translation.post_type = %s AND translation.post_status = {$wpdb->posts}.post_status
+		)",
+		$locale,
+		POST_TYPE
+	);
 
 	return $clauses;
 }
