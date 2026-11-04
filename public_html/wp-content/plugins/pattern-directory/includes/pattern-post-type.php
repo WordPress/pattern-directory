@@ -1352,7 +1352,7 @@ function decode_pattern_content( $content ) {
  * @return string
  */
 function remove_media_ids( $content ) {
-	return preg_replace_callback(
+	$stripped = preg_replace_callback(
 		// The opening delimiter, then its markup up to the next delimiter, which holds the cover's background image.
 		'/(<!-- wp:(?:cover|image) )(\{.*?\})( \/?-->)(.*?)(?=<!-- \/?wp:|$)/s',
 		function ( $matches ) {
@@ -1365,30 +1365,42 @@ function remove_media_ids( $content ) {
 
 			// Only the top-level member is the block's ID, so track nesting, skipping over strings.
 			$depth = 0;
+			$start = null;
 			preg_match_all( '/"(?:[^"\\\\]|\\\\.)*"|[{}\[\]]/', $attributes, $tokens, PREG_OFFSET_CAPTURE );
 			foreach ( $tokens[0] as list( $token, $offset ) ) {
 				if ( '"' !== $token[0] ) {
 					$depth += ( '{' === $token || '[' === $token ) ? 1 : -1;
 				} elseif ( 1 === $depth && preg_match( '/([{,])"id":' . $id . '([,}])/A', $attributes, $sides, 0, $offset - 1 ) ) {
-					// Keep the brace or comma on each side that still has a neighbor.
-					$replacement = '{' === $sides[1] ? ( '}' === $sides[2] ? '{}' : '{' ) : $sides[2];
-					$attributes  = substr_replace( $attributes, $replacement, $offset - 1, strlen( $sides[0] ) );
+					$start = $offset - 1;
 					break;
 				}
 			}
 
+			// An ID not written the way the serializer writes it keeps its class too, so the markup still validates.
+			if ( null === $start ) {
+				return $block;
+			}
+
+			// Keep the brace or comma on each side that still has a neighbor.
+			$replacement = '{' === $sides[1] ? ( '}' === $sides[2] ? '{}' : '{' ) : $sides[2];
+			$attributes  = substr_replace( $attributes, $replacement, $start, strlen( $sides[0] ) );
+
+			// Parallax and repeated covers put the class on a background `<div>` rather than an `<img>`.
 			$tags = new \WP_HTML_Tag_Processor( $html );
-			while ( $tags->next_tag( 'IMG' ) ) {
-				if ( $tags->has_class( "wp-image-$id" ) ) {
-					$tags->remove_class( "wp-image-$id" );
-					break;
-				}
+			if ( $tags->next_tag( array( 'class_name' => "wp-image-$id" ) ) ) {
+				$tags->remove_class( "wp-image-$id" );
 			}
 
-			return $opener . $attributes . $closer . $tags->get_updated_html();
+			// The serializer omits empty attributes rather than writing `{}`.
+			$opener = '{}' === $attributes ? rtrim( $opener ) : $opener . $attributes;
+
+			return $opener . $closer . $tags->get_updated_html();
 		},
 		$content
 	);
+
+	// Very large markup can exhaust PCRE's backtrack limit; keep the IDs rather than lose the content.
+	return $stripped ?? $content;
 }
 
 /**

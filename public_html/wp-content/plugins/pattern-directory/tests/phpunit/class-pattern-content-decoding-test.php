@@ -235,7 +235,7 @@ class Pattern_Content_Decoding_Test extends WP_UnitTestCase {
 		$expected  = '<!-- wp:cover {"url":"https://pd.w.org/a.jpg","dimRatio":50} -->';
 		$expected .= '<div class="wp-block-cover"><span aria-hidden="true" class="wp-block-cover__background"></span>';
 		$expected .= '<img class="wp-block-cover__image-background" alt="" src="https://pd.w.org/a.jpg" data-object-fit="cover"/>';
-		$expected .= '<div class="wp-block-cover__inner-container"><!-- wp:image {} -->';
+		$expected .= '<div class="wp-block-cover__inner-container"><!-- wp:image -->';
 		$expected .= '<figure class="wp-block-image"><img src="https://pd.w.org/b.jpg" alt="" /></figure>';
 		$expected .= '<!-- /wp:image --></div></div><!-- /wp:cover -->';
 
@@ -265,6 +265,42 @@ class Pattern_Content_Decoding_Test extends WP_UnitTestCase {
 		$expected .= '<!-- /wp:image -->';
 
 		$this->assertSame( $expected, decode_pattern_content( $content ) );
+	}
+
+	/**
+	 * A parallax or repeated cover's media ID class goes too, though it sits on a background `<div>`.
+	 *
+	 * Catches the class staying behind once the ID is gone, which makes the cover invalid in the editor.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content
+	 */
+	public function test_media_id_class_is_removed_from_background_div(): void {
+		$content  = '<!-- wp:cover {"url":"https://pd.w.org/a.jpg","id":334,"hasParallax":true} -->';
+		$content .= '<div class="wp-block-cover has-parallax"><span aria-hidden="true" class="wp-block-cover__background"></span>';
+		$content .= '<div class="wp-block-cover__image-background wp-image-334 has-parallax" style="background-image:url(https://pd.w.org/a.jpg)"></div>';
+		$content .= '<div class="wp-block-cover__inner-container"></div></div><!-- /wp:cover -->';
+
+		$expected  = '<!-- wp:cover {"url":"https://pd.w.org/a.jpg","hasParallax":true} -->';
+		$expected .= '<div class="wp-block-cover has-parallax"><span aria-hidden="true" class="wp-block-cover__background"></span>';
+		$expected .= '<div class="wp-block-cover__image-background has-parallax" style="background-image:url(https://pd.w.org/a.jpg)"></div>';
+		$expected .= '<div class="wp-block-cover__inner-container"></div></div><!-- /wp:cover -->';
+
+		$this->assertSame( $expected, decode_pattern_content( $content ) );
+	}
+
+	/**
+	 * An ID that isn't written the way the serializer writes it is left in place, along with its class.
+	 *
+	 * Catches dropping the class while the ID stays, which makes the block invalid in the editor.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content
+	 */
+	public function test_unmatched_media_id_keeps_its_class(): void {
+		$content  = '<!-- wp:image {"id": 61} -->';
+		$content .= '<figure class="wp-block-image"><img src="https://pd.w.org/b.jpg" alt="" class="wp-image-61"/></figure>';
+		$content .= '<!-- /wp:image -->';
+
+		$this->assertSame( $content, decode_pattern_content( $content ) );
 	}
 
 	/**
