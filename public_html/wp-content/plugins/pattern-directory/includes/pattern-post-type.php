@@ -898,6 +898,12 @@ function filter_patterns_rest_query( $args, $request ) {
 	}
 
 	$orderby = $request->get_param( 'orderby' );
+
+	// The collection defaults to `date`, so a search ranks by relevance only when the request picks no order.
+	if ( ! empty( $request['search'] ) && ! isset( $request->get_query_params()['orderby'] ) ) {
+		$args['orderby'] = 'relevance';
+	}
+
 	if ( 'favorite_count' === $orderby ) {
 		$args['orderby']  = 'meta_value_num';
 		$args['meta_key'] = 'wporg-pattern-favorites';
