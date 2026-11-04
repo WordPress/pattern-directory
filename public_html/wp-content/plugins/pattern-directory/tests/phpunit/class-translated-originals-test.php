@@ -29,27 +29,35 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	protected static $ids = array();
 
 	/**
-	 * Create an original translated into Spanish, one translated into French only, and their translations.
+	 * Create an original translated into Spanish, one translated into French only, one with a user-submitted
+	 * child claiming to be its Spanish translation, and their children.
 	 *
 	 * @param WP_UnitTest_Factory $factory Test data factory.
 	 */
 	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ): void {
-		$create = function ( string $title, string $locale, int $parent_id = 0 ) use ( $factory ): int {
+		$create = function ( string $title, string $locale, int $parent_id = 0, bool $is_translation = false ) use ( $factory ): int {
+			$meta = array( 'wpop_locale' => $locale );
+			if ( $is_translation ) {
+				$meta['wpop_is_translation'] = true;
+			}
+
 			return $factory->post->create(
 				array(
 					'post_title'  => $title,
 					'post_type'   => POST_TYPE,
 					'post_parent' => $parent_id,
-					'meta_input'  => array( 'wpop_locale' => $locale ),
+					'meta_input'  => $meta,
 				)
 			);
 		};
 
 		self::$ids['original']       = $create( 'About cards', 'en_US' );
-		self::$ids['translation']    = $create( 'Tarjetas sobre mí', 'es_ES', self::$ids['original'] );
+		self::$ids['translation']    = $create( 'Tarjetas sobre mí', 'es_ES', self::$ids['original'], true );
 		self::$ids['french_only']    = $create( 'About columns', 'en_US' );
-		self::$ids['french']         = $create( 'Colonnes à propos', 'fr_FR', self::$ids['french_only'] );
+		self::$ids['french']         = $create( 'Colonnes à propos', 'fr_FR', self::$ids['french_only'], true );
 		self::$ids['not_translated'] = $create( 'About header', 'en_US' );
+		self::$ids['forged_target']  = $create( 'About footer', 'en_US' );
+		self::$ids['forged']         = $create( 'Pie de página', 'es_ES', self::$ids['forged_target'] );
 	}
 
 	/**
@@ -84,10 +92,23 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	 * into another locale only.
 	 */
 	public function test_browsing_lists_the_translation_in_place_of_its_original(): void {
-		$expected = array( self::$ids['translation'], self::$ids['french_only'], self::$ids['not_translated'] );
+		$expected = array(
+			self::$ids['translation'],
+			self::$ids['french_only'],
+			self::$ids['not_translated'],
+			self::$ids['forged_target'],
+			self::$ids['forged'],
+		);
 		sort( $expected );
 
 		$this->assertSame( $expected, $this->get_ids( array( 'locale' => 'es_ES' ) ) );
+	}
+
+	/**
+	 * Catches a user's own pattern claiming `post_parent` and `wpop_locale` hiding someone else's original.
+	 */
+	public function test_browsing_keeps_an_original_with_a_forged_translation(): void {
+		$this->assertContains( self::$ids['forged_target'], $this->get_ids( array( 'locale' => 'es_ES' ) ) );
 	}
 
 	/**

@@ -866,7 +866,7 @@ function filter_patterns_rest_query( $args, $request ) {
 		);
 
 		// Search keeps both, so an English query still finds the original; a list of IDs asks for exactly those.
-		if ( empty( $request['search'] ) && empty( $args['post__in'] ) ) {
+		if ( '' === (string) $request['search'] && empty( $args['post__in'] ) ) {
 			$args['hide_translated_originals'] = true;
 		}
 	}
@@ -1010,18 +1010,19 @@ function filter_where_translated_originals( $where, $query ) {
 
 	$placeholders = implode( ', ', array_fill( 0, count( $locales ), '%s' ) );
 
+	// Submitters can set `post_parent` and `wpop_locale` on their own pattern; only the pipeline sets `wpop_is_translation`.
 	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Placeholders are generated above.
 	$where .= $wpdb->prepare(
 		" AND NOT EXISTS (
 			SELECT 1 FROM {$wpdb->posts} AS translation
 			INNER JOIN {$wpdb->postmeta} AS translation_locale ON ( translation_locale.post_id = translation.ID AND translation_locale.meta_key = 'wpop_locale' )
+			INNER JOIN {$wpdb->postmeta} AS translation_marker ON ( translation_marker.post_id = translation.ID AND translation_marker.meta_key = 'wpop_is_translation' AND translation_marker.meta_value = '1' )
 			WHERE translation.post_parent = {$wpdb->posts}.ID
 				AND translation.post_type = %s
 				AND translation.post_status = 'publish'
 				AND translation_locale.meta_value IN ( {$placeholders} )
 		)",
-		POST_TYPE,
-		...$locales
+		array_merge( array( POST_TYPE ), $locales )
 	);
 	// phpcs:enable
 
