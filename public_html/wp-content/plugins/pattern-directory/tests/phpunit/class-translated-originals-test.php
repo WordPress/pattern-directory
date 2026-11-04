@@ -35,29 +35,38 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	 * @param WP_UnitTest_Factory $factory Test data factory.
 	 */
 	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ): void {
-		$create = function ( string $title, string $locale, int $parent_id = 0, bool $is_translation = false ) use ( $factory ): int {
-			$meta = array( 'wpop_locale' => $locale );
-			if ( $is_translation ) {
-				$meta['wpop_is_translation'] = true;
-			}
+		self::$ids['original']       = self::create_pattern( 'Hero cards', 'en_US' );
+		self::$ids['translation']    = self::create_pattern( 'Tarjetas hero', 'es_ES', self::$ids['original'], true );
+		self::$ids['french_only']    = self::create_pattern( 'About columns', 'en_US' );
+		self::$ids['french']         = self::create_pattern( 'Colonnes à propos', 'fr_FR', self::$ids['french_only'], true );
+		self::$ids['not_translated'] = self::create_pattern( 'About header', 'en_US' );
+		self::$ids['forged_target']  = self::create_pattern( 'About footer', 'en_US' );
+		self::$ids['forged']         = self::create_pattern( 'Pie de página', 'es_ES', self::$ids['forged_target'] );
+	}
 
-			return $factory->post->create(
-				array(
-					'post_title'  => $title,
-					'post_type'   => POST_TYPE,
-					'post_parent' => $parent_id,
-					'meta_input'  => $meta,
-				)
-			);
-		};
+	/**
+	 * Create a published pattern.
+	 *
+	 * @param string $title          The pattern title.
+	 * @param string $locale         The pattern's `wpop_locale`.
+	 * @param int    $parent_id      The original it claims to translate, if any.
+	 * @param bool   $is_translation Whether to mark it as created by the translation pipeline.
+	 * @return int The new post ID.
+	 */
+	private static function create_pattern( string $title, string $locale, int $parent_id = 0, bool $is_translation = false ): int {
+		$meta = array( 'wpop_locale' => $locale );
+		if ( $is_translation ) {
+			$meta['wpop_is_translation'] = true;
+		}
 
-		self::$ids['original']       = $create( 'About cards', 'en_US' );
-		self::$ids['translation']    = $create( 'Tarjetas sobre mí', 'es_ES', self::$ids['original'], true );
-		self::$ids['french_only']    = $create( 'About columns', 'en_US' );
-		self::$ids['french']         = $create( 'Colonnes à propos', 'fr_FR', self::$ids['french_only'], true );
-		self::$ids['not_translated'] = $create( 'About header', 'en_US' );
-		self::$ids['forged_target']  = $create( 'About footer', 'en_US' );
-		self::$ids['forged']         = $create( 'Pie de página', 'es_ES', self::$ids['forged_target'] );
+		return self::factory()->post->create(
+			array(
+				'post_title'  => $title,
+				'post_type'   => POST_TYPE,
+				'post_parent' => $parent_id,
+				'meta_input'  => $meta,
+			)
+		);
 	}
 
 	/**
@@ -88,8 +97,9 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Catches the Spanish browse listing both versions of a translated pattern, or hiding originals translated
-	 * into another locale only.
+	 * Catches the Spanish browse listing both versions of a translated pattern, hiding originals translated
+	 * into another locale only, or letting a user's own pattern that claims `post_parent` and `wpop_locale`
+	 * hide someone else's original.
 	 */
 	public function test_browsing_lists_the_translation_in_place_of_its_original(): void {
 		$expected = array(
@@ -105,23 +115,32 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Catches a user's own pattern claiming `post_parent` and `wpop_locale` hiding someone else's original.
-	 */
-	public function test_browsing_keeps_an_original_with_a_forged_translation(): void {
-		$this->assertContains( self::$ids['forged_target'], $this->get_ids( array( 'locale' => 'es_ES' ) ) );
-	}
-
-	/**
-	 * Catches search dropping the original, which an English query must still find.
+	 * Catches search dropping the original when its translation matches too, as an English query must find it.
 	 */
 	public function test_search_keeps_the_original(): void {
 		$ids = $this->get_ids(
 			array(
 				'locale' => 'es_ES',
-				'search' => 'About',
+				'search' => 'hero',
 			)
 		);
 
+		$this->assertContains( self::$ids['translation'], $ids );
 		$this->assertContains( self::$ids['original'], $ids );
+	}
+
+	/**
+	 * Catches an original vanishing when the query filters out its translation, as core's request for a
+	 * theme.json pattern by slug does.
+	 */
+	public function test_original_stays_when_its_translation_is_filtered_out(): void {
+		$ids = $this->get_ids(
+			array(
+				'locale' => 'es_ES',
+				'slug'   => array( 'hero-cards' ),
+			)
+		);
+
+		$this->assertSame( array( self::$ids['original'] ), $ids );
 	}
 }
