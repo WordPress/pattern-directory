@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { useSelect } from '@wordpress/data';
-import { useRef } from '@wordpress/element';
+import { useMemo, useRef } from '@wordpress/element';
 import { useEntityBlockEditor } from '@wordpress/core-data';
 /* eslint-disable @wordpress/no-unsafe-wp-apis */
 import {
@@ -43,6 +43,8 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 		[ setIsInserterOpen ]
 	);
 	const [ layout ] = useSettings( 'layout' );
+	// Memoized because BlockList provides it as layout context to every block.
+	const rootLayout = useMemo( () => ( { ...layout, type: 'constrained' } ), [ layout ] );
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor( 'postType', POST_TYPE );
 	const resizedCanvasStyles = useResizeCanvas( deviceType, true );
 	const ref = useMouseMoveTypingReset();
@@ -69,13 +71,10 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 					<EditorStyles styles={ settings.styles } />
 					<LayoutStyle
 						selector=".pattern-block-editor__block-list.is-root-container"
-						layout={ { ...layout, type: 'constrained' } }
+						layout={ rootLayout }
 						layoutDefinitions={ layout?.definitions }
 					/>
-					<BlockList
-						className="pattern-block-editor__block-list wp-site-blocks"
-						layout={ { ...layout, type: 'constrained' } }
-					/>
+					<BlockList className="pattern-block-editor__block-list wp-site-blocks" layout={ rootLayout } />
 				</Iframe>
 			</BlockTools>
 		</BlockEditorProvider>
