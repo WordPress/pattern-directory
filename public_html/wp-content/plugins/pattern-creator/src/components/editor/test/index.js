@@ -35,15 +35,7 @@ const mockMakeStore = ( name, selectors, actions = {} ) => {
 
 jest.mock( '../../../store', () => ( {
 	POST_TYPE: 'wporg-pattern',
-	store: mockMakeStore(
-		'test/editor-pattern',
-		{
-			isInserterOpened: () => false,
-			isListViewOpened: () => false,
-			getSettings: () => mockSettings,
-		},
-		{ setIsInserterOpened: () => ( { type: 'NOOP' } ) }
-	),
+	store: mockMakeStore( 'test/editor-pattern', { getSettings: () => mockSettings } ),
 } ) );
 jest.mock( '@wordpress/core-data', () => ( {
 	store: mockMakeStore( 'test/editor-core', {
@@ -67,6 +59,14 @@ jest.mock( '@wordpress/interface', () => {
 /* Stub the heavy components so importing the editor module stays cheap. */
 const Noop = () => null;
 jest.mock( '@wordpress/editor', () => ( {
+	store: mockMakeStore(
+		'test/editor-editor',
+		{
+			isInserterOpened: () => false,
+			isListViewOpened: () => false,
+		},
+		{ setIsInserterOpened: () => ( { type: 'NOOP' } ) }
+	),
 	EditorNotices: Noop,
 	EditorProvider: Noop,
 	EditorSnackbars: Noop,

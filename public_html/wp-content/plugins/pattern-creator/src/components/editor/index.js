@@ -19,6 +19,7 @@ import {
 	EditorProvider,
 	EditorSnackbars,
 	ErrorBoundary,
+	store as editorStore,
 	UnsavedChangesWarning,
 } from '@wordpress/editor';
 import { Notice, Popover, SlotFillProvider } from '@wordpress/components';
@@ -47,7 +48,8 @@ const interfaceLabels = {
 function Editor( { onError, postId } ) {
 	const { isInserterOpen, isListViewOpen, post, sidebarIsOpened, settings } = useSelect(
 		( select ) => {
-			const { isInserterOpened, isListViewOpened, getSettings } = select( patternStore );
+			const { getSettings } = select( patternStore );
+			const { isInserterOpened, isListViewOpened } = select( editorStore );
 			const { getEntityRecord } = select( coreStore );
 
 			return {
@@ -60,7 +62,7 @@ function Editor( { onError, postId } ) {
 		},
 		[ postId ]
 	);
-	const { setIsInserterOpened } = useDispatch( patternStore );
+	const { setIsInserterOpened } = useDispatch( editorStore );
 	const { createInfoNotice } = useDispatch( noticesStore );
 	const [ isEntitiesSavedStatesOpen, setIsEntitiesSavedStatesOpen ] = useState( false );
 	const closeEntitiesSavedStates = useCallback( () => {

@@ -9,16 +9,12 @@ import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { closeSmall } from '@wordpress/icons';
 import { ESCAPE } from '@wordpress/keycodes';
-
-/**
- * Internal dependencies
- */
-import { store as patternStore } from '../../store';
+import { store as editorStore } from '@wordpress/editor';
 
 // Forked from https://raw.githubusercontent.com/WordPress/gutenberg/1b9157577fce4133e9be89c1d89cdd02918f6ba3/packages/edit-site/src/components/secondary-sidebar/list-view-sidebar.js
 
 export default function ListViewSidebar() {
-	const { setIsListViewOpened } = useDispatch( patternStore );
+	const { setIsListViewOpened } = useDispatch( editorStore );
 
 	const focusOnMountRef = useFocusOnMount( 'firstElement' );
 	const headerFocusReturnRef = useFocusReturn();

@@ -2,39 +2,39 @@
  * WordPress dependencies
  */
 import { useDispatch, useSelect } from '@wordpress/data';
-import { Button } from '@wordpress/components';
 /* eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK. */
 import { __experimentalLibrary as Library } from '@wordpress/block-editor';
-import { close } from '@wordpress/icons';
 /* eslint-disable-next-line @wordpress/no-unsafe-wp-apis -- Experimental is OK. */
 import { __experimentalUseDialog as useDialog, useViewportMatch } from '@wordpress/compose';
+import { store as editorStore } from '@wordpress/editor';
 
 /**
  * Internal dependencies
  */
-import { store as patternStore } from '../../store';
+import { unlock } from '../../lock-unlock';
 
 export default function InserterSidebar() {
-	const { setIsInserterOpened } = useDispatch( patternStore );
-	const insertionPoint = useSelect( ( select ) => select( patternStore ).__experimentalGetInsertionPoint(), [] );
+	const { setIsInserterOpened } = useDispatch( editorStore );
+	const inserter = useSelect( ( select ) => unlock( select( editorStore ) ).getInserter(), [] );
 
 	const isMobile = useViewportMatch( 'medium', '<' );
+	const closeInserter = () => setIsInserterOpened( false );
 	const [ inserterDialogRef, inserterDialogProps ] = useDialog( {
-		onClose: () => setIsInserterOpened( false ),
+		onClose: closeInserter,
 	} );
 
 	return (
 		<div ref={ inserterDialogRef } { ...inserterDialogProps } className="pattern__inserter-panel">
-			<div className="pattern__inserter-panel-header">
-				<Button icon={ close } onClick={ () => setIsInserterOpened( false ) } />
-			</div>
 			<div className="pattern__inserter-panel-content">
 				<Library
 					showInserterHelpPanel={ false }
 					showMostUsedBlocks={ false }
 					shouldFocusBlock={ isMobile }
-					rootClientId={ insertionPoint.rootClientId }
-					__experimentalInsertionIndex={ insertionPoint.insertionIndex }
+					rootClientId={ inserter.rootClientId }
+					__experimentalInsertionIndex={ inserter.insertionIndex }
+					__experimentalFilterValue={ inserter.filterValue }
+					onSelect={ inserter.onSelect }
+					onClose={ closeInserter }
 				/>
 			</div>
 		</div>
