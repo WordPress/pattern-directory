@@ -20,13 +20,6 @@ defined( 'WPINC' ) || die();
 const UNLISTED_DETAIL_META = '_wporg_unlist_reason_detail';
 
 /**
- * Actions and filters.
- */
-add_action( 'wp_after_insert_post', __NAMESPACE__ . '\trigger_notifications', 20, 4 );
-add_action( 'init', __NAMESPACE__ . '\register_unlisted_meta' );
-add_filter( 'rest_prepare_' . PATTERN, __NAMESPACE__ . '\filter_unlisted_meta' );
-
-/**
  * Keep moderator-only meta out of authors' editor state and subsequent saves.
  *
  * @param \WP_REST_Response $response Pattern response.
@@ -41,6 +34,7 @@ function filter_unlisted_meta( $response ) {
 
 	return $response;
 }
+add_filter( 'rest_prepare_' . PATTERN, __NAMESPACE__ . '\filter_unlisted_meta' );
 
 /**
  * Register the post meta used to store the moderator's message to the author.
@@ -67,6 +61,7 @@ function register_unlisted_meta() {
 		)
 	);
 }
+add_action( 'init', __NAMESPACE__ . '\register_unlisted_meta' );
 
 /**
  * Fire off relevant notification when a post is finished updating.
@@ -108,6 +103,7 @@ function trigger_notifications( $post_id, $post, $update, $post_before ) {
 		notify_pattern_unlisted( $post );
 	}
 }
+add_action( 'wp_after_insert_post', __NAMESPACE__ . '\trigger_notifications', 20, 4 );
 
 /**
  * Notify when a pattern has been approved.
