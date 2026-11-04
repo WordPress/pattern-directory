@@ -249,6 +249,25 @@ class Pattern_Content_Decoding_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Only the block's own media ID goes, not a nested `"id"` with the same value that precedes it.
+	 *
+	 * Catches removing the nested member instead, which leaves the block's ID for the editor to fetch.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content
+	 */
+	public function test_nested_id_is_kept_when_removing_media_id(): void {
+		$content  = '<!-- wp:image {"meta":{"id":61},"id":61} -->';
+		$content .= '<figure class="wp-block-image"><img src="https://pd.w.org/b.jpg" alt="" class="wp-image-61"/></figure>';
+		$content .= '<!-- /wp:image -->';
+
+		$expected  = '<!-- wp:image {"meta":{"id":61}} -->';
+		$expected .= '<figure class="wp-block-image"><img src="https://pd.w.org/b.jpg" alt="" /></figure>';
+		$expected .= '<!-- /wp:image -->';
+
+		$this->assertSame( $expected, decode_pattern_content( $content ) );
+	}
+
+	/**
 	 * Remove nested block references without damaging neighboring attributes or content.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content

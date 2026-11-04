@@ -1363,15 +1363,19 @@ function remove_media_ids( $content ) {
 				return $block;
 			}
 
-			$attributes = preg_replace_callback(
-				'/([{,])"id":' . $id . '([,}])/',
-				function ( $sides ) {
+			// Only the top-level member is the block's ID, so track nesting, skipping over strings.
+			$depth = 0;
+			preg_match_all( '/"(?:[^"\\\\]|\\\\.)*"|[{}\[\]]/', $attributes, $tokens, PREG_OFFSET_CAPTURE );
+			foreach ( $tokens[0] as list( $token, $offset ) ) {
+				if ( '"' !== $token[0] ) {
+					$depth += ( '{' === $token || '[' === $token ) ? 1 : -1;
+				} elseif ( 1 === $depth && preg_match( '/([{,])"id":' . $id . '([,}])/A', $attributes, $sides, 0, $offset - 1 ) ) {
 					// Keep the brace or comma on each side that still has a neighbor.
-					return '{' === $sides[1] ? ( '}' === $sides[2] ? '{}' : '{' ) : $sides[2];
-				},
-				$attributes,
-				1
-			);
+					$replacement = '{' === $sides[1] ? ( '}' === $sides[2] ? '{}' : '{' ) : $sides[2];
+					$attributes  = substr_replace( $attributes, $replacement, $offset - 1, strlen( $sides[0] ) );
+					break;
+				}
+			}
 
 			$tags = new \WP_HTML_Tag_Processor( $html );
 			while ( $tags->next_tag( 'IMG' ) ) {
