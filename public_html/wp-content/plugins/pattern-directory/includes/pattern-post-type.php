@@ -1323,7 +1323,7 @@ add_action(
 );
 
 /**
- * Process post content, replacing broken encoding & removing refs.
+ * Process post content, replacing broken encoding & removing refs and media IDs.
  *
  * Note that the creator persists the normalization this does, via the pattern_content REST field.
  *
@@ -1339,7 +1339,52 @@ function decode_pattern_content( $content ) {
 	$content = str_replace( array( '\u0026amp;', 'u0026amp;' ), '&', $content );
 	// Remove `ref` from all content, taking the comma from whichever side of the key it sits on.
 	$content = preg_replace( '/"ref":\d+,|,?"ref":\d+/', '', $content );
-	return $content;
+	return remove_media_ids( $content );
+}
+
+/**
+ * Remove media library IDs from cover and image blocks, along with the `wp-image-<id>` class that goes with them.
+ *
+ * The IDs point at this site's media library, so the editor of a site inserting the pattern fetches an attachment
+ * that 404s or, worse, belongs to something else. The image URL is all the block needs.
+ *
+ * @param string $content Pattern content.
+ * @return string
+ */
+function remove_media_ids( $content ) {
+	return preg_replace_callback(
+		// The opening delimiter, then its markup up to the next delimiter, which holds the cover's background image.
+		'/(<!-- wp:(?:cover|image) )(\{.*?\})( \/?-->)(.*?)(?=<!-- \/?wp:|$)/s',
+		function ( $matches ) {
+			list( $block, $opener, $attributes, $closer, $html ) = $matches;
+
+			$id = json_decode( $attributes, true )['id'] ?? null;
+			if ( ! is_int( $id ) ) {
+				return $block;
+			}
+
+			$attributes = preg_replace_callback(
+				'/([{,])"id":' . $id . '([,}])/',
+				function ( $sides ) {
+					// Keep the brace or comma on each side that still has a neighbor.
+					return '{' === $sides[1] ? ( '}' === $sides[2] ? '{}' : '{' ) : $sides[2];
+				},
+				$attributes,
+				1
+			);
+
+			$tags = new \WP_HTML_Tag_Processor( $html );
+			while ( $tags->next_tag( 'IMG' ) ) {
+				if ( $tags->has_class( "wp-image-$id" ) ) {
+					$tags->remove_class( "wp-image-$id" );
+					break;
+				}
+			}
+
+			return $opener . $attributes . $closer . $tags->get_updated_html();
+		},
+		$content
+	);
 }
 
 /**

@@ -217,6 +217,38 @@ class Pattern_Content_Decoding_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Media IDs point at this site's library, so a site inserting the pattern must not get them (#727).
+	 *
+	 * Catches the editor fetching `/wp/v2/media/334` for the core patterns' covers, and a leftover `wp-image-<id>`
+	 * class, which the block's own markup no longer matches without the ID.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content
+	 */
+	public function test_media_ids_are_removed(): void {
+		$cover  = '<!-- wp:cover {"url":"https://pd.w.org/a.jpg","id":334,"dimRatio":50} -->';
+		$cover .= '<div class="wp-block-cover"><span aria-hidden="true" class="wp-block-cover__background"></span>';
+		$cover .= '<img class="wp-block-cover__image-background wp-image-334" alt="" src="https://pd.w.org/a.jpg" data-object-fit="cover"/>';
+		$cover .= '<div class="wp-block-cover__inner-container"><!-- wp:image {"id":61} -->';
+		$cover .= '<figure class="wp-block-image"><img src="https://pd.w.org/b.jpg" alt="" class="wp-image-61"/></figure>';
+		$cover .= '<!-- /wp:image --></div></div><!-- /wp:cover -->';
+
+		$expected  = '<!-- wp:cover {"url":"https://pd.w.org/a.jpg","dimRatio":50} -->';
+		$expected .= '<div class="wp-block-cover"><span aria-hidden="true" class="wp-block-cover__background"></span>';
+		$expected .= '<img class="wp-block-cover__image-background" alt="" src="https://pd.w.org/a.jpg" data-object-fit="cover"/>';
+		$expected .= '<div class="wp-block-cover__inner-container"><!-- wp:image {} -->';
+		$expected .= '<figure class="wp-block-image"><img src="https://pd.w.org/b.jpg" alt="" /></figure>';
+		$expected .= '<!-- /wp:image --></div></div><!-- /wp:cover -->';
+
+		// An outer cover without an ID passes through untouched.
+		$content  = '<!-- wp:cover {"customOverlayColor":"#36220c"} --><div class="wp-block-cover">';
+		$content .= $cover . '</div><!-- /wp:cover -->';
+		$expected = '<!-- wp:cover {"customOverlayColor":"#36220c"} --><div class="wp-block-cover">' . $expected . '</div><!-- /wp:cover -->';
+
+		$this->assertSame( $expected, decode_pattern_content( $content ) );
+		$this->assertSame( $expected, decode_pattern_content( $expected ) );
+	}
+
+	/**
 	 * Remove nested block references without damaging neighboring attributes or content.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content
