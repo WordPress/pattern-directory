@@ -17,14 +17,7 @@ use WP_UnitTest_Factory;
  */
 class Theme_Document_Title_Test extends WP_UnitTestCase {
 	/**
-	 * The registered hooks as they were before the theme was loaded, or null if it was already loaded.
-	 *
-	 * @var array|null
-	 */
-	protected static $hooks_before_theme = null;
-
-	/**
-	 * Create the pages and a category, and load the theme as Theme_Pattern_Actions_Test does.
+	 * Create the pages and a category, and load the theme's functions without its hooks.
 	 *
 	 * @param WP_UnitTest_Factory $factory Test data factory.
 	 */
@@ -52,7 +45,8 @@ class Theme_Document_Title_Test extends WP_UnitTestCase {
 		);
 
 		if ( ! function_exists( '\WordPressdotorg\Theme\Pattern_Directory_2024\set_document_title' ) ) {
-			self::$hooks_before_theme = array_map(
+			// `WP_Hook` objects change in place, so each has to be cloned.
+			$hooks_before_theme = array_map(
 				function ( $hook ) {
 					return clone $hook;
 				},
@@ -60,24 +54,14 @@ class Theme_Document_Title_Test extends WP_UnitTestCase {
 			);
 
 			require_once dirname( dirname( dirname( dirname( __DIR__ ) ) ) ) . '/themes/wporg-pattern-directory-2024/functions.php';
+
+			// Drop the theme's hooks at once, so no test here or in a later class depends on which class loaded it.
+			$GLOBALS['wp_filter'] = $hooks_before_theme; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restoring the snapshot taken above.
 		}
 	}
 
 	/**
-	 * Put back the hooks loading the theme added.
-	 */
-	public static function tear_down_after_class(): void {
-		if ( null !== self::$hooks_before_theme ) {
-			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restoring the snapshot taken above.
-			$GLOBALS['wp_filter']     = self::$hooks_before_theme;
-			self::$hooks_before_theme = null;
-		}
-
-		parent::tear_down_after_class();
-	}
-
-	/**
-	 * Register the theme hooks under test, which an earlier class that loaded the theme may have rolled back.
+	 * Register just the theme hooks under test, whichever class loaded the theme.
 	 */
 	public function set_up(): void {
 		parent::set_up();
