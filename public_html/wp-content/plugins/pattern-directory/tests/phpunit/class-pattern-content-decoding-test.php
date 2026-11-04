@@ -217,6 +217,93 @@ class Pattern_Content_Decoding_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Media IDs point at this site's library, so a site inserting the pattern must not get them (#727).
+	 *
+	 * Catches the editor fetching `/wp/v2/media/334` for the core patterns' covers, and a leftover `wp-image-<id>`
+	 * class, which the block's own markup no longer matches without the ID.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content
+	 */
+	public function test_media_ids_are_removed(): void {
+		$cover  = '<!-- wp:cover {"url":"https://pd.w.org/a.jpg","id":334,"dimRatio":50} -->';
+		$cover .= '<div class="wp-block-cover"><span aria-hidden="true" class="wp-block-cover__background"></span>';
+		$cover .= '<img class="wp-block-cover__image-background wp-image-334" alt="" src="https://pd.w.org/a.jpg" data-object-fit="cover"/>';
+		$cover .= '<div class="wp-block-cover__inner-container"><!-- wp:image {"id":61} -->';
+		$cover .= '<figure class="wp-block-image"><img src="https://pd.w.org/b.jpg" alt="" class="wp-image-61"/></figure>';
+		$cover .= '<!-- /wp:image --></div></div><!-- /wp:cover -->';
+
+		$expected  = '<!-- wp:cover {"url":"https://pd.w.org/a.jpg","dimRatio":50} -->';
+		$expected .= '<div class="wp-block-cover"><span aria-hidden="true" class="wp-block-cover__background"></span>';
+		$expected .= '<img class="wp-block-cover__image-background" alt="" src="https://pd.w.org/a.jpg" data-object-fit="cover"/>';
+		$expected .= '<div class="wp-block-cover__inner-container"><!-- wp:image -->';
+		$expected .= '<figure class="wp-block-image"><img src="https://pd.w.org/b.jpg" alt="" /></figure>';
+		$expected .= '<!-- /wp:image --></div></div><!-- /wp:cover -->';
+
+		// An outer cover without an ID passes through untouched.
+		$content  = '<!-- wp:cover {"customOverlayColor":"#36220c"} --><div class="wp-block-cover">';
+		$content .= $cover . '</div><!-- /wp:cover -->';
+		$expected = '<!-- wp:cover {"customOverlayColor":"#36220c"} --><div class="wp-block-cover">' . $expected . '</div><!-- /wp:cover -->';
+
+		$this->assertSame( $expected, decode_pattern_content( $content ) );
+		$this->assertSame( $expected, decode_pattern_content( $expected ) );
+	}
+
+	/**
+	 * Only the block's own media ID goes, not a nested `"id"` with the same value that precedes it.
+	 *
+	 * Catches removing the nested member instead, which leaves the block's ID for the editor to fetch.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content
+	 */
+	public function test_nested_id_is_kept_when_removing_media_id(): void {
+		$content  = '<!-- wp:image {"meta":{"id":61},"id":61} -->';
+		$content .= '<figure class="wp-block-image"><img src="https://pd.w.org/b.jpg" alt="" class="wp-image-61"/></figure>';
+		$content .= '<!-- /wp:image -->';
+
+		$expected  = '<!-- wp:image {"meta":{"id":61}} -->';
+		$expected .= '<figure class="wp-block-image"><img src="https://pd.w.org/b.jpg" alt="" /></figure>';
+		$expected .= '<!-- /wp:image -->';
+
+		$this->assertSame( $expected, decode_pattern_content( $content ) );
+	}
+
+	/**
+	 * A parallax or repeated cover's media ID class goes too, though it sits on a background `<div>`.
+	 *
+	 * Catches the class staying behind once the ID is gone, which makes the cover invalid in the editor.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content
+	 */
+	public function test_media_id_class_is_removed_from_background_div(): void {
+		$content  = '<!-- wp:cover {"url":"https://pd.w.org/a.jpg","id":334,"hasParallax":true} -->';
+		$content .= '<div class="wp-block-cover has-parallax"><span aria-hidden="true" class="wp-block-cover__background"></span>';
+		$content .= '<div class="wp-block-cover__image-background wp-image-334 has-parallax" style="background-image:url(https://pd.w.org/a.jpg)"></div>';
+		$content .= '<div class="wp-block-cover__inner-container"></div></div><!-- /wp:cover -->';
+
+		$expected  = '<!-- wp:cover {"url":"https://pd.w.org/a.jpg","hasParallax":true} -->';
+		$expected .= '<div class="wp-block-cover has-parallax"><span aria-hidden="true" class="wp-block-cover__background"></span>';
+		$expected .= '<div class="wp-block-cover__image-background has-parallax" style="background-image:url(https://pd.w.org/a.jpg)"></div>';
+		$expected .= '<div class="wp-block-cover__inner-container"></div></div><!-- /wp:cover -->';
+
+		$this->assertSame( $expected, decode_pattern_content( $content ) );
+	}
+
+	/**
+	 * An ID that isn't written the way the serializer writes it is left in place, along with its class.
+	 *
+	 * Catches dropping the class while the ID stays, which makes the block invalid in the editor.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content
+	 */
+	public function test_unmatched_media_id_keeps_its_class(): void {
+		$content  = '<!-- wp:image {"id": 61} -->';
+		$content .= '<figure class="wp-block-image"><img src="https://pd.w.org/b.jpg" alt="" class="wp-image-61"/></figure>';
+		$content .= '<!-- /wp:image -->';
+
+		$this->assertSame( $content, decode_pattern_content( $content ) );
+	}
+
+	/**
 	 * Remove nested block references without damaging neighboring attributes or content.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content

@@ -1323,7 +1323,7 @@ add_action(
 );
 
 /**
- * Process post content, replacing broken encoding & removing refs.
+ * Process post content, replacing broken encoding & removing refs and media IDs.
  *
  * Note that the creator persists the normalization this does, via the pattern_content REST field.
  *
@@ -1339,7 +1339,68 @@ function decode_pattern_content( $content ) {
 	$content = str_replace( array( '\u0026amp;', 'u0026amp;' ), '&', $content );
 	// Remove `ref` from all content, taking the comma from whichever side of the key it sits on.
 	$content = preg_replace( '/"ref":\d+,|,?"ref":\d+/', '', $content );
-	return $content;
+	return remove_media_ids( $content );
+}
+
+/**
+ * Remove media library IDs from cover and image blocks, along with the `wp-image-<id>` class that goes with them.
+ *
+ * The IDs point at this site's media library, so the editor of a site inserting the pattern fetches an attachment
+ * that 404s or, worse, belongs to something else. The image URL is all the block needs.
+ *
+ * @param string $content Pattern content.
+ * @return string
+ */
+function remove_media_ids( $content ) {
+	$stripped = preg_replace_callback(
+		// The opening delimiter, then its markup up to the next delimiter, which holds the cover's background image.
+		'/(<!-- wp:(?:cover|image) )(\{.*?\})( \/?-->)(.*?)(?=<!-- \/?wp:|$)/s',
+		function ( $matches ) {
+			list( $block, $opener, $attributes, $closer, $html ) = $matches;
+
+			$id = json_decode( $attributes, true )['id'] ?? null;
+			if ( ! is_int( $id ) ) {
+				return $block;
+			}
+
+			// Only the top-level member is the block's ID, so track nesting, skipping over strings.
+			$depth = 0;
+			$start = null;
+			preg_match_all( '/"(?:[^"\\\\]|\\\\.)*"|[{}\[\]]/', $attributes, $tokens, PREG_OFFSET_CAPTURE );
+			foreach ( $tokens[0] as list( $token, $offset ) ) {
+				if ( '"' !== $token[0] ) {
+					$depth += ( '{' === $token || '[' === $token ) ? 1 : -1;
+				} elseif ( 1 === $depth && preg_match( '/([{,])"id":' . $id . '([,}])/A', $attributes, $sides, 0, $offset - 1 ) ) {
+					$start = $offset - 1;
+					break;
+				}
+			}
+
+			// An ID not written the way the serializer writes it keeps its class too, so the markup still validates.
+			if ( null === $start ) {
+				return $block;
+			}
+
+			// Keep the brace or comma on each side that still has a neighbor.
+			$replacement = '{' === $sides[1] ? ( '}' === $sides[2] ? '{}' : '{' ) : $sides[2];
+			$attributes  = substr_replace( $attributes, $replacement, $start, strlen( $sides[0] ) );
+
+			// Parallax and repeated covers put the class on a background `<div>` rather than an `<img>`.
+			$tags = new \WP_HTML_Tag_Processor( $html );
+			if ( $tags->next_tag( array( 'class_name' => "wp-image-$id" ) ) ) {
+				$tags->remove_class( "wp-image-$id" );
+			}
+
+			// The serializer omits empty attributes rather than writing `{}`.
+			$opener = '{}' === $attributes ? rtrim( $opener ) : $opener . $attributes;
+
+			return $opener . $closer . $tags->get_updated_html();
+		},
+		$content
+	);
+
+	// Very large markup can exhaust PCRE's backtrack limit; keep the IDs rather than lose the content.
+	return $stripped ?? $content;
 }
 
 /**
