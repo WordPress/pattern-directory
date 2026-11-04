@@ -118,7 +118,7 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 		$patterns = $this->get_patterns_or_exit( $args );
 
 		$makepot = new PatternMakepot( $patterns );
-		WP_CLI::log( $makepot->import( isset( $args['save'] ) ) );
+		WP_CLI::log( $makepot->import( isset( $args['save'] ), isset( $args['all-posts'] ) ) );
 		exit( 0 );
 	}
 

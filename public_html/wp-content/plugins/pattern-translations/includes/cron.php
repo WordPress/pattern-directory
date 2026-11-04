@@ -38,7 +38,7 @@ add_action( 'admin_init', __NAMESPACE__ . '\register_cron_tasks' );
 function pattern_import_to_glotpress() {
 	$patterns = Pattern::get_patterns();
 	$makepot  = new PatternMakepot( $patterns );
-	$result   = $makepot->import( true );
+	$result   = $makepot->import( true, true );
 	log_message( $result );
 }
 add_action( 'pattern_import_to_glotpress', __NAMESPACE__ . '\pattern_import_to_glotpress' );

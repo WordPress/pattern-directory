@@ -96,10 +96,11 @@ class PatternMakepot {
 	/**
 	 * Import pattern strings into GlotPress.
 	 *
-	 * @param bool $save Whether to persist the import.
+	 * @param bool $save     Whether to persist the import.
+	 * @param bool $complete Whether the patterns are every published pattern, so strings no longer in any are obsoleted.
 	 * @return string Import result.
 	 */
-	public function import( $save = false ) {
+	public function import( $save = false, $complete = false ) {
 		/*
 		 * Avoid attempting to import strings when no patterns are found.
 		 * This is a precautionary check to ensure we don't accidentally remove all translations.
@@ -120,7 +121,10 @@ class PatternMakepot {
 		$po = $this->makepo();
 
 		if ( true === $save ) {
-			add_filter( 'gp_import_project_originals', array( $this, 'extend_imported_originals' ), 10, 3 );
+			// Obsoleting keeps the translations, and importing a string again restores them.
+			if ( ! $complete ) {
+				add_filter( 'gp_import_project_originals', array( $this, 'extend_imported_originals' ), 10, 3 );
+			}
 			list( $added, $existing, $fuzzied, $obsoleted, $error ) = \GP::$original->import_for_project( $project, $po );
 			remove_filter( 'gp_import_project_originals', array( $this, 'extend_imported_originals' ), 10, 3 );
 
@@ -150,10 +154,8 @@ class PatternMakepot {
 	}
 
 	/**
-	 * In the patterns case we import patterns in separate runs and can't rely on the full set of strings
-	 * being imported at the same time.
-	 *
-	 * We want to leave most originals active and only obsolete things when they're really no longer in use.
+	 * A partial import, of a few patterns from the CLI, doesn't hold the strings of the patterns it leaves out,
+	 * so keep those active. Only a complete import obsoletes strings that are no longer in any published pattern.
 	 *
 	 * @param \PO         $po               Imported catalog.
 	 * @param \GP_Project $project          GlotPress project.
