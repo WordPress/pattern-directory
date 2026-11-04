@@ -126,7 +126,9 @@ jest.mock( '../../header', () => {
 	return {
 		__esModule: true,
 		default: function MockHeader() {
-			const { setIsInserterOpened, setIsListViewOpened } = useDispatch( require( '@wordpress/editor' ).store );
+			const { setIsInserterOpened, setIsListViewOpened } = useDispatch(
+				require( '@wordpress/editor' ).store
+			);
 			return el(
 				'div',
 				null,
