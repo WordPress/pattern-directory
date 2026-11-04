@@ -591,6 +591,22 @@ function set_document_title( $title ) {
 	} else {
 		if ( is_singular( POST_TYPE ) ) {
 			$title['title'] .= ' - ' . __( 'Block Pattern', 'wporg-patterns' );
+		} elseif ( is_page( array( 'favorites', 'my-patterns' ) ) ) {
+			$filters  = array();
+			$category = get_term_by( 'slug', (string) get_query_var( 'pattern-categories' ), 'wporg-pattern-category' );
+			if ( $category ) {
+				$filters[] = $category->name;
+			}
+
+			$status = is_page( 'my-patterns' ) ? get_post_status_object( (string) get_query_var( 'status' ) ) : null;
+			if ( $status ) {
+				$filters[] = $status->label;
+			}
+
+			if ( $filters ) {
+				/* translators: 1: Page title, 2: Comma-separated filters, like a category or status. */
+				$title['title'] = sprintf( __( '%1$s: %2$s', 'wporg-patterns' ), $title['title'], implode( ', ', $filters ) );
+			}
 		} elseif ( is_tax() ) {
 			/* translators: Taxonomy term name */
 			$title['title'] = sprintf( __( 'Block Patterns: %s', 'wporg-patterns' ), $title['title'] );
