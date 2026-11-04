@@ -22,7 +22,7 @@ const mockSettings = {};
 /*
  * Replace the stores with minimal stand-ins so `useSelect` (the unit under
  * test) stays real while `@wordpress/core-data` and friends are not pulled in.
- * `getSettings` returns no `siteUrl`, so the editor short-circuits to `null`
+ * By default `getSettings` returns no `siteUrl`, so the editor short-circuits to `null`
  * before mounting its heavy render tree — but the `useSelect` mapping still
  * runs, which is what reads `postId`.
  */
@@ -52,25 +52,59 @@ jest.mock( '@wordpress/interface', () => {
 		store: mockMakeStore( 'test/editor-interface', { getActiveComplementaryArea: () => undefined } ),
 		ComplementaryArea: Object.assign( Noop, { Slot: Noop } ),
 		FullscreenMode: Noop,
-		InterfaceSkeleton: () => el( 'div', null ),
+		InterfaceSkeleton: ( { header, secondarySidebar } ) => el( 'div', null, header, secondarySidebar ),
 	};
 } );
 
 /* Stub the heavy components so importing the editor module stays cheap. */
 const Noop = () => null;
-jest.mock( '@wordpress/editor', () => ( {
-	store: mockMakeStore(
-		'test/editor-editor',
-		{
-			isInserterOpened: () => false,
-			isListViewOpened: () => false,
+const Passthrough = ( { children } ) => children;
+
+/*
+ * A real store for the panel state, and an `EditorProvider` that, like the real one, hands its children
+ * a sub-registry with their own instance of it. State changed inside the provider is invisible outside.
+ */
+const mockMakeEditorStore = () => {
+	const { createReduxStore, register } = jest.requireActual( '@wordpress/data' );
+	const store = createReduxStore( 'test/editor-editor', {
+		reducer: ( state = { inserter: false, listView: false }, action ) => {
+			switch ( action.type ) {
+				case 'SET_INSERTER':
+					return { inserter: action.value, listView: false };
+				case 'SET_LIST_VIEW':
+					return { inserter: false, listView: action.value };
+			}
+			return state;
 		},
-		{ setIsInserterOpened: () => ( { type: 'NOOP' } ) }
-	),
+		selectors: {
+			isInserterOpened: ( state ) => state.inserter,
+			isListViewOpened: ( state ) => state.listView,
+		},
+		actions: {
+			setIsInserterOpened: ( value ) => ( { type: 'SET_INSERTER', value } ),
+			setIsListViewOpened: ( value ) => ( { type: 'SET_LIST_VIEW', value } ),
+		},
+	} );
+	register( store );
+	return store;
+};
+function MockEditorProvider( { children } ) {
+	const { createRegistry, RegistryProvider, useRegistry } = jest.requireActual( '@wordpress/data' );
+	const { createElement: el, useState } = jest.requireActual( '@wordpress/element' );
+	const parentRegistry = useRegistry();
+	const [ subRegistry ] = useState( () => {
+		const registry = createRegistry( {}, parentRegistry );
+		registry.register( require( '@wordpress/editor' ).store );
+		return registry;
+	} );
+	return el( RegistryProvider, { value: subRegistry }, children );
+}
+jest.mock( '@wordpress/editor', () => ( {
+	store: mockMakeEditorStore(),
 	EditorNotices: Noop,
-	EditorProvider: Noop,
+	EditorProvider: MockEditorProvider,
 	EditorSnackbars: Noop,
-	ErrorBoundary: Noop,
+	ErrorBoundary: Passthrough,
 	UnsavedChangesWarning: Noop,
 } ) );
 jest.mock( '@wordpress/components', () => {
@@ -83,12 +117,37 @@ jest.mock( '@wordpress/components', () => {
 	};
 } );
 jest.mock( '@wordpress/block-editor', () => ( { BlockBreadcrumb: Noop } ) );
-jest.mock( '@wordpress/keyboard-shortcuts', () => ( { ShortcutProvider: () => null } ) );
+jest.mock( '@wordpress/keyboard-shortcuts', () => ( { ShortcutProvider: Passthrough } ) );
 jest.mock( '../../block-editor', () => ( { __esModule: true, default: Noop } ) );
-jest.mock( '../../header', () => ( { __esModule: true, default: Noop } ) );
-jest.mock( '../../secondary-sidebar/inserter-sidebar', () => ( { __esModule: true, default: Noop } ) );
-jest.mock( '../../secondary-sidebar/list-view-sidebar', () => ( { __esModule: true, default: Noop } ) );
-jest.mock( '../../keyboard-shortcuts', () => ( { __esModule: true, default: Noop } ) );
+// The header toggles the panels from inside `EditorProvider`, as the real one does.
+jest.mock( '../../header', () => {
+	const { createElement: el } = jest.requireActual( '@wordpress/element' );
+	const { useDispatch } = jest.requireActual( '@wordpress/data' );
+	return {
+		__esModule: true,
+		default: function MockHeader() {
+			const { setIsInserterOpened, setIsListViewOpened } = useDispatch( require( '@wordpress/editor' ).store );
+			return el(
+				'div',
+				null,
+				el( 'button', { 'data-toggle': 'inserter', onClick: () => setIsInserterOpened( true ) } ),
+				el( 'button', { 'data-toggle': 'list-view', onClick: () => setIsListViewOpened( true ) } )
+			);
+		},
+	};
+} );
+jest.mock( '../../secondary-sidebar/inserter-sidebar', () => {
+	const { createElement: el } = jest.requireActual( '@wordpress/element' );
+	return { __esModule: true, default: () => el( 'div', { 'data-panel': 'inserter' } ) };
+} );
+jest.mock( '../../secondary-sidebar/list-view-sidebar', () => {
+	const { createElement: el } = jest.requireActual( '@wordpress/element' );
+	return { __esModule: true, default: () => el( 'div', { 'data-panel': 'list-view' } ) };
+} );
+jest.mock( '../../keyboard-shortcuts', () => ( {
+	__esModule: true,
+	default: Object.assign( () => null, { Register: () => null } ),
+} ) );
 jest.mock( '../../sidebar', () => ( { SidebarComplementaryAreaFills: Noop } ) );
 jest.mock( '../../url-controller', () => ( { __esModule: true, default: Noop } ) );
 jest.mock( '../../welcome-guide', () => ( { __esModule: true, default: Noop } ) );
@@ -138,5 +197,31 @@ describe( 'Editor', () => {
 		render( 2 );
 
 		expect( mockGetEntityRecord ).toHaveBeenCalledWith( 'postType', 'wporg-pattern', 2 );
+	} );
+
+	describe( 'with the pattern loaded', () => {
+		beforeEach( () => {
+			mockSettings.siteUrl = 'https://example.test';
+			mockGetEntityRecord.mockReturnValue( { id: 1 } );
+		} );
+
+		afterEach( () => {
+			delete mockSettings.siteUrl;
+		} );
+
+		/*
+		 * Regression: the panel state was read outside `EditorProvider`, from a different `core/editor`
+		 * instance than the header writes to, so neither panel ever opened.
+		 */
+		it.each( [ 'inserter', 'list-view' ] )( 'opens the %s panel the header toggles', ( panel ) => {
+			render( 1 );
+			expect( container.querySelector( `[data-panel="${ panel }"]` ) ).toBeNull();
+
+			act( () => {
+				container.querySelector( `[data-toggle="${ panel }"]` ).click();
+			} );
+
+			expect( container.querySelector( `[data-panel="${ panel }"]` ) ).not.toBeNull();
+		} );
 	} );
 } );

@@ -45,25 +45,26 @@ const interfaceLabels = {
 	actions: __( 'Editor publish', 'wporg-patterns' ),
 };
 
-function Editor( { onError, postId } ) {
-	const { isInserterOpen, isListViewOpen, post, sidebarIsOpened, settings } = useSelect(
-		( select ) => {
-			const { getSettings } = select( patternStore );
-			const { isInserterOpened, isListViewOpened } = select( editorStore );
-			const { getEntityRecord } = select( coreStore );
-
-			return {
-				isInserterOpen: isInserterOpened(),
-				isListViewOpen: isListViewOpened(),
-				post: getEntityRecord( 'postType', POST_TYPE, postId ),
-				sidebarIsOpened: !! select( interfaceStore ).getActiveComplementaryArea( STORE_NAME ),
-				settings: getSettings(),
-			};
-		},
-		[ postId ]
+/**
+ * The editor chrome, rendered inside `EditorProvider`.
+ *
+ * `EditorProvider` gives its children a sub-registry with their own `core/editor` store, so the inserter and
+ * List View state have to be read here, where the header and block editor change it.
+ *
+ * @param {Object}  props
+ * @param {?number} props.postId The pattern being edited.
+ * @return {Element} The editor interface.
+ */
+function EditorLayout( { postId } ) {
+	const { isInserterOpen, isListViewOpen, sidebarIsOpened } = useSelect(
+		( select ) => ( {
+			isInserterOpen: select( editorStore ).isInserterOpened(),
+			isListViewOpen: select( editorStore ).isListViewOpened(),
+			sidebarIsOpened: !! select( interfaceStore ).getActiveComplementaryArea( STORE_NAME ),
+		} ),
+		[]
 	);
 	const { setIsInserterOpened } = useDispatch( editorStore );
-	const { createInfoNotice } = useDispatch( noticesStore );
 	const [ isEntitiesSavedStatesOpen, setIsEntitiesSavedStatesOpen ] = useState( false );
 	const closeEntitiesSavedStates = useCallback( () => {
 		setIsEntitiesSavedStatesOpen( false );
@@ -71,6 +72,66 @@ function Editor( { onError, postId } ) {
 	const openEntitiesSavedStates = useCallback( () => {
 		setIsEntitiesSavedStatesOpen( true );
 	}, [] );
+
+	let secondarySidebar = null;
+	if ( isInserterOpen ) {
+		secondarySidebar = <InserterSidebar />;
+	} else if ( isListViewOpen ) {
+		secondarySidebar = <ListViewSidebar />;
+	}
+
+	return (
+		<InterfaceSkeleton
+			className="pattern-interface"
+			labels={ interfaceLabels }
+			secondarySidebar={ secondarySidebar }
+			sidebar={ sidebarIsOpened && <ComplementaryArea.Slot scope={ STORE_NAME } /> }
+			header={ <Header /> }
+			notices={ <EditorSnackbars /> }
+			content={
+				<>
+					<EditorNotices />
+					<BlockEditor setIsInserterOpen={ setIsInserterOpened } />
+					{ ! postId && (
+						<Notice status="warning" isDismissible={ false }>
+							{ __(
+								"You attempted to edit an item that doesn't exist. Perhaps it was deleted?",
+								'wporg-patterns'
+							) }
+						</Notice>
+					) }
+					<KeyboardShortcuts />
+				</>
+			}
+			actions={
+				<EntitiesSavedStates
+					closeEntitiesSavedStates={ closeEntitiesSavedStates }
+					openEntitiesSavedStates={ openEntitiesSavedStates }
+					isEntitiesSavedStatesOpen={ isEntitiesSavedStatesOpen }
+				/>
+			}
+			footer={ <BlockBreadcrumb /> }
+		/>
+	);
+}
+
+/**
+ * Load the pattern and settings, then mount the editor providers around the layout.
+ *
+ * @param {Object}   props
+ * @param {Function} props.onError Reboots the editor after an unhandled error.
+ * @param {?number}  props.postId  The pattern being edited.
+ * @return {?Element} The editor, or nothing while the pattern loads.
+ */
+function Editor( { onError, postId } ) {
+	const { post, settings } = useSelect(
+		( select ) => ( {
+			post: select( coreStore ).getEntityRecord( 'postType', POST_TYPE, postId ),
+			settings: select( patternStore ).getSettings(),
+		} ),
+		[ postId ]
+	);
+	const { createInfoNotice } = useDispatch( noticesStore );
 
 	useEffect( () => {
 		if ( ! wporgLocale.id.startsWith( 'en_' ) ) {
@@ -85,16 +146,6 @@ function Editor( { onError, postId } ) {
 		return null;
 	}
 
-	const secondarySidebar = () => {
-		if ( isInserterOpen ) {
-			return <InserterSidebar />;
-		}
-		if ( isListViewOpen ) {
-			return <ListViewSidebar />;
-		}
-		return null;
-	};
-
 	return (
 		<ShortcutProvider>
 			<SlotFillProvider>
@@ -105,37 +156,7 @@ function Editor( { onError, postId } ) {
 						<UnsavedChangesWarning />
 						<KeyboardShortcuts.Register />
 						<SidebarComplementaryAreaFills />
-						<InterfaceSkeleton
-							className="pattern-interface"
-							labels={ interfaceLabels }
-							secondarySidebar={ secondarySidebar() }
-							sidebar={ sidebarIsOpened && <ComplementaryArea.Slot scope={ STORE_NAME } /> }
-							header={ <Header /> }
-							notices={ <EditorSnackbars /> }
-							content={
-								<>
-									<EditorNotices />
-									<BlockEditor setIsInserterOpen={ setIsInserterOpened } />
-									{ ! postId && (
-										<Notice status="warning" isDismissible={ false }>
-											{ __(
-												"You attempted to edit an item that doesn't exist. Perhaps it was deleted?",
-												'wporg-patterns'
-											) }
-										</Notice>
-									) }
-									<KeyboardShortcuts />
-								</>
-							}
-							actions={
-								<EntitiesSavedStates
-									closeEntitiesSavedStates={ closeEntitiesSavedStates }
-									openEntitiesSavedStates={ openEntitiesSavedStates }
-									isEntitiesSavedStatesOpen={ isEntitiesSavedStatesOpen }
-								/>
-							}
-							footer={ <BlockBreadcrumb /> }
-						/>
+						<EditorLayout postId={ postId } />
 						<WelcomeGuide />
 						<Popover.Slot />
 					</ErrorBoundary>
