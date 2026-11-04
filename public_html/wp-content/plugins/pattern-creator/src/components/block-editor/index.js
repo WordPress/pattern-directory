@@ -74,7 +74,7 @@ export default function BlockEditor( { setIsInserterOpen } ) {
 					/>
 					<BlockList
 						className="pattern-block-editor__block-list wp-site-blocks"
-						__experimentalLayout={ { ...layout, type: 'constrained' } }
+						layout={ { ...layout, type: 'constrained' } }
 					/>
 				</Iframe>
 			</BlockTools>
