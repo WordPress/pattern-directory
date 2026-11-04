@@ -592,13 +592,10 @@ function set_document_title( $title ) {
 		if ( is_singular( POST_TYPE ) ) {
 			$title['title'] .= ' - ' . __( 'Block Pattern', 'wporg-patterns' );
 		} elseif ( is_page( array( 'favorites', 'my-patterns' ) ) ) {
-			$filters  = array();
-			$category = get_term_by( 'slug', (string) get_query_var( 'pattern-categories' ), 'wporg-pattern-category' );
-			if ( $category ) {
-				$filters[] = $category->name;
-			}
+			$filters = wp_list_pluck( get_applied_filter_list( false ), 'name' );
 
-			$status = is_page( 'my-patterns' ) ? get_post_status_object( (string) get_query_var( 'status' ) ) : null;
+			$status = get_query_var( 'status' );
+			$status = is_page( 'my-patterns' ) && is_string( $status ) ? get_post_status_object( $status ) : null;
 			if ( $status ) {
 				$filters[] = $status->label;
 			}
