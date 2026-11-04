@@ -30,6 +30,7 @@ add_filter( 'rest_' . POST_TYPE . '_query', __NAMESPACE__ . '\filter_patterns_re
 add_filter( 'user_has_cap', __NAMESPACE__ . '\set_pattern_caps' );
 add_filter( 'map_meta_cap', __NAMESPACE__ . '\protect_moderated_patterns', 10, 4 );
 add_filter( 'posts_orderby', __NAMESPACE__ . '\filter_orderby_locale', 10, 2 );
+add_filter( 'posts_clauses', __NAMESPACE__ . '\filter_clauses_translated_originals', PHP_INT_MAX, 2 );
 add_action( 'init', __NAMESPACE__ . '\add_preview_endpoint' );
 add_action( 'setup_theme', __NAMESPACE__ . '\setup_preview_theme', 1 );
 add_filter( 'request', __NAMESPACE__ . '\limit_preview_query_var' );
@@ -863,6 +864,11 @@ function filter_patterns_rest_query( $args, $request ) {
 			// Order in value determines result order.
 			'value'   => array( $locale, 'en_US' ),
 		);
+
+		// A list of IDs or slugs asks for exactly those, and a translation's slug differs from its original's.
+		if ( empty( $args['post__in'] ) && empty( $args['post_name__in'] ) ) {
+			$args['hide_translated_originals'] = true;
+		}
 	}
 
 	// Use the `author_name` passed in to the API to request patterns by an author slug, not just an ID.
@@ -978,6 +984,51 @@ function filter_orderby_locale( $orderby, $query ) {
 	}
 
 	return $orderby;
+}
+
+/**
+ * Leave out English originals whose translation is listed in the same results.
+ *
+ * Opt-in through the `hide_translated_originals` query var, so lists of specific patterns, like favorites, keep
+ * the originals they hold. Searches keep both, so an English query still finds the original.
+ *
+ * @param string[]  $clauses The query's SQL clauses.
+ * @param \WP_Query $query   The WP_Query object.
+ * @return string[] The clauses, excluding translated originals when requested.
+ */
+function filter_clauses_translated_originals( $clauses, $query ) {
+	global $wpdb;
+
+	if ( ! $query->get( 'hide_translated_originals' ) || $query->is_search() ) {
+		return $clauses;
+	}
+
+	$locale = $query->meta_query->queries['orderby_locale']['value'][0] ?? '';
+
+	// English listings have no translations to swap in.
+	if ( ! is_string( $locale ) || '' === $locale || 'en_US' === $locale ) {
+		return $clauses;
+	}
+
+	/*
+	 * Looks each listed row's translation up by `post_parent`, then its meta by `post_id`. The join order and
+	 * indexes are pinned because, left to table statistics, the optimizer can start from the `wpop_is_translation`
+	 * meta that ~97k rows share. The pipeline copies the original's author, status, date, terms and version onto
+	 * its translations, so a translation passes the same filters and is listed instead. Submitters can set
+	 * `post_parent` and `wpop_locale` on their own pattern; only the pipeline sets the marker.
+	 */
+	$clauses['where'] .= $wpdb->prepare(
+		" AND NOT EXISTS (
+			SELECT 1 FROM {$wpdb->posts} AS translation FORCE INDEX ( post_parent )
+			STRAIGHT_JOIN {$wpdb->postmeta} AS translation_marker FORCE INDEX ( post_id ) ON ( translation_marker.post_id = translation.ID AND translation_marker.meta_key = 'wpop_is_translation' AND translation_marker.meta_value = '1' )
+			STRAIGHT_JOIN {$wpdb->postmeta} AS translation_locale FORCE INDEX ( post_id ) ON ( translation_locale.post_id = translation.ID AND translation_locale.meta_key = 'wpop_locale' AND translation_locale.meta_value = %s )
+			WHERE translation.post_parent = {$wpdb->posts}.ID AND translation.post_type = %s AND translation.post_status = {$wpdb->posts}.post_status
+		)",
+		$locale,
+		POST_TYPE
+	);
+
+	return $clauses;
 }
 
 /**

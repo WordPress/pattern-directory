@@ -268,6 +268,9 @@ function modify_patterns_query( $query ) {
 				),
 			)
 		);
+
+		// See Pattern_Post_Type\filter_clauses_translated_originals().
+		$query->set( 'hide_translated_originals', true );
 	}
 }
 
