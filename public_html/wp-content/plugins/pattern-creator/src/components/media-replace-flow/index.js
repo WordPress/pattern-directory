@@ -6,13 +6,15 @@ import { Dropdown, MenuItem, NavigableMenu, ToolbarButton } from '@wordpress/com
 import { MediaUpload, store as blockEditorStore, useBlockEditContext } from '@wordpress/block-editor';
 import { createBlock } from '@wordpress/blocks';
 import { useDispatch } from '@wordpress/data';
+import { DOWN } from '@wordpress/keycodes';
 import { media as mediaIcon } from '@wordpress/icons';
 
 /**
  * Replace or add media from Openverse, in place of core's menu, which offers only uploads and the media library.
  *
  * Patterns can't hold uploads, and authors can't upload, so core's menu is empty for them. Blocks' extra items,
- * like the cover's video URL, are left out too, since patterns only take Openverse media.
+ * like the cover's video URL, are left out too, since patterns only take Openverse media. Openverse only offers
+ * images, so blocks that take no images only get "Reset".
  *
  * @param {Object}   props
  * @param {string}   props.name         Toggle label.
@@ -27,7 +29,7 @@ import { media as mediaIcon } from '@wordpress/icons';
  * @param {Object}   props.popoverProps Popover props.
  * @param {Function} props.renderToggle Custom toggle renderer.
  * @param {string}   props.className    Dropdown class name.
- * @return {Element} The replace menu.
+ * @return {?Element} The replace menu, or nothing when it would be empty.
  */
 export default function MediaReplaceFlow( {
 	name = __( 'Replace', 'wporg-patterns' ),
@@ -45,6 +47,12 @@ export default function MediaReplaceFlow( {
 } ) {
 	const { name: blockName, clientId } = useBlockEditContext();
 	const { insertBlocks } = useDispatch( blockEditorStore );
+	const allowsImages = allowedTypes?.some( ( type ) => 'image' === type || type.startsWith( 'image/' ) );
+	const canReset = !! mediaURL && !! onReset;
+
+	if ( ! allowsImages && ! canReset ) {
+		return null;
+	}
 
 	const selectMedia = ( media ) => {
 		/*
@@ -69,7 +77,17 @@ export default function MediaReplaceFlow( {
 			className={ className }
 			contentClassName="block-editor-media-replace-flow__options"
 			renderToggle={ ( { isOpen, onToggle } ) => {
-				const toggleProps = { 'aria-expanded': isOpen, 'aria-haspopup': 'true', onClick: onToggle };
+				const toggleProps = {
+					'aria-expanded': isOpen,
+					'aria-haspopup': 'true',
+					onClick: onToggle,
+					onKeyDown: ( event ) => {
+						if ( DOWN === event.keyCode ) {
+							event.preventDefault();
+							event.target.click();
+						}
+					},
+				};
 				return renderToggle ? (
 					renderToggle( { ...toggleProps, children: name } )
 				) : (
@@ -78,22 +96,24 @@ export default function MediaReplaceFlow( {
 			} }
 			renderContent={ ( { onClose } ) => (
 				<NavigableMenu className="block-editor-media-replace-flow__media-upload-menu">
-					<MediaUpload
-						gallery={ multiple }
-						multiple={ multiple }
-						value={ multiple ? mediaIds : mediaId }
-						allowedTypes={ allowedTypes }
-						onSelect={ ( media ) => {
-							onClose();
-							selectMedia( media );
-						} }
-						render={ ( { open } ) => (
-							<MenuItem icon={ mediaIcon } onClick={ open }>
-								{ __( 'Open Media Library', 'wporg-patterns' ) }
-							</MenuItem>
-						) }
-					/>
-					{ mediaURL && onReset && (
+					{ allowsImages && (
+						<MediaUpload
+							gallery={ multiple }
+							multiple={ multiple }
+							value={ multiple ? mediaIds : mediaId }
+							allowedTypes={ allowedTypes }
+							onSelect={ ( media ) => {
+								onClose();
+								selectMedia( media );
+							} }
+							render={ ( { open } ) => (
+								<MenuItem icon={ mediaIcon } onClick={ open }>
+									{ __( 'Open Media Library', 'wporg-patterns' ) }
+								</MenuItem>
+							) }
+						/>
+					) }
+					{ canReset && (
 						<MenuItem
 							onClick={ () => {
 								onReset();

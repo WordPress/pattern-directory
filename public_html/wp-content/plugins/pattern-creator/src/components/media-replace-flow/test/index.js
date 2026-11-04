@@ -59,9 +59,15 @@ describe( 'MediaReplaceFlow', () => {
 		container.remove();
 	} );
 
-	const pick = ( blockName, props ) => {
+	const render = ( blockName, props ) => {
 		mockBlockContext.name = blockName;
 		act( () => root.render( createElement( MediaReplaceFlow, props ) ) );
+	};
+
+	const menuItems = () => [ ...container.querySelectorAll( 'button' ) ].map( ( button ) => button.textContent );
+
+	const pick = ( blockName, props ) => {
+		render( blockName, { allowedTypes: [ 'image' ], ...props } );
 		act( () => {
 			[ ...container.querySelectorAll( 'button' ) ]
 				.find( ( button ) => 'Open Media Library' === button.textContent )
@@ -91,5 +97,16 @@ describe( 'MediaReplaceFlow', () => {
 
 		expect( onSelect ).toHaveBeenCalledWith( mockPicked[ 0 ] );
 		expect( mockInsertBlocks ).not.toHaveBeenCalled();
+	} );
+
+	// Openverse only returns images, which a video, audio or file block would take as its own media.
+	it( 'offers only Reset to blocks that take no images', () => {
+		render( 'core/video', {
+			allowedTypes: [ 'video' ],
+			mediaURL: 'https://example.org/a.mp4',
+			onReset: () => {},
+		} );
+
+		expect( menuItems() ).toEqual( [ 'Reset' ] );
 	} );
 } );
