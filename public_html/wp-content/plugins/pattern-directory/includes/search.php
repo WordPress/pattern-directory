@@ -147,20 +147,9 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 		),
 	);
 
-	$tax_query = $wp_query->get( 'tax_query' );
-	if ( $tax_query ) {
-		foreach ( $tax_query as $term ) {
-			$taxonomy = $term['taxonomy'];
-
-			// `wporg-pattern-flag-reason` is private.
-			if ( ! in_array( $taxonomy, array( 'wporg-pattern-category', 'wporg-pattern-keyword' ), true ) ) {
-				continue;
-			}
-
-			$filter['bool']['must'][] = array(
-				'terms' => array( "taxonomy.$taxonomy.term_id" => $term['terms'] ),
-			);
-		}
+	$tax_filter = get_tax_filter( $wp_query->get( 'tax_query' ) );
+	if ( $tax_filter ) {
+		$filter['bool']['must'][] = $tax_filter;
 	}
 
 	$parser->add_query( $must_query, 'must' );
@@ -179,6 +168,95 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 	);
 
 	return $es_query_args;
+}
+
+/**
+ * Convert a WP_Query `tax_query` into an Elasticsearch filter.
+ *
+ * Covers the clauses the REST API builds: term IDs from `pattern-categories`/`pattern-keywords` (with their
+ * `_exclude` and `operator: AND` forms, and `tax_relation`), and the `core` keyword slug from `curation`.
+ * Clauses on other taxonomies or with other operators are ignored.
+ *
+ * @param mixed $tax_query The query's `tax_query` var.
+ *
+ * @return array|null The filter, or null when nothing applies.
+ */
+function get_tax_filter( $tax_query ) {
+	if ( ! is_array( $tax_query ) ) {
+		return null;
+	}
+
+	$clauses = array();
+
+	foreach ( $tax_query as $clause ) {
+		// Skips the `relation` key, which is a string.
+		if ( ! is_array( $clause ) || ! isset( $clause['taxonomy'], $clause['terms'] ) ) {
+			continue;
+		}
+
+		$taxonomy = $clause['taxonomy'];
+
+		// `wporg-pattern-flag-reason` is private.
+		if ( ! in_array( $taxonomy, array( 'wporg-pattern-category', 'wporg-pattern-keyword' ), true ) ) {
+			continue;
+		}
+
+		// WP_Query accepts a single term as a string, but the ES `terms` query rejects anything but an array.
+		$terms = (array) $clause['terms'];
+
+		// The index is filtered by term ID, so resolve slugs, which `curation` passes.
+		if ( isset( $clause['field'] ) && 'slug' === $clause['field'] ) {
+			$terms = get_terms(
+				array(
+					'taxonomy'   => $taxonomy,
+					'slug'       => $terms,
+					'fields'     => 'ids',
+					'hide_empty' => false,
+				)
+			);
+			$terms = is_wp_error( $terms ) ? array() : $terms;
+		}
+
+		$terms    = array_values( wp_parse_id_list( $terms ) );
+		$field    = "taxonomy.$taxonomy.term_id";
+		$operator = strtoupper( $clause['operator'] ?? 'IN' );
+
+		if ( 'IN' === $operator ) {
+			$clauses[] = array( 'terms' => array( $field => $terms ) );
+		} elseif ( 'NOT IN' === $operator ) {
+			$clauses[] = array(
+				'bool' => array(
+					'must_not' => array( array( 'terms' => array( $field => $terms ) ) ),
+				),
+			);
+		} elseif ( 'AND' === $operator && $terms ) {
+			$clauses[] = array(
+				'bool' => array(
+					'must' => array_map(
+						function ( $term_id ) use ( $field ) {
+							return array( 'term' => array( $field => $term_id ) );
+						},
+						$terms
+					),
+				),
+			);
+		}
+	}
+
+	if ( ! $clauses ) {
+		return null;
+	}
+
+	if ( isset( $tax_query['relation'] ) && 'OR' === strtoupper( $tax_query['relation'] ) ) {
+		return array(
+			'bool' => array(
+				'should'               => $clauses,
+				'minimum_should_match' => 1,
+			),
+		);
+	}
+
+	return array( 'bool' => array( 'must' => $clauses ) );
 }
 
 /**
