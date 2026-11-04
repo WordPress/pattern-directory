@@ -13,6 +13,7 @@ use WP_REST_Request;
 use WP_UnitTestCase;
 use WP_UnitTest_Factory;
 use function WordPressdotorg\Pattern_Directory\Notifications\register_unlisted_meta;
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\register_post_type_data;
 use const WordPressdotorg\Pattern_Directory\Notifications\UNLISTED_DETAIL_META;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS };
 
@@ -95,6 +96,7 @@ class Unlist_Message_Test extends WP_UnitTestCase {
 		 * The test case resets post types between classes, which drops their registered meta. Register it
 		 * again, and drop the cached controller and server so the REST schema picks it up.
 		 */
+		register_post_type_data();
 		register_unlisted_meta();
 		get_post_type_object( POST_TYPE )->rest_controller = null;
 		$GLOBALS['wp_rest_server']                         = null;
@@ -203,6 +205,64 @@ class Unlist_Message_Test extends WP_UnitTestCase {
 		$this->assertTrue( $response->is_error() );
 		$this->assertSame( 403, $response->get_status() );
 		$this->assertSame( '', get_post_meta( self::$pattern_id, UNLISTED_DETAIL_META, true ) );
+	}
+
+	/**
+	 * Authors can save metadata without receiving or modifying moderator messages.
+	 *
+	 * @param string|null $detail Stored moderator message, or null for absent meta.
+	 * @dataProvider moderator_message_provider
+	 * @covers \WordPressdotorg\Pattern_Directory\Notifications\filter_unlisted_meta
+	 */
+	public function test_member_can_save_meta_from_edit_response( ?string $detail ): void {
+		wp_set_current_user( self::$member );
+		if ( null !== $detail ) {
+			update_post_meta( self::$pattern_id, UNLISTED_DETAIL_META, $detail );
+		}
+
+		$request = new WP_REST_Request( 'GET', '/wp/v2/' . POST_TYPE . '/' . self::$pattern_id );
+		$request->set_param( 'context', 'edit' );
+		$response = rest_do_request( $request );
+
+		$this->assertFalse( $response->is_error() );
+		$meta = $response->get_data()['meta'];
+		$this->assertArrayNotHasKey( UNLISTED_DETAIL_META, $meta );
+		$meta['wpop_description'] = 'An updated description.';
+
+		$response = $this->update_pattern( array( 'meta' => $meta ) );
+
+		$this->assertFalse( $response->is_error() );
+		$this->assertSame( 'An updated description.', get_post_meta( self::$pattern_id, 'wpop_description', true ) );
+		$this->assertSame( $detail ?? '', get_post_meta( self::$pattern_id, UNLISTED_DETAIL_META, true ) );
+	}
+
+	/**
+	 * Moderator message states an author may encounter when opening the editor.
+	 *
+	 * @return array
+	 */
+	public function moderator_message_provider(): array {
+		return array(
+			'absent message' => array( null ),
+			'stored message' => array( 'Please revise the pattern.' ),
+		);
+	}
+
+	/**
+	 * Moderators still receive the field used by the Unlist modal.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Notifications\filter_unlisted_meta
+	 */
+	public function test_moderator_can_read_message_in_edit_context(): void {
+		wp_set_current_user( self::$moderator );
+		update_post_meta( self::$pattern_id, UNLISTED_DETAIL_META, 'Please revise the pattern.' );
+
+		$request = new WP_REST_Request( 'GET', '/wp/v2/' . POST_TYPE . '/' . self::$pattern_id );
+		$request->set_param( 'context', 'edit' );
+		$response = rest_do_request( $request );
+
+		$this->assertFalse( $response->is_error() );
+		$this->assertSame( 'Please revise the pattern.', $response->get_data()['meta'][ UNLISTED_DETAIL_META ] );
 	}
 
 	/**
