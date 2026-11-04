@@ -14,17 +14,15 @@ const { act } = jest.requireActual(
 );
 
 const mockGetEntityRecord = jest.fn();
-// A stable reference: `useSelect` warns in dev if the mapping returns a new
-// object for the same state, and the editor short-circuits when `siteUrl` is
-// absent regardless.
+// A stable reference: `useSelect` warns in dev if the mapping returns a new object for the same state.
 const mockSettings = {};
 
 /*
  * Replace the stores with minimal stand-ins so `useSelect` (the unit under
  * test) stays real while `@wordpress/core-data` and friends are not pulled in.
- * By default `getSettings` returns no `siteUrl`, so the editor short-circuits to `null`
- * before mounting its heavy render tree — but the `useSelect` mapping still
- * runs, which is what reads `postId`.
+ * By default `getSettings` returns no `siteUrl`, so the editor short-circuits
+ * to `null` before mounting its render tree — but the `useSelect` mapping
+ * still runs, which is what reads `postId`.
  */
 const mockMakeStore = ( name, selectors, actions = {} ) => {
 	const { createReduxStore, register } = jest.requireActual( '@wordpress/data' );
@@ -235,29 +233,44 @@ describe( 'Editor', () => {
 	} );
 
 	describe( 'with the pattern loaded', () => {
+		const toggle = ( name ) =>
+			act( () => {
+				container.querySelector( `[data-toggle="${ name }"]` ).click();
+			} );
+		const hasPanel = ( name ) => !! container.querySelector( `[data-panel="${ name }"]` );
+
 		beforeEach( () => {
 			mockSettings.siteUrl = 'https://example.test';
 			mockGetEntityRecord.mockReturnValue( { id: 1 } );
+
+			// The panel store lives on the shared default registry, so start every test with both closed.
+			const { dispatch } = jest.requireActual( '@wordpress/data' );
+			const { store: editorStore } = require( '@wordpress/editor' );
+			dispatch( editorStore ).setIsInserterOpened( false );
+			dispatch( editorStore ).setIsListViewOpened( false );
 		} );
 
 		afterEach( () => {
 			delete mockSettings.siteUrl;
 		} );
 
-		// Regression: in a sub-registry, the toggles changed a `core/editor` the panels never read.
-		it.each( [
-			[ 'inserter', 'inserter' ],
-			[ 'list-view', 'list-view' ],
-			[ 'browse-all', 'inserter' ],
-		] )( 'opens the panel when %s is toggled', ( toggle, panel ) => {
+		// Regression: in a sub-registry, the header changed a `core/editor` the panels never read.
+		it.each( [ 'inserter', 'list-view' ] )( 'opens the %s panel the header toggles', ( panel ) => {
 			render( 1 );
-			expect( container.querySelector( `[data-panel="${ panel }"]` ) ).toBeNull();
+			expect( hasPanel( panel ) ).toBe( false );
 
-			act( () => {
-				container.querySelector( `[data-toggle="${ toggle }"]` ).click();
-			} );
+			toggle( panel );
 
-			expect( container.querySelector( `[data-panel="${ panel }"]` ) ).not.toBeNull();
+			expect( hasPanel( panel ) ).toBe( true );
+		} );
+
+		it( 'opens the inserter when the block editor asks for it, as Browse all does', () => {
+			render( 1 );
+			expect( hasPanel( 'inserter' ) ).toBe( false );
+
+			toggle( 'browse-all' );
+
+			expect( hasPanel( 'inserter' ) ).toBe( true );
 		} );
 	} );
 } );
