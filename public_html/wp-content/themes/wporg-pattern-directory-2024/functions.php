@@ -268,6 +268,11 @@ function modify_patterns_query( $query ) {
 				),
 			)
 		);
+
+		// See Pattern_Post_Type\filter_where_translated_originals(). Search keeps both, so an English query still finds the original.
+		if ( ! $query->is_search() ) {
+			$query->set( 'hide_translated_originals', true );
+		}
 	}
 }
 
