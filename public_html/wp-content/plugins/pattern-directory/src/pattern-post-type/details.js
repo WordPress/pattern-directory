@@ -2,10 +2,9 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
 import { ComboboxControl, FormTokenField, TextControl, TextareaControl } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
+import { PluginDocumentSettingPanel, store as editorStore } from '@wordpress/editor';
 
 const KEYWORD_SLUG = 'wpop_keywords';
 const DESCRIPTION_SLUG = 'wpop_description';

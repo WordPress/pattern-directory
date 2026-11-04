@@ -12,7 +12,7 @@ export default function OpenverseGridActions( { actions, items, onClear } ) {
 					<div>
 						<p className="pattern-openverse__footer-selected-label">
 							{ sprintf(
-								/* translators: %d: number of items selected. */
+								/* translators: %1$d: number of items selected. */
 								_n( '%1$d item selected', '%1$d items selected', items.length, 'wporg-patterns' ),
 								items.length
 							) }

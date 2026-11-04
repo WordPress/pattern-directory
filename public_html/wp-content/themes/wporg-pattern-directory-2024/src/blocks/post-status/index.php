@@ -43,20 +43,20 @@ function render( $attributes, $content, $block ) {
 	switch ( $status ) {
 		case 'publish':
 			$label = __( 'Published', 'wporg-patterns' );
-			$type = 'published';
+			$type  = 'published';
 			break;
 		case 'pending-review': // Potential spam.
 		case 'pending':
 			$label = __( 'Pending', 'wporg-patterns' );
-			$type = 'pending';
+			$type  = 'pending';
 			break;
 		case 'draft':
 			$label = __( 'Draft', 'wporg-patterns' );
-			$type = 'draft';
+			$type  = 'draft';
 			break;
 		case 'unlisted':
 			$label = __( 'Declined', 'wporg-patterns' );
-			$type = 'unlisted';
+			$type  = 'unlisted';
 			break;
 	}
 
@@ -64,6 +64,6 @@ function render( $attributes, $content, $block ) {
 		return '';
 	}
 
-	$wrapper_attributes = get_block_wrapper_attributes( [ 'class' => 'is-' . $type ] );
-	return sprintf( '<div %1s>%2s</div>', $wrapper_attributes, $label );
+	$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => 'is-' . $type ) );
+	return sprintf( '<div %1$s>%2$s</div>', $wrapper_attributes, esc_html( $label ) );
 }

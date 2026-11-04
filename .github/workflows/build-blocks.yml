@@ -6,6 +6,7 @@ on:
             - trunk
         paths:
             - public_html/wp-content/themes/wporg-pattern-directory-2024/**
+            - public_html/wp-content/plugins/**
     # Enable manually running action if necessary.
     workflow_dispatch:
 
@@ -14,20 +15,24 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-            - name: Setup
-              uses: WordPress/wporg-repo-tools/.github/actions/setup@trunk
-              with:
-                token: ${{ secrets.GITHUB_TOKEN }}
+            - name: Setup Node dependencies
+              uses: ./.github/actions/setup-node-deps
+
+            - name: Build
+              run: npm run build --workspaces --if-present
 
             - name: Remove build artifacts
               run: |
                   rm -rf public_html/wp-content/themes/wporg-pattern-directory-2024/node_modules
+                  rm -rf public_html/wp-content/plugins/pattern-creator/node_modules
+                  rm -rf public_html/wp-content/plugins/pattern-directory/node_modules
 
             - name: Ignore .gitignore
               run: |
                   git add public_html/wp-content/themes/wporg-pattern-directory-2024/* --force
+                  git add public_html/wp-content/plugins/pattern-*/build --force
 
             - name: Append build number to version
               run: |

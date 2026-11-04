@@ -5,43 +5,43 @@ on:
     push:
         branches: [trunk]
     pull_request:
+    # Enable manually running action if necessary.
+    workflow_dispatch:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+    cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-    check:
-        name: All
+    php:
+        name: PHP
 
         runs-on: ubuntu-latest
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3.1.0
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-            - name: Install NodeJS
-              uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # v3.5.1
-              with:
-                  node-version-file: '.nvmrc'
-                  cache: yarn
-
-            - name: Install JS dependencies
-              run: |
-                  yarn
-
-            - name: Set PHP version
-              uses: shivammathur/setup-php@e04e1d97f0c0481c6e1ba40f8a538454fe5d7709 # v2.21.2
-              with:
-                  php-version: 7.4
-                  coverage: none
-                  tools: composer:v2
-
-            - name: Install PHP dependencies
-              run: |
-                  composer install
-
-            - name: Lint JavaScript and Styles
-              run: |
-                  yarn workspaces run lint:js --quiet
-                  yarn workspaces run lint:css
+            - name: Install Composer dependencies
+              uses: ramsey/composer-install@65e4f84970763564f46a70b8a54b90d033b3bdda # v4.0.0
 
             - name: Lint PHP
-              run: |
-                  composer run lint
+              run: composer run lint
+
+    js-css:
+        name: JS & CSS
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+            - name: Setup Node dependencies
+              uses: ./.github/actions/setup-node-deps
+
+            - name: Lint CSS
+              run: npm run lint:css --workspaces --if-present
+
+            - name: Lint JS
+              run: npm run lint:js --workspaces --if-present

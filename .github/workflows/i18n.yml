@@ -3,6 +3,7 @@ name: I18n
 on:
     schedule:
         - cron: '0 6,18 * * *'
+    workflow_dispatch:
 
 jobs:
     translation-strings:
@@ -11,20 +12,18 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v2
+            - name: Checkout repository
+              uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
 
-            - name: Set PHP version
-              uses: shivammathur/setup-php@e04e1d97f0c0481c6e1ba40f8a538454fe5d7709 # v2.21.2
+            - name: i18n
+              uses: WordPress/wporg-repo-tools/.github/actions/i18n@trunk
               with:
-                  php-version: 7.4
-                  coverage: none
-                  tools: composer:v2
+                token: ${{ secrets.GITHUB_TOKEN }}
+                args: --taxonomies=wporg-pattern-category,wporg-pattern-flag-reason --post_types=page --url=https://wordpress.org/patterns/wp-json/wp/v2/ --textdomain=wporg-patterns
 
-            - name: Install dependencies
-              run: composer install
-
-            - name: Run translation script
-              run: php ./bin/i18n.php
+            - name: Update the translation context
+              run: |
+                sed -i "s/, 'page title'/, 'Page title'/" extra/translation-strings.php
 
             - name: Commit and push
               # Using a specific hash here instead of a tagged version, for risk mitigation, since this action modifies our repo.

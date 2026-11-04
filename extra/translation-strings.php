@@ -1,8 +1,9 @@
 <?php
+// phpcs:disable
 /**
  * Generated file for translation strings.
  *
- * Used to import additional strings into the pattern-directory translation project.
+ * Used to import additional strings into the GlotPress translation project.
  *
  * ⚠️ This is a generated file. Do not edit manually. See bin/i18n.php.
  * ⚠️ Do not require or include this file anywhere.
@@ -29,6 +30,7 @@ _x( 'Different layouts for displaying images.', 'Categories term description', '
 _x( 'Headers', 'Categories term name', 'wporg-patterns' );
 _x( 'A variety of header designs displaying your site title and navigation.', 'Categories term description', 'wporg-patterns' );
 _x( 'Images', 'Categories term name', 'wporg-patterns' );
+_x( 'Intro', 'Categories term name', 'wporg-patterns' );
 _x( 'Media', 'Categories term name', 'wporg-patterns' );
 _x( 'Different layouts containing video or audio.', 'Categories term description', 'wporg-patterns' );
 _x( 'Portfolio', 'Categories term name', 'wporg-patterns' );

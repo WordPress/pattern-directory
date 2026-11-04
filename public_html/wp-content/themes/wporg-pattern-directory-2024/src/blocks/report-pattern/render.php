@@ -1,4 +1,9 @@
 <?php
+/**
+ * Render the report pattern pattern component.
+ *
+ * @package WordPress\Pattern_Directory
+ */
 
 use function WordPressdotorg\Theme\Pattern_Directory_2024\user_has_flagged_pattern;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_REASON;
@@ -23,27 +28,29 @@ if ( ! current_user_can( 'read' ) ) {
 if ( user_has_flagged_pattern() ) {
 	printf(
 		'<div %s>%s</div>',
-		get_block_wrapper_attributes(), // phpcs:ignore
+		get_block_wrapper_attributes(), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		esc_html__( 'You&#8217;ve reported this pattern.', 'wporg-patterns' )
 	);
 	return;
 }
 
-$reasons = get_terms( [
-	'taxonomy' => FLAG_REASON,
-	'hide_empty' => false,
-	'orderby' => 'slug',
-] );
+$reasons = get_terms(
+	array(
+		'taxonomy'   => FLAG_REASON,
+		'hide_empty' => false,
+		'orderby'    => 'slug',
+	)
+);
 
 ?>
-<div <?php echo get_block_wrapper_attributes(); // phpcs:ignore ?>>
+<div <?php echo get_block_wrapper_attributes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 	<div class="wp-block-button is-small is-style-text">
 		<button
 			class="wp-block-button__link wp-element-button"
 			disabled="disabled"
 			data-a11y-dialog-show="report-dialog"
 		>
-			<?php echo esc_html_e( 'Report this pattern', 'wporg-patterns' ); ?>
+			<?php esc_html_e( 'Report this pattern', 'wporg-patterns' ); ?>
 		</button>
 	</div>
 	<div
@@ -57,14 +64,14 @@ $reasons = get_terms( [
 		<div role="document" class="wporg-report-pattern__dialog-content">
 			<div class="wporg-report-pattern__dialog-header">
 				<h1 id="report-pattern-dialog-title">
-					<?php echo esc_html_e( 'Report this pattern', 'wporg-patterns' ); ?>
+					<?php esc_html_e( 'Report this pattern', 'wporg-patterns' ); ?>
 				</h1>
-				<button type="button" data-a11y-dialog-hide aria-label="<?php echo esc_attr_e( 'Close dialog', 'wporg-patterns' ); ?>"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path></svg></button>
+				<button type="button" data-a11y-dialog-hide aria-label="<?php esc_attr_e( 'Close dialog', 'wporg-patterns' ); ?>"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path></svg></button>
 			</div>
 			<form method="POST" action="<?php echo esc_url( get_the_permalink( $current_post_id ) ); ?>">
 				<div class="wporg-report-pattern__dialog-body">
 					<fieldset class="wporg-report-pattern__dialog-field">
-						<legend><?php echo esc_html_e( 'Please choose a reason:', 'wporg-patterns' ); ?></legend>
+						<legend><?php esc_html_e( 'Please choose a reason:', 'wporg-patterns' ); ?></legend>
 						<?php foreach ( $reasons as $reason ) : ?>
 							<div>
 								<input
@@ -77,15 +84,15 @@ $reasons = get_terms( [
 								<label
 									for="report-reason-<?php echo esc_attr( $reason->term_id ); ?>"
 								>
-									<?php echo esc_attr( $reason->name ); ?>
+									<?php echo esc_html( $reason->name ); ?>
 								</label>
-							<div>
+							</div>
 						<?php endforeach; ?>
 					</fieldset>
 					<div class="wporg-report-pattern__dialog-field">
 						<label
 							for="report-details"
-						><?php echo esc_html_e( 'Please provide details (required)', 'wporg-patterns' ); ?></label>
+						><?php esc_html_e( 'Please provide details (required)', 'wporg-patterns' ); ?></label>
 						<textarea
 							id="report-details"
 							rows="4"
@@ -99,12 +106,12 @@ $reasons = get_terms( [
 				<div class="wp-block-buttons wporg-report-pattern__dialog-footer">
 					<div class="wp-block-button is-small is-style-outline">
 						<button type="button" data-a11y-dialog-hide class="wp-block-button__link wp-element-button">
-							<?php echo esc_html_e( 'Cancel', 'wporg-patterns' ); ?>
+							<?php esc_html_e( 'Cancel', 'wporg-patterns' ); ?>
 						</button>
 					</div>
 					<div class="wp-block-button is-small">
 						<button type="submit" class="wp-block-button__link wp-element-button">
-							<?php echo esc_html_e( 'Report', 'wporg-patterns' ); ?>
+							<?php esc_html_e( 'Report', 'wporg-patterns' ); ?>
 						</button>
 					</div>
 				</div>

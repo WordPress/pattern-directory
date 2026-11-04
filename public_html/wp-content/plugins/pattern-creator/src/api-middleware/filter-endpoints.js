@@ -1,4 +1,79 @@
 /**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
+ * ID of the placeholder Navigation menu.
+ *
+ * Every `wp_navigation` read is mocked, and `decode_pattern_content()` strips
+ * a saved `ref`, so any positive integer works.
+ */
+const MOCK_NAVIGATION_ID = 1;
+
+/**
+ * Inner blocks of the placeholder Navigation menu.
+ *
+ * Keep in sync with `provide_fallback_nav_items()` in `includes/mock-blocks.php`.
+ */
+const MOCK_NAVIGATION_CONTENT = [ 'Home', 'About', 'Contact' ]
+	.map(
+		( label ) =>
+			`<!-- wp:navigation-link {"label":"${ label }","url":"#","kind":"custom","isTopLevelLink":true} /-->`
+	)
+	.join( '' );
+
+/**
+ * Build a `wp_navigation` record holding the placeholder menu.
+ *
+ * @param {number} id The menu ID.
+ * @return {Object} The menu record.
+ */
+function getMockNavigation( id ) {
+	const title = __( 'Navigation', 'wporg-patterns' );
+
+	return {
+		id,
+		type: 'wp_navigation',
+		status: 'publish',
+		title: { raw: title, rendered: title },
+		content: { raw: MOCK_NAVIGATION_CONTENT, rendered: '', protected: false },
+	};
+}
+
+/**
+ * Mock the menu endpoints the Navigation block reads, which regular users can't access.
+ *
+ * The front end always renders the placeholder menu from `includes/mock-blocks.php`,
+ * so the editor shows that same menu to everyone.
+ *
+ * @param {string} path The endpoint path (possibly with a query string).
+ * @return {Object|Array|undefined} The mocked response body, if the endpoint is mocked.
+ */
+function getMockNavigationResponse( path ) {
+	if ( /^\/wp-block-editor\/v1\/navigation-fallback(\?|$)/.test( path ) ) {
+		return {
+			id: MOCK_NAVIGATION_ID,
+			_embedded: { self: [ getMockNavigation( MOCK_NAVIGATION_ID ) ] },
+		};
+	}
+
+	const navigation = path.match( /^\/wp\/v2\/navigation(?:\/(\d+))?(\?|$)/ );
+	if ( navigation ) {
+		return navigation[ 1 ]
+			? getMockNavigation( Number( navigation[ 1 ] ) )
+			: [ getMockNavigation( MOCK_NAVIGATION_ID ) ];
+	}
+
+	// No classic menus, so the block never offers to import one.
+	if ( /^\/wp\/v2\/menus(\?|$)/.test( path ) ) {
+		return [];
+	}
+
+	return undefined;
+}
+
+/**
  * Update the `context` query parameter to view for a set of endpoints.
  *
  * @param {string} path The endpoint path (possibly with a query string).
@@ -36,6 +111,33 @@ export default async function ( options, next ) {
 		options.path = options.path.replace( 'per_page=-1', 'per_page=50' );
 
 		options.path = maybeUpdateContext( options.path );
+
+		const method = ( options.method || 'GET' ).toUpperCase();
+		// core-data's `canUser()` sends a raw `OPTIONS` request and reads the `Allow` header.
+		const isPermissionCheck = 'OPTIONS' === method && false === options.parse;
+		const mock = ( 'GET' === method || isPermissionCheck ) && getMockNavigationResponse( options.path );
+		if ( mock ) {
+			// The placeholder menu is read-only, so no write method may be advertised for it.
+			const allow = { Allow: 'GET' };
+			if ( isPermissionCheck ) {
+				return new Response( null, { headers: allow } );
+			}
+
+			// Entity queries ask for the raw `Response` to read the totals and permissions.
+			if ( false === options.parse ) {
+				const total = String( Array.isArray( mock ) ? mock.length : 1 );
+				return new Response( JSON.stringify( mock ), {
+					headers: {
+						...allow,
+						'Content-Type': 'application/json',
+						'X-WP-Total': total,
+						'X-WP-TotalPages': '1',
+					},
+				} );
+			}
+
+			return mock;
+		}
 	}
 
 	// Wait to get the API response back, so it can be filtered.

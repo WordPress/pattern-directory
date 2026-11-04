@@ -39,19 +39,31 @@ function PatternSettings() {
 	} );
 
 	const { editPost } = useDispatch( editorStore );
-	const setTitle = useCallback( ( value ) => {
-		editPost( { title: value } );
-	} );
-	const setDescription = useCallback( ( value ) => {
-		editPost( { meta: { ...meta, wpop_description: value } } );
-	} );
-	const setCategories = useCallback( ( value ) => {
-		editPost( { 'pattern-categories': value } );
-	} );
-	const setKeywords = useCallback( ( value ) => {
-		const keywordsString = value.join( ', ' );
-		editPost( { meta: { ...meta, [ KEYWORD_SLUG ]: keywordsString } } );
-	} );
+	const setTitle = useCallback(
+		( value ) => {
+			editPost( { title: value } );
+		},
+		[ editPost ]
+	);
+	const setDescription = useCallback(
+		( value ) => {
+			editPost( { meta: { ...meta, wpop_description: value } } );
+		},
+		[ editPost, meta ]
+	);
+	const setCategories = useCallback(
+		( value ) => {
+			editPost( { 'pattern-categories': value } );
+		},
+		[ editPost ]
+	);
+	const setKeywords = useCallback(
+		( value ) => {
+			const keywordsString = value.join( ', ' );
+			editPost( { meta: { ...meta, [ KEYWORD_SLUG ]: keywordsString } } );
+		},
+		[ editPost, meta ]
+	);
 
 	return (
 		<>

@@ -1,6 +1,8 @@
 <?php
 /**
  * Pattern Creator settings.
+ *
+ * @package WordPressdotorg\Pattern_Directory
  */
 
 namespace WordPressdotorg\Pattern_Directory\View\Settings;

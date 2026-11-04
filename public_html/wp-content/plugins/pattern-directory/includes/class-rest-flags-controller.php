@@ -1,9 +1,15 @@
 <?php
+/**
+ * REST flags controller for the Pattern Directory.
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ */
 
 namespace WordPressdotorg\Pattern_Directory;
 
 use WP_Error, WP_Post, WP_Query;
 use WP_REST_Posts_Controller, WP_REST_Request, WP_REST_Server;
+use function WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\flag_details_to_html;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE as PATTERN;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\TAX_TYPE as FLAG_TAX;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\PENDING_STATUS;
@@ -78,7 +84,8 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 	public function get_items_permissions_check( $request ) {
 		$parent_post_type = get_post_type_object( PATTERN );
 
-		if ( ! current_user_can( $parent_post_type->cap->edit_posts ) ) {
+		// Flags name their reporter, so only moderators may list them.
+		if ( ! current_user_can( $parent_post_type->cap->edit_others_posts ) ) {
 			return new WP_Error(
 				'rest_forbidden_context',
 				__( 'Sorry, you are not allowed to view pattern flags.', 'wporg-patterns' ),
@@ -107,7 +114,10 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 			return $parent;
 		}
 
-		if ( ! current_user_can( 'edit_post', $parent->ID ) ) {
+		$parent_post_type = get_post_type_object( PATTERN );
+
+		// Flags name their reporter, so only moderators may read them.
+		if ( ! current_user_can( $parent_post_type->cap->edit_others_posts ) ) {
 			return new WP_Error(
 				'rest_cannot_read',
 				__( 'Sorry, you are not allowed to view flags for this pattern.', 'wporg-patterns' ),
@@ -156,12 +166,14 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 		}
 
 		// Check if the user has already submitted a flag for the pattern.
-		$flag_check = new WP_Query( array(
-			'post_type'   => $this->post_type,
-			'post_parent' => $parent->ID,
-			'post_status' => 'pending',
-			'author'      => get_current_user_id(),
-		) );
+		$flag_check = new WP_Query(
+			array(
+				'post_type'   => $this->post_type,
+				'post_parent' => $parent->ID,
+				'post_status' => 'pending',
+				'author'      => get_current_user_id(),
+			)
+		);
 		if ( $flag_check->found_posts > 0 ) {
 			return new WP_Error(
 				'rest_already_flagged',
@@ -185,13 +197,34 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 
 		$prepared_post = parent::prepare_item_for_database( $request );
 
-		$prepared_post->post_author = get_current_user_id();
-
-		if ( ! isset( $request['status'] ) ) {
-			$prepared_post->post_status = $schema['properties']['status']['default'];
+		if ( is_wp_error( $prepared_post ) ) {
+			return $prepared_post;
 		}
 
-		foreach ( $request['wporg-pattern-flag-reason'] as $term_id ) {
+		// Author, status and details belong to the report, so an update must not reassign, reset or re-encode them.
+		if ( empty( $prepared_post->ID ) ) {
+			$prepared_post->post_author  = get_current_user_id();
+			$prepared_post->post_excerpt = flag_details_to_html( $prepared_post->post_excerpt ?? '' );
+
+			if ( '' === $prepared_post->post_excerpt ) {
+				return new WP_Error(
+					'rest_missing_report_details',
+					__( 'A report needs details explaining why the pattern was flagged.', 'wporg-patterns' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			if ( ! isset( $request['status'] ) ) {
+				$prepared_post->post_status = $schema['properties']['status']['default'];
+			}
+		} else {
+			unset( $prepared_post->post_excerpt );
+		}
+
+		// Reasons are only required on create, so an update can legitimately carry none.
+		$reasons = isset( $request[ FLAG_TAX ] ) ? (array) $request[ FLAG_TAX ] : array();
+
+		foreach ( $reasons as $term_id ) {
 			if ( ! term_exists( $term_id, FLAG_TAX ) ) {
 				return new WP_Error(
 					'rest_invalid_term_id',
@@ -223,6 +256,9 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 		);
 
 		$schema['properties']['wporg-pattern-flag-reason']['required'] = true;
+
+		// Report details are mandatory, matching the front-end report form. `required` only binds on create.
+		$schema['properties']['excerpt']['required'] = true;
 
 		return $schema;
 	}
@@ -261,25 +297,25 @@ class REST_Flags_Controller extends WP_REST_Posts_Controller {
 	/**
 	 * Get the parent post, if the ID is valid.
 	 *
-	 * @param int $parent Supplied ID.
+	 * @param int $parent_post Supplied ID.
 	 *
 	 * @return WP_Post|WP_Error Post object if ID is valid, WP_Error otherwise.
 	 */
-	protected function get_parent( $parent ) {
+	protected function get_parent( $parent_post ) {
 		$error = new WP_Error(
 			'rest_post_invalid_parent',
 			__( 'Invalid post parent ID.', 'wporg-patterns' ),
 			array( 'status' => 404 )
 		);
-		if ( (int) $parent <= 0 ) {
+		if ( (int) $parent_post <= 0 ) {
 			return $error;
 		}
 
-		$parent = get_post( (int) $parent );
-		if ( empty( $parent ) || empty( $parent->ID ) || $this->parent_post_type !== $parent->post_type ) {
+		$parent_post = get_post( (int) $parent_post );
+		if ( empty( $parent_post ) || empty( $parent_post->ID ) || $this->parent_post_type !== $parent_post->post_type ) {
 			return $error;
 		}
 
-		return $parent;
+		return $parent_post;
 	}
 }

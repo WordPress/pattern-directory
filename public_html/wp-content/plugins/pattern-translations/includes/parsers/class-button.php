@@ -1,0 +1,76 @@
+<?php
+/**
+ * Block translation parser helpers.
+ *
+ * @package WordPressdotorg\Pattern_Translations
+ */
+
+namespace WordPressdotorg\Pattern_Translations\Parsers;
+
+/**
+ * Translate Button block content.
+ */
+class Button implements BlockParser {
+	use DomUtils;
+	use SwapTags;
+	use GetSetAttribute;
+	use TextNodesXPath;
+
+	/**
+	 * Extract translatable block strings.
+	 *
+	 * @param array $block Parsed block.
+	 * @return array Extracted strings.
+	 */
+	public function to_strings( array $block ): array {
+		$strings = $this->get_attribute( 'placeholder', $block );
+
+		$encoded_html = $this->encode_tags( $block['innerHTML'] );
+
+		$dom   = $this->get_dom( $encoded_html );
+		$xpath = new \DOMXPath( $dom );
+
+		foreach ( $xpath->query( $this->text_nodes_xpath_query() ) as $text ) {
+			if ( trim( $text->nodeValue ) ) {
+				$strings[] = $this->decode_tags( $text->nodeValue );
+			}
+		}
+
+		return $strings;
+	}
+
+	/**
+	 * Replace translated strings in a block.
+	 *
+	 * @param array $block        Parsed block.
+	 * @param array $replacements Translations keyed by original string.
+	 * @return array Updated block.
+	 */
+	public function replace_strings( array $block, array $replacements ): array {
+		$this->set_attribute( 'placeholder', $block, $replacements );
+
+		$encoded_html = $this->encode_tags( $block['innerHTML'] );
+
+		$dom   = $this->get_dom( $encoded_html );
+		$xpath = new \DOMXPath( $dom );
+
+		foreach ( $xpath->query( $this->text_nodes_xpath_query() ) as $text ) {
+			if ( trim( $text->nodeValue ) && isset( $replacements[ $this->decode_tags( $text->nodeValue ) ] ) ) {
+				$text->parentNode->replaceChild(
+					$dom->createCDATASection(
+						$this->encode_tags(
+							$replacements[ $this->decode_tags( $text->nodeValue ) ]
+						)
+					),
+					$text
+				);
+			}
+		}
+
+		$decoded_html          = $this->decode_tags( $this->remove_html( $dom->saveHTML() ) );
+		$block['innerHTML']    = $decoded_html;
+		$block['innerContent'] = array( $decoded_html );
+
+		return $block;
+	}
+}

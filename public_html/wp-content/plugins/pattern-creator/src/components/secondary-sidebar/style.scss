@@ -11,29 +11,8 @@
 	min-width: 350px;
 }
 
-.pattern__inserter-panel-header {
-	padding-top: $grid-unit-10;
-	padding-right: $grid-unit-10;
-	display: flex;
-	justify-content: flex-end;
-
-	@include break-medium() {
-		display: none;
-	}
-}
-
-.pattern__inserter-panel-content,
-.pattern__list-view-panel-content {
-	// Leave space for the close button
-	height: calc(100% - #{$button-size} - #{$grid-unit-10});
-}
-
-
 .pattern__inserter-panel-content {
-
-	@include break-medium() {
-		height: 100%;
-	}
+	height: 100%;
 }
 
 .pattern__list-view-panel-header {
@@ -47,6 +26,8 @@
 }
 
 .pattern__list-view-panel-content {
+	// Leave space for the close button
+	height: calc(100% - #{$button-size} - #{$grid-unit-10});
 	overflow-y: auto;
 	padding: $grid-unit-10;
 }

@@ -1,6 +1,8 @@
 <?php
 /**
  * Content shown when user is not the current pattern owner.
+ *
+ * @package WordPressdotorg\Pattern_Creator
  */
 
 namespace WordPressdotorg\Pattern_Creator;

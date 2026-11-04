@@ -3,21 +3,25 @@
  * Plugin Name: Block Pattern Creator
  * Description: Create block patterns on the frontend of a site.
  * Version: 1.0.0
- * Requires at least: 5.5
+ * Requires at least: 6.2
  * Author: WordPress Meta Team
  * Text Domain: wporg-patterns
  * License: GPL v2 or later
  * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
+ *
+ * @package WordPressdotorg\Pattern_Creator
  */
 
 namespace WordPressdotorg\Pattern_Creator;
-use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
-use function WordPressdotorg\MU_Plugins\Global_Header_Footer\{ is_rosetta_site, get_rosetta_name };
+
 use WP_Block_Editor_Context;
+use function WordPressdotorg\MU_Plugins\Global_Header_Footer\{ is_rosetta_site, get_rosetta_name };
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\get_selectable_category_slugs;
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 const AUTOSAVE_INTERVAL = 30;
-const IS_EDIT_VAR = 'edit-pattern';
-const PATTERN_ID_VAR = 'pattern-id';
+const IS_EDIT_VAR       = 'edit-pattern';
+const PATTERN_ID_VAR    = 'pattern-id';
 
 require_once __DIR__ . '/includes/mock-blocks.php';
 
@@ -33,7 +37,7 @@ require_once __DIR__ . '/includes/mock-blocks.php';
 function should_load_creator() {
 	global $wp_query;
 	$is_editor = $wp_query->is_singular( POST_TYPE ) && false !== $wp_query->get( IS_EDIT_VAR, false );
-	$is_new = is_page( 'new-pattern' );
+	$is_new    = is_page( 'new-pattern' );
 	return $is_editor || $is_new;
 }
 
@@ -81,16 +85,17 @@ function pattern_creator_init() {
 	wp_deregister_style( 'wporg-style' );
 	// These will have no effect if the styles are not registered.
 	wp_deregister_style( 'wporg-pattern-directory-2024-style' );
+	wp_deregister_style( 'wporg-parent-2021-print' );
 	wp_deregister_style( 'wporg-parent-2021-style' );
 	wp_deregister_style( 'global-styles' );
 
-	$dir = dirname( __FILE__ );
+	$dir               = __DIR__;
 	$script_asset_path = "$dir/build/index.asset.php";
 	if ( ! file_exists( $script_asset_path ) ) {
-		throw new \Error( 'You need to run `yarn start` or `yarn build` for the Pattern Creator.' );
+		throw new \Error( 'You need to run `npm run start:creator` or `npm run build:creator` for the Pattern Creator.' );
 	}
 
-	$script_asset = require( $script_asset_path );
+	$script_asset = require $script_asset_path;
 	wp_enqueue_script(
 		'wp-pattern-creator',
 		plugins_url( 'build/index.js', __FILE__ ),
@@ -104,10 +109,14 @@ function pattern_creator_init() {
 		'wp-pattern-creator',
 		sprintf(
 			"var wporgLocale = JSON.parse( decodeURIComponent( '%s' ) );",
-			rawurlencode( wp_json_encode( array(
-				'id' => get_locale(),
-				'displayName' => is_rosetta_site() ? get_rosetta_name() : '',
-			) ) ),
+			rawurlencode(
+				wp_json_encode(
+					array(
+						'id'          => get_locale(),
+						'displayName' => is_rosetta_site() ? get_rosetta_name() : '',
+					)
+				)
+			),
 		),
 		'before'
 	);
@@ -116,9 +125,14 @@ function pattern_creator_init() {
 		'wp-pattern-creator',
 		sprintf(
 			'var wporgBlockPattern = JSON.parse( decodeURIComponent( \'%s\' ) );',
-			rawurlencode( wp_json_encode( array(
-				'siteUrl' => esc_url( home_url() ),
-			) ) )
+			rawurlencode(
+				wp_json_encode(
+					array(
+						'siteUrl'       => esc_url( home_url() ),
+						'categorySlugs' => get_selectable_category_slugs(),
+					)
+				)
+			)
 		),
 		'before'
 	);
@@ -182,7 +196,6 @@ function pattern_creator_init() {
 		'after'
 	);
 
-	wp_enqueue_script( 'wp-edit-site' );
 	wp_enqueue_script( 'wp-format-library' );
 	wp_enqueue_style( 'wp-edit-site' );
 	wp_enqueue_style( 'wp-format-library' );
@@ -192,6 +205,9 @@ add_action( 'wp_enqueue_scripts', __NAMESPACE__ . '\pattern_creator_init', 20 );
 
 /**
  * Bypass WordPress template system to load only our editor app.
+ *
+ * @param string $template Original template path.
+ * @return string Editor template path when the creator is active.
  */
 function inject_editor_template( $template ) {
 	if ( should_load_creator() ) {
@@ -200,6 +216,153 @@ function inject_editor_template( $template ) {
 	return $template;
 }
 add_filter( 'template_include', __NAMESPACE__ . '\inject_editor_template' );
+
+/**
+ * Enqueue block frontend styles for the editor canvas.
+ *
+ * _wp_get_iframed_editor_assets() fires enqueue_block_assets with an isolated WP_Styles
+ * instance, then captures its output into __unstableResolvedAssets. It enqueues
+ * editor_style_handles but not style_handles, so block frontend styles (style.min.css)
+ * are absent from the canvas — breaking blocks like Cover that need them for layout/background.
+ *
+ * Mirroring the fix proposed for WordPress core (_wp_get_iframed_editor_assets should loop
+ * over style_handles too), we enqueue them here so they are captured in the same window.
+ *
+ * enqueue_block_assets also fires on the outer creator page's normal front-end render.
+ * Enqueuing there would print every block's frontend stylesheet into the outer <head>,
+ * where Gutenberg's iframe onLoad clones each one into the canvas and logs a
+ * "<handle> was added to the iframe incorrectly" warning. The outer page renders no
+ * blocks, so those styles are pure leakage. _wp_get_iframed_editor_assets() brackets its
+ * enqueue_block_assets dispatch with a `should_load_block_editor_scripts_and_styles` =>
+ * __return_false filter; its presence is what distinguishes the capture from the outer
+ * render, so we only enqueue when that filter is active.
+ */
+function enqueue_block_frontend_styles_for_canvas() {
+	if ( ! should_load_creator() ) {
+		return;
+	}
+
+	// Only run inside the iframed-editor asset capture, not on the outer page.
+	if ( false === has_filter( 'should_load_block_editor_scripts_and_styles', '__return_false' ) ) {
+		return;
+	}
+
+	$block_registry = \WP_Block_Type_Registry::get_instance();
+	foreach ( $block_registry->get_all_registered() as $block_type ) {
+		if ( isset( $block_type->style_handles ) && is_array( $block_type->style_handles ) ) {
+			foreach ( $block_type->style_handles as $style_handle ) {
+				wp_enqueue_style( $style_handle );
+			}
+		}
+	}
+}
+add_action( 'enqueue_block_assets', __NAMESPACE__ . '\enqueue_block_frontend_styles_for_canvas' );
+
+/**
+ * Fix relative @import paths in editor styles that lack a baseURL.
+ *
+ * WordPress core fetches external editor styles (added via add_editor_style()
+ * with an https:// URL) using wp_remote_get(), but unlike local files it
+ * never sets baseURL on the returned object. Gutenberg's transformStyles
+ * rewrites url() property values using baseURL but silently ignores @import
+ * at-rules, so a path like @import "./NotoSerif/NotoSerifJP/style.css" from
+ * global-fonts/style.css ends up resolving against the iframe's page URL
+ * (/new-pattern/) instead of the CSS file's own directory, producing 404s.
+ *
+ * Fix: for any entry in settings.styles that has no baseURL and contains a
+ * relative @import path, infer the base URL from the absolute url() font
+ * references already present in the same CSS — they point to sibling
+ * directories, so removing their last two path segments (sibling-dir/file)
+ * yields the shared parent, which is the correct base for the @import paths.
+ *
+ * @param array $settings Block editor settings.
+ * @return array
+ */
+function fix_editor_style_import_paths( $settings ) {
+	if ( ! should_load_creator() ) {
+		return $settings;
+	}
+	if ( empty( $settings['styles'] ) ) {
+		return $settings;
+	}
+	// Iterate keys: a by-reference loop over $settings['styles'] ?? array() would modify a temporary value, losing updates.
+	foreach ( array_keys( $settings['styles'] ) as $key ) {
+		$style = $settings['styles'][ $key ];
+		if ( ! empty( $style['baseURL'] ) || empty( $style['css'] ) ) {
+			continue;
+		}
+		if ( ! preg_match( '/@import\s+["\']\.\//', $style['css'] ) ) {
+			continue;
+		}
+		// Find any absolute url() reference to infer the shared parent directory.
+		if ( ! preg_match( '/url\(\s*[\'"]?(https?:\/\/[^\s\'")\s]+)[\'"]?\s*\)/', $style['css'], $m ) ) {
+			continue;
+		}
+		$parts = explode( '/', preg_replace( '/[?#].*$/', '', $m[1] ) );
+		if ( count( $parts ) < 6 ) { // Scheme, host, and at least one path segment before sibling/file.
+			continue;
+		}
+		array_splice( $parts, -2 ); // Drop sibling-dir/filename, keep parent.
+		$base = implode( '/', $parts ) . '/';
+		if ( 0 !== strpos( $m[1], $base ) ) {
+			continue; // The inferred depth must match the URL prefix.
+		}
+		$settings['styles'][ $key ]['css']     = preg_replace_callback(
+			'/@import\s+["\']\.\/([^"\']+)["\']/',
+			fn( $x ) => '@import "' . $base . $x[1] . '"',
+			$style['css']
+		);
+		$settings['styles'][ $key ]['baseURL'] = $base;
+	}
+	return $settings;
+}
+add_filter( 'block_editor_settings_all', __NAMESPACE__ . '\fix_editor_style_import_paths' );
+
+/**
+ * Allow logged-in users to read wp_global_styles posts via the REST API.
+ *
+ * The block editor fetches GET /wp/v2/global-styles/{id} to load the site's
+ * active theme customisations. wp_global_styles is a non-public post type
+ * authored by an admin, so WordPress maps read_post to the read_private_posts
+ * capability — which regular users don't have — returning 403. Browsers can
+ * surface this as a CORS error in the console.
+ *
+ * The published global styles post is already compiled and served publicly
+ * through the site's front-end <style> tag, so granting authenticated users
+ * REST read access to published wp_global_styles posts is safe. Draft and
+ * private revisions are excluded.
+ *
+ * @param string[] $caps    Required primitive capabilities.
+ * @param string   $cap     Capability being checked.
+ * @param int      $user_id User performing the check.
+ * @param mixed[]  $args    Extra args (post ID for read_post checks).
+ * @return string[]
+ */
+function allow_reading_global_styles( $caps, $cap, $user_id, $args ) {
+	// Check the meta capability because its primitive mapping can vary.
+	if (
+		'read_post' !== $cap ||
+		! defined( 'REST_REQUEST' ) || ! REST_REQUEST ||
+		! $user_id ||
+		empty( $args[0] )
+	) {
+		return $caps;
+	}
+	$request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) : '';
+	$request_uri    = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+	if (
+		( 'GET' !== $request_method && 'HEAD' !== $request_method ) ||
+		false === strpos( $request_uri, '/wp/v2/global-styles' )
+	) {
+		return $caps;
+	}
+	$post = get_post( (int) $args[0] );
+	if ( $post && 'wp_global_styles' === $post->post_type && 'publish' === $post->post_status ) {
+		return array( 'read' );
+	}
+	return $caps;
+}
+add_filter( 'map_meta_cap', __NAMESPACE__ . '\allow_reading_global_styles', 10, 4 );
 
 /**
  * Add a rewrite rule to handle editing a pattern.
@@ -243,14 +406,12 @@ add_filter( 'user_has_cap', __NAMESPACE__ . '\disallow_uploads' );
  * Set up any custom endpoints.
  */
 function rest_api_init() {
-	require_once __DIR__ . '/includes/openverse-client.php';
-	require_once __DIR__ . '/includes/openverse-rest-controller.php';
+	require_once __DIR__ . '/includes/class-openverse-client.php';
+	require_once __DIR__ . '/includes/class-openverse-rest-controller.php';
 	$controller = new \Openverse_REST_Controller();
 	$controller->register_routes();
 
-	// Allow the post type labels through the `types` endpoint when viewing.
-	// This passes the value back to unauthenticated users, which prevents JS
-	// errors when the post-date block tries to use them.
+	// Public labels prevent errors when the post-date block reads them.
 	register_rest_field(
 		'type', // The object-type for the `types` endpoint.
 		'labels',
@@ -283,6 +444,10 @@ function set_theme_twentytwentythree() {
  * Temporarily restore gutenberg_initialize_editor() for compat with Gutenberg 16.5.0
  *
  * @see https://github.com/WordPress/pattern-directory/issues/601
+ *
+ * @param string $editor_name          Editor identifier.
+ * @param string $editor_script_handle Editor script handle suffix.
+ * @param array  $settings             Editor initialization settings.
  */
 function gutenberg_initialize_editor( $editor_name, $editor_script_handle, $settings ) {
 

@@ -1,0 +1,25 @@
+name: "Setup Node dependencies"
+description: "Install Node and restore node_modules from cache, running npm ci only on a cache miss."
+
+runs:
+    using: "composite"
+    steps:
+        - name: Install Node
+          uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+          with:
+              node-version-file: ".nvmrc"
+
+        - name: Cache node_modules
+          id: node-modules-cache
+          uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+          with:
+              path: |
+                  node_modules
+                  public_html/wp-content/plugins/*/node_modules
+                  public_html/wp-content/themes/*/node_modules
+              key: node-modules-${{ runner.os }}-${{ hashFiles('.nvmrc', 'package-lock.json') }}
+
+        - name: Install dependencies
+          if: steps.node-modules-cache.outputs.cache-hit != 'true'
+          shell: bash
+          run: npm ci

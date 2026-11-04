@@ -1,10 +1,22 @@
 <?php
-// phpcs:disable WordPress.Files.FileName -- Allow underscore for pattern partial.
 /**
+ * Render the grid mine pattern component.
+ *
  * Title: Pattern Grid (Mine)
  * Slug: wporg-pattern-directory-2024/grid-mine
  * Inserter: no
+ *
+ * @package WordPress\Pattern_Directory
+ *
+ * phpcs:disable WordPress.Files.FileName -- Allow underscore for pattern partial.
  */
+
+global $wp_query;
+
+// When a status filter is applied, an empty result only means the filter
+// matched nothing, not that the user has never created a pattern. This reads
+// the same query var that filters the list in modify_query_loop_block_query_vars().
+$is_status_filtered = ! empty( $wp_query->query['status'] );
 
 ?>
 <!-- wp:query {"align":"wide","queryId":0,"query":{"inherit":false,"postType":"wporg-pattern"},"className":"wporg-my-patterns","layout":{"type":"default"}} -->
@@ -48,7 +60,7 @@
 
 				<!-- wp:button {"className":"is-style-text is-small is-edit-link","metadata":{"bindings":{"text":{"source":"wporg-pattern/edit-label"},"url":{"source":"wporg-pattern/edit-url"}}}} -->
 				<div class="wp-block-button is-style-text is-small is-edit-link"><a href="#" class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Edit', 'wporg-patterns' ); ?></a></div>
-				<!-- /wp:paragraph -->
+				<!-- /wp:button -->
 			</div>
 			<!-- /wp:group -->
 		</div>
@@ -68,6 +80,19 @@
 	<!-- /wp:spacer -->
 
 	<!-- wp:query-no-results -->
+		<?php if ( $is_status_filtered ) : ?>
+		<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0"}}}} -->
+		<p style="margin-top:0"><?php esc_html_e( 'You have no patterns with this status.', 'wporg-patterns' ); ?></p>
+		<!-- /wp:paragraph -->
+
+		<!-- wp:buttons -->
+		<div class="wp-block-buttons">
+			<!-- wp:button -->
+			<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( get_permalink() ); ?>"><?php esc_html_e( 'View all your patterns', 'wporg-patterns' ); ?></a></div>
+			<!-- /wp:button -->
+		</div>
+		<!-- /wp:buttons -->
+		<?php else : ?>
 		<!-- wp:paragraph {"style":{"spacing":{"margin":{"top":"0"}}}} -->
 		<p style="margin-top:0"><?php esc_html_e( 'Anyone can create and share patterns using the familiar block editor. Design helpful starting points for yourself and any WordPress site.', 'wporg-patterns' ); ?></p>
 		<!-- /wp:paragraph -->
@@ -79,6 +104,7 @@
 			<!-- /wp:button -->
 		</div>
 		<!-- /wp:buttons -->
+		<?php endif; ?>
 
 		<!-- wp:spacer {"height":"var:preset|spacing|40","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
 		<div style="margin-top:0;margin-bottom:0;height:var(--wp--preset--spacing--40)" aria-hidden="true" class="wp-block-spacer"></div>

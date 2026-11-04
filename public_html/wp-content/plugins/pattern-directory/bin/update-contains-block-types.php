@@ -3,18 +3,24 @@
  * Update all patterns with the "contains block types" meta field.
  *
  * To run locally, use `wp-env`, ex:
- * yarn wp-env run cli "php wp-content/plugins/pattern-directory/bin/update-contains-block-types.php --all --per_page=100 --apply"
+ * npm run wp-env run cli "php wp-content/plugins/pattern-directory/bin/update-contains-block-types.php --all --per_page=100 --apply"
  *
  * To run in a sandbox, use php directly, ex:
  * php ./bin/update-contains-block-types.php --all --apply
+ *
+ * @package WordPressdotorg\Pattern_Directory
+ *
+ * phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- CLI output is plain text.
+ * phpcs:disable WordPress.WP.AlternativeFunctions -- Native functions are needed for CLI bootstrap and streams.
  */
 
 namespace WordPressdotorg\Pattern_Directory;
 
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\get_contains_block_types;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE };
 
 // This script should only be called in a CLI environment.
-if ( 'cli' != php_sapi_name() ) {
+if ( 'cli' !== php_sapi_name() ) {
 	die();
 }
 
@@ -32,7 +38,7 @@ $opts['apply']   = isset( $opts['apply'] );
 $opts['verbose'] = isset( $opts['verbose'] );
 $opts['all']     = isset( $opts['all'] );
 
-// Bootstrap WordPress
+// Bootstrap WordPress.
 $_SERVER['HTTP_HOST']   = parse_url( $opts['url'], PHP_URL_HOST );
 $_SERVER['REQUEST_URI'] = parse_url( $opts['url'], PHP_URL_PATH );
 
@@ -65,38 +71,30 @@ $args = array(
 if ( isset( $opts['post'] ) ) {
 	$args = array(
 		'post_type' => POST_TYPE,
-		'p' => absint( $opts['post'] ),
+		'p'         => absint( $opts['post'] ),
 	);
 }
 
-$query = new \WP_Query( $args );
+$query        = new \WP_Query( $args );
 $meta_updated = 0;
 
 while ( $query->have_posts() ) {
 	$query->the_post();
-	$pattern    = get_post();
-	$pattern_id = $pattern->ID;
-	$blocks     = parse_blocks( $pattern->post_content );
-	$all_blocks = _flatten_blocks( $blocks );
-
-	// Get the list of block names and convert it to a single string.
-	$block_names = wp_list_pluck( $all_blocks, 'blockName' );
-	$block_names = array_filter( $block_names );
-	$block_names = array_unique( $block_names );
-	sort( $block_names );
-	$used_blocks = implode( ',', $block_names );
+	$pattern     = get_post();
+	$pattern_id  = $pattern->ID;
+	$used_blocks = get_contains_block_types( $pattern->post_content );
 
 	if ( $opts['apply'] ) {
 		$result = update_post_meta( $pattern_id, 'wpop_contains_block_types', $used_blocks );
 		if ( $result ) {
-			$meta_updated++;
-		} else if ( $opts['verbose'] ) {
-			echo "Error updating {$pattern_id}.\n"; // phpcs:ignore
+			++$meta_updated;
+		} elseif ( $opts['verbose'] ) {
+			echo "Error updating {$pattern_id}.\n";
 		}
-	} else if ( $opts['verbose'] ) {
-		echo "Will update {$pattern_id} with '{$used_blocks}'.\n"; // phpcs:ignore
+	} elseif ( $opts['verbose'] ) {
+		echo "Will update {$pattern_id} with '{$used_blocks}'.\n";
 	}
 }
 
-echo "Updated {$meta_updated} patterns.\n"; // phpcs:ignore
-echo "Done.\n\n"; // phpcs:ignore
+echo "Updated {$meta_updated} patterns.\n";
+echo "Done.\n\n";

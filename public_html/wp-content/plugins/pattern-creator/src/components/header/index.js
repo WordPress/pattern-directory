@@ -1,3 +1,4 @@
+/* global wporgBlockPattern */
 /**
  * External dependencies
  */
@@ -7,7 +8,6 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 import { __, _x } from '@wordpress/i18n';
-import { ToolSelector } from '@wordpress/block-editor';
 import { Button, VisuallyHidden } from '@wordpress/components';
 import { Icon, arrowLeft, listView, plus } from '@wordpress/icons';
 import { PinnedItems } from '@wordpress/interface';
@@ -15,6 +15,7 @@ import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
 import { useCallback, useRef } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useViewportMatch } from '@wordpress/compose';
+import { store as editorStore } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -32,7 +33,8 @@ const preventDefault = ( event ) => {
 export default function Header() {
 	const inserterButton = useRef();
 	const { hasReducedUI, isInserterOpen, isListViewOpen, listViewShortcut } = useSelect( ( select ) => {
-		const { isFeatureActive, isInserterOpened, isListViewOpened } = select( patternStore );
+		const { isFeatureActive } = select( patternStore );
+		const { isInserterOpened, isListViewOpened } = select( editorStore );
 		const { getShortcutRepresentation } = select( keyboardShortcutsStore );
 
 		return {
@@ -43,7 +45,7 @@ export default function Header() {
 		};
 	}, [] );
 
-	const { setIsInserterOpened, setIsListViewOpened } = useDispatch( patternStore );
+	const { setIsInserterOpened, setIsListViewOpened } = useDispatch( editorStore );
 
 	const isLargeViewport = useViewportMatch( 'medium' );
 
@@ -89,7 +91,6 @@ export default function Header() {
 					/>
 					{ isLargeViewport && (
 						<>
-							<ToolSelector />
 							<UndoButton />
 							<RedoButton />
 							<Button

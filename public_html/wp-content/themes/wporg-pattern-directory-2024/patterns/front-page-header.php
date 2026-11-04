@@ -3,6 +3,8 @@
  * Title: Front Page Header
  * Slug: wporg-pattern-directory-2024/front-page-header
  * Inserter: no
+ *
+ * @package WordPress\Pattern_Directory
  */
 
 ?>

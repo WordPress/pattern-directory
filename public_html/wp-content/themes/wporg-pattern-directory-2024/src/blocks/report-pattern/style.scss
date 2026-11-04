@@ -1,5 +1,5 @@
 .wp-block-wporg-report-pattern {
-	// stylelint-disable-next-line max-line-length
+	// stylelint-disable-next-line @stylistic/max-line-length
 	--wp-report-dialog-offset: calc(var(--wp-admin--admin-bar--height, 0px) + var(--wp--custom--local-navigation-bar--spacing--height, 0px));
 
 	// Only update font size on toggle button.

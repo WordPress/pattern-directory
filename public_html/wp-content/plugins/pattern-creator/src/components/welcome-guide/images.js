@@ -82,6 +82,37 @@ export const ImageCollectionImage = () => (
 	</>
 );
 
+export const GuidelinesImage = () => (
+	<>
+		{ /* Faint geometric field behind the card, matching the other guide pages. */ }
+		<SVG width="100%" height="240" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<defs>
+				<pattern id="wporg-guidelines-background" width="26" height="26" patternUnits="userSpaceOnUse">
+					<path d="M13 5V21M5 13H21" stroke="white" strokeOpacity="0.08" strokeWidth="1.5" />
+				</pattern>
+			</defs>
+			<rect width="100%" height="100%" fill="url(#wporg-guidelines-background)" />
+		</SVG>
+
+		<SVG width="261" height="127" viewBox="0 0 261 127" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<rect width="261" height="127" rx="2" fill="white" />
+
+			<path d="M20 27L26 33L38 20" stroke="#3858E9" strokeWidth="3" strokeLinecap="round" />
+			<rect x="54" y="21" width="185" height="12" fill="#E2E2E2" />
+
+			<path d="M20 54L26 60L38 47" stroke="#3858E9" strokeWidth="3" strokeLinecap="round" />
+			<rect x="54" y="48" width="185" height="12" fill="#E2E2E2" />
+
+			<path d="M20 81L26 87L38 74" stroke="#3858E9" strokeWidth="3" strokeLinecap="round" />
+			<rect x="54" y="75" width="185" height="12" fill="#E2E2E2" />
+
+			<path d="M21 100L37 116" stroke="#757575" strokeWidth="3" strokeLinecap="round" />
+			<path d="M37 100L21 116" stroke="#757575" strokeWidth="3" strokeLinecap="round" />
+			<rect x="54" y="102" width="122" height="12" fill="#E8E8E8" />
+		</SVG>
+	</>
+);
+
 export const PatternEditorImage = () => (
 	<>
 		<SVG width="100%" height="240" viewBox="0 0 312 240" fill="none" xmlns="http://www.w3.org/2000/svg">

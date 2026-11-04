@@ -1,9 +1,14 @@
 <?php
-// phpcs:disable WordPress.Files.FileName -- Allow underscore for pattern partial.
 /**
+ * Render the grid favorites pattern component.
+ *
  * Title: Pattern Grid (Favorites)
  * Slug: wporg-pattern-directory-2024/grid-favorites
  * Inserter: no
+ *
+ * @package WordPress\Pattern_Directory
+ *
+ * phpcs:disable WordPress.Files.FileName -- Allow underscore for pattern partial.
  */
 
 ?>
@@ -69,7 +74,7 @@
 			<p><?php esc_html_e( 'Check out these suggestions.', 'wporg-patterns' ); ?></p>
 			<!-- /wp:paragraph -->
 		</div>
-		<!-- wp:group /-->
+		<!-- /wp:group -->
 
 		<!-- wp:spacer {"height":"var:preset|spacing|50","style":{"spacing":{"margin":{"top":"0","bottom":"0"}}}} -->
 		<div style="margin-top:0;margin-bottom:0;height:var(--wp--preset--spacing--50)" aria-hidden="true" class="wp-block-spacer"></div>
