@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "wporg/post-status",
+  "version": "0.1.0",
+  "title": "Post Status",
+  "category": "design",
+  "icon": "",
+  "description": "A label displaying the current pattern's status.",
+  "textdomain": "wporg",
+  "attributes": {},
+  "supports": {
+    "html": false
+  },
+  "usesContext": [
+    "postId",
+    "postType"
+  ],
+  "style": "file:./style-index.css",
+  "editorScript": "file:./index.js",
+  "render": "file:./render.php"
+}
