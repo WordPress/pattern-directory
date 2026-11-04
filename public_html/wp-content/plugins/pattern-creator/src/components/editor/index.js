@@ -98,7 +98,8 @@ function Editor( { onError, postId } ) {
 	return (
 		<ShortcutProvider>
 			<SlotFillProvider>
-				<EditorProvider settings={ settings } post={ post }>
+				{ /* One editor per page: share `core/editor` with the header and panels, as edit-post does. */ }
+				<EditorProvider settings={ settings } post={ post } useSubRegistry={ false }>
 					<ErrorBoundary onError={ onError }>
 						<FullscreenMode isActive />
 						<UrlController postId={ postId } />
