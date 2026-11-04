@@ -12,6 +12,7 @@ namespace WordPressdotorg\Pattern_Directory\Tests;
 use WP_REST_Request;
 use WP_UnitTestCase;
 use WP_UnitTest_Factory;
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\register_post_type_data;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 /**
@@ -62,6 +63,20 @@ class Endpoint_Wporg_Pattern_Test extends WP_UnitTestCase {
 			)
 		);
 		wp_set_object_terms( self::$pattern_id, $term_ids, 'wporg-pattern-category' );
+	}
+
+	/**
+	 * Re-register the pattern meta and start from a fresh REST server.
+	 *
+	 * Post types are reset between classes, which drops their meta, and a server left by an earlier test outlives
+	 * the `rest_api_init` hooks the suite rolls back, including the one that answers `OPTIONS` requests.
+	 */
+	public function set_up(): void {
+		parent::set_up();
+
+		register_post_type_data();
+		get_post_type_object( POST_TYPE )->rest_controller = null;
+		$GLOBALS['wp_rest_server']                         = null;
 	}
 
 	/**
