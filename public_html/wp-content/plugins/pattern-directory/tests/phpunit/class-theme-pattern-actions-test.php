@@ -14,6 +14,8 @@ use WP_UnitTest_Factory;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\{ POST_TYPE, UNLISTED_STATUS, SPAM_STATUS };
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\{ POST_TYPE as FLAG_POST_TYPE, TAX_TYPE as FLAG_REASON };
 
+require_once __DIR__ . '/trait-loads-theme.php';
+
 /**
  * `do_pattern_actions()` drafts a pattern through `wp_update_post()` rather than the REST API, so
  * `validate_status()` never sees it. Without its own check an author could draft their way out of a
@@ -22,6 +24,8 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\{ POST_TYPE a
  * @group pattern-status-validation
  */
 class Theme_Pattern_Actions_Test extends WP_UnitTestCase {
+	use Loads_Theme;
+
 	/**
 	 * A moderator: holds `edit_others_patterns`.
 	 *
@@ -37,13 +41,6 @@ class Theme_Pattern_Actions_Test extends WP_UnitTestCase {
 	protected static $member;
 
 	/**
-	 * The registered hooks as they were before the theme was loaded, or null if it was already loaded.
-	 *
-	 * @var array|null
-	 */
-	protected static $hooks_before_theme = null;
-
-	/**
 	 * Set up shared fixtures.
 	 *
 	 * @param WP_UnitTest_Factory $factory Test factory.
@@ -52,36 +49,13 @@ class Theme_Pattern_Actions_Test extends WP_UnitTestCase {
 		self::$moderator = $factory->user->create( array( 'role' => 'editor' ) );
 		self::$member    = $factory->user->create( array( 'role' => 'subscriber' ) );
 
-		/*
-		 * The suite loads plugins, not the theme, so pull in the one file under test. Loading it registers the
-		 * theme's hooks -- `pre_get_posts` forces `curation=core` on every main query -- which would silently
-		 * filter results for any later test that runs a pattern query. Snapshot the hooks so they can be put
-		 * back exactly as they were once this class is done.
-		 */
-		if ( ! function_exists( '\WordPressdotorg\Theme\Pattern_Directory_2024\do_pattern_actions' ) ) {
-			// `$wp_filter` holds `WP_Hook` objects, so the array has to be cloned, not just copied.
-			self::$hooks_before_theme = array_map(
-				function ( $hook ) {
-					return clone $hook;
-				},
-				$GLOBALS['wp_filter']
-			);
-
-			require_once dirname( dirname( dirname( dirname( __DIR__ ) ) ) ) . '/themes/wporg-pattern-directory-2024/functions.php';
-		}
+		self::load_theme();
 	}
 
 	/**
 	 * Clean up shared fixtures.
 	 */
 	public static function tear_down_after_class(): void {
-		// Put the hooks back, so loading the theme here doesn't change what any later test sees.
-		if ( null !== self::$hooks_before_theme ) {
-			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- restoring the snapshot taken above.
-			$GLOBALS['wp_filter']     = self::$hooks_before_theme;
-			self::$hooks_before_theme = null;
-		}
-
 		wp_delete_user( self::$moderator );
 		wp_delete_user( self::$member );
 
