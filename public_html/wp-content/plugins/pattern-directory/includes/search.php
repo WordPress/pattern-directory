@@ -8,6 +8,7 @@
 namespace WordPressdotorg\Pattern_Directory\Search;
 
 use WP_Query;
+use Automattic\Jetpack\Search\Helper as Jetpack_Search_Helper;
 use Automattic\Jetpack\Search\WPES\Query_Parser as Jetpack_WPES_Search_Query_Parser;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
@@ -152,6 +153,9 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 		$filter['bool']['must'][] = $tax_filter;
 	}
 
+	// This replaces the filter Jetpack built, so carry over what it covered and add what it doesn't know about.
+	$filter['bool']['must'] = array_merge( $filter['bool']['must'], get_query_filters( $wp_query->query_vars ) );
+
 	$parser->add_query( $must_query, 'must' );
 	$parser->add_query( $should_query, 'should' );
 	$parser->add_filter( $filter );
@@ -159,15 +163,85 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 	$es_query_args['query']  = $parser->build_query();
 	$es_query_args['filter'] = $parser->build_filter();
 
-	$es_query_args['sort'] = array(
-		array(
-			'_score' => array(
-				'order' => 'desc',
+	// Jetpack only pages; `from` is the ES offset. Like WP_Query, any numeric offset beats `paged`.
+	if ( is_numeric( $wp_query->get( 'offset' ) ) ) {
+		$offset                = absint( $wp_query->get( 'offset' ) );
+		$max_offset            = Jetpack_Search_Helper::get_max_offset();
+		$es_query_args['from'] = min( $offset, $max_offset );
+
+		// Past the cap, return nothing rather than the capped page again, as Jetpack does for `paged`.
+		if ( $offset + $es_query_args['size'] > $max_offset ) {
+			$es_query_args['size'] = 0;
+		}
+	}
+
+	// Jetpack already sorted by `orderby`, which the REST API sets to `relevance` for a search with the default order.
+	if ( empty( $es_query_args['sort'] ) ) {
+		$es_query_args['sort'] = array(
+			array(
+				'_score' => array(
+					'order' => 'desc',
+				),
 			),
-		),
-	);
+		);
+	}
 
 	return $es_query_args;
+}
+
+/**
+ * Convert the query's author, ID and allowed blocks restrictions into Elasticsearch filter clauses.
+ *
+ * The MySQL query applies these through `author`, `post__in` and the `allowed_blocks` meta query, which an ES
+ * search otherwise ignores.
+ *
+ * @param array $query_vars The query's vars.
+ *
+ * @return array[] Filter clauses, all of which must match.
+ */
+function get_query_filters( $query_vars ) {
+	$clauses = array();
+
+	// `post__in` is also how the REST filters say "match nothing", with an ID of 0 or -1.
+	if ( ! empty( $query_vars['post__in'] ) ) {
+		$clauses[] = array( 'terms' => array( 'post_id' => array_map( 'intval', (array) $query_vars['post__in'] ) ) );
+	}
+
+	/*
+	 * `author_name` resolves to `author`, the REST `author` param to `author__in`. The index stores logins, not IDs.
+	 * A negative `author` excludes, which no search request sends.
+	 */
+	$author_ids = array_merge(
+		wp_parse_id_list( $query_vars['author__in'] ?? array() ),
+		array_filter(
+			array_map( 'intval', wp_parse_list( $query_vars['author'] ?? '' ) ),
+			function ( $author_id ) {
+				return $author_id > 0;
+			}
+		)
+	);
+	if ( $author_ids ) {
+		// Not `get_users()`, which on multisite only returns members of the current site.
+		$logins = array();
+		foreach ( array_unique( $author_ids ) as $author_id ) {
+			$user = get_userdata( $author_id );
+			if ( $user ) {
+				$logins[] = $user->user_login;
+			}
+		}
+
+		$clauses[] = $logins
+			? array( 'terms' => array( 'author_login' => $logins ) )
+			: array( 'terms' => array( 'post_id' => array( 0 ) ) );
+	}
+
+	// Lucene regular expressions are always anchored and treat `^` and `$` as literals, so drop the MySQL anchors.
+	$allowed_blocks = $query_vars['meta_query']['allowed_blocks']['value'] ?? '';
+	if ( $allowed_blocks ) {
+		$clauses[] = array( 'regexp' => array( 'meta.wpop_contains_block_types.value.raw' => trim( $allowed_blocks, '^$' ) ) );
+	}
+
+	return $clauses;
 }
 
 /**
