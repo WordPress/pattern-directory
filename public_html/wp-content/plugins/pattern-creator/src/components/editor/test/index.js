@@ -52,17 +52,27 @@ jest.mock( '@wordpress/interface', () => {
 		store: mockMakeStore( 'test/editor-interface', { getActiveComplementaryArea: () => undefined } ),
 		ComplementaryArea: Object.assign( Noop, { Slot: Noop } ),
 		FullscreenMode: Noop,
-		InterfaceSkeleton: ( { header, secondarySidebar } ) => el( 'div', null, header, secondarySidebar ),
+		InterfaceSkeleton: ( { header, secondarySidebar, content } ) =>
+			el( 'div', null, header, secondarySidebar, content ),
 	};
 } );
 
 /* Stub the heavy components so importing the editor module stays cheap. */
 const Noop = () => null;
+
+/**
+ * Render children unchanged, for providers and boundaries the tests don't exercise.
+ *
+ * @param {Object}  props
+ * @param {Element} props.children Wrapped elements.
+ * @return {Element} The children.
+ */
 const Passthrough = ( { children } ) => children;
 
-/*
- * A real store for the panel state, and an `EditorProvider` that, like the real one, hands its children
- * a sub-registry with their own instance of it. State changed inside the provider is invisible outside.
+/**
+ * Register a real store for the inserter and List View state, standing in for `core/editor`.
+ *
+ * @return {Object} The store descriptor.
  */
 const mockMakeEditorStore = () => {
 	const { createReduxStore, register } = jest.requireActual( '@wordpress/data' );
@@ -88,16 +98,27 @@ const mockMakeEditorStore = () => {
 	register( store );
 	return store;
 };
-function MockEditorProvider( { children } ) {
+/**
+ * Like the real `EditorProvider`, give children their own `core/editor` unless `useSubRegistry` is false.
+ *
+ * @param {Object}  props
+ * @param {Element} props.children       Wrapped elements.
+ * @param {boolean} props.useSubRegistry Whether to isolate the children's stores.
+ * @return {Element} The children, in a sub-registry when requested.
+ */
+function MockEditorProvider( { children, useSubRegistry = true } ) {
 	const { createRegistry, RegistryProvider, useRegistry } = jest.requireActual( '@wordpress/data' );
 	const { createElement: el, useState } = jest.requireActual( '@wordpress/element' );
 	const parentRegistry = useRegistry();
-	const [ subRegistry ] = useState( () => {
-		const registry = createRegistry( {}, parentRegistry );
-		registry.register( require( '@wordpress/editor' ).store );
-		return registry;
+	const [ registry ] = useState( () => {
+		if ( ! useSubRegistry ) {
+			return parentRegistry;
+		}
+		const subRegistry = createRegistry( {}, parentRegistry );
+		subRegistry.register( require( '@wordpress/editor' ).store );
+		return subRegistry;
 	} );
-	return el( RegistryProvider, { value: subRegistry }, children );
+	return el( RegistryProvider, { value: registry }, children );
 }
 jest.mock( '@wordpress/editor', () => ( {
 	store: mockMakeEditorStore(),
@@ -118,13 +139,25 @@ jest.mock( '@wordpress/components', () => {
 } );
 jest.mock( '@wordpress/block-editor', () => ( { BlockBreadcrumb: Noop } ) );
 jest.mock( '@wordpress/keyboard-shortcuts', () => ( { ShortcutProvider: Passthrough } ) );
-jest.mock( '../../block-editor', () => ( { __esModule: true, default: Noop } ) );
-// The header toggles the panels from inside `EditorProvider`, as the real one does.
+// "Browse all" in the quick inserter opens the panel through the setter `BlockEditor` receives.
+jest.mock( '../../block-editor', () => {
+	const { createElement: el } = jest.requireActual( '@wordpress/element' );
+	return {
+		__esModule: true,
+		default: ( { setIsInserterOpen } ) =>
+			el( 'button', { 'data-toggle': 'browse-all', onClick: () => setIsInserterOpen( true ) } ),
+	};
+} );
 jest.mock( '../../header', () => {
 	const { createElement: el } = jest.requireActual( '@wordpress/element' );
 	const { useDispatch } = jest.requireActual( '@wordpress/data' );
 	return {
 		__esModule: true,
+		/**
+		 * Toggle the panels from inside `EditorProvider`, as the real header does.
+		 *
+		 * @return {Element} The toggle buttons.
+		 */
 		default: function MockHeader() {
 			const { setIsInserterOpened, setIsListViewOpened } = useDispatch(
 				require( '@wordpress/editor' ).store
@@ -211,16 +244,17 @@ describe( 'Editor', () => {
 			delete mockSettings.siteUrl;
 		} );
 
-		/*
-		 * Regression: the panel state was read outside `EditorProvider`, from a different `core/editor`
-		 * instance than the header writes to, so neither panel ever opened.
-		 */
-		it.each( [ 'inserter', 'list-view' ] )( 'opens the %s panel the header toggles', ( panel ) => {
+		// Regression: in a sub-registry, the toggles changed a `core/editor` the panels never read.
+		it.each( [
+			[ 'inserter', 'inserter' ],
+			[ 'list-view', 'list-view' ],
+			[ 'browse-all', 'inserter' ],
+		] )( 'opens the panel when %s is toggled', ( toggle, panel ) => {
 			render( 1 );
 			expect( container.querySelector( `[data-panel="${ panel }"]` ) ).toBeNull();
 
 			act( () => {
-				container.querySelector( `[data-toggle="${ panel }"]` ).click();
+				container.querySelector( `[data-toggle="${ toggle }"]` ).click();
 			} );
 
 			expect( container.querySelector( `[data-panel="${ panel }"]` ) ).not.toBeNull();
