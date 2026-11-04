@@ -236,6 +236,8 @@ function replace_site_info( $value, $option ) {
 /**
  * Provide custom links as default for empty Navigation blocks.
  *
+ * These links should be the same as returned in `src/api-middleware/filter-endpoints.js`.
+ *
  * @return array[]
  */
 function provide_fallback_nav_items() {
