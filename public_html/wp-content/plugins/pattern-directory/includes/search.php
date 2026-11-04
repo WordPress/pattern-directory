@@ -163,12 +163,19 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 	$es_query_args['query']  = $parser->build_query();
 	$es_query_args['filter'] = $parser->build_filter();
 
-	// Jetpack only pages; `from` is the ES offset, capped as Jetpack caps it.
-	if ( $wp_query->get( 'offset' ) ) {
-		$es_query_args['from'] = min( absint( $wp_query->get( 'offset' ) ), Jetpack_Search_Helper::get_max_offset() );
+	// Jetpack only pages; `from` is the ES offset. Like WP_Query, any numeric offset beats `paged`.
+	if ( is_numeric( $wp_query->get( 'offset' ) ) ) {
+		$offset                = absint( $wp_query->get( 'offset' ) );
+		$max_offset            = Jetpack_Search_Helper::get_max_offset();
+		$es_query_args['from'] = min( $offset, $max_offset );
+
+		// Past the cap, return nothing rather than the capped page again, as Jetpack does for `paged`.
+		if ( $offset + $es_query_args['size'] > $max_offset ) {
+			$es_query_args['size'] = 0;
+		}
 	}
 
-	// Jetpack already sorted by `orderby`, and the REST API asks for `relevance` unless the request picks an order.
+	// Jetpack already sorted by `orderby`, which the REST API sets to `relevance` for a search with the default order.
 	if ( empty( $es_query_args['sort'] ) ) {
 		$es_query_args['sort'] = array(
 			array(
@@ -214,17 +221,17 @@ function get_query_filters( $query_vars ) {
 		)
 	);
 	if ( $author_ids ) {
-		$logins    = wp_list_pluck(
-			get_users(
-				array(
-					'include' => $author_ids,
-					'fields'  => array( 'user_login' ),
-				)
-			),
-			'user_login'
-		);
+		// Not `get_users()`, which on multisite only returns members of the current site.
+		$logins = array();
+		foreach ( array_unique( $author_ids ) as $author_id ) {
+			$user = get_userdata( $author_id );
+			if ( $user ) {
+				$logins[] = $user->user_login;
+			}
+		}
+
 		$clauses[] = $logins
-			? array( 'terms' => array( 'author_login' => array_values( $logins ) ) )
+			? array( 'terms' => array( 'author_login' => $logins ) )
 			: array( 'terms' => array( 'post_id' => array( 0 ) ) );
 	}
 

@@ -29,12 +29,16 @@ class Search_Query_Filters_Test extends WP_UnitTestCase {
 	protected static $author;
 
 	/**
-	 * Create the author.
+	 * Create the author, who, like most pattern authors, isn't a member of the site.
 	 *
 	 * @param WP_UnitTest_Factory $factory Factory instance.
 	 */
 	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ): void {
 		self::$author = $factory->user->create_and_get( array( 'user_login' => 'pattern-author' ) );
+
+		if ( is_multisite() ) {
+			remove_user_from_blog( self::$author->ID, get_current_blog_id() );
+		}
 	}
 
 	/**
@@ -45,7 +49,7 @@ class Search_Query_Filters_Test extends WP_UnitTestCase {
 	 */
 	private function get_query_args( array $params ): array {
 		$args    = array();
-		$capture = function ( $query_args ) use ( &$args ) {
+		$capture = function ( array $query_args ) use ( &$args ): array {
 			$args = $query_args;
 			return $query_args;
 		};
@@ -102,8 +106,22 @@ class Search_Query_Filters_Test extends WP_UnitTestCase {
 	 */
 	public function data_search_orders(): array {
 		return array(
-			'no order picked' => array( array(), 'relevance' ),
-			'by date'         => array( array( 'orderby' => 'date' ), 'date' ),
+			'no order picked'     => array( array(), 'relevance' ),
+			'core proxy defaults' => array(
+				array(
+					'orderby' => 'date',
+					'order'   => 'desc',
+				),
+				'relevance',
+			),
+			'oldest first'        => array(
+				array(
+					'orderby' => 'date',
+					'order'   => 'asc',
+				),
+				'date',
+			),
+			'by title'            => array( array( 'orderby' => 'title' ), 'title' ),
 		);
 	}
 }

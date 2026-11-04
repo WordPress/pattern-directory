@@ -899,8 +899,8 @@ function filter_patterns_rest_query( $args, $request ) {
 
 	$orderby = $request->get_param( 'orderby' );
 
-	// The collection defaults to `date`, so a search ranks by relevance only when the request picks no order.
-	if ( ! empty( $request['search'] ) && ! isset( $request->get_query_params()['orderby'] ) ) {
+	// Core's pattern directory proxy always sends the `date`/`desc` defaults, so a search ranks by relevance for those.
+	if ( ! empty( $request['search'] ) && 'date' === $orderby && 'desc' === $request['order'] ) {
 		$args['orderby'] = 'relevance';
 	}
 
