@@ -287,7 +287,10 @@ function get_translation_ids( int $parent_id ): array {
  * @param \WP_Post $post       Post whose status changed.
  */
 function sync_translation_statuses( $new_status, $old_status, $post ) {
-	if ( $new_status === $old_status || 'new' === $old_status || POST_TYPE !== $post->post_type ) {
+	// A scheduled original can move to another time without changing its status.
+	$unchanged = $new_status === $old_status && 'future' !== $new_status;
+
+	if ( $unchanged || 'new' === $old_status || POST_TYPE !== $post->post_type ) {
 		return;
 	}
 
@@ -297,31 +300,36 @@ function sync_translation_statuses( $new_status, $old_status, $post ) {
 	}
 
 	foreach ( get_translation_ids( $post->ID ) as $translation_id ) {
-		set_translation_status( $translation_id, $new_status );
+		set_translation_status( $translation_id, $post );
 	}
 }
 add_action( 'transition_post_status', __NAMESPACE__ . '\sync_translation_statuses', 10, 3 );
 
 /**
- * Give a translation a status.
+ * Give a translation its original's status.
  *
  * Only the status changes, trash included: `wp_trash_post()` deletes the post outright when `EMPTY_TRASH_DAYS`
- * is 0, and its trash meta would let the scheduled purge delete translations.
+ * is 0, and its trash meta would let the scheduled purge delete translations. A scheduled original's date comes
+ * along, as the job copies it too, because `wp_update_post()` publishes a `future` post whose date has passed.
  *
- * @param int    $translation_id Translation post ID.
- * @param string $status         Status to give it.
+ * @param int      $translation_id Translation post ID.
+ * @param \WP_Post $original       The translation's English original.
  */
-function set_translation_status( int $translation_id, string $status ) {
-	if ( get_post_status( $translation_id ) === $status ) {
-		return;
+function set_translation_status( int $translation_id, \WP_Post $original ) {
+	$args = array( 'post_status' => $original->post_status );
+
+	if ( 'future' === $original->post_status ) {
+		$args['post_date']     = $original->post_date;
+		$args['post_date_gmt'] = $original->post_date_gmt;
 	}
 
-	wp_update_post(
-		array(
-			'ID'          => $translation_id,
-			'post_status' => $status,
-		)
-	);
+	$translation = get_post( $translation_id );
+	foreach ( $args as $field => $value ) {
+		if ( $translation->$field !== $value ) {
+			wp_update_post( array( 'ID' => $translation_id ) + $args );
+			return;
+		}
+	}
 }
 
 /**
@@ -361,7 +369,7 @@ function sync_all_translation_statuses( bool $apply ): array {
 		} elseif ( $translation->post_status !== $original->post_status ) {
 			$change = "{$translation->post_status} to {$original->post_status}";
 			if ( $apply ) {
-				set_translation_status( $translation_id, $original->post_status );
+				set_translation_status( $translation_id, $original );
 			}
 		} else {
 			$change = false;
@@ -372,7 +380,7 @@ function sync_all_translation_statuses( bool $apply ): array {
 		}
 
 		if ( 0 === ( $i + 1 ) % 500 ) {
-			clear_memory_heavy_variables();
+			Cron\clear_memory_heavy_variables();
 		}
 	}
 

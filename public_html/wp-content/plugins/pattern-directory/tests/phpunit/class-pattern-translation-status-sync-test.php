@@ -126,6 +126,36 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Scheduling a published original schedules its translations for the same time. The translations still have
+	 * the original's old, past date, which `wp_update_post()` would otherwise turn back into `publish`.
+	 */
+	public function test_scheduling_the_original_schedules_its_translations(): void {
+		$translations = $this->translate_all();
+
+		$this->schedule( $this->parent_id, '+1 day' );
+
+		foreach ( $translations as $translation_id ) {
+			$this->assertSame( 'future', get_post_status( $translation_id ) );
+			$this->assertSame( get_post( $this->parent_id )->post_date_gmt, get_post( $translation_id )->post_date_gmt );
+		}
+	}
+
+	/**
+	 * Moving a scheduled original to another time moves its translations, though the status stays `future`.
+	 */
+	public function test_rescheduling_the_original_moves_its_translations(): void {
+		$translations = $this->translate_all();
+
+		$this->schedule( $this->parent_id, '+1 day' );
+		$this->schedule( $this->parent_id, '+2 days' );
+
+		foreach ( $translations as $translation_id ) {
+			$this->assertSame( 'future', get_post_status( $translation_id ) );
+			$this->assertSame( get_post( $this->parent_id )->post_date_gmt, get_post( $translation_id )->post_date_gmt );
+		}
+	}
+
+	/**
 	 * A submitter can point `post_parent` at someone else's pattern; that doesn't make their pattern a translation.
 	 */
 	public function test_pattern_claiming_the_original_as_parent_is_left_alone(): void {
@@ -218,6 +248,33 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The scan clears runtime caches every 500 translations and carries on.
+	 */
+	public function test_scan_continues_past_the_cache_clearing(): void {
+		self::factory()->post->create_many(
+			501,
+			array(
+				'post_type'   => POST_TYPE,
+				'post_status' => 'publish',
+				'post_parent' => $this->parent_id,
+				'meta_input'  => array(
+					'wpop_locale'         => 'fr_FR',
+					'wpop_is_translation' => true,
+				),
+			)
+		);
+		$this->set_status_without_sync( $this->parent_id, UNLISTED_STATUS );
+
+		$this->assertSame(
+			array(
+				'checked'                       => 501,
+				'publish to ' . UNLISTED_STATUS => 501,
+			),
+			sync_all_translation_statuses( false )
+		);
+	}
+
+	/**
 	 * Store a translation of the original for each locale, as the job does.
 	 *
 	 * @return int[] Translation IDs, in `LOCALES` order.
@@ -260,6 +317,26 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 			array(
 				'ID'          => $post_id,
 				'post_status' => $status,
+			)
+		);
+	}
+
+	/**
+	 * Schedule a pattern, as an edit with a future date does.
+	 *
+	 * @param int    $post_id Pattern ID.
+	 * @param string $when    Relative time, for `strtotime()`.
+	 */
+	protected function schedule( int $post_id, string $when ): void {
+		$gmt = gmdate( 'Y-m-d H:i:s', strtotime( $when ) );
+
+		wp_update_post(
+			array(
+				'ID'            => $post_id,
+				'post_status'   => 'future',
+				'post_date'     => get_date_from_gmt( $gmt ),
+				'post_date_gmt' => $gmt,
+				'edit_date'     => true,
 			)
 		);
 	}
