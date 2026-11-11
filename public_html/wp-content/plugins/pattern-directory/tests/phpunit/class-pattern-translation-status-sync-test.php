@@ -156,6 +156,22 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Publishing a scheduled original early publishes its translations, which still have the scheduled date that
+	 * `wp_update_post()` would otherwise keep them `future` for.
+	 */
+	public function test_publishing_a_scheduled_original_early_publishes_its_translations(): void {
+		$translations = $this->translate_all();
+
+		$this->schedule( $this->parent_id, '+1 day' );
+		$this->schedule( $this->parent_id, 'now', 'publish' );
+
+		foreach ( $translations as $translation_id ) {
+			$this->assertSame( 'publish', get_post_status( $translation_id ) );
+			$this->assertSame( get_post( $this->parent_id )->post_date_gmt, get_post( $translation_id )->post_date_gmt );
+		}
+	}
+
+	/**
 	 * A submitter can point `post_parent` at someone else's pattern; that doesn't make their pattern a translation.
 	 */
 	public function test_pattern_claiming_the_original_as_parent_is_left_alone(): void {
@@ -322,18 +338,19 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Schedule a pattern, as an edit with a future date does.
+	 * Give a pattern a date and status, as an edit that schedules or publishes it does.
 	 *
 	 * @param int    $post_id Pattern ID.
 	 * @param string $when    Relative time, for `strtotime()`.
+	 * @param string $status  Status to save with the date.
 	 */
-	protected function schedule( int $post_id, string $when ): void {
+	protected function schedule( int $post_id, string $when, string $status = 'future' ): void {
 		$gmt = gmdate( 'Y-m-d H:i:s', strtotime( $when ) );
 
 		wp_update_post(
 			array(
 				'ID'            => $post_id,
-				'post_status'   => 'future',
+				'post_status'   => $status,
 				'post_date'     => get_date_from_gmt( $gmt ),
 				'post_date_gmt' => $gmt,
 				'edit_date'     => true,

@@ -309,19 +309,18 @@ add_action( 'transition_post_status', __NAMESPACE__ . '\sync_translation_statuse
  * Give a translation its original's status.
  *
  * Only the status changes, trash included: `wp_trash_post()` deletes the post outright when `EMPTY_TRASH_DAYS`
- * is 0, and its trash meta would let the scheduled purge delete translations. A scheduled original's date comes
- * along, as the job copies it too, because `wp_update_post()` publishes a `future` post whose date has passed.
+ * is 0, and its trash meta would let the scheduled purge delete translations. The original's dates come along,
+ * as the job copies them too, because `wp_update_post()` picks `publish` or `future` by date.
  *
  * @param int      $translation_id Translation post ID.
  * @param \WP_Post $original       The translation's English original.
  */
 function set_translation_status( int $translation_id, \WP_Post $original ) {
-	$args = array( 'post_status' => $original->post_status );
-
-	if ( 'future' === $original->post_status ) {
-		$args['post_date']     = $original->post_date;
-		$args['post_date_gmt'] = $original->post_date_gmt;
-	}
+	$args = array(
+		'post_status'   => $original->post_status,
+		'post_date'     => $original->post_date,
+		'post_date_gmt' => $original->post_date_gmt,
+	);
 
 	$translation = get_post( $translation_id );
 	foreach ( $args as $field => $value ) {
