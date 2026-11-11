@@ -123,6 +123,33 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 	}
 
 	/**
+	 * Give stored translations their original's status.
+	 *
+	 * Translations stored before statuses were kept in sync stay published after their original
+	 * is unlisted or trashed. Without --apply, only counts what would change. Translations whose
+	 * original no longer exists are counted and left as they are.
+	 *
+	 * @param array $_    Positional CLI arguments.
+	 * @param array $args Named CLI arguments.
+	 * @return void
+	 *
+	 * @example wp --url=https://wordpress.org/patterns/ patterns sync-translation-status --apply
+	 * @subcommand sync-translation-status
+	 * @synopsis [--apply]
+	 */
+	public function sync_translation_status( $_, $args ) {
+		$apply = isset( $args['apply'] );
+
+		if ( ! $apply ) {
+			WP_CLI::log( 'Dry run, nothing will change. Add --apply to make these changes.' );
+		}
+
+		foreach ( sync_all_translation_statuses( $apply ) as $change => $count ) {
+			WP_CLI::log( "{$change}: {$count}" );
+		}
+	}
+
+	/**
 	 * Select patterns using the shared CLI flags.
 	 *
 	 * @param array $args Named CLI arguments.

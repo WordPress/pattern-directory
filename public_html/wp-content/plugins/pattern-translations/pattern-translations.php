@@ -245,6 +245,141 @@ function get_term_ids( int $post_id, string $taxonomy ): array {
 }
 
 /**
+ * The translations this pipeline stored for an English original, in any status.
+ *
+ * Requires `wpop_is_translation` for the same reason as `Pattern::find_existing_translation()`: any submitter
+ * can point `post_parent` at someone else's pattern.
+ *
+ * @param int $parent_id The English original's post ID.
+ * @return int[] Translation post IDs.
+ */
+function get_translation_ids( int $parent_id ): array {
+	if ( $parent_id <= 0 ) {
+		return array();
+	}
+
+	return get_posts(
+		array(
+			'post_type'      => POST_TYPE,
+			'post_parent'    => $parent_id,
+			// `any` leaves out trash and the non-public custom statuses.
+			'post_status'    => array_keys( get_post_stati() ),
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'meta_query'     => array(
+				array(
+					'key'   => 'wpop_is_translation',
+					'value' => 1,
+				),
+			),
+		)
+	);
+}
+
+/**
+ * Give an English original's translations its new status.
+ *
+ * The job copies the original's status when it writes a translation, but it only loads published originals.
+ * Without this, unlisting, trashing or un-approving an original leaves its translations published.
+ *
+ * @param string   $new_status New post status.
+ * @param string   $old_status Old post status.
+ * @param \WP_Post $post       Post whose status changed.
+ */
+function sync_translation_statuses( $new_status, $old_status, $post ) {
+	if ( $new_status === $old_status || 'new' === $old_status || POST_TYPE !== $post->post_type ) {
+		return;
+	}
+
+	// A translation follows its original, never the other way round.
+	if ( get_post_meta( $post->ID, 'wpop_is_translation', true ) ) {
+		return;
+	}
+
+	foreach ( get_translation_ids( $post->ID ) as $translation_id ) {
+		set_translation_status( $translation_id, $new_status );
+	}
+}
+add_action( 'transition_post_status', __NAMESPACE__ . '\sync_translation_statuses', 10, 3 );
+
+/**
+ * Give a translation a status.
+ *
+ * Only the status changes, trash included: `wp_trash_post()` deletes the post outright when `EMPTY_TRASH_DAYS`
+ * is 0, and its trash meta would let the scheduled purge delete translations.
+ *
+ * @param int    $translation_id Translation post ID.
+ * @param string $status         Status to give it.
+ */
+function set_translation_status( int $translation_id, string $status ) {
+	if ( get_post_status( $translation_id ) === $status ) {
+		return;
+	}
+
+	wp_update_post(
+		array(
+			'ID'          => $translation_id,
+			'post_status' => $status,
+		)
+	);
+}
+
+/**
+ * Bring stored translations in line with their originals' status, for translations written before the sync above.
+ *
+ * A translation whose original no longer exists has no status to copy, so it is only counted.
+ *
+ * @param bool $apply Whether to change anything, or only count.
+ * @return int[] Number of translations checked, then the number per change, keyed by change.
+ */
+function sync_all_translation_statuses( bool $apply ): array {
+	$translation_ids = get_posts(
+		array(
+			'post_type'      => POST_TYPE,
+			'post_status'    => array_keys( get_post_stati() ),
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'orderby'        => 'ID',
+			'order'          => 'ASC',
+			'meta_query'     => array(
+				array(
+					'key'   => 'wpop_is_translation',
+					'value' => 1,
+				),
+			),
+		)
+	);
+
+	$counts = array( 'checked' => count( $translation_ids ) );
+
+	foreach ( $translation_ids as $i => $translation_id ) {
+		$translation = get_post( $translation_id );
+		$original    = $translation->post_parent ? get_post( $translation->post_parent ) : null;
+
+		if ( ! $original || POST_TYPE !== $original->post_type || get_post_meta( $original->ID, 'wpop_is_translation', true ) ) {
+			$change = "original missing, left {$translation->post_status}";
+		} elseif ( $translation->post_status !== $original->post_status ) {
+			$change = "{$translation->post_status} to {$original->post_status}";
+			if ( $apply ) {
+				set_translation_status( $translation_id, $original->post_status );
+			}
+		} else {
+			$change = false;
+		}
+
+		if ( $change ) {
+			$counts[ $change ] = ( $counts[ $change ] ?? 0 ) + 1;
+		}
+
+		if ( 0 === ( $i + 1 ) % 500 ) {
+			clear_memory_heavy_variables();
+		}
+	}
+
+	return $counts;
+}
+
+/**
  * Translate term names into the current site locale.
  *
  * @param WP_Term $term The WP_Term object being loaded.
