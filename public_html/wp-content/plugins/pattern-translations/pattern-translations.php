@@ -328,3 +328,75 @@ function locale( $locale ) {
 	return $locale;
 }
 add_filter( 'locale', __NAMESPACE__ . '\locale' );
+
+/**
+ * IDs of the translations this pipeline stored for an English original.
+ *
+ * @param int $parent_id The English original's post ID.
+ * @return int[] Translation post IDs, in any status.
+ */
+function get_translation_ids( int $parent_id ): array {
+	return get_posts(
+		array(
+			'post_parent' => $parent_id,
+			'post_type'   => POST_TYPE,
+			// `any` leaves out trashed and non-public statuses such as `unlisted`.
+			'post_status' => array_keys( get_post_stati() ),
+			'numberposts' => -1,
+			'fields'      => 'ids',
+			'meta_query'  => array(
+				array(
+					'key'   => 'wpop_is_translation',
+					'value' => 1,
+				),
+			),
+		)
+	);
+}
+
+/**
+ * Give an original's stored translations its new status.
+ *
+ * The translation job only loads published originals, so without this a translation stays published after
+ * its original is unlisted, unpublished, or trashed.
+ *
+ * @param string   $new_status New post status.
+ * @param string   $old_status Previous post status.
+ * @param \WP_Post $post       Post being processed.
+ */
+function sync_translation_status( $new_status, $old_status, $post ) {
+	if ( POST_TYPE !== get_post_type( $post ) || $new_status === $old_status || $post->wpop_is_translation ) {
+		return;
+	}
+
+	foreach ( get_translation_ids( $post->ID ) as $translation_id ) {
+		if ( 'trash' === $new_status ) {
+			// Records the trash meta that emptying the trash relies on.
+			wp_trash_post( $translation_id );
+		} elseif ( get_post_status( $translation_id ) !== $new_status ) {
+			wp_update_post(
+				array(
+					'ID'          => $translation_id,
+					'post_status' => $new_status,
+				)
+			);
+		}
+	}
+}
+add_action( 'transition_post_status', __NAMESPACE__ . '\sync_translation_status', 10, 3 );
+
+/**
+ * Trash an original's translations when the original is deleted without going through the trash.
+ *
+ * @param int $post_id Post ID.
+ */
+function trash_translations_of_deleted_pattern( $post_id ) {
+	if ( POST_TYPE !== get_post_type( $post_id ) || get_post_meta( $post_id, 'wpop_is_translation', true ) ) {
+		return;
+	}
+
+	foreach ( get_translation_ids( (int) $post_id ) as $translation_id ) {
+		wp_trash_post( $translation_id );
+	}
+}
+add_action( 'before_delete_post', __NAMESPACE__ . '\trash_translations_of_deleted_pattern' );

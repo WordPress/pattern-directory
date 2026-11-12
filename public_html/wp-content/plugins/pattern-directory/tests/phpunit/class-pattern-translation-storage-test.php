@@ -201,14 +201,13 @@ class Pattern_Translation_Storage_Test extends WP_UnitTestCase {
 	 * A change to only the parent's status is copied.
 	 */
 	public function test_parent_status_change_is_copied(): void {
+		global $wpdb;
+
 		$post_id = create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Titre' ) ) );
 
-		wp_update_post(
-			array(
-				'ID'          => self::$parent_id,
-				'post_status' => 'draft',
-			)
-		);
+		// Bypass the status hooks, which already copy the change, to leave the stored translation behind.
+		$wpdb->update( $wpdb->posts, array( 'post_status' => 'draft' ), array( 'ID' => self::$parent_id ) );
+		clean_post_cache( self::$parent_id );
 		create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Titre' ), $post_id ), $written );
 
 		$this->assertTrue( $written );
