@@ -340,7 +340,7 @@ function get_translation_ids( int $parent_id ): array {
 		array(
 			'post_parent' => $parent_id,
 			'post_type'   => POST_TYPE,
-			// `any` leaves out trashed and non-public statuses such as `unlisted`.
+			// `any` leaves out trashed translations.
 			'post_status' => array_keys( get_post_stati() ),
 			'numberposts' => -1,
 			'fields'      => 'ids',
@@ -373,7 +373,15 @@ function sync_translation_status( $new_status, $old_status, $post ) {
 		if ( 'trash' === $new_status ) {
 			// Records the trash meta that emptying the trash relies on.
 			wp_trash_post( $translation_id );
-		} elseif ( get_post_status( $translation_id ) !== $new_status ) {
+			continue;
+		}
+
+		if ( 'trash' === get_post_status( $translation_id ) ) {
+			// Clears that trash meta again.
+			wp_untrash_post( $translation_id );
+		}
+
+		if ( get_post_status( $translation_id ) !== $new_status ) {
 			wp_update_post(
 				array(
 					'ID'          => $translation_id,

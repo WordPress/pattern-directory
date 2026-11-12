@@ -87,6 +87,7 @@ class Pattern_Translation_Status_Test extends WP_UnitTestCase {
 
 		wp_untrash_post( $this->parent_id );
 		$this->assertSame( get_post_status( $this->parent_id ), get_post_status( $this->translation_id ) );
+		$this->assertSame( '', get_post_meta( $this->translation_id, '_wp_trash_meta_time', true ) );
 	}
 
 	/**
