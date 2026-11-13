@@ -123,6 +123,33 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 	}
 
 	/**
+	 * Give stored translations their original's status.
+	 *
+	 * Translations stored before statuses were kept in sync stay published after their original
+	 * is unlisted or trashed. With --dry-run, only counts what would change. Translations whose
+	 * original no longer exists are trashed.
+	 *
+	 * @param array $_    Positional CLI arguments.
+	 * @param array $args Named CLI arguments.
+	 * @return void
+	 *
+	 * @example wp --url=https://wordpress.org/patterns/ patterns sync-translation-status --dry-run
+	 * @subcommand sync-translation-status
+	 * @synopsis [--dry-run]
+	 */
+	public function sync_translation_status( $_, $args ) {
+		$dry_run = WP_CLI\Utils\get_flag_value( $args, 'dry-run', false );
+
+		if ( $dry_run ) {
+			WP_CLI::log( 'Dry run, nothing will change.' );
+		}
+
+		foreach ( sync_all_translation_statuses( ! $dry_run ) as $change => $count ) {
+			WP_CLI::log( "{$change}: {$count}" );
+		}
+	}
+
+	/**
 	 * Select patterns using the shared CLI flags.
 	 *
 	 * @param array $args Named CLI arguments.

@@ -30,6 +30,11 @@ const TRANSLATED_TAXONOMIES = array(
 	'wporg-pattern-flag-reason' => 'Flag Reasons term name',
 );
 
+/**
+ * Meta key marking a translation that went to the trash with its original, so it comes back with it.
+ */
+const TRASHED_WITH_ORIGINAL = '_wpop_trashed_with_original';
+
 require __DIR__ . '/includes/class-pattern.php';
 require __DIR__ . '/includes/class-patternparser.php';
 require __DIR__ . '/includes/i18n.php';
@@ -242,6 +247,196 @@ function get_term_ids( int $post_id, string $taxonomy ): array {
 	sort( $term_ids );
 
 	return $term_ids;
+}
+
+/**
+ * The translations this pipeline stored for an English original, in any status.
+ *
+ * Requires `wpop_is_translation` for the same reason as `Pattern::find_existing_translation()`: any submitter
+ * can point `post_parent` at someone else's pattern.
+ *
+ * @param int $parent_id The English original's post ID.
+ * @return int[] Translation post IDs.
+ */
+function get_translation_ids( int $parent_id ): array {
+	if ( $parent_id <= 0 ) {
+		return array();
+	}
+
+	return get_posts(
+		array(
+			'post_type'      => POST_TYPE,
+			'post_parent'    => $parent_id,
+			// `any` leaves out trash and the non-public custom statuses.
+			'post_status'    => array_keys( get_post_stati() ),
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'meta_query'     => array(
+				array(
+					'key'   => 'wpop_is_translation',
+					'value' => 1,
+				),
+			),
+		)
+	);
+}
+
+/**
+ * Give an English original's translations its new status.
+ *
+ * The job copies the original's status when it writes a translation, but it only loads published originals.
+ * Without this, unlisting, trashing or un-approving an original leaves its translations published.
+ *
+ * @param string   $new_status New post status.
+ * @param string   $old_status Old post status.
+ * @param \WP_Post $post       Post whose status changed.
+ */
+function sync_translation_statuses( $new_status, $old_status, $post ) {
+	// A scheduled original can move to another time without changing its status.
+	$unchanged = $new_status === $old_status && 'future' !== $new_status;
+
+	if ( $unchanged || 'new' === $old_status || POST_TYPE !== $post->post_type ) {
+		return;
+	}
+
+	// A translation follows its original, never the other way round.
+	if ( get_post_meta( $post->ID, 'wpop_is_translation', true ) ) {
+		return;
+	}
+
+	foreach ( get_translation_ids( $post->ID ) as $translation_id ) {
+		set_translation_status( $translation_id, $post );
+	}
+}
+add_action( 'transition_post_status', __NAMESPACE__ . '\sync_translation_statuses', 10, 3 );
+
+/**
+ * Give a translation its original's status.
+ *
+ * Trash goes through `wp_trash_post()`, so the scheduled purge deletes translations along with their original.
+ * The original's dates come along, as the job copies them too, because `wp_update_post()` picks `publish` or
+ * `future` by date.
+ *
+ * A translation trashed on its own stays there, as the job has likely stored a replacement since.
+ *
+ * @param int      $translation_id Translation post ID.
+ * @param \WP_Post $original       The translation's English original.
+ */
+function set_translation_status( int $translation_id, \WP_Post $original ) {
+	if ( 'trash' === $original->post_status ) {
+		if ( wp_trash_post( $translation_id ) && 'trash' === get_post_status( $translation_id ) ) {
+			update_post_meta( $translation_id, TRASHED_WITH_ORIGINAL, 1 );
+		}
+		return;
+	}
+
+	if ( 'trash' === get_post_status( $translation_id ) ) {
+		if ( ! get_post_meta( $translation_id, TRASHED_WITH_ORIGINAL, true ) ) {
+			return;
+		}
+
+		// Clears the trash meta, so the purge doesn't delete a translation whose original was restored.
+		wp_untrash_post( $translation_id );
+	}
+
+	$args = array(
+		'post_status'   => $original->post_status,
+		'post_date'     => $original->post_date,
+		'post_date_gmt' => $original->post_date_gmt,
+	);
+
+	$translation = get_post( $translation_id );
+	foreach ( $args as $field => $value ) {
+		if ( $translation->$field !== $value ) {
+			wp_update_post( array( 'ID' => $translation_id ) + $args );
+			return;
+		}
+	}
+}
+
+/**
+ * Drop the trashed-with-original mark once a translation leaves the trash, however it was restored.
+ *
+ * @param int $post_id Post ID.
+ */
+function clear_trashed_with_original( $post_id ) {
+	delete_post_meta( $post_id, TRASHED_WITH_ORIGINAL );
+}
+add_action( 'untrashed_post', __NAMESPACE__ . '\clear_trashed_with_original' );
+
+/**
+ * Trash an original's translations when it is deleted without going through the trash.
+ *
+ * @param int      $post_id Post ID.
+ * @param \WP_Post $post    Post being deleted.
+ */
+function trash_translations_of_deleted_original( $post_id, $post ) {
+	if ( POST_TYPE !== $post->post_type || get_post_meta( $post_id, 'wpop_is_translation', true ) ) {
+		return;
+	}
+
+	foreach ( get_translation_ids( (int) $post_id ) as $translation_id ) {
+		wp_trash_post( $translation_id );
+	}
+}
+add_action( 'before_delete_post', __NAMESPACE__ . '\trash_translations_of_deleted_original', 10, 2 );
+
+/**
+ * Bring stored translations in line with their originals' status, for translations written before the sync above.
+ *
+ * A translation whose original no longer exists is trashed, as it would have been when the original was deleted.
+ *
+ * @param bool $apply Whether to change anything, or only count.
+ * @return int[] Number of translations checked, then the number per change, keyed by change.
+ */
+function sync_all_translation_statuses( bool $apply ): array {
+	$translation_ids = get_posts(
+		array(
+			'post_type'      => POST_TYPE,
+			'post_status'    => array_keys( get_post_stati() ),
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'orderby'        => 'ID',
+			'order'          => 'ASC',
+			'meta_query'     => array(
+				array(
+					'key'   => 'wpop_is_translation',
+					'value' => 1,
+				),
+			),
+		)
+	);
+
+	$counts = array( 'checked' => count( $translation_ids ) );
+
+	foreach ( $translation_ids as $i => $translation_id ) {
+		$translation = get_post( $translation_id );
+		$original    = $translation->post_parent ? get_post( $translation->post_parent ) : null;
+
+		if ( ! $original || POST_TYPE !== $original->post_type || get_post_meta( $original->ID, 'wpop_is_translation', true ) ) {
+			$change = 'trash' === $translation->post_status ? false : "{$translation->post_status} to trash, original missing";
+			if ( $change && $apply ) {
+				wp_trash_post( $translation_id );
+			}
+		} elseif ( $translation->post_status !== $original->post_status && 'trash' !== $translation->post_status ) {
+			$change = "{$translation->post_status} to {$original->post_status}";
+			if ( $apply ) {
+				set_translation_status( $translation_id, $original );
+			}
+		} else {
+			$change = false;
+		}
+
+		if ( $change ) {
+			$counts[ $change ] = ( $counts[ $change ] ?? 0 ) + 1;
+		}
+
+		if ( 0 === ( $i + 1 ) % 500 ) {
+			Cron\clear_memory_heavy_variables();
+		}
+	}
+
+	return $counts;
 }
 
 /**

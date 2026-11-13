@@ -100,6 +100,11 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 	log_message( sprintf( 'Processing %d Patterns in %d locales.', count( $pattern_ids ), count( $locales ) ) );
 
 	foreach ( $pattern_ids as $i => $pattern_id ) {
+		// Queued chunks run hours later; by then an original may be trashed, deleted, or unlisted.
+		if ( 'publish' !== get_post_status( $pattern_id ) ) {
+			continue;
+		}
+
 		$pattern = Pattern::from_post( get_post( $pattern_id ) );
 
 		log_message( "{$i}. Processing {$pattern->name} / '{$pattern->title}'.." );
