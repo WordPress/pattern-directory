@@ -127,7 +127,7 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 	 *
 	 * Translations stored before statuses were kept in sync stay published after their original
 	 * is unlisted or trashed. Without --apply, only counts what would change. Translations whose
-	 * original no longer exists are counted and left as they are.
+	 * original no longer exists are trashed.
 	 *
 	 * @param array $_    Positional CLI arguments.
 	 * @param array $args Named CLI arguments.

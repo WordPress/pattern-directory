@@ -308,14 +308,22 @@ add_action( 'transition_post_status', __NAMESPACE__ . '\sync_translation_statuse
 /**
  * Give a translation its original's status.
  *
- * Only the status changes, trash included: `wp_trash_post()` deletes the post outright when `EMPTY_TRASH_DAYS`
- * is 0, and its trash meta would let the scheduled purge delete translations. The original's dates come along,
- * as the job copies them too, because `wp_update_post()` picks `publish` or `future` by date.
+ * Trash goes through `wp_trash_post()`, so the scheduled purge deletes translations along with their original.
+ * The original's dates come along, as the job copies them too, because `wp_update_post()` picks `publish` or
+ * `future` by date.
  *
  * @param int      $translation_id Translation post ID.
  * @param \WP_Post $original       The translation's English original.
  */
 function set_translation_status( int $translation_id, \WP_Post $original ) {
+	if ( 'trash' === $original->post_status ) {
+		wp_trash_post( $translation_id );
+		return;
+	}
+
+	// Clears the trash meta, so the purge doesn't delete a translation whose original was restored.
+	wp_untrash_post( $translation_id );
+
 	$args = array(
 		'post_status'   => $original->post_status,
 		'post_date'     => $original->post_date,
@@ -332,9 +340,26 @@ function set_translation_status( int $translation_id, \WP_Post $original ) {
 }
 
 /**
+ * Trash an original's translations when it is deleted without going through the trash.
+ *
+ * @param int      $post_id Post ID.
+ * @param \WP_Post $post    Post being deleted.
+ */
+function trash_translations_of_deleted_original( $post_id, $post ) {
+	if ( POST_TYPE !== $post->post_type || get_post_meta( $post_id, 'wpop_is_translation', true ) ) {
+		return;
+	}
+
+	foreach ( get_translation_ids( (int) $post_id ) as $translation_id ) {
+		wp_trash_post( $translation_id );
+	}
+}
+add_action( 'before_delete_post', __NAMESPACE__ . '\trash_translations_of_deleted_original', 10, 2 );
+
+/**
  * Bring stored translations in line with their originals' status, for translations written before the sync above.
  *
- * A translation whose original no longer exists has no status to copy, so it is only counted.
+ * A translation whose original no longer exists is trashed, as it would have been when the original was deleted.
  *
  * @param bool $apply Whether to change anything, or only count.
  * @return int[] Number of translations checked, then the number per change, keyed by change.
@@ -364,7 +389,10 @@ function sync_all_translation_statuses( bool $apply ): array {
 		$original    = $translation->post_parent ? get_post( $translation->post_parent ) : null;
 
 		if ( ! $original || POST_TYPE !== $original->post_type || get_post_meta( $original->ID, 'wpop_is_translation', true ) ) {
-			$change = "original missing, left {$translation->post_status}";
+			$change = 'trash' === $translation->post_status ? false : "{$translation->post_status} to trash, original missing";
+			if ( $change && $apply ) {
+				wp_trash_post( $translation_id );
+			}
 		} elseif ( $translation->post_status !== $original->post_status ) {
 			$change = "{$translation->post_status} to {$original->post_status}";
 			if ( $apply ) {

@@ -84,7 +84,8 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Trashing the original trashes its translations, and restoring it brings them back.
+	 * Trashing the original trashes its translations with the meta the scheduled purge deletes them by, and
+	 * restoring it brings them back without that meta.
 	 */
 	public function test_trashing_and_restoring_the_original_carries_its_translations(): void {
 		$translations = $this->translate_all();
@@ -93,6 +94,7 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 
 		foreach ( $translations as $translation_id ) {
 			$this->assertSame( 'trash', get_post_status( $translation_id ) );
+			$this->assertNotSame( '', get_post_meta( $translation_id, '_wp_trash_meta_time', true ) );
 		}
 
 		wp_untrash_post( $this->parent_id );
@@ -100,28 +102,20 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 
 		foreach ( $translations as $translation_id ) {
 			$this->assertSame( $restored, get_post_status( $translation_id ) );
+			$this->assertSame( '', get_post_meta( $translation_id, '_wp_trash_meta_time', true ) );
 		}
 	}
 
 	/**
-	 * Following the original only changes a translation's status. Core's trash path isn't used for translations:
-	 * `wp_trash_post()` deletes outright when `EMPTY_TRASH_DAYS` is 0, and its meta lets the scheduled purge delete.
+	 * Deleting the original without going through the trash trashes its translations.
 	 */
-	public function test_trashing_the_original_never_deletes_or_schedules_deleting_translations(): void {
+	public function test_deleting_the_original_trashes_its_translations(): void {
 		$translations = $this->translate_all();
-		$touched      = array();
-		$record       = function ( $post_id ) use ( &$touched ) {
-			$touched[] = (int) ( $post_id instanceof \WP_Post ? $post_id->ID : $post_id );
-		};
-		add_action( 'wp_trash_post', $record );
-		add_action( 'before_delete_post', $record );
 
-		wp_trash_post( $this->parent_id );
+		wp_delete_post( $this->parent_id, true );
 
-		$this->assertSame( array( $this->parent_id ), $touched );
 		foreach ( $translations as $translation_id ) {
 			$this->assertSame( 'trash', get_post_status( $translation_id ) );
-			$this->assertSame( '', get_post_meta( $translation_id, '_wp_trash_meta_time', true ) );
 		}
 	}
 
@@ -226,7 +220,7 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 
 	/**
 	 * Translations left behind before statuses were synced are found, and only changed when applying.
-	 * One whose original is gone has no status to copy, so it is counted and left as it is.
+	 * One whose original is gone is trashed.
 	 */
 	public function test_existing_mismatches_are_reported_then_fixed(): void {
 		list( $kept, $stale ) = $this->translate_all();
@@ -247,20 +241,21 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 		$this->set_status_without_sync( $this->parent_id, UNLISTED_STATUS );
 		$this->set_status_without_sync( $kept, UNLISTED_STATUS );
 
-		$missing  = array( 'original missing, left publish' => 1 );
 		$expected = array(
-			'checked'                       => 3,
-			'publish to ' . UNLISTED_STATUS => 1,
-		) + $missing;
+			'checked'                            => 3,
+			'publish to ' . UNLISTED_STATUS      => 1,
+			'publish to trash, original missing' => 1,
+		);
 
 		$this->assertSame( $expected, sync_all_translation_statuses( false ) );
 		$this->assertSame( 'publish', get_post_status( $stale ) );
+		$this->assertSame( 'publish', get_post_status( $orphan ) );
 
 		$this->assertSame( $expected, sync_all_translation_statuses( true ) );
 		$this->assertSame( UNLISTED_STATUS, get_post_status( $stale ) );
-		$this->assertSame( 'publish', get_post_status( $orphan ) );
+		$this->assertSame( 'trash', get_post_status( $orphan ) );
 
-		$this->assertSame( array( 'checked' => 3 ) + $missing, sync_all_translation_statuses( true ) );
+		$this->assertSame( array( 'checked' => 3 ), sync_all_translation_statuses( true ) );
 	}
 
 	/**
