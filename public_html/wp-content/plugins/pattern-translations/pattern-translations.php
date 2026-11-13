@@ -30,6 +30,11 @@ const TRANSLATED_TAXONOMIES = array(
 	'wporg-pattern-flag-reason' => 'Flag Reasons term name',
 );
 
+/**
+ * Meta key marking a translation that went to the trash with its original, so it comes back with it.
+ */
+const TRASHED_WITH_ORIGINAL = '_wpop_trashed_with_original';
+
 require __DIR__ . '/includes/class-pattern.php';
 require __DIR__ . '/includes/class-patternparser.php';
 require __DIR__ . '/includes/i18n.php';
@@ -300,7 +305,7 @@ function sync_translation_statuses( $new_status, $old_status, $post ) {
 	}
 
 	foreach ( get_translation_ids( $post->ID ) as $translation_id ) {
-		set_translation_status( $translation_id, $post, 'trash' === $old_status );
+		set_translation_status( $translation_id, $post );
 	}
 }
 add_action( 'transition_post_status', __NAMESPACE__ . '\sync_translation_statuses', 10, 3 );
@@ -316,16 +321,17 @@ add_action( 'transition_post_status', __NAMESPACE__ . '\sync_translation_statuse
  *
  * @param int      $translation_id Translation post ID.
  * @param \WP_Post $original       The translation's English original.
- * @param bool     $untrash        Whether the original was just restored, bringing its trashed translations back.
  */
-function set_translation_status( int $translation_id, \WP_Post $original, bool $untrash ) {
+function set_translation_status( int $translation_id, \WP_Post $original ) {
 	if ( 'trash' === $original->post_status ) {
-		wp_trash_post( $translation_id );
+		if ( wp_trash_post( $translation_id ) && 'trash' === get_post_status( $translation_id ) ) {
+			update_post_meta( $translation_id, TRASHED_WITH_ORIGINAL, 1 );
+		}
 		return;
 	}
 
 	if ( 'trash' === get_post_status( $translation_id ) ) {
-		if ( ! $untrash ) {
+		if ( ! get_post_meta( $translation_id, TRASHED_WITH_ORIGINAL, true ) ) {
 			return;
 		}
 
@@ -347,6 +353,16 @@ function set_translation_status( int $translation_id, \WP_Post $original, bool $
 		}
 	}
 }
+
+/**
+ * Drop the trashed-with-original mark once a translation leaves the trash, however it was restored.
+ *
+ * @param int $post_id Post ID.
+ */
+function clear_trashed_with_original( $post_id ) {
+	delete_post_meta( $post_id, TRASHED_WITH_ORIGINAL );
+}
+add_action( 'untrashed_post', __NAMESPACE__ . '\clear_trashed_with_original' );
 
 /**
  * Trash an original's translations when it is deleted without going through the trash.
@@ -405,7 +421,7 @@ function sync_all_translation_statuses( bool $apply ): array {
 		} elseif ( $translation->post_status !== $original->post_status && 'trash' !== $translation->post_status ) {
 			$change = "{$translation->post_status} to {$original->post_status}";
 			if ( $apply ) {
-				set_translation_status( $translation_id, $original, false );
+				set_translation_status( $translation_id, $original );
 			}
 		} else {
 			$change = false;
