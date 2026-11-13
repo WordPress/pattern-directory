@@ -300,7 +300,7 @@ function sync_translation_statuses( $new_status, $old_status, $post ) {
 	}
 
 	foreach ( get_translation_ids( $post->ID ) as $translation_id ) {
-		set_translation_status( $translation_id, $post );
+		set_translation_status( $translation_id, $post, 'trash' === $old_status );
 	}
 }
 add_action( 'transition_post_status', __NAMESPACE__ . '\sync_translation_statuses', 10, 3 );
@@ -312,17 +312,26 @@ add_action( 'transition_post_status', __NAMESPACE__ . '\sync_translation_statuse
  * The original's dates come along, as the job copies them too, because `wp_update_post()` picks `publish` or
  * `future` by date.
  *
+ * A translation trashed on its own stays there, as the job has likely stored a replacement since.
+ *
  * @param int      $translation_id Translation post ID.
  * @param \WP_Post $original       The translation's English original.
+ * @param bool     $untrash        Whether the original was just restored, bringing its trashed translations back.
  */
-function set_translation_status( int $translation_id, \WP_Post $original ) {
+function set_translation_status( int $translation_id, \WP_Post $original, bool $untrash ) {
 	if ( 'trash' === $original->post_status ) {
 		wp_trash_post( $translation_id );
 		return;
 	}
 
-	// Clears the trash meta, so the purge doesn't delete a translation whose original was restored.
-	wp_untrash_post( $translation_id );
+	if ( 'trash' === get_post_status( $translation_id ) ) {
+		if ( ! $untrash ) {
+			return;
+		}
+
+		// Clears the trash meta, so the purge doesn't delete a translation whose original was restored.
+		wp_untrash_post( $translation_id );
+	}
 
 	$args = array(
 		'post_status'   => $original->post_status,
@@ -393,10 +402,10 @@ function sync_all_translation_statuses( bool $apply ): array {
 			if ( $change && $apply ) {
 				wp_trash_post( $translation_id );
 			}
-		} elseif ( $translation->post_status !== $original->post_status ) {
+		} elseif ( $translation->post_status !== $original->post_status && 'trash' !== $translation->post_status ) {
 			$change = "{$translation->post_status} to {$original->post_status}";
 			if ( $apply ) {
-				set_translation_status( $translation_id, $original );
+				set_translation_status( $translation_id, $original, false );
 			}
 		} else {
 			$change = false;

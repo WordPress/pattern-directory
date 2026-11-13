@@ -24,6 +24,11 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\UNLISTED_STATUS;
  * @group pattern-translation-status-sync
  */
 class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
+	/**
+	 * Locales the original is translated into.
+	 *
+	 * @var string[]
+	 */
 	const LOCALES = array( 'fr_FR', 'de_DE' );
 
 	/**
@@ -193,6 +198,21 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 
 		$this->assertSame( 'publish', get_post_status( $this->parent_id ) );
 		$this->assertSame( 'publish', get_post_status( $second ) );
+	}
+
+	/**
+	 * A translation trashed on its own stays trashed when its original changes status or the command runs, since
+	 * the job stores a replacement that restoring it would duplicate.
+	 */
+	public function test_translation_trashed_on_its_own_stays_trashed(): void {
+		list( $trashed ) = $this->translate_all();
+		wp_trash_post( $trashed );
+
+		$this->set_status( $this->parent_id, UNLISTED_STATUS );
+		$this->set_status( $this->parent_id, 'publish' );
+		sync_all_translation_statuses( true );
+
+		$this->assertSame( 'trash', get_post_status( $trashed ) );
 	}
 
 	/**
