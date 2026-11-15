@@ -15,6 +15,7 @@ use function WordPressdotorg\Pattern_Directory\Favorite\{add_favorite, get_favor
 add_action( 'init', __NAMESPACE__ . '\register_block_bindings' );
 add_filter( 'wporg_query_total_label', __NAMESPACE__ . '\update_query_total_label', 10, 2 );
 add_filter( 'wporg_query_filter_options_curation', __NAMESPACE__ . '\get_curation_options' );
+add_filter( 'render_block_wporg/query-filter', __NAMESPACE__ . '\hide_curation_filter_on_author_archives', 10, 2 );
 add_filter( 'wporg_query_filter_options_sort', __NAMESPACE__ . '\get_sort_options' );
 add_action( 'wporg_query_filter_in_form', __NAMESPACE__ . '\inject_other_filters' );
 add_filter( 'wporg_favorite_button_settings', __NAMESPACE__ . '\get_favorite_settings', 10, 2 );
@@ -181,6 +182,24 @@ function get_curation_options() {
 		),
 		'selected' => array( $current ),
 	);
+}
+
+/**
+ * Hide the curation filter on author archives.
+ *
+ * Only patterns by the wordpressdotorg account are curated, so on any other
+ * author's archive the "Curated" option leads to an empty archive (a 404).
+ *
+ * @param string $block_content The block content.
+ * @param array  $block         The full block, including name and attributes.
+ * @return string The block content, or an empty string on author archives.
+ */
+function hide_curation_filter_on_author_archives( $block_content, $block ) {
+	if ( is_author() && isset( $block['attrs']['key'] ) && 'curation' === $block['attrs']['key'] ) {
+		return '';
+	}
+
+	return $block_content;
 }
 
 /**
