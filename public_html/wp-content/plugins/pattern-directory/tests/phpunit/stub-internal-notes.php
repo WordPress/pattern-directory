@@ -7,6 +7,8 @@
  * @package WordPress\Pattern_Directory
  */
 
+declare( strict_types = 1 );
+
 namespace WordPressdotorg\InternalNotes;
 
 if ( ! function_exists( __NAMESPACE__ . '\create_note' ) ) {
@@ -24,7 +26,7 @@ if ( ! function_exists( __NAMESPACE__ . '\create_note' ) ) {
 	 *
 	 * @return void
 	 */
-	function create_note( $post_id, $data ) {
+	function create_note( int $post_id, array $data ): void {
 		$GLOBALS['pattern_directory_test_notes'][] = array_merge( $data, array( 'post_parent' => $post_id ) );
 	}
 }
