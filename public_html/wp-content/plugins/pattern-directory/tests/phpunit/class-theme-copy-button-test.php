@@ -61,5 +61,6 @@ class Theme_Copy_Button_Test extends WP_UnitTestCase {
 		$img = new WP_HTML_Tag_Processor( $copied );
 		$this->assertTrue( $img->next_tag( 'img' ) );
 		$this->assertNull( $img->get_attribute( 'class' ) );
+		$this->assertSame( 'https://example.com/a.jpg', $img->get_attribute( 'src' ) );
 	}
 }
