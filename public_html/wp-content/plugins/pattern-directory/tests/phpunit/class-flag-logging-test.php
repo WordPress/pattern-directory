@@ -15,8 +15,6 @@ use WordPressdotorg\InternalNotes;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\{ PENDING_STATUS, RESOLVED_STATUS, POST_TYPE as FLAG_POST_TYPE };
 
-require_once __DIR__ . '/stub-internal-notes.php';
-
 /**
  * Flag status changes are logged on the pattern once the flag is saved (#480).
  *
@@ -62,49 +60,34 @@ class Flag_Logging_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * The log messages written on the pattern.
-	 *
-	 * Reads the stand-in's record, or the saved notes when the real plugin is loaded.
+	 * The log messages the stand-in recorded on the pattern.
 	 *
 	 * @return string[]
 	 */
 	protected function get_log_messages(): array {
-		if ( isset( $GLOBALS['pattern_directory_test_notes'] ) && ! post_type_exists( InternalNotes\LOG_POST_TYPE ) ) {
-			$notes = array_filter(
-				$GLOBALS['pattern_directory_test_notes'],
-				function ( array $note ): bool {
-					return self::$pattern_id === $note['post_parent'] && InternalNotes\LOG_POST_TYPE === ( $note['post_type'] ?? '' );
-				}
-			);
-
-			return array_values( array_column( $notes, 'post_excerpt' ) );
-		}
-
-		$notes = get_posts(
-			array(
-				'post_type'   => InternalNotes\LOG_POST_TYPE,
-				'post_parent' => self::$pattern_id,
-				'post_status' => 'any',
-				'orderby'     => 'ID',
-				'order'       => 'ASC',
-			)
+		$notes = array_filter(
+			$GLOBALS['pattern_directory_test_notes'],
+			function ( array $note ): bool {
+				return self::$pattern_id === $note['post_parent'] && InternalNotes\LOG_POST_TYPE === ( $note['post_type'] ?? '' );
+			}
 		);
 
-		return wp_list_pluck( $notes, 'post_excerpt' );
+		return array_values( array_column( $notes, 'post_excerpt' ) );
 	}
 
 	/**
 	 * Insert a flag the way the REST API does: after-insert hooks run once the request has saved everything.
 	 *
 	 * @param bool $fire_after_hooks Whether to run the after-insert hooks right away.
+	 * @param int  $author_id        The reporter, the shared one by default.
 	 * @return int The flag ID.
 	 */
-	protected function insert_flag( bool $fire_after_hooks = true ): int {
+	protected function insert_flag( bool $fire_after_hooks = true, int $author_id = 0 ): int {
 		return wp_insert_post(
 			array(
 				'post_type'   => FLAG_POST_TYPE,
 				'post_parent' => self::$pattern_id,
-				'post_author' => self::$reporter->ID,
+				'post_author' => $author_id ? $author_id : self::$reporter->ID,
 				'post_status' => PENDING_STATUS,
 			),
 			false,
@@ -160,6 +143,23 @@ class Flag_Logging_Test extends WP_UnitTestCase {
 				'New flag submitted by @flag-reporter',
 				'Flag submitted by @flag-reporter marked as ' . $resolved,
 				'Flag submitted by @flag-reporter moved to trash.',
+			),
+			$this->get_log_messages()
+		);
+	}
+
+	/**
+	 * Catches moderation of a flag whose reporter's account is gone dropping out of the pattern's log.
+	 */
+	public function test_flag_from_a_deleted_user_is_logged(): void {
+		$flag_id = $this->insert_flag( true, 999999 );
+
+		wp_trash_post( $flag_id );
+
+		$this->assertSame(
+			array(
+				'New flag submitted by a deleted user',
+				'Flag submitted by a deleted user moved to trash.',
 			),
 			$this->get_log_messages()
 		);

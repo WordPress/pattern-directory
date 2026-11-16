@@ -14,6 +14,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\{ PENDING_STA
 /**
  * Actions and filters.
  */
+// Before `check_flag_threshold()`, so a new flag is logged ahead of the pattern status change it causes.
 add_action( 'wp_after_insert_post', __NAMESPACE__ . '\flag_status_change', 5, 4 );
 
 /**
@@ -30,11 +31,7 @@ function logging_enabled() {
 }
 
 /**
- * Add a log entry to a pattern when a flag's status changes.
- *
- * Runs once the flag is fully saved (terms and meta included), and before
- * `check_flag_threshold()` so the new flag is logged ahead of any status
- * change it causes on the pattern.
+ * Add a log entry to a pattern when a flag's status changes, once the flag is fully saved.
  *
  * @param int           $post_id     Post ID.
  * @param \WP_Post      $post        Post object.
@@ -63,24 +60,24 @@ function flag_status_change( $post_id, $post, $update, $post_before ) {
 		return;
 	}
 
-	$new_status = $post->post_status;
-	$old_status = $post_before ? $post_before->post_status : 'new';
-
-	$user = get_user_by( 'id', $post->post_author );
-	if ( ! $user ) {
+	// Without the post as it was, an update's old status is unknown.
+	if ( $update && ! $post_before ) {
 		return;
 	}
 
-	$new         = get_post_status_object( $new_status );
-	$user_handle = sprintf(
-		'@%s',
-		$user->user_login
-	);
+	$new_status = $post->post_status;
+	$old_status = $update ? $post_before->post_status : 'new';
 
-	$msg = '';
 	if ( $new_status === $old_status ) {
 		return;
-	} elseif ( 'new' === $old_status && PENDING_STATUS === $new_status ) {
+	}
+
+	$user        = get_user_by( 'id', $post->post_author );
+	$user_handle = $user ? '@' . $user->user_login : __( 'a deleted user', 'wporg-patterns' );
+	$new         = get_post_status_object( $new_status );
+
+	$msg = '';
+	if ( 'new' === $old_status && PENDING_STATUS === $new_status ) {
 		$msg = sprintf(
 			// translators: User name.
 			__( 'New flag submitted by %s', 'wporg-patterns' ),

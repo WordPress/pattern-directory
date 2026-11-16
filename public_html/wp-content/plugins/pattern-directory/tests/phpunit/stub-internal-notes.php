@@ -1,8 +1,8 @@
 <?php
 /**
- * Stand-in for the wporg-internal-notes plugin, which CI doesn't load.
+ * Stand-in for the wporg-internal-notes plugin, which the tests don't load.
  *
- * Records notes in memory instead of saving them, so other tests are unaffected.
+ * The PHPUnit bootstrap loads it for every test. It records notes in memory instead of saving them.
  *
  * @package WordPress\Pattern_Directory
  */
