@@ -53,9 +53,13 @@ class Theme_Copy_Button_Test extends WP_UnitTestCase {
 
 		$copied = $this->get_copied_content( $post_id );
 
-		$this->assertSame(
-			'<!-- wp:image {"sizeSlug":"large"} --><figure class="wp-block-image size-large"><img src="https://example.com/a.jpg" alt=""  /></figure><!-- /wp:image --><!-- wp:block {} /-->',
-			$copied
-		);
+		$blocks = parse_blocks( $copied );
+		$this->assertSame( array( 'sizeSlug' => 'large' ), $blocks[0]['attrs'] );
+		$this->assertSame( array(), $blocks[1]['attrs'] );
+
+		// How kses serializes the tag varies between core versions, so check the attribute, not the markup.
+		$img = new WP_HTML_Tag_Processor( $copied );
+		$this->assertTrue( $img->next_tag( 'img' ) );
+		$this->assertNull( $img->get_attribute( 'class' ) );
 	}
 }
