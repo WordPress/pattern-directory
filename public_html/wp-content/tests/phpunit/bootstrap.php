@@ -59,6 +59,9 @@ function _manually_load_plugins() {
 		require_once $_locales;
 	}
 
+	// Loaded for the whole run, as the real plugin is in production, so no test depends on file load order.
+	require_once dirname( dirname( __DIR__ ) ) . '/plugins/pattern-directory/tests/phpunit/stub-internal-notes.php';
+
 	require dirname( dirname( __DIR__ ) ) . '/plugins/pattern-directory/bootstrap.php';
 	require dirname( dirname( __DIR__ ) ) . '/plugins/pattern-creator/pattern-creator.php';
 	require dirname( dirname( __DIR__ ) ) . '/plugins/pattern-translations/pattern-translations.php';

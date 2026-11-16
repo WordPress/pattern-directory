@@ -14,7 +14,8 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Flag_Post_Type\{ PENDING_STA
 /**
  * Actions and filters.
  */
-add_action( 'transition_post_status', __NAMESPACE__ . '\flag_status_change', 10, 3 );
+// Before `check_flag_threshold()`, so a new flag is logged ahead of the pattern status change it causes.
+add_action( 'wp_after_insert_post', __NAMESPACE__ . '\flag_status_change', 5, 4 );
 
 /**
  * Check if logging is enabled for patterns.
@@ -30,15 +31,17 @@ function logging_enabled() {
 }
 
 /**
- * Add a log entry to a pattern when a flag's status changes.
+ * Add a log entry to a pattern when a flag's status changes, once the flag is fully saved.
  *
- * @param string   $new_status New post status.
- * @param string   $old_status Previous post status.
- * @param \WP_Post $post       Post being processed.
+ * @param int           $post_id     Post ID.
+ * @param \WP_Post      $post        Post object.
+ * @param bool          $update      Whether this is an existing post being updated.
+ * @param null|\WP_Post $post_before Null for new posts, the WP_Post object prior
+ *                                   to the update for updated posts.
  *
  * @return void
  */
-function flag_status_change( $new_status, $old_status, $post ) {
+function flag_status_change( $post_id, $post, $update, $post_before ) {
 	if ( ! logging_enabled() ) {
 		return;
 	}
@@ -57,17 +60,24 @@ function flag_status_change( $new_status, $old_status, $post ) {
 		return;
 	}
 
-	$new         = get_post_status_object( $new_status );
-	$user        = get_user_by( 'id', $post->post_author );
-	$user_handle = sprintf(
-		'@%s',
-		$user->user_login
-	);
+	// Without the post as it was, an update's old status is unknown.
+	if ( $update && ! $post_before ) {
+		return;
+	}
 
-	$msg = '';
+	$new_status = $post->post_status;
+	$old_status = $update ? $post_before->post_status : 'new';
+
 	if ( $new_status === $old_status ) {
 		return;
-	} elseif ( 'new' === $old_status && PENDING_STATUS === $new_status ) {
+	}
+
+	$user        = get_user_by( 'id', $post->post_author );
+	$user_handle = $user ? '@' . $user->user_login : __( 'a deleted user', 'wporg-patterns' );
+	$new         = get_post_status_object( $new_status );
+
+	$msg = '';
+	if ( 'new' === $old_status && PENDING_STATUS === $new_status ) {
 		$msg = sprintf(
 			// translators: User name.
 			__( 'New flag submitted by %s', 'wporg-patterns' ),
