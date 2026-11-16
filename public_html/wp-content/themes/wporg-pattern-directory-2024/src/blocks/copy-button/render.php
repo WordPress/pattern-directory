@@ -5,6 +5,8 @@
  * @package WordPress\Pattern_Directory
  */
 
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content;
+
 $variant = $attributes['variant'] ?? 'default';
 
 $current_post_id = $block->context['postId'];
@@ -32,5 +34,5 @@ $current_post = get_post( $current_post_id );
 	>
 		<?php echo esc_attr( $label ); ?>
 	</button>
-	<input class="wp-block-wporg-copy-button__content" type="hidden" value="<?php echo rawurlencode( wp_json_encode( $current_post->post_content ) ); ?>" />
+	<input class="wp-block-wporg-copy-button__content" type="hidden" value="<?php echo rawurlencode( wp_json_encode( decode_pattern_content( $current_post->post_content ) ) ); ?>" />
 </div>
