@@ -11,7 +11,6 @@ namespace WordPressdotorg\Pattern_Directory\Tests;
 
 use WP_HTML_Tag_Processor;
 use WP_UnitTestCase;
-use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 /**
@@ -43,8 +42,6 @@ class Theme_Copy_Button_Test extends WP_UnitTestCase {
 
 	/**
 	 * Catches copied markup that keeps an image ID from the site the pattern was built on.
-	 *
-	 * @covers \WordPressdotorg\Pattern_Directory\Pattern_Post_Type\decode_pattern_content
 	 */
 	public function test_copied_content_drops_media_ids_and_refs(): void {
 		$post_id = self::factory()->post->create(
@@ -56,10 +53,9 @@ class Theme_Copy_Button_Test extends WP_UnitTestCase {
 
 		$copied = $this->get_copied_content( $post_id );
 
-		// Stored content goes through kses, so compare with what the API serves rather than raw markup.
-		$this->assertSame( decode_pattern_content( get_post( $post_id )->post_content ), $copied );
-		$this->assertStringContainsString( '<!-- wp:image {"sizeSlug":"large"} -->', $copied );
-		$this->assertStringNotContainsString( 'wp-image-334', $copied );
-		$this->assertStringNotContainsString( '"ref":12', $copied );
+		$this->assertSame(
+			'<!-- wp:image {"sizeSlug":"large"} --><figure class="wp-block-image size-large"><img src="https://example.com/a.jpg" alt=""  /></figure><!-- /wp:image --><!-- wp:block {} /-->',
+			$copied
+		);
 	}
 }
