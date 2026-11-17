@@ -1,18 +1,19 @@
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import {
 	ExternalLink,
 	FormTokenField,
 	PanelBody,
 	PanelRow,
+	RangeControl,
 	TextControl,
 	TextareaControl,
 } from '@wordpress/components';
 import { store as editorStore } from '@wordpress/editor';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -69,22 +70,12 @@ function PatternSettings() {
 		[ editPost, meta ]
 	);
 
-	const viewportWidth = meta[ VIEWPORT_WIDTH_SLUG ];
-	// Keep the typed text locally so the field can be cleared or hold a partial number while typing,
-	// and only store it on blur, if it is a width the REST API accepts. Storing on every keystroke
-	// would keep a valid prefix (e.g. 256 while typing 2560) when the finished number is out of range.
-	const [ viewportWidthText, setViewportWidthText ] = useState( String( viewportWidth ?? '' ) );
-	useEffect( () => {
-		setViewportWidthText( String( viewportWidth ?? '' ) );
-	}, [ viewportWidth ] );
-	const commitViewportWidth = useCallback( () => {
-		const width = Number( viewportWidthText );
-		if ( Number.isInteger( width ) && width >= VIEWPORT_WIDTH_MIN && width <= VIEWPORT_WIDTH_MAX ) {
-			editPost( { meta: { ...meta, [ VIEWPORT_WIDTH_SLUG ]: width } } );
-		} else {
-			setViewportWidthText( String( viewportWidth ?? '' ) );
-		}
-	}, [ editPost, meta, viewportWidth, viewportWidthText ] );
+	const setViewportWidth = useCallback(
+		( value ) => {
+			editPost( { meta: { ...meta, [ VIEWPORT_WIDTH_SLUG ]: value } } );
+		},
+		[ editPost, meta ]
+	);
 
 	return (
 		<>
@@ -104,24 +95,17 @@ function PatternSettings() {
 					/>
 				</PanelRow>
 				<PanelRow>
-					<TextControl
-						type="number"
+					<RangeControl
+						__next40pxDefaultSize
 						label={ __( 'Viewport width', 'wporg-patterns' ) }
-						help={ sprintf(
-							/* translators: 1: Minimum width in pixels. 2: Maximum width in pixels. */
-							__(
-								'The width in pixels the pattern is designed for, used to scale its preview in the block inserter. Between %1$d and %2$d.',
-								'wporg-patterns'
-							),
-							VIEWPORT_WIDTH_MIN,
-							VIEWPORT_WIDTH_MAX
+						help={ __(
+							'The width in pixels the pattern is designed for, used to scale its preview in the block inserter.',
+							'wporg-patterns'
 						) }
 						min={ VIEWPORT_WIDTH_MIN }
 						max={ VIEWPORT_WIDTH_MAX }
-						step={ 1 }
-						value={ viewportWidthText }
-						onChange={ setViewportWidthText }
-						onBlur={ commitViewportWidth }
+						value={ meta[ VIEWPORT_WIDTH_SLUG ] }
+						onChange={ setViewportWidth }
 					/>
 				</PanelRow>
 				{ [ 'pending', 'publish' ].includes( status ) && (
