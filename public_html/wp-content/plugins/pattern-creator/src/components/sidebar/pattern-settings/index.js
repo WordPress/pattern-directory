@@ -23,9 +23,6 @@ import { KEYWORD_SLUG } from '../../../store';
 
 const DESCRIPTION_SLUG = 'wpop_description';
 const VIEWPORT_WIDTH_SLUG = 'wpop_viewport_width';
-// Matches the range the `wpop_viewport_width` meta accepts over the REST API.
-const VIEWPORT_WIDTH_MIN = 200;
-const VIEWPORT_WIDTH_MAX = 2000;
 
 function PatternSettings() {
 	const { description, keywords, link, meta, selectedCategories, status, title } = useSelect( ( select ) => {
@@ -102,8 +99,9 @@ function PatternSettings() {
 							'The width in pixels the pattern is designed for, used to scale its preview in the block inserter.',
 							'wporg-patterns'
 						) }
-						min={ VIEWPORT_WIDTH_MIN }
-						max={ VIEWPORT_WIDTH_MAX }
+						// Matches the range the meta accepts over the REST API.
+						min={ 200 }
+						max={ 2000 }
 						value={ meta[ VIEWPORT_WIDTH_SLUG ] }
 						onChange={ setViewportWidth }
 					/>
