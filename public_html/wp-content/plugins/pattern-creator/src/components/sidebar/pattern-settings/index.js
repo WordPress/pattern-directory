@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	ExternalLink,
 	FormTokenField,
@@ -12,7 +12,7 @@ import {
 } from '@wordpress/components';
 import { store as editorStore } from '@wordpress/editor';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useCallback } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -21,6 +21,10 @@ import PatternCategoriesControl from '../../pattern-categories-control';
 import { KEYWORD_SLUG } from '../../../store';
 
 const DESCRIPTION_SLUG = 'wpop_description';
+const VIEWPORT_WIDTH_SLUG = 'wpop_viewport_width';
+// Matches the range the `wpop_viewport_width` meta accepts over the REST API.
+const VIEWPORT_WIDTH_MIN = 200;
+const VIEWPORT_WIDTH_MAX = 2000;
 
 function PatternSettings() {
 	const { description, keywords, link, meta, selectedCategories, status, title } = useSelect( ( select ) => {
@@ -65,6 +69,24 @@ function PatternSettings() {
 		[ editPost, meta ]
 	);
 
+	const viewportWidth = meta[ VIEWPORT_WIDTH_SLUG ];
+	// Keep the typed text locally so the field can be cleared or hold a partial number while typing,
+	// and only store widths the REST API accepts.
+	const [ viewportWidthText, setViewportWidthText ] = useState( String( viewportWidth ?? '' ) );
+	useEffect( () => {
+		setViewportWidthText( String( viewportWidth ?? '' ) );
+	}, [ viewportWidth ] );
+	const setViewportWidth = useCallback(
+		( value ) => {
+			setViewportWidthText( value );
+			const width = Number( value );
+			if ( Number.isInteger( width ) && width >= VIEWPORT_WIDTH_MIN && width <= VIEWPORT_WIDTH_MAX ) {
+				editPost( { meta: { ...meta, [ VIEWPORT_WIDTH_SLUG ]: width } } );
+			}
+		},
+		[ editPost, meta ]
+	);
+
 	return (
 		<>
 			<PanelBody initialOpen>
@@ -80,6 +102,27 @@ function PatternSettings() {
 						) }
 						value={ description }
 						onChange={ setDescription }
+					/>
+				</PanelRow>
+				<PanelRow>
+					<TextControl
+						type="number"
+						label={ __( 'Viewport width', 'wporg-patterns' ) }
+						help={ sprintf(
+							/* translators: 1: Minimum width in pixels. 2: Maximum width in pixels. */
+							__(
+								'The width in pixels the pattern is designed for, used to scale its preview in the block inserter. Between %1$d and %2$d.',
+								'wporg-patterns'
+							),
+							VIEWPORT_WIDTH_MIN,
+							VIEWPORT_WIDTH_MAX
+						) }
+						min={ VIEWPORT_WIDTH_MIN }
+						max={ VIEWPORT_WIDTH_MAX }
+						step={ 1 }
+						value={ viewportWidthText }
+						onChange={ setViewportWidth }
+						onBlur={ () => setViewportWidthText( String( viewportWidth ?? '' ) ) }
 					/>
 				</PanelRow>
 				{ [ 'pending', 'publish' ].includes( status ) && (
