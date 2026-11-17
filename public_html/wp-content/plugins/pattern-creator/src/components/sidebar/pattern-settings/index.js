@@ -7,6 +7,7 @@ import {
 	FormTokenField,
 	PanelBody,
 	PanelRow,
+	RangeControl,
 	TextControl,
 	TextareaControl,
 } from '@wordpress/components';
@@ -21,6 +22,7 @@ import PatternCategoriesControl from '../../pattern-categories-control';
 import { KEYWORD_SLUG } from '../../../store';
 
 const DESCRIPTION_SLUG = 'wpop_description';
+const VIEWPORT_WIDTH_SLUG = 'wpop_viewport_width';
 
 function PatternSettings() {
 	const { description, keywords, link, meta, selectedCategories, status, title } = useSelect( ( select ) => {
@@ -65,6 +67,13 @@ function PatternSettings() {
 		[ editPost, meta ]
 	);
 
+	const setViewportWidth = useCallback(
+		( value ) => {
+			editPost( { meta: { ...meta, [ VIEWPORT_WIDTH_SLUG ]: value } } );
+		},
+		[ editPost, meta ]
+	);
+
 	return (
 		<>
 			<PanelBody initialOpen>
@@ -80,6 +89,21 @@ function PatternSettings() {
 						) }
 						value={ description }
 						onChange={ setDescription }
+					/>
+				</PanelRow>
+				<PanelRow>
+					<RangeControl
+						__next40pxDefaultSize
+						label={ __( 'Viewport width', 'wporg-patterns' ) }
+						help={ __(
+							'The width in pixels the pattern is designed for, used to scale its preview in the block inserter.',
+							'wporg-patterns'
+						) }
+						// Matches the range the meta accepts over the REST API.
+						min={ 200 }
+						max={ 2000 }
+						value={ meta[ VIEWPORT_WIDTH_SLUG ] }
+						onChange={ setViewportWidth }
 					/>
 				</PanelRow>
 				{ [ 'pending', 'publish' ].includes( status ) && (
