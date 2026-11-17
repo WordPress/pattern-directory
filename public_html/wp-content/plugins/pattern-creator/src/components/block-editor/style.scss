@@ -17,9 +17,20 @@
 	max-width: 960px;
 	margin-left: auto;
 	margin-right: auto;
+	padding-top: $grid-unit-30;
 
 	h1 {
 		color: $white;
+	}
+
+	// The title sits outside the canvas iframe, so it doesn't get the editor's rich text placeholder styles.
+	[data-rich-text-placeholder] {
+		pointer-events: none;
+	}
+
+	[data-rich-text-placeholder]::after {
+		content: attr(data-rich-text-placeholder);
+		opacity: 0.62;
 	}
 }
 
