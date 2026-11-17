@@ -54,6 +54,7 @@ describe( 'selectors', () => {
 			const state = { settings: {}, preferences: {} };
 			const setInserterOpened = () => {};
 			expect( getSettings( state, setInserterOpened ) ).toEqual( {
+				titlePlaceholder: 'Enter your pattern name',
 				outlineMode: true,
 				focusMode: false,
 				fullscreenMode: true,
@@ -78,6 +79,7 @@ describe( 'selectors', () => {
 			const setInserterOpened = () => {};
 			expect( getSettings( state, setInserterOpened ) ).toEqual( {
 				key: 'value',
+				titlePlaceholder: 'Enter your pattern name',
 				outlineMode: true,
 				focusMode: true,
 				fullscreenMode: true,

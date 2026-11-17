@@ -9,6 +9,7 @@ import createSelector from 'rememo';
  */
 import { store as coreStore } from '@wordpress/core-data';
 import { createRegistrySelector } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
 import {
 	/* eslint-disable-next-line @wordpress/no-unsafe-wp-apis */
 	__unstableSerializeAndClean,
@@ -66,6 +67,7 @@ export const getSettings = createSelector(
 	( state, setIsInserterOpen ) => {
 		const settings = {
 			...state.settings,
+			titlePlaceholder: __( 'Enter your pattern name', 'wporg-patterns' ),
 			fullscreenMode: true,
 			outlineMode: true,
 			focusMode: isFeatureActive( state, 'focusMode' ),
