@@ -98,6 +98,7 @@ describe( 'PatternSettings', () => {
 		expect( input.value ).toBe( '1200' );
 
 		act( () => typeInto( input, '1400' ) );
+		act( () => input.dispatchEvent( new window.FocusEvent( 'focusout', { bubbles: true } ) ) );
 
 		expect( getViewportWidth() ).toBe( 1400 );
 		expect( input.value ).toBe( '1400' );
@@ -109,9 +110,11 @@ describe( 'PatternSettings', () => {
 		const input = container.querySelector( 'input[aria-label="Viewport width"]' );
 		const before = getViewportWidth();
 
-		act( () => typeInto( input, '50' ) );
+		// Typing 2400 passes through 240, which is in range on its own.
+		act( () => typeInto( input, '240' ) );
+		act( () => typeInto( input, '2400' ) );
 
-		expect( input.value ).toBe( '50' );
+		expect( input.value ).toBe( '2400' );
 		expect( getViewportWidth() ).toBe( before );
 
 		act( () => input.dispatchEvent( new window.FocusEvent( 'focusout', { bubbles: true } ) ) );

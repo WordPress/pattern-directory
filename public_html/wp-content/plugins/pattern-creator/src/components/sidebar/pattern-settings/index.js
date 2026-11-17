@@ -71,21 +71,20 @@ function PatternSettings() {
 
 	const viewportWidth = meta[ VIEWPORT_WIDTH_SLUG ];
 	// Keep the typed text locally so the field can be cleared or hold a partial number while typing,
-	// and only store widths the REST API accepts.
+	// and only store it on blur, if it is a width the REST API accepts. Storing on every keystroke
+	// would keep a valid prefix (e.g. 256 while typing 2560) when the finished number is out of range.
 	const [ viewportWidthText, setViewportWidthText ] = useState( String( viewportWidth ?? '' ) );
 	useEffect( () => {
 		setViewportWidthText( String( viewportWidth ?? '' ) );
 	}, [ viewportWidth ] );
-	const setViewportWidth = useCallback(
-		( value ) => {
-			setViewportWidthText( value );
-			const width = Number( value );
-			if ( Number.isInteger( width ) && width >= VIEWPORT_WIDTH_MIN && width <= VIEWPORT_WIDTH_MAX ) {
-				editPost( { meta: { ...meta, [ VIEWPORT_WIDTH_SLUG ]: width } } );
-			}
-		},
-		[ editPost, meta ]
-	);
+	const commitViewportWidth = useCallback( () => {
+		const width = Number( viewportWidthText );
+		if ( Number.isInteger( width ) && width >= VIEWPORT_WIDTH_MIN && width <= VIEWPORT_WIDTH_MAX ) {
+			editPost( { meta: { ...meta, [ VIEWPORT_WIDTH_SLUG ]: width } } );
+		} else {
+			setViewportWidthText( String( viewportWidth ?? '' ) );
+		}
+	}, [ editPost, meta, viewportWidth, viewportWidthText ] );
 
 	return (
 		<>
@@ -121,8 +120,8 @@ function PatternSettings() {
 						max={ VIEWPORT_WIDTH_MAX }
 						step={ 1 }
 						value={ viewportWidthText }
-						onChange={ setViewportWidth }
-						onBlur={ () => setViewportWidthText( String( viewportWidth ?? '' ) ) }
+						onChange={ setViewportWidthText }
+						onBlur={ commitViewportWidth }
 					/>
 				</PanelRow>
 				{ [ 'pending', 'publish' ].includes( status ) && (
