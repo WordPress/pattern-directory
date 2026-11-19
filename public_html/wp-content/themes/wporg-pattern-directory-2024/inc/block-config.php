@@ -499,7 +499,8 @@ function update_archive_title( $block_content, $block ) {
 			return '';
 		}
 
-		$term_names = get_applied_filter_list( false );
+		$author_link = '';
+		$term_names  = get_applied_filter_list( false );
 		if ( ! empty( $term_names ) ) {
 			$term_names = wp_list_pluck( $term_names, 'name' );
 			// translators: %s list of terms used for filtering.
@@ -509,13 +510,32 @@ function update_archive_title( $block_content, $block ) {
 			if ( $author ) {
 				/* translators: %s: Author display name. */
 				$title = sprintf( __( 'Author: %s', 'wporg-patterns' ), $author->display_name );
+
+				$author_link = sprintf(
+					'<a href="%1$s">%2$s</a>',
+					esc_url( 'https://profiles.wordpress.org/' . $author->user_nicename . '/' ),
+					esc_html( $author->display_name )
+				);
 			} else {
 				$title = __( 'All patterns', 'wporg-patterns' );
 			}
 		}
 
 		if ( is_search() ) {
-			$title = __( 'Search results', 'wporg-patterns' );
+			$title       = __( 'Search results', 'wporg-patterns' );
+			$author_link = '';
+		}
+
+		$content = esc_html( $title );
+
+		// Show the author heading in the grid, with a link to the author's WordPress.org profile.
+		// The heading in the local navigation bar stays plain text.
+		$class_names = isset( $attributes['className'] ) ? explode( ' ', $attributes['className'] ) : array();
+		if ( $author_link && in_array( 'screen-reader-text', $class_names, true ) ) {
+			$block['attrs']['className'] = implode( ' ', array_diff( $class_names, array( 'screen-reader-text' ) ) ) . ' is-author-title';
+
+			/* translators: %s: Author display name, linked to their WordPress.org profile. */
+			$content = sprintf( esc_html__( 'Author: %s', 'wporg-patterns' ), $author_link );
 		}
 
 		$allowed_tags     = array( 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' );
@@ -533,7 +553,7 @@ function update_archive_title( $block_content, $block ) {
 			'<%1$s %2$s>%3$s</%1$s>',
 			$tag_name,
 			$wrapper_attributes,
-			esc_html( $title )
+			$content
 		);
 	}
 	return $block_content;
