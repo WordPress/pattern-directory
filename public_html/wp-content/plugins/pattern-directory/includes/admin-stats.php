@@ -137,8 +137,7 @@ function get_export_form_inputs() {
  * @return void
  */
 function handle_csv_export() {
-	require_once __DIR__ . '/class-export-csv.php';
-	$csv = new \WordCamp\Utilities\Export_CSV();
+	$csv = new \WordPressdotorg\MU_Plugins\Utilities\Export_CSV();
 
 	$action = EXPORT_ACTION;
 	$cpt    = get_post_type_object( PATTERN_POST_TYPE );
