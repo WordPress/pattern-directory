@@ -58,9 +58,15 @@ $is_status_filtered = ! empty( $wp_query->query['status'] );
 			<div class="wp-block-group">
 				<!-- wp:post-title {"isLink":true,"fontSize":"small","fontFamily":"inter"} /-->
 
-				<!-- wp:button {"className":"is-style-text is-small is-edit-link","metadata":{"bindings":{"text":{"source":"wporg-pattern/edit-label"},"url":{"source":"wporg-pattern/edit-url"}}}} -->
-				<div class="wp-block-button is-style-text is-small is-edit-link"><a href="#" class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Edit', 'wporg-patterns' ); ?></a></div>
-				<!-- /wp:button -->
+				<!-- wp:group {"style":{"spacing":{"blockGap":"var:preset|spacing|10"}},"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+				<div class="wp-block-group">
+					<!-- wp:wporg/favorite-button {"showCount":true,"variant":"small"} /-->
+
+					<!-- wp:button {"className":"is-style-text is-small is-edit-link","metadata":{"bindings":{"text":{"source":"wporg-pattern/edit-label"},"url":{"source":"wporg-pattern/edit-url"}}}} -->
+					<div class="wp-block-button is-style-text is-small is-edit-link"><a href="#" class="wp-block-button__link wp-element-button"><?php esc_html_e( 'Edit', 'wporg-patterns' ); ?></a></div>
+					<!-- /wp:button -->
+				</div>
+				<!-- /wp:group -->
 			</div>
 			<!-- /wp:group -->
 		</div>
