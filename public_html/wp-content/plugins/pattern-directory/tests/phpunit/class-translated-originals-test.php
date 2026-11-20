@@ -115,6 +115,19 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Catches the cached list of translated originals outliving a newly published translation.
+	 */
+	public function test_new_translation_hides_its_original_right_away(): void {
+		$this->assertContains( self::$ids['not_translated'], $this->get_ids( array( 'locale' => 'es_ES' ) ) );
+
+		$translation = self::create_pattern( 'Cabecera', 'es_ES', self::$ids['not_translated'], true );
+		$ids         = $this->get_ids( array( 'locale' => 'es_ES' ) );
+
+		$this->assertNotContains( self::$ids['not_translated'], $ids );
+		$this->assertContains( $translation, $ids );
+	}
+
+	/**
 	 * Catches search dropping the original when its translation matches too, as an English query must find it.
 	 */
 	public function test_search_keeps_the_original(): void {

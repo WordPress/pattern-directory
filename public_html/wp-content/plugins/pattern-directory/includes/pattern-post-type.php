@@ -1010,25 +1010,51 @@ function filter_clauses_translated_originals( $clauses, $query ) {
 		return $clauses;
 	}
 
-	/*
-	 * Looks each listed row's translation up by `post_parent`, then its meta by `post_id`. The join order and
-	 * indexes are pinned because, left to table statistics, the optimizer can start from the `wpop_is_translation`
-	 * meta that ~97k rows share. The pipeline copies the original's author, status, date, terms and version onto
-	 * its translations, so a translation passes the same filters and is listed instead. Submitters can set
-	 * `post_parent` and `wpop_locale` on their own pattern; only the pipeline sets the marker.
-	 */
-	$clauses['where'] .= $wpdb->prepare(
-		" AND NOT EXISTS (
-			SELECT 1 FROM {$wpdb->posts} AS translation FORCE INDEX ( post_parent )
-			STRAIGHT_JOIN {$wpdb->postmeta} AS translation_marker FORCE INDEX ( post_id ) ON ( translation_marker.post_id = translation.ID AND translation_marker.meta_key = 'wpop_is_translation' AND translation_marker.meta_value = '1' )
-			STRAIGHT_JOIN {$wpdb->postmeta} AS translation_locale FORCE INDEX ( post_id ) ON ( translation_locale.post_id = translation.ID AND translation_locale.meta_key = 'wpop_locale' AND translation_locale.meta_value = %s )
-			WHERE translation.post_parent = {$wpdb->posts}.ID AND translation.post_type = %s AND translation.post_status = {$wpdb->posts}.post_status
-		)",
-		$locale,
-		POST_TYPE
-	);
+	$original_ids = get_translated_original_ids( $locale );
+	if ( $original_ids ) {
+		$clauses['where'] .= " AND {$wpdb->posts}.ID NOT IN ( " . implode( ',', $original_ids ) . ' )';
+	}
 
 	return $clauses;
+}
+
+/**
+ * IDs of the English originals with a published translation into a locale.
+ *
+ * One lookup per locale rather than a subquery per listed row: MariaDB rewrites a correlated `NOT EXISTS` into a
+ * single pass over every post. The pipeline copies the original's author, status, date, terms and version onto
+ * its translations, so a translation passes the same filters and is listed instead. Submitters can set
+ * `post_parent` and `wpop_locale` on their own pattern; only the pipeline sets the marker.
+ *
+ * @param string $locale The requested locale.
+ * @return int[] Original pattern IDs.
+ */
+function get_translated_original_ids( string $locale ): array {
+	global $wpdb;
+
+	$cache_key = 'translated-originals:' . $locale . ':' . wp_cache_get_last_changed( 'posts' );
+	$ids       = wp_cache_get( $cache_key, 'wporg-patterns' );
+
+	if ( false === $ids ) {
+		$ids = array_map(
+			'intval',
+			$wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT DISTINCT translation.post_parent
+					FROM {$wpdb->posts} AS translation
+					INNER JOIN {$wpdb->postmeta} AS translation_locale ON ( translation_locale.post_id = translation.ID AND translation_locale.meta_key = 'wpop_locale' AND translation_locale.meta_value = %s )
+					INNER JOIN {$wpdb->postmeta} AS translation_marker ON ( translation_marker.post_id = translation.ID AND translation_marker.meta_key = 'wpop_is_translation' AND translation_marker.meta_value = '1' )
+					WHERE translation.post_type = %s AND translation.post_status = 'publish' AND translation.post_parent > 0",
+					$locale,
+					POST_TYPE
+				)
+			)
+		);
+
+		wp_cache_set( $cache_key, $ids, 'wporg-patterns', DAY_IN_SECONDS );
+	}
+
+	return $ids;
 }
 
 /**
