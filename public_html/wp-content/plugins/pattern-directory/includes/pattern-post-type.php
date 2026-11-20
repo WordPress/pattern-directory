@@ -1051,7 +1051,8 @@ function get_translated_original_ids( string $locale ): array {
 		return array();
 	}
 
-	$ids = $wpdb->get_col(
+	$version = get_translated_originals_version( $locale );
+	$ids     = $wpdb->get_col(
 		$wpdb->prepare(
 			// Published patterns first, by the `post_type`/`post_status` indexes: starting from the locale meta scans all of postmeta.
 			"SELECT DISTINCT translation.post_parent
@@ -1067,6 +1068,11 @@ function get_translated_original_ids( string $locale ): array {
 	if ( ! $wpdb->last_error ) {
 		$ids = array_map( 'intval', $ids );
 		wp_cache_set( $cache_key, $ids, 'wporg-patterns', DAY_IN_SECONDS );
+
+		// A translation changed during the lookup, so the list may predate it: the next request rebuilds it.
+		if ( get_translated_originals_version( $locale ) !== $version ) {
+			wp_cache_delete( $cache_key, 'wporg-patterns' );
+		}
 	} else {
 		$ids = array();
 	}
@@ -1118,22 +1124,73 @@ function update_translated_original_ids_on_delete( $post_id, $post ) {
 /**
  * Add an original to, or remove it from, a locale's cached list of translated originals.
  *
- * A list that isn't cached is left for the next request to build.
+ * A list that isn't cached is left for the next request to build. Changes to a list take turns under a lock, and
+ * each one bumps the locale's version, so a rebuild or change that may have missed it drops its list instead.
  *
  * @param string $locale      The translation's locale, or an empty string to do nothing.
  * @param int    $original_id The original's post ID.
  * @param bool   $translated  Whether the original now has a published translation into the locale.
  */
 function set_translated_original( string $locale, int $original_id, bool $translated ) {
-	$cache_key = 'translated-originals:' . $locale;
-	$ids       = $locale ? wp_cache_get( $cache_key, 'wporg-patterns' ) : false;
-
-	if ( false === $ids ) {
+	if ( ! $locale ) {
 		return;
 	}
 
-	$ids = $translated ? array_merge( $ids, array( $original_id ) ) : array_diff( $ids, array( $original_id ) );
-	wp_cache_set( $cache_key, array_values( array_unique( $ids ) ), 'wporg-patterns', DAY_IN_SECONDS );
+	$cache_key = 'translated-originals:' . $locale;
+	$lock_key  = $cache_key . ':write';
+
+	$tries = 0;
+	while ( ! wp_cache_add( $lock_key, 1, 'wporg-patterns', 10 ) ) {
+		// Another change holds the lock for too long: drop the list, and bump the version so that change drops it too.
+		if ( ++$tries > 20 ) {
+			bump_translated_originals_version( $locale );
+			wp_cache_delete( $cache_key, 'wporg-patterns' );
+			return;
+		}
+
+		usleep( 50000 );
+	}
+
+	$version = bump_translated_originals_version( $locale );
+	$ids     = wp_cache_get( $cache_key, 'wporg-patterns' );
+
+	if ( false !== $ids ) {
+		$ids = $translated ? array_merge( $ids, array( $original_id ) ) : array_diff( $ids, array( $original_id ) );
+		wp_cache_set( $cache_key, array_values( array_unique( $ids ) ), 'wporg-patterns', DAY_IN_SECONDS );
+
+		if ( get_translated_originals_version( $locale ) !== $version ) {
+			wp_cache_delete( $cache_key, 'wporg-patterns' );
+		}
+	}
+
+	wp_cache_delete( $lock_key, 'wporg-patterns' );
+}
+
+/**
+ * A counter for a locale's list of translated originals that every change to it increments.
+ *
+ * @param string $locale The locale.
+ * @return int The version, 0 before the first change.
+ */
+function get_translated_originals_version( string $locale ): int {
+	return (int) wp_cache_get( 'translated-originals:' . $locale . ':version', 'wporg-patterns' );
+}
+
+/**
+ * Increment a locale's translated-originals version.
+ *
+ * @param string $locale The locale.
+ * @return int The new version.
+ */
+function bump_translated_originals_version( string $locale ): int {
+	$key     = 'translated-originals:' . $locale . ':version';
+	$version = wp_cache_incr( $key, 1, 'wporg-patterns' );
+
+	if ( false === $version ) {
+		$version = wp_cache_add( $key, 1, 'wporg-patterns' ) ? 1 : wp_cache_incr( $key, 1, 'wporg-patterns' );
+	}
+
+	return (int) $version;
 }
 
 /**
