@@ -1043,7 +1043,7 @@ function get_translated_original_ids( string $locale ): array {
 	if ( false === $ids ) {
 		$ids = $wpdb->get_col(
 			$wpdb->prepare(
-				// Published patterns first, through `type_status_date`: starting from the marker meta scans all of postmeta.
+				// Published patterns first, by the `post_type`/`post_status` indexes: starting from the marker meta scans all of postmeta.
 				"SELECT DISTINCT translation.post_parent
 				FROM {$wpdb->posts} AS translation
 				STRAIGHT_JOIN {$wpdb->postmeta} AS translation_locale ON ( translation_locale.post_id = translation.ID AND translation_locale.meta_key = 'wpop_locale' AND translation_locale.meta_value = %s )
