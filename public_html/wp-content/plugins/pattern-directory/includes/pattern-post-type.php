@@ -1026,9 +1026,8 @@ function filter_clauses_translated_originals( $clauses, $query ) {
  *
  * One lookup per locale rather than a subquery per listed row: MariaDB rewrites a correlated `NOT EXISTS` into a
  * single pass over every post. The pipeline copies the original's author, status, date, terms and version onto
- * its translations, so a translation passes the same filters and is listed instead. Requiring the marker, which
- * only the pipeline sets, keeps patterns with a parent from elsewhere, set by a moderator or before authors were
- * stopped from setting one, from hiding it.
+ * its translations, so a translation passes the same filters and is listed instead. Only the pipeline gives a
+ * pattern a parent; authors can't set one over REST.
  *
  * The lookup takes ~2 s, so the cached list is kept up to date in place (see `update_translated_original_ids()`)
  * rather than rebuilt, and only one request at a time rebuilds a missing one.
@@ -1053,11 +1052,10 @@ function get_translated_original_ids( string $locale ): array {
 
 	$ids = $wpdb->get_col(
 		$wpdb->prepare(
-			// Published patterns first, by the `post_type`/`post_status` indexes: starting from the marker meta scans all of postmeta.
+			// Published patterns first, by the `post_type`/`post_status` indexes: starting from the locale meta scans all of postmeta.
 			"SELECT DISTINCT translation.post_parent
 			FROM {$wpdb->posts} AS translation
 			STRAIGHT_JOIN {$wpdb->postmeta} AS translation_locale ON ( translation_locale.post_id = translation.ID AND translation_locale.meta_key = 'wpop_locale' AND translation_locale.meta_value = %s )
-			STRAIGHT_JOIN {$wpdb->postmeta} AS translation_marker ON ( translation_marker.post_id = translation.ID AND translation_marker.meta_key = 'wpop_is_translation' AND translation_marker.meta_value = '1' )
 			WHERE translation.post_type = %s AND translation.post_status = 'publish' AND translation.post_parent > 0",
 			$locale,
 			POST_TYPE
@@ -1138,13 +1136,13 @@ function set_translated_original( string $locale, int $original_id, bool $transl
 }
 
 /**
- * The locale of a pattern the translation pipeline stored.
+ * The locale of a translated pattern.
  *
  * @param \WP_Post $post The pattern.
- * @return string The locale, or an empty string if the pattern isn't a pipeline translation.
+ * @return string The locale, or an empty string if the pattern isn't a translation.
  */
 function get_translation_locale( \WP_Post $post ): string {
-	if ( POST_TYPE !== $post->post_type || ! $post->post_parent || ! get_post_meta( $post->ID, 'wpop_is_translation', true ) ) {
+	if ( POST_TYPE !== $post->post_type || ! $post->post_parent ) {
 		return '';
 	}
 

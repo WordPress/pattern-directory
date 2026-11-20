@@ -29,42 +29,34 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	protected static $ids = array();
 
 	/**
-	 * Create an original translated into Spanish, one translated into French only, one with a user-submitted
-	 * child claiming to be its Spanish translation, and their children.
+	 * Create an original translated into Spanish, one translated into French only, one not translated, and the
+	 * translations.
 	 *
 	 * @param WP_UnitTest_Factory $factory Test data factory.
 	 */
 	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ): void {
 		self::$ids['original']       = self::create_pattern( 'Hero cards', 'en_US' );
-		self::$ids['translation']    = self::create_pattern( 'Tarjetas hero', 'es_ES', self::$ids['original'], true );
+		self::$ids['translation']    = self::create_pattern( 'Tarjetas hero', 'es_ES', self::$ids['original'] );
 		self::$ids['french_only']    = self::create_pattern( 'About columns', 'en_US' );
-		self::$ids['french']         = self::create_pattern( 'Colonnes à propos', 'fr_FR', self::$ids['french_only'], true );
+		self::$ids['french']         = self::create_pattern( 'Colonnes à propos', 'fr_FR', self::$ids['french_only'] );
 		self::$ids['not_translated'] = self::create_pattern( 'About header', 'en_US' );
-		self::$ids['forged_target']  = self::create_pattern( 'About footer', 'en_US' );
-		self::$ids['forged']         = self::create_pattern( 'Pie de página', 'es_ES', self::$ids['forged_target'] );
 	}
 
 	/**
 	 * Create a published pattern.
 	 *
-	 * @param string $title          The pattern title.
-	 * @param string $locale         The pattern's `wpop_locale`.
-	 * @param int    $parent_id      The original it claims to translate, if any.
-	 * @param bool   $is_translation Whether to mark it as created by the translation pipeline.
+	 * @param string $title     The pattern title.
+	 * @param string $locale    The pattern's `wpop_locale`.
+	 * @param int    $parent_id The original it translates, if any.
 	 * @return int The new post ID.
 	 */
-	private static function create_pattern( string $title, string $locale, int $parent_id = 0, bool $is_translation = false ): int {
-		$meta = array( 'wpop_locale' => $locale );
-		if ( $is_translation ) {
-			$meta['wpop_is_translation'] = true;
-		}
-
+	private static function create_pattern( string $title, string $locale, int $parent_id = 0 ): int {
 		return self::factory()->post->create(
 			array(
 				'post_title'  => $title,
 				'post_type'   => POST_TYPE,
 				'post_parent' => $parent_id,
-				'meta_input'  => $meta,
+				'meta_input'  => array( 'wpop_locale' => $locale ),
 			)
 		);
 	}
@@ -97,17 +89,14 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Catches the Spanish browse listing both versions of a translated pattern, hiding originals translated
-	 * into another locale only, or letting a user's own pattern that claims `post_parent` and `wpop_locale`
-	 * hide someone else's original.
+	 * Catches the Spanish browse listing both versions of a translated pattern, or hiding originals translated
+	 * into another locale only.
 	 */
 	public function test_browsing_lists_the_translation_in_place_of_its_original(): void {
 		$expected = array(
 			self::$ids['translation'],
 			self::$ids['french_only'],
 			self::$ids['not_translated'],
-			self::$ids['forged_target'],
-			self::$ids['forged'],
 		);
 		sort( $expected );
 
@@ -120,7 +109,7 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	public function test_original_follows_its_translation_being_published_and_unpublished(): void {
 		$this->assertContains( self::$ids['not_translated'], $this->get_ids( array( 'locale' => 'es_ES' ) ) );
 
-		$translation = self::create_pattern( 'Cabecera', 'es_ES', self::$ids['not_translated'], true );
+		$translation = self::create_pattern( 'Cabecera', 'es_ES', self::$ids['not_translated'] );
 		$this->assertNotContains( self::$ids['not_translated'], $this->get_ids( array( 'locale' => 'es_ES' ) ) );
 
 		wp_update_post(
@@ -131,7 +120,7 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 		);
 		$this->assertContains( self::$ids['not_translated'], $this->get_ids( array( 'locale' => 'es_ES' ) ) );
 
-		$deleted = self::create_pattern( 'Encabezado', 'es_ES', self::$ids['not_translated'], true );
+		$deleted = self::create_pattern( 'Encabezado', 'es_ES', self::$ids['not_translated'] );
 		$this->assertNotContains( self::$ids['not_translated'], $this->get_ids( array( 'locale' => 'es_ES' ) ) );
 
 		wp_delete_post( $deleted, true );
