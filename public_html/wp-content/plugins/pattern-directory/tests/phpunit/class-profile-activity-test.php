@@ -200,8 +200,7 @@ class Profile_Activity_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A translation is its own post with the original as its parent and the same author, so publishing it adds
-	 * nothing.
+	 * A translation is its own post with the original's author, so publishing it adds nothing.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Directory\Profile_Activity\maybe_add_published_activity
 	 */
@@ -215,12 +214,36 @@ class Profile_Activity_Test extends WP_UnitTestCase {
 				'post_parent' => $original_id,
 				'post_title'  => 'Cita y citación estilizadas',
 				'post_status' => 'publish',
-				'meta_input'  => array( 'wpop_locale' => 'es_ES' ),
+				'meta_input'  => array(
+					'wpop_locale'         => 'es_ES',
+					'wpop_is_translation' => true,
+				),
 			)
 		);
 
 		$this->assertCount( 1, $this->calls() );
 		$this->assertSame( $original_id, $this->calls()[0][3]['item_id'] );
+	}
+
+	/**
+	 * Moderators can give any pattern a parent, so a parent alone doesn't make it a translation.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Directory\Profile_Activity\maybe_add_published_activity
+	 */
+	public function test_publishing_a_pattern_with_a_parent_adds_activity(): void {
+		$parent_id  = $this->create_pattern( 'publish' );
+		$pattern_id = $this->create_pattern( 'pending', 'Pricing Table' );
+
+		wp_update_post(
+			array(
+				'ID'          => $pattern_id,
+				'post_parent' => $parent_id,
+			)
+		);
+		$this->set_status( $pattern_id, 'publish' );
+
+		$this->assertCount( 2, $this->calls() );
+		$this->assertSame( $pattern_id, $this->calls()[1][3]['item_id'] );
 	}
 
 	/**
