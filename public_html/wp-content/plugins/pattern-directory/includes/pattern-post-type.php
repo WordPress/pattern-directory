@@ -864,7 +864,7 @@ function filter_patterns_rest_query( $args, $request ) {
 			'value'   => array( $locale, 'en_US' ),
 		);
 
-		// A list of IDs or slugs asks for exactly those, and a translation's slug differs from its original's.
+		// Lists of IDs or slugs ask for exactly those patterns.
 		if ( empty( $args['post__in'] ) && empty( $args['post_name__in'] ) ) {
 			$args['hide_translated_originals'] = true;
 		}

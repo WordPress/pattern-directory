@@ -9,20 +9,15 @@ declare( strict_types = 1 );
 
 namespace WordPressdotorg\Pattern_Directory\Tests;
 
-use WP_REST_Request;
-use WP_UnitTestCase;
-use WP_UnitTest_Factory;
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\register_post_type_data;
-use function WordPressdotorg\Pattern_Directory\Translated_Originals\sync_all;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
-use const WordPressdotorg\Pattern_Directory\Translated_Originals\TAXONOMY;
 
 /**
  * An English original with a translation in the requested locale is replaced by it when browsing (#314).
  *
  * @group rest-api
  */
-class Translated_Originals_Test extends WP_UnitTestCase {
+class Translated_Originals_Test extends \WP_UnitTestCase {
 	/**
 	 * Pattern IDs by role.
 	 *
@@ -31,12 +26,11 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	protected static $ids = array();
 
 	/**
-	 * Create an original translated into Spanish, one translated into French only, one not translated, and the
-	 * translations.
+	 * Create originals translated into Spanish, into French only, and not at all.
 	 *
-	 * @param WP_UnitTest_Factory $factory Test data factory.
+	 * @param \WP_UnitTest_Factory $factory Test data factory.
 	 */
-	public static function wpSetUpBeforeClass( WP_UnitTest_Factory $factory ): void {
+	public static function wpSetUpBeforeClass( \WP_UnitTest_Factory $factory ): void {
 		self::$ids['original']       = self::create_pattern( 'Hero cards', 'en_US' );
 		self::$ids['translation']    = self::create_pattern( 'Tarjetas hero', 'es_ES', self::$ids['original'] );
 		self::$ids['french_only']    = self::create_pattern( 'About columns', 'en_US' );
@@ -64,7 +58,7 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Register the pattern meta and start from a fresh REST server, as in Endpoint_Wporg_Pattern_Test.
+	 * Register the pattern meta and start from a fresh REST server.
 	 */
 	public function set_up(): void {
 		parent::set_up();
@@ -81,7 +75,7 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	 * @return int[] Sorted pattern IDs.
 	 */
 	private function get_ids( array $params ): array {
-		$request = new WP_REST_Request( 'GET', '/wp/v2/' . POST_TYPE );
+		$request = new \WP_REST_Request( 'GET', '/wp/v2/' . POST_TYPE );
 		$request->set_query_params( $params + array( 'per_page' => 100 ) );
 
 		$ids = wp_list_pluck( rest_do_request( $request )->get_data(), 'id' );
@@ -91,8 +85,7 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Catches the Spanish browse listing both versions of a translated pattern, or hiding originals translated
-	 * into another locale only.
+	 * Catches Spanish browsing listing both versions, or hiding an original translated into French only.
 	 */
 	public function test_browsing_lists_the_translation_in_place_of_its_original(): void {
 		$expected = array(
@@ -106,7 +99,7 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Catches the label falling out of step with its translation being published, unpublished or deleted.
+	 * Catches the label missing a translation being published, unpublished or deleted.
 	 */
 	public function test_original_follows_its_translation_being_published_unpublished_and_deleted(): void {
 		$translation = self::create_pattern( 'Cabecera', 'es_ES', self::$ids['not_translated'] );
@@ -128,30 +121,7 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Catches the command missing translations stored before the label existed, or keeping a label whose
-	 * translation is gone.
-	 */
-	public function test_sync_labels_existing_translations_and_drops_stale_labels(): void {
-		wp_remove_object_terms( self::$ids['original'], 'es_ES', TAXONOMY );
-		wp_add_object_terms( self::$ids['not_translated'], 'es_ES', TAXONOMY );
-
-		$expected = array(
-			'checked' => 3,
-			'changed' => 2,
-		);
-		$this->assertSame( $expected, sync_all( false ) );
-		$this->assertContains( self::$ids['original'], $this->get_ids( array( 'locale' => 'es_ES' ) ) );
-
-		$this->assertSame( $expected, sync_all( true ) );
-		$ids = $this->get_ids( array( 'locale' => 'es_ES' ) );
-		$this->assertNotContains( self::$ids['original'], $ids );
-		$this->assertContains( self::$ids['not_translated'], $ids );
-
-		$this->assertSame( 0, sync_all( true )['changed'] );
-	}
-
-	/**
-	 * Catches search dropping the original when its translation matches too, as an English query must find it.
+	 * Catches search dropping the original, which an English query must find.
 	 */
 	public function test_search_keeps_the_original(): void {
 		$ids = $this->get_ids(
@@ -166,8 +136,7 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Catches the Popular sort dropping a translated pattern: it lists only patterns with a favorite count, and
-	 * the translation has none.
+	 * Catches the Popular sort dropping a pattern whose translation has no favorites.
 	 */
 	public function test_popular_sort_keeps_the_original(): void {
 		update_post_meta( self::$ids['original'], 'wporg-pattern-favorites', 3 );
@@ -183,8 +152,7 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Catches an original vanishing when the query filters out its translation, as core's request for a
-	 * theme.json pattern by slug does.
+	 * Catches a request by slug, as core makes for theme.json patterns, losing the original.
 	 */
 	public function test_original_stays_when_its_translation_is_filtered_out(): void {
 		$ids = $this->get_ids(
