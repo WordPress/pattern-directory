@@ -1026,8 +1026,9 @@ function filter_clauses_translated_originals( $clauses, $query ) {
  *
  * One lookup per locale rather than a subquery per listed row: MariaDB rewrites a correlated `NOT EXISTS` into a
  * single pass over every post. The pipeline copies the original's author, status, date, terms and version onto
- * its translations, so a translation passes the same filters and is listed instead. Submitters can set
- * `post_parent` and `wpop_locale` on their own pattern; only the pipeline sets the marker.
+ * its translations, so a translation passes the same filters and is listed instead. Requiring the marker, which
+ * only the pipeline sets, keeps patterns with a parent from elsewhere, set by a moderator or before authors were
+ * stopped from setting one, from hiding it.
  *
  * The lookup takes ~2 s, so the cached list is kept up to date in place (see `update_translated_original_ids()`)
  * rather than rebuilt, and only one request at a time rebuilds a missing one.
