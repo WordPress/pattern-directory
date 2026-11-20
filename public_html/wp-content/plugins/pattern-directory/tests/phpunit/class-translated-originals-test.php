@@ -115,7 +115,7 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Catches the cached list of translated originals outliving a translation being published or unpublished.
+	 * Catches the cached list of translated originals outliving a translation being published, unpublished or deleted.
 	 */
 	public function test_original_follows_its_translation_being_published_and_unpublished(): void {
 		$this->assertContains( self::$ids['not_translated'], $this->get_ids( array( 'locale' => 'es_ES' ) ) );
@@ -129,6 +129,12 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 				'post_status' => 'draft',
 			)
 		);
+		$this->assertContains( self::$ids['not_translated'], $this->get_ids( array( 'locale' => 'es_ES' ) ) );
+
+		$deleted = self::create_pattern( 'Encabezado', 'es_ES', self::$ids['not_translated'], true );
+		$this->assertNotContains( self::$ids['not_translated'], $this->get_ids( array( 'locale' => 'es_ES' ) ) );
+
+		wp_delete_post( $deleted, true );
 		$this->assertContains( self::$ids['not_translated'], $this->get_ids( array( 'locale' => 'es_ES' ) ) );
 	}
 
