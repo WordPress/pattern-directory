@@ -17,8 +17,7 @@ use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\UNLISTED_STATUS;
 
 /**
- * The translation job only loads published originals, so it can't carry a status change away from
- * `publish` to the translations it created earlier.
+ * Translations follow their original's status.
  *
  * @group pattern-translation-status-sync
  */
@@ -88,8 +87,7 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Trashing the original trashes its translations with the meta the scheduled purge deletes them by, and
-	 * restoring it brings them back without that meta.
+	 * Trashing the original trashes its translations, with trash meta, and restoring it restores them.
 	 */
 	public function test_trashing_and_restoring_the_original_carries_its_translations(): void {
 		$translations = $this->translate_all();
@@ -124,8 +122,7 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Scheduling a published original schedules its translations for the same time. The translations still have
-	 * the original's old, past date, which `wp_update_post()` would otherwise turn back into `publish`.
+	 * Scheduling a published original schedules its translations for the same time.
 	 */
 	public function test_scheduling_the_original_schedules_its_translations(): void {
 		$translations = $this->translate_all();
@@ -139,7 +136,7 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Moving a scheduled original to another time moves its translations, though the status stays `future`.
+	 * Rescheduling the original reschedules its translations.
 	 */
 	public function test_rescheduling_the_original_moves_its_translations(): void {
 		$translations = $this->translate_all();
@@ -154,8 +151,7 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Publishing a scheduled original early publishes its translations, which still have the scheduled date that
-	 * `wp_update_post()` would otherwise keep them `future` for.
+	 * Publishing a scheduled original early publishes its translations.
 	 */
 	public function test_publishing_a_scheduled_original_early_publishes_its_translations(): void {
 		$translations = $this->translate_all();
@@ -170,7 +166,7 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A submitter can point `post_parent` at someone else's pattern; that doesn't make their pattern a translation.
+	 * A pattern with the original as its parent but no translation marker is left alone.
 	 */
 	public function test_pattern_claiming_the_original_as_parent_is_left_alone(): void {
 		$claimant = self::factory()->post->create(
@@ -200,8 +196,7 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A translation a moderator took down on its own stays down when its original changes status, is trashed and
-	 * restored.
+	 * A translation a moderator took down stays down through its original's status changes.
 	 *
 	 * @dataProvider data_takedown_statuses
 	 *
@@ -237,7 +232,7 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Catches the job republishing a translation a moderator unlisted on its own, or no longer updating its wording.
+	 * Catches the job republishing a translation a moderator unlisted, or no longer updating its wording.
 	 */
 	public function test_job_updates_a_translation_taken_down_on_its_own_but_keeps_it_down(): void {
 		list( $taken_down ) = $this->translate_all();
@@ -253,8 +248,7 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Catches a queued chunk writing a translation with the `publish` status it cached before another request
-	 * unlisted the original.
+	 * Catches a queued chunk writing a translation for an original unlisted since it was loaded.
 	 */
 	public function test_job_skips_an_original_unpublished_after_it_was_loaded(): void {
 		global $wpdb;
@@ -269,8 +263,7 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Following the original changes only the status: the stored bytes, dates and slug stay as the job wrote them,
-	 * also when the moderator can't post unfiltered HTML.
+	 * Following the original changes only the status, also when the moderator can't post unfiltered HTML.
 	 */
 	public function test_status_sync_keeps_the_stored_translation(): void {
 		$translation_id = create_or_update_translated_pattern(

@@ -31,7 +31,7 @@ const TRANSLATED_TAXONOMIES = array(
 );
 
 /**
- * Meta key marking a translation that left `publish` because its original did, so it comes back with it.
+ * Marks a translation that left `publish` because its original did.
  */
 const STATUS_FROM_ORIGINAL = '_wpop_status_from_original';
 
@@ -101,7 +101,7 @@ function create_or_update_translated_pattern( Pattern $pattern, ?bool &$written 
 
 	$parent = false;
 	if ( $pattern->parent ) {
-		// A queued chunk runs for minutes, so the original's cached status can be out of date.
+		// A chunk runs for minutes, so the cached status may be stale.
 		clean_post_cache( $pattern->parent->ID );
 		$parent = get_post( $pattern->parent->ID );
 
@@ -153,7 +153,7 @@ function create_or_update_translated_pattern( Pattern $pattern, ?bool &$written 
 		unset( $args['ID'] );
 	}
 
-	// A moderator took this translation down on its own: it gets the new wording, but stays down.
+	// Taken down by a moderator: new wording, same status.
 	if ( $existing && ! is_following_original( $existing ) ) {
 		if ( 'trash' === $existing->post_status ) {
 			return $existing->ID;
@@ -272,9 +272,6 @@ function get_term_ids( int $post_id, string $taxonomy ): array {
 /**
  * The translations this pipeline stored for an English original, in any status.
  *
- * Requires `wpop_is_translation` for the same reason as `Pattern::find_existing_translation()`: any submitter
- * can point `post_parent` at someone else's pattern.
- *
  * @param int $parent_id The English original's post ID.
  * @return int[] Translation post IDs.
  */
@@ -287,7 +284,7 @@ function get_translation_ids( int $parent_id ): array {
 		array(
 			'post_type'      => POST_TYPE,
 			'post_parent'    => $parent_id,
-			// `any` leaves out trash, which a translation restored with its original is in.
+			// Not `any`, which leaves out trash.
 			'post_status'    => array_keys( get_post_stati() ),
 			'posts_per_page' => -1,
 			'fields'         => 'ids',
@@ -304,22 +301,18 @@ function get_translation_ids( int $parent_id ): array {
 /**
  * Give an English original's translations its new status.
  *
- * The job copies the original's status when it writes a translation, but it only loads published originals.
- * Without this, unlisting, trashing or un-approving an original leaves its translations published.
- *
  * @param string   $new_status New post status.
  * @param string   $old_status Old post status.
  * @param \WP_Post $post       Post whose status changed.
  */
 function sync_translation_statuses( $new_status, $old_status, $post ) {
-	// A scheduled original can move to another time without changing its status.
+	// Rescheduling keeps `future` but changes the date.
 	$unchanged = $new_status === $old_status && 'future' !== $new_status;
 
 	if ( $unchanged || 'new' === $old_status || POST_TYPE !== $post->post_type ) {
 		return;
 	}
 
-	// A translation follows its original, never the other way round.
 	if ( get_post_meta( $post->ID, 'wpop_is_translation', true ) ) {
 		return;
 	}
@@ -331,10 +324,7 @@ function sync_translation_statuses( $new_status, $old_status, $post ) {
 add_action( 'transition_post_status', __NAMESPACE__ . '\sync_translation_statuses', 10, 3 );
 
 /**
- * Whether a translation follows its original's status.
- *
- * It does while it's public, or while it holds a status its original gave it. A translation a moderator took
- * out of `publish` on its own doesn't: the status sync and the import job both leave it as it is.
+ * Whether a translation follows its original's status: while it's public, or holds a status its original gave it.
  *
  * @param \WP_Post $translation The translation.
  * @return bool
@@ -345,7 +335,7 @@ function is_following_original( \WP_Post $translation ): bool {
 }
 
 /**
- * Whether `wp_insert_post()` keeps a status for a post with this date, rather than switching `publish` and `future`.
+ * Whether `wp_insert_post()` keeps this status for this date, rather than switching `publish` and `future`.
  *
  * @param string $status   Post status.
  * @param string $date_gmt Post date, in GMT.
@@ -362,7 +352,7 @@ function status_holds_for_date( string $status, string $date_gmt ): bool {
 }
 
 /**
- * The translation the status sync is writing, so `forget_status_from_original()` can tell its writes from a moderator's.
+ * The translation the status sync is writing, so its writes aren't taken for a moderator's.
  *
  * @param int|null $translation_id Optional. The translation to record, or 0 once done.
  * @return int The translation being written, or 0.
@@ -378,12 +368,7 @@ function translation_being_synced( ?int $translation_id = null ): int {
 }
 
 /**
- * Give a translation its original's status, or only say what would change.
- *
- * Trash goes through `wp_trash_post()`, so the scheduled purge deletes translations along with their original.
- * The original's dates come along, as the job copies them too, because `wp_update_post()` picks `publish` or
- * `future` by date. An original whose date no longer fits its status, like a `future` one past its time, is
- * skipped: the translation can't hold that pair, and the original's own publish brings the sync back.
+ * Give a translation its original's status and dates, or only report the change.
  *
  * @param \WP_Post $translation The translation.
  * @param \WP_Post $original    The translation's English original.
@@ -414,7 +399,7 @@ function set_translation_status( \WP_Post $translation, \WP_Post $original, bool
 		wp_trash_post( $translation->ID );
 	} else {
 		if ( 'trash' === $from ) {
-			// Clears the trash meta, so the purge doesn't delete a translation whose original was restored.
+			// Clears the trash meta, so the purge spares it.
 			wp_untrash_post( $translation->ID );
 		}
 
@@ -444,7 +429,7 @@ function set_translation_status( \WP_Post $translation, \WP_Post $original, bool
 }
 
 /**
- * Drop the mark once anyone but the status sync changes a translation's status, so it no longer follows its original.
+ * Drop the mark when anyone but the status sync changes a translation's status.
  *
  * @param string   $new_status New post status.
  * @param string   $old_status Old post status.

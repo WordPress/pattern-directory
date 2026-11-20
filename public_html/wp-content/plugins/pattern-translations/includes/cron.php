@@ -100,7 +100,7 @@ function pattern_import_translations_to_directory( $pattern_ids = array() ) {
 	log_message( sprintf( 'Processing %d Patterns in %d locales.', count( $pattern_ids ), count( $locales ) ) );
 
 	foreach ( $pattern_ids as $i => $pattern_id ) {
-		// Queued chunks run hours later; by then an original may be trashed, deleted, or unlisted.
+		// Queued chunks run hours later, when the original may be gone.
 		if ( 'publish' !== get_post_status( $pattern_id ) ) {
 			continue;
 		}
