@@ -31,9 +31,9 @@ add_filter( 'user_has_cap', __NAMESPACE__ . '\set_pattern_caps' );
 add_filter( 'map_meta_cap', __NAMESPACE__ . '\protect_moderated_patterns', 10, 4 );
 add_filter( 'posts_orderby', __NAMESPACE__ . '\filter_orderby_locale', 10, 2 );
 add_filter( 'posts_clauses', __NAMESPACE__ . '\filter_clauses_translated_originals', PHP_INT_MAX, 2 );
-add_action( 'transition_post_status', __NAMESPACE__ . '\flush_translated_original_ids', 10, 3 );
-add_action( 'before_delete_post', __NAMESPACE__ . '\flush_translated_original_ids_on_delete', 10, 2 );
-add_action( 'deleted_post', __NAMESPACE__ . '\flush_translated_original_ids_on_delete', 10, 2 );
+add_action( 'transition_post_status', __NAMESPACE__ . '\update_translated_original_ids', 10, 3 );
+add_action( 'before_delete_post', __NAMESPACE__ . '\update_translated_original_ids_on_delete', 10, 2 );
+add_action( 'deleted_post', __NAMESPACE__ . '\update_translated_original_ids_on_delete', 10, 2 );
 add_action( 'init', __NAMESPACE__ . '\add_preview_endpoint' );
 add_action( 'setup_theme', __NAMESPACE__ . '\setup_preview_theme', 1 );
 add_filter( 'request', __NAMESPACE__ . '\limit_preview_query_var' );
@@ -1029,7 +1029,8 @@ function filter_clauses_translated_originals( $clauses, $query ) {
  * its translations, so a translation passes the same filters and is listed instead. Submitters can set
  * `post_parent` and `wpop_locale` on their own pattern; only the pipeline sets the marker.
  *
- * Cached until a translation into the locale is published or unpublished, see `flush_translated_original_ids()`.
+ * The lookup takes ~2 s, so the cached list is kept up to date in place (see `update_translated_original_ids()`)
+ * rather than rebuilt, and only one request at a time rebuilds a missing one.
  *
  * @param string $locale The requested locale.
  * @return int[] Original pattern IDs.
@@ -1040,60 +1041,65 @@ function get_translated_original_ids( string $locale ): array {
 	$cache_key = 'translated-originals:' . $locale;
 	$ids       = wp_cache_get( $cache_key, 'wporg-patterns' );
 
-	if ( false === $ids ) {
-		$ids = $wpdb->get_col(
-			$wpdb->prepare(
-				// Published patterns first, by the `post_type`/`post_status` indexes: starting from the marker meta scans all of postmeta.
-				"SELECT DISTINCT translation.post_parent
-				FROM {$wpdb->posts} AS translation
-				STRAIGHT_JOIN {$wpdb->postmeta} AS translation_locale ON ( translation_locale.post_id = translation.ID AND translation_locale.meta_key = 'wpop_locale' AND translation_locale.meta_value = %s )
-				STRAIGHT_JOIN {$wpdb->postmeta} AS translation_marker ON ( translation_marker.post_id = translation.ID AND translation_marker.meta_key = 'wpop_is_translation' AND translation_marker.meta_value = '1' )
-				WHERE translation.post_type = %s AND translation.post_status = 'publish' AND translation.post_parent > 0",
-				$locale,
-				POST_TYPE
-			)
-		);
+	if ( false !== $ids ) {
+		return $ids;
+	}
 
-		// A failed lookup isn't cached, so the next request retries it.
-		if ( $wpdb->last_error ) {
-			return array();
-		}
+	// Requests arriving during a rebuild list both versions, as without this filter, rather than run it again.
+	if ( ! wp_cache_add( $cache_key . ':lock', 1, 'wporg-patterns', MINUTE_IN_SECONDS ) ) {
+		return array();
+	}
 
+	$ids = $wpdb->get_col(
+		$wpdb->prepare(
+			// Published patterns first, by the `post_type`/`post_status` indexes: starting from the marker meta scans all of postmeta.
+			"SELECT DISTINCT translation.post_parent
+			FROM {$wpdb->posts} AS translation
+			STRAIGHT_JOIN {$wpdb->postmeta} AS translation_locale ON ( translation_locale.post_id = translation.ID AND translation_locale.meta_key = 'wpop_locale' AND translation_locale.meta_value = %s )
+			STRAIGHT_JOIN {$wpdb->postmeta} AS translation_marker ON ( translation_marker.post_id = translation.ID AND translation_marker.meta_key = 'wpop_is_translation' AND translation_marker.meta_value = '1' )
+			WHERE translation.post_type = %s AND translation.post_status = 'publish' AND translation.post_parent > 0",
+			$locale,
+			POST_TYPE
+		)
+	);
+
+	// A failed lookup isn't cached, so the next request retries it.
+	if ( ! $wpdb->last_error ) {
 		$ids = array_map( 'intval', $ids );
 		wp_cache_set( $cache_key, $ids, 'wporg-patterns', DAY_IN_SECONDS );
+	} else {
+		$ids = array();
 	}
+
+	wp_cache_delete( $cache_key . ':lock', 'wporg-patterns' );
 
 	return $ids;
 }
 
 /**
- * Drop a locale's cached list of translated originals when a translation into it is published or unpublished.
+ * Add a translation's original to its locale's cached list when it's published, and remove it when it's unpublished.
  *
  * @param string   $new_status New post status.
  * @param string   $old_status Old post status.
  * @param \WP_Post $post       Post whose status changed.
  */
-function flush_translated_original_ids( $new_status, $old_status, $post ) {
+function update_translated_original_ids( $new_status, $old_status, $post ) {
 	if ( $new_status === $old_status || ! in_array( 'publish', array( $new_status, $old_status ), true ) ) {
 		return;
 	}
 
-	$locale = get_translation_locale( $post );
-	if ( $locale ) {
-		wp_cache_delete( 'translated-originals:' . $locale, 'wporg-patterns' );
-	}
+	set_translated_original( get_translation_locale( $post ), (int) $post->post_parent, 'publish' === $new_status );
 }
 
 /**
- * Drop a locale's cached list of translated originals once a published translation into it is deleted outright.
+ * Remove a published translation's original from its locale's cached list once the translation is deleted outright.
  *
- * The locale is read before deletion, as core removes the meta first. The list is dropped after, so a request in
- * between can't cache the original as translated again.
+ * The locale is read before deletion, as core removes the meta first.
  *
  * @param int      $post_id Post ID.
  * @param \WP_Post $post    Post being deleted.
  */
-function flush_translated_original_ids_on_delete( $post_id, $post ) {
+function update_translated_original_ids_on_delete( $post_id, $post ) {
 	static $locales = array();
 
 	if ( 'before_delete_post' === current_action() ) {
@@ -1104,9 +1110,30 @@ function flush_translated_original_ids_on_delete( $post_id, $post ) {
 	}
 
 	if ( ! empty( $locales[ $post_id ] ) ) {
-		wp_cache_delete( 'translated-originals:' . $locales[ $post_id ], 'wporg-patterns' );
+		set_translated_original( $locales[ $post_id ], (int) $post->post_parent, false );
 	}
 	unset( $locales[ $post_id ] );
+}
+
+/**
+ * Add an original to, or remove it from, a locale's cached list of translated originals.
+ *
+ * A list that isn't cached is left for the next request to build.
+ *
+ * @param string $locale      The translation's locale, or an empty string to do nothing.
+ * @param int    $original_id The original's post ID.
+ * @param bool   $translated  Whether the original now has a published translation into the locale.
+ */
+function set_translated_original( string $locale, int $original_id, bool $translated ) {
+	$cache_key = 'translated-originals:' . $locale;
+	$ids       = $locale ? wp_cache_get( $cache_key, 'wporg-patterns' ) : false;
+
+	if ( false === $ids ) {
+		return;
+	}
+
+	$ids = $translated ? array_merge( $ids, array( $original_id ) ) : array_diff( $ids, array( $original_id ) );
+	wp_cache_set( $cache_key, array_values( array_unique( $ids ) ), 'wporg-patterns', DAY_IN_SECONDS );
 }
 
 /**

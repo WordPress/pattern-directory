@@ -139,6 +139,19 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Catches every request that misses the cached list running the ~2 s lookup at once, not only the first.
+	 */
+	public function test_requests_during_a_rebuild_list_both_versions(): void {
+		wp_cache_delete( 'translated-originals:es_ES', 'wporg-patterns' );
+		wp_cache_add( 'translated-originals:es_ES:lock', 1, 'wporg-patterns' );
+
+		$ids = $this->get_ids( array( 'locale' => 'es_ES' ) );
+
+		$this->assertContains( self::$ids['original'], $ids );
+		$this->assertContains( self::$ids['translation'], $ids );
+	}
+
+	/**
 	 * Catches search dropping the original when its translation matches too, as an English query must find it.
 	 */
 	public function test_search_keeps_the_original(): void {
