@@ -239,9 +239,9 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Catches the job writing over a translation a moderator unlisted on its own, which republishes it.
+	 * Catches the job republishing a translation a moderator unlisted on its own, or no longer updating its wording.
 	 */
-	public function test_job_leaves_a_translation_taken_down_on_its_own(): void {
+	public function test_job_updates_a_translation_taken_down_on_its_own_but_keeps_it_down(): void {
 		list( $taken_down ) = $this->translate_all();
 		$this->set_status( $taken_down, UNLISTED_STATUS );
 
@@ -249,7 +249,8 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 		$pattern->ID = $taken_down;
 
 		$this->assertSame( $taken_down, create_or_update_translated_pattern( $pattern, $written ) );
-		$this->assertFalse( $written );
+		$this->assertTrue( $written );
+		$this->assertSame( 'Nouveau titre', get_post( $taken_down )->post_title );
 		$this->assertSame( UNLISTED_STATUS, get_post_status( $taken_down ) );
 	}
 

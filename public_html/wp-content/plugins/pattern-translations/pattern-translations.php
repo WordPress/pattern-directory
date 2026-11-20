@@ -113,11 +113,7 @@ function create_or_update_translated_pattern( Pattern $pattern, ?bool &$written 
 		}
 	}
 
-	// A moderator took this translation down on its own, so it stays down.
 	$existing = $pattern->ID ? get_post( $pattern->ID ) : null;
-	if ( $existing && ! is_following_original( $existing ) ) {
-		return $existing->ID;
-	}
 
 	$args = array(
 		'ID'                    => $pattern->ID,
@@ -155,6 +151,15 @@ function create_or_update_translated_pattern( Pattern $pattern, ?bool &$written 
 
 	if ( ! $args['ID'] ) {
 		unset( $args['ID'] );
+	}
+
+	// A moderator took this translation down on its own: it gets the new wording, but stays down.
+	if ( $existing && ! is_following_original( $existing ) ) {
+		if ( 'trash' === $existing->post_status ) {
+			return $existing->ID;
+		}
+
+		$args['post_status'] = $existing->post_status;
 	}
 
 	// Each write fires the save hooks, and Jetpack Sync sends the whole post.
