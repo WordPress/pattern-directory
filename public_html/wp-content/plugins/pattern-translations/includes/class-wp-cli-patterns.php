@@ -9,6 +9,7 @@ namespace WordPressdotorg\Pattern_Translations;
 
 use WP_CLI;
 use WP_CLI_Command;
+use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 WP_CLI::add_command( 'patterns', __NAMESPACE__ . '\WP_CLI_Patterns' );
 
@@ -138,13 +139,54 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 	 * @synopsis [--dry-run]
 	 */
 	public function sync_translation_status( $_, $args ) {
-		$dry_run = WP_CLI\Utils\get_flag_value( $args, 'dry-run', false );
+		$apply = ! WP_CLI\Utils\get_flag_value( $args, 'dry-run', false );
 
-		if ( $dry_run ) {
+		if ( ! $apply ) {
 			WP_CLI::log( 'Dry run, nothing will change.' );
 		}
 
-		foreach ( sync_all_translation_statuses( ! $dry_run ) as $change => $count ) {
+		$translation_ids = get_posts(
+			array(
+				'post_type'      => POST_TYPE,
+				'post_status'    => array_keys( get_post_stati() ),
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+				'orderby'        => 'ID',
+				'order'          => 'ASC',
+				'meta_query'     => array(
+					array(
+						'key'   => 'wpop_is_translation',
+						'value' => 1,
+					),
+				),
+			)
+		);
+
+		$counts = array( 'checked' => count( $translation_ids ) );
+
+		foreach ( $translation_ids as $i => $translation_id ) {
+			$translation = get_post( $translation_id );
+			$original    = $translation->post_parent ? get_post( $translation->post_parent ) : null;
+
+			if ( ! $original || POST_TYPE !== $original->post_type || get_post_meta( $original->ID, 'wpop_is_translation', true ) ) {
+				$change = 'trash' === $translation->post_status ? null : "{$translation->post_status} to trash, original missing";
+				if ( $change && $apply && ! wp_trash_post( $translation_id ) ) {
+					$change .= ', failed';
+				}
+			} else {
+				$change = set_translation_status( $translation, $original, $apply );
+			}
+
+			if ( $change ) {
+				$counts[ $change ] = ( $counts[ $change ] ?? 0 ) + 1;
+			}
+
+			if ( 0 === ( $i + 1 ) % 500 ) {
+				Cron\clear_memory_heavy_variables();
+			}
+		}
+
+		foreach ( $counts as $change => $count ) {
 			WP_CLI::log( "{$change}: {$count}" );
 		}
 	}

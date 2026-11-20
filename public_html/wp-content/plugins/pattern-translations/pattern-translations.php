@@ -479,59 +479,6 @@ function trash_translations_of_deleted_original( $post_id, $post ) {
 add_action( 'before_delete_post', __NAMESPACE__ . '\trash_translations_of_deleted_original', 10, 2 );
 
 /**
- * Bring stored translations in line with their originals' status, for translations written before the sync above.
- *
- * A translation whose original no longer exists is trashed, as it would have been when the original was deleted.
- *
- * @param bool $apply Whether to change anything, or only count.
- * @return int[] Number of translations checked, then the number per change, keyed by change.
- */
-function sync_all_translation_statuses( bool $apply ): array {
-	$translation_ids = get_posts(
-		array(
-			'post_type'      => POST_TYPE,
-			'post_status'    => array_keys( get_post_stati() ),
-			'posts_per_page' => -1,
-			'fields'         => 'ids',
-			'orderby'        => 'ID',
-			'order'          => 'ASC',
-			'meta_query'     => array(
-				array(
-					'key'   => 'wpop_is_translation',
-					'value' => 1,
-				),
-			),
-		)
-	);
-
-	$counts = array( 'checked' => count( $translation_ids ) );
-
-	foreach ( $translation_ids as $i => $translation_id ) {
-		$translation = get_post( $translation_id );
-		$original    = $translation->post_parent ? get_post( $translation->post_parent ) : null;
-
-		if ( ! $original || POST_TYPE !== $original->post_type || get_post_meta( $original->ID, 'wpop_is_translation', true ) ) {
-			$change = 'trash' === $translation->post_status ? null : "{$translation->post_status} to trash, original missing";
-			if ( $change && $apply && ! wp_trash_post( $translation_id ) ) {
-				$change .= ', failed';
-			}
-		} else {
-			$change = set_translation_status( $translation, $original, $apply );
-		}
-
-		if ( $change ) {
-			$counts[ $change ] = ( $counts[ $change ] ?? 0 ) + 1;
-		}
-
-		if ( 0 === ( $i + 1 ) % 500 ) {
-			Cron\clear_memory_heavy_variables();
-		}
-	}
-
-	return $counts;
-}
-
-/**
  * Translate term names into the current site locale.
  *
  * @param WP_Term $term The WP_Term object being loaded.

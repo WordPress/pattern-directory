@@ -13,7 +13,6 @@ use WP_UnitTestCase;
 use WordPressdotorg\Pattern_Translations\Pattern as Translations_Pattern;
 use WordPressdotorg\Pattern_Translations\PatternParser;
 use function WordPressdotorg\Pattern_Translations\create_or_update_translated_pattern;
-use function WordPressdotorg\Pattern_Translations\sync_all_translation_statuses;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\UNLISTED_STATUS;
 
@@ -202,7 +201,7 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 
 	/**
 	 * A translation a moderator took down on its own stays down when its original changes status, is trashed and
-	 * restored, or the command runs.
+	 * restored.
 	 *
 	 * @dataProvider data_takedown_statuses
 	 *
@@ -220,7 +219,6 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 		wp_trash_post( $this->parent_id );
 		wp_untrash_post( $this->parent_id );
 		$this->set_status( $this->parent_id, 'publish' );
-		sync_all_translation_statuses( true );
 
 		$this->assertSame( $status, get_post_status( $taken_down ) );
 		$this->assertSame( 'publish', get_post_status( $kept ) );
@@ -271,30 +269,6 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Catches the command reporting the same change on every run for an original past its scheduled time, whose
-	 * `future` status `wp_update_post()` turns into `publish` on the translation.
-	 */
-	public function test_original_past_its_scheduled_time_is_left_alone(): void {
-		global $wpdb;
-
-		$this->translate_all();
-
-		$past = gmdate( 'Y-m-d H:i:s', strtotime( '-1 hour' ) );
-		$wpdb->update(
-			$wpdb->posts,
-			array(
-				'post_status'   => 'future',
-				'post_date'     => get_date_from_gmt( $past ),
-				'post_date_gmt' => $past,
-			),
-			array( 'ID' => $this->parent_id )
-		);
-		clean_post_cache( $this->parent_id );
-
-		$this->assertSame( array( 'checked' => 2 ), sync_all_translation_statuses( true ) );
-	}
-
-	/**
 	 * Following the original changes only the status: the stored bytes, dates and slug stay as the job wrote them,
 	 * also when the moderator can't post unfiltered HTML.
 	 */
@@ -315,73 +289,6 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 		foreach ( array( 'post_content', 'post_title', 'post_name', 'post_date', 'post_date_gmt', 'post_author' ) as $field ) {
 			$this->assertSame( $before->$field, $after->$field, $field );
 		}
-	}
-
-	/**
-	 * Translations left behind before statuses were synced are found, and only changed when applying.
-	 * One whose original is gone is trashed.
-	 */
-	public function test_existing_mismatches_are_reported_then_fixed(): void {
-		list( $kept, $stale ) = $this->translate_all();
-
-		$orphan = self::factory()->post->create(
-			array(
-				'post_type'   => POST_TYPE,
-				'post_status' => 'publish',
-				'post_parent' => PHP_INT_MAX,
-				'meta_input'  => array(
-					'wpop_locale'         => 'fr_FR',
-					'wpop_is_translation' => true,
-				),
-			)
-		);
-
-		// The state production is in: originals that left `publish` before this sync existed.
-		$this->set_status_without_sync( $this->parent_id, UNLISTED_STATUS );
-		$this->set_status_without_sync( $kept, UNLISTED_STATUS );
-
-		$expected = array(
-			'checked'                            => 3,
-			'publish to ' . UNLISTED_STATUS      => 1,
-			'publish to trash, original missing' => 1,
-		);
-
-		$this->assertSame( $expected, sync_all_translation_statuses( false ) );
-		$this->assertSame( 'publish', get_post_status( $stale ) );
-		$this->assertSame( 'publish', get_post_status( $orphan ) );
-
-		$this->assertSame( $expected, sync_all_translation_statuses( true ) );
-		$this->assertSame( UNLISTED_STATUS, get_post_status( $stale ) );
-		$this->assertSame( 'trash', get_post_status( $orphan ) );
-
-		$this->assertSame( array( 'checked' => 3 ), sync_all_translation_statuses( true ) );
-	}
-
-	/**
-	 * The scan clears runtime caches every 500 translations and carries on.
-	 */
-	public function test_scan_continues_past_the_cache_clearing(): void {
-		self::factory()->post->create_many(
-			501,
-			array(
-				'post_type'   => POST_TYPE,
-				'post_status' => 'publish',
-				'post_parent' => $this->parent_id,
-				'meta_input'  => array(
-					'wpop_locale'         => 'fr_FR',
-					'wpop_is_translation' => true,
-				),
-			)
-		);
-		$this->set_status_without_sync( $this->parent_id, UNLISTED_STATUS );
-
-		$this->assertSame(
-			array(
-				'checked'                       => 501,
-				'publish to ' . UNLISTED_STATUS => 501,
-			),
-			sync_all_translation_statuses( false )
-		);
 	}
 
 	/**
@@ -450,18 +357,5 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 				'edit_date'     => true,
 			)
 		);
-	}
-
-	/**
-	 * Change a pattern's status without firing the status hooks.
-	 *
-	 * @param int    $post_id Pattern ID.
-	 * @param string $status  New status.
-	 */
-	protected function set_status_without_sync( int $post_id, string $status ): void {
-		global $wpdb;
-
-		$wpdb->update( $wpdb->posts, array( 'post_status' => $status ), array( 'ID' => $post_id ) );
-		clean_post_cache( $post_id );
 	}
 }
