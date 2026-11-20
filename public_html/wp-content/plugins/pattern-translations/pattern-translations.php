@@ -101,7 +101,7 @@ function create_or_update_translated_pattern( Pattern $pattern, ?bool &$written 
 
 	$parent = false;
 	if ( $pattern->parent ) {
-		// A chunk runs for minutes, so the cached status may be stale; `clean_post_cache()` would invalidate every cached query.
+		// The chunk's cached status may be stale. Not `clean_post_cache()`, which resets every cached query.
 		wp_cache_delete( $pattern->parent->ID, 'posts' );
 		$parent = get_post( $pattern->parent->ID );
 
