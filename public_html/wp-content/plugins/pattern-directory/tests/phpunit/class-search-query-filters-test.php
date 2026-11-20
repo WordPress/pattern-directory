@@ -120,7 +120,14 @@ class Search_Query_Filters_Test extends WP_UnitTestCase {
 				'date',
 			),
 			'by title'            => array( array( 'orderby' => 'title' ), 'title' ),
-			'searching for 0'     => array( array( 'search' => '0' ), 'relevance' ),
+			'searching for 0'     => array(
+				array(
+					'search'  => '0',
+					'orderby' => 'date',
+					'order'   => 'desc',
+				),
+				'relevance',
+			),
 		);
 	}
 }
