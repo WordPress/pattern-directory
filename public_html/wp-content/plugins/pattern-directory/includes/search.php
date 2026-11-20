@@ -52,9 +52,13 @@ function sync_pattern_meta( $post_meta_safelist ) {
  * @return bool
  */
 function should_handle_query( $handle_query, $query ) {
-	// The search API allows no query type that can check every block against `allowed_blocks`, so MySQL does that.
+	/*
+	 * MySQL handles searches the index can't filter: the search API has no query type that checks every block
+	 * against `allowed_blocks`, and the index has no author login for authors who aren't members of the site.
+	 */
 	return defined( 'REST_REQUEST' ) && REST_REQUEST && $query->is_search() && POST_TYPE === $query->get( 'post_type' )
-		&& empty( $query->get( 'meta_query' )['allowed_blocks'] );
+		&& empty( $query->get( 'meta_query' )['allowed_blocks'] )
+		&& empty( $query->get( 'author' ) ) && empty( $query->get( 'author__in' ) );
 }
 
 /**
@@ -192,9 +196,9 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 }
 
 /**
- * Convert the query's author and ID restrictions into Elasticsearch filter clauses.
+ * Convert the query's ID restriction into Elasticsearch filter clauses.
  *
- * The MySQL query applies these through `author` and `post__in`, which an ES search otherwise ignores.
+ * The MySQL query applies it through `post__in`, which an ES search otherwise ignores.
  *
  * @param array $query_vars The query's vars.
  *
@@ -206,34 +210,6 @@ function get_query_filters( $query_vars ) {
 	// `post__in` is also how the REST filters say "match nothing", with an ID of 0 or -1.
 	if ( ! empty( $query_vars['post__in'] ) ) {
 		$clauses[] = array( 'terms' => array( 'post_id' => array_map( 'intval', (array) $query_vars['post__in'] ) ) );
-	}
-
-	/*
-	 * `author_name` resolves to `author`, the REST `author` param to `author__in`. The index stores logins, not IDs.
-	 * A negative `author` excludes, which no search request sends.
-	 */
-	$author_ids = array_merge(
-		wp_parse_id_list( $query_vars['author__in'] ?? array() ),
-		array_filter(
-			array_map( 'intval', wp_parse_list( $query_vars['author'] ?? '' ) ),
-			function ( $author_id ) {
-				return $author_id > 0;
-			}
-		)
-	);
-	if ( $author_ids ) {
-		// Not `get_users()`, which on multisite only returns members of the current site.
-		$logins = array();
-		foreach ( array_unique( $author_ids ) as $author_id ) {
-			$user = get_userdata( $author_id );
-			if ( $user ) {
-				$logins[] = $user->user_login;
-			}
-		}
-
-		$clauses[] = $logins
-			? array( 'terms' => array( 'author_login' => $logins ) )
-			: array( 'terms' => array( 'post_id' => array( 0 ) ) );
 	}
 
 	return $clauses;
