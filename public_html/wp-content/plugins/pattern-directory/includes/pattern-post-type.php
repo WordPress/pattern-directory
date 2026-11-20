@@ -863,6 +863,11 @@ function filter_patterns_rest_query( $args, $request ) {
 			// Order in value determines result order.
 			'value'   => array( $locale, 'en_US' ),
 		);
+
+		// A list of IDs or slugs asks for exactly those, and a translation's slug differs from its original's.
+		if ( empty( $args['post__in'] ) && empty( $args['post_name__in'] ) ) {
+			$args['hide_translated_originals'] = true;
+		}
 	}
 
 	// Use the `author_name` passed in to the API to request patterns by an author slug, not just an ID.

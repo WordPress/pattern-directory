@@ -123,6 +123,33 @@ class WP_CLI_Patterns extends WP_CLI_Command {
 	}
 
 	/**
+	 * Label English originals with the locales they have published translations into.
+	 *
+	 * Browsing a locale leaves out the originals labelled with it, as their translation is listed instead. Labels
+	 * are kept current as translations are published; this sets them for existing translations, and repairs any
+	 * that fell out of step. With --dry-run, only counts what would change.
+	 *
+	 * @param array $_    Positional CLI arguments.
+	 * @param array $args Named CLI arguments.
+	 * @return void
+	 *
+	 * @example wp --url=https://wordpress.org/patterns/ patterns sync-translated-originals --dry-run
+	 * @subcommand sync-translated-originals
+	 * @synopsis [--dry-run]
+	 */
+	public function sync_translated_originals( $_, $args ) {
+		$dry_run = WP_CLI\Utils\get_flag_value( $args, 'dry-run', false );
+
+		if ( $dry_run ) {
+			WP_CLI::log( 'Dry run, nothing will change.' );
+		}
+
+		foreach ( \WordPressdotorg\Pattern_Directory\Translated_Originals\sync_all( ! $dry_run ) as $count => $value ) {
+			WP_CLI::log( "{$count}: {$value}" );
+		}
+	}
+
+	/**
 	 * Select patterns using the shared CLI flags.
 	 *
 	 * @param array $args Named CLI arguments.
