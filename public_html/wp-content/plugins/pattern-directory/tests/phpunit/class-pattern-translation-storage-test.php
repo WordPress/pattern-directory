@@ -198,25 +198,6 @@ class Pattern_Translation_Storage_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A change to only the parent's status is copied.
-	 *
-	 * Status changes reach translations when they happen (see `Pattern_Translation_Status_Sync_Test`), so the
-	 * status is changed without hooks here, as for translations stored before that sync.
-	 */
-	public function test_parent_status_change_is_copied(): void {
-		global $wpdb;
-
-		$post_id = create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Titre' ) ) );
-
-		$wpdb->update( $wpdb->posts, array( 'post_status' => 'draft' ), array( 'ID' => self::$parent_id ) );
-		clean_post_cache( self::$parent_id );
-		create_or_update_translated_pattern( $this->translate( array( 'Title' => 'Titre' ), $post_id ), $written );
-
-		$this->assertTrue( $written );
-		$this->assertSame( 'draft', get_post_status( $post_id ) );
-	}
-
-	/**
 	 * Run the parent through the parser with the given translator strings, as the job does.
 	 *
 	 * @param array $replacements Translations keyed by original string.

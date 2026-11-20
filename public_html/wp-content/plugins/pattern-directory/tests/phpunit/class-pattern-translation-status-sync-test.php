@@ -201,12 +201,20 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * A translation trashed on its own stays trashed when its original changes status, is trashed and restored, or
-	 * the command runs, since the job stores a replacement that restoring it would duplicate.
+	 * A translation a moderator took down on its own stays down when its original changes status, is trashed and
+	 * restored, or the command runs.
+	 *
+	 * @dataProvider data_takedown_statuses
+	 *
+	 * @param string $status The status the moderator gave the translation.
 	 */
-	public function test_translation_trashed_on_its_own_stays_trashed(): void {
-		list( $trashed, $kept ) = $this->translate_all();
-		wp_trash_post( $trashed );
+	public function test_translation_taken_down_on_its_own_stays_down( string $status ): void {
+		list( $taken_down, $kept ) = $this->translate_all();
+		if ( 'trash' === $status ) {
+			wp_trash_post( $taken_down );
+		} else {
+			$this->set_status( $taken_down, $status );
+		}
 
 		$this->set_status( $this->parent_id, UNLISTED_STATUS );
 		wp_trash_post( $this->parent_id );
@@ -214,8 +222,75 @@ class Pattern_Translation_Status_Sync_Test extends WP_UnitTestCase {
 		$this->set_status( $this->parent_id, 'publish' );
 		sync_all_translation_statuses( true );
 
-		$this->assertSame( 'trash', get_post_status( $trashed ) );
+		$this->assertSame( $status, get_post_status( $taken_down ) );
 		$this->assertSame( 'publish', get_post_status( $kept ) );
+	}
+
+	/**
+	 * Statuses a moderator takes a translation down with.
+	 *
+	 * @return array[]
+	 */
+	public function data_takedown_statuses(): array {
+		return array(
+			'trashed'  => array( 'trash' ),
+			'unlisted' => array( UNLISTED_STATUS ),
+		);
+	}
+
+	/**
+	 * Catches the job writing over a translation a moderator unlisted on its own, which republishes it.
+	 */
+	public function test_job_leaves_a_translation_taken_down_on_its_own(): void {
+		list( $taken_down ) = $this->translate_all();
+		$this->set_status( $taken_down, UNLISTED_STATUS );
+
+		$pattern     = $this->translate( 'fr_FR', array( 'Title' => 'Nouveau titre' ) );
+		$pattern->ID = $taken_down;
+
+		$this->assertSame( $taken_down, create_or_update_translated_pattern( $pattern, $written ) );
+		$this->assertFalse( $written );
+		$this->assertSame( UNLISTED_STATUS, get_post_status( $taken_down ) );
+	}
+
+	/**
+	 * Catches a queued chunk writing a translation with the `publish` status it cached before another request
+	 * unlisted the original.
+	 */
+	public function test_job_skips_an_original_unpublished_after_it_was_loaded(): void {
+		global $wpdb;
+
+		$pattern = $this->translate( 'fr_FR', array( 'Title' => 'Titre' ) );
+		$wpdb->update( $wpdb->posts, array( 'post_status' => UNLISTED_STATUS ), array( 'ID' => $this->parent_id ) );
+
+		$result = create_or_update_translated_pattern( $pattern );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'pattern_translation_original_unpublished', $result->get_error_code() );
+	}
+
+	/**
+	 * Catches the command reporting the same change on every run for an original past its scheduled time, whose
+	 * `future` status `wp_update_post()` turns into `publish` on the translation.
+	 */
+	public function test_original_past_its_scheduled_time_is_left_alone(): void {
+		global $wpdb;
+
+		$this->translate_all();
+
+		$past = gmdate( 'Y-m-d H:i:s', strtotime( '-1 hour' ) );
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_status'   => 'future',
+				'post_date'     => get_date_from_gmt( $past ),
+				'post_date_gmt' => $past,
+			),
+			array( 'ID' => $this->parent_id )
+		);
+		clean_post_cache( $this->parent_id );
+
+		$this->assertSame( array( 'checked' => 2 ), sync_all_translation_statuses( true ) );
 	}
 
 	/**
