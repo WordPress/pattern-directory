@@ -16,6 +16,11 @@ import {
 	/* eslint-enable @wordpress/no-unsafe-wp-apis */
 } from '@wordpress/components';
 
+/**
+ * Internal dependencies
+ */
+import OpenverseThumbnail from './thumbnail';
+
 // Helper function to match an item from a list by ID.
 function includesById( list = [], item = {} ) {
 	return !! list.find( ( { id } ) => id === item.id );
@@ -55,7 +60,7 @@ export default function OpenverseGridItems( { items, multiple, selected, onSelec
 						} }
 						aria-selected={ includesById( selected, item ) }
 					>
-						<img src={ item.thumbnail } alt={ item.title } />
+						<OpenverseThumbnail item={ item } />
 					</CompositeItem>
 				);
 			} ) }
