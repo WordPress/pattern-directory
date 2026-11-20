@@ -152,6 +152,15 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Catches a made-up locale running the ~2 s lookup, so each new string an anonymous client sends costs one.
+	 */
+	public function test_unknown_locale_skips_the_lookup(): void {
+		$this->get_ids( array( 'locale' => 'xx_XX' ) );
+
+		$this->assertFalse( wp_cache_get( 'translated-originals:xx_XX', 'wporg-patterns' ) );
+	}
+
+	/**
 	 * Catches search dropping the original when its translation matches too, as an English query must find it.
 	 */
 	public function test_search_keeps_the_original(): void {

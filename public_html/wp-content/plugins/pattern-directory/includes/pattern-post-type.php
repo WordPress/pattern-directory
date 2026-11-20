@@ -1008,8 +1008,8 @@ function filter_clauses_translated_originals( $clauses, $query ) {
 
 	$locale = $query->meta_query->queries['orderby_locale']['value'][0] ?? '';
 
-	// English listings have no translations to swap in.
-	if ( ! is_string( $locale ) || '' === $locale || 'en_US' === $locale ) {
+	// English listings have no translations to swap in, nor do locales a pattern can't be saved in.
+	if ( ! is_string( $locale ) || 'en_US' === $locale || ! isset( get_locales()[ $locale ] ) ) {
 		return $clauses;
 	}
 
