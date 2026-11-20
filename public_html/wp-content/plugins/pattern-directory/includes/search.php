@@ -8,6 +8,7 @@
 namespace WordPressdotorg\Pattern_Directory\Search;
 
 use WP_Query;
+use Automattic\Jetpack\Search\Helper as Jetpack_Search_Helper;
 use Automattic\Jetpack\Search\WPES\Query_Parser as Jetpack_WPES_Search_Query_Parser;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
@@ -51,7 +52,13 @@ function sync_pattern_meta( $post_meta_safelist ) {
  * @return bool
  */
 function should_handle_query( $handle_query, $query ) {
-	return defined( 'REST_REQUEST' ) && REST_REQUEST && $query->is_search() && POST_TYPE === $query->get( 'post_type' );
+	/*
+	 * MySQL handles searches the index can't filter: the search API has no query type that checks every block
+	 * against `allowed_blocks`, and the index has no author login for authors who aren't members of the site.
+	 */
+	return defined( 'REST_REQUEST' ) && REST_REQUEST && $query->is_search() && POST_TYPE === $query->get( 'post_type' )
+		&& empty( $query->get( 'meta_query' )['allowed_blocks'] )
+		&& empty( $query->get( 'author' ) ) && empty( $query->get( 'author__in' ) );
 }
 
 /**
@@ -152,6 +159,9 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 		$filter['bool']['must'][] = $tax_filter;
 	}
 
+	// This replaces the filter Jetpack built, so carry over what it covered and add what it doesn't know about.
+	$filter['bool']['must'] = array_merge( $filter['bool']['must'], get_query_filters( $wp_query->query_vars ) );
+
 	$parser->add_query( $must_query, 'must' );
 	$parser->add_query( $should_query, 'should' );
 	$parser->add_filter( $filter );
@@ -159,15 +169,50 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 	$es_query_args['query']  = $parser->build_query();
 	$es_query_args['filter'] = $parser->build_filter();
 
-	$es_query_args['sort'] = array(
-		array(
-			'_score' => array(
-				'order' => 'desc',
+	// Jetpack only pages; `from` is the ES offset. Like WP_Query, any numeric offset beats `paged`.
+	if ( is_numeric( $wp_query->get( 'offset' ) ) ) {
+		$offset                = absint( $wp_query->get( 'offset' ) );
+		$max_offset            = Jetpack_Search_Helper::get_max_offset();
+		$es_query_args['from'] = min( $offset, $max_offset );
+
+		// Past the cap, return nothing rather than the capped page again, as Jetpack does for `paged`.
+		if ( $offset + $es_query_args['size'] > $max_offset ) {
+			$es_query_args['size'] = 0;
+		}
+	}
+
+	// Jetpack already sorted by `orderby`, which the REST API sets to `relevance` for a search with the default order.
+	if ( empty( $es_query_args['sort'] ) ) {
+		$es_query_args['sort'] = array(
+			array(
+				'_score' => array(
+					'order' => 'desc',
+				),
 			),
-		),
-	);
+		);
+	}
 
 	return $es_query_args;
+}
+
+/**
+ * Convert the query's ID restriction into Elasticsearch filter clauses.
+ *
+ * The MySQL query applies it through `post__in`, which an ES search otherwise ignores.
+ *
+ * @param array $query_vars The query's vars.
+ *
+ * @return array[] Filter clauses, all of which must match.
+ */
+function get_query_filters( $query_vars ) {
+	$clauses = array();
+
+	// `post__in` is also how the REST filters say "match nothing", with an ID of 0 or -1.
+	if ( ! empty( $query_vars['post__in'] ) ) {
+		$clauses[] = array( 'terms' => array( 'post_id' => array_map( 'intval', (array) $query_vars['post__in'] ) ) );
+	}
+
+	return $clauses;
 }
 
 /**
