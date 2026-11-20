@@ -993,7 +993,8 @@ function filter_orderby_locale( $orderby, $query ) {
  * Leave out English originals whose translation is listed in the same results.
  *
  * Opt-in through the `hide_translated_originals` query var, so lists of specific patterns, like favorites, keep
- * the originals they hold. Searches keep both, so an English query still finds the original.
+ * the originals they hold. Searches keep both, so an English query still finds the original. So does the Popular
+ * sort, which only lists patterns with a favorite count, and translations rarely have one.
  *
  * @param string[]  $clauses The query's SQL clauses.
  * @param \WP_Query $query   The WP_Query object.
@@ -1002,7 +1003,7 @@ function filter_orderby_locale( $orderby, $query ) {
 function filter_clauses_translated_originals( $clauses, $query ) {
 	global $wpdb;
 
-	if ( ! $query->get( 'hide_translated_originals' ) || $query->is_search() ) {
+	if ( ! $query->get( 'hide_translated_originals' ) || $query->is_search() || 'wporg-pattern-favorites' === $query->get( 'meta_key' ) ) {
 		return $clauses;
 	}
 

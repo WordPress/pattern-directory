@@ -13,6 +13,7 @@ use WP_REST_Request;
 use WP_UnitTestCase;
 use WP_UnitTest_Factory;
 use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\register_post_type_data;
+use function WordPressdotorg\Pattern_Directory\Pattern_Post_Type\set_translated_original;
 use const WordPressdotorg\Pattern_Directory\Pattern_Post_Type\POST_TYPE;
 
 /**
@@ -150,6 +151,25 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Catches a rebuild caching a list that predates a translation change made during its ~2 s lookup.
+	 */
+	public function test_rebuild_drops_a_list_outdated_during_its_lookup(): void {
+		wp_cache_delete( 'translated-originals:es_ES', 'wporg-patterns' );
+
+		$unpublish_during_lookup = function ( string $sql ): string {
+			if ( false !== strpos( $sql, 'AS translation_locale' ) ) {
+				set_translated_original( 'es_ES', self::$ids['original'], false );
+			}
+			return $sql;
+		};
+		add_filter( 'query', $unpublish_during_lookup );
+		$this->get_ids( array( 'locale' => 'es_ES' ) );
+		remove_filter( 'query', $unpublish_during_lookup );
+
+		$this->assertFalse( wp_cache_get( 'translated-originals:es_ES', 'wporg-patterns' ) );
+	}
+
+	/**
 	 * Catches search dropping the original when its translation matches too, as an English query must find it.
 	 */
 	public function test_search_keeps_the_original(): void {
@@ -161,6 +181,23 @@ class Translated_Originals_Test extends WP_UnitTestCase {
 		);
 
 		$this->assertContains( self::$ids['translation'], $ids );
+		$this->assertContains( self::$ids['original'], $ids );
+	}
+
+	/**
+	 * Catches the Popular sort dropping a translated pattern: it lists only patterns with a favorite count, and
+	 * the translation has none.
+	 */
+	public function test_popular_sort_keeps_the_original(): void {
+		update_post_meta( self::$ids['original'], 'wporg-pattern-favorites', 3 );
+
+		$ids = $this->get_ids(
+			array(
+				'locale'  => 'es_ES',
+				'orderby' => 'favorite_count',
+			)
+		);
+
 		$this->assertContains( self::$ids['original'], $ids );
 	}
 
