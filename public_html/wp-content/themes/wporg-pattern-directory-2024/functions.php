@@ -268,6 +268,8 @@ function modify_patterns_query( $query ) {
 				),
 			)
 		);
+
+		$query->set( 'hide_translated_originals', true );
 	}
 }
 

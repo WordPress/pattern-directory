@@ -23,3 +23,4 @@ require_once __DIR__ . '/includes/admin.php';
 require_once __DIR__ . '/includes/notifications.php';
 require_once __DIR__ . '/includes/badges.php';
 require_once __DIR__ . '/includes/profile-activity.php';
+require_once __DIR__ . '/includes/translated-originals.php';
