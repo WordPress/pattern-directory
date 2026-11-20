@@ -52,7 +52,9 @@ function sync_pattern_meta( $post_meta_safelist ) {
  * @return bool
  */
 function should_handle_query( $handle_query, $query ) {
-	return defined( 'REST_REQUEST' ) && REST_REQUEST && $query->is_search() && POST_TYPE === $query->get( 'post_type' );
+	// The search API allows no query type that can check every block against `allowed_blocks`, so MySQL does that.
+	return defined( 'REST_REQUEST' ) && REST_REQUEST && $query->is_search() && POST_TYPE === $query->get( 'post_type' )
+		&& empty( $query->get( 'meta_query' )['allowed_blocks'] );
 }
 
 /**
@@ -190,10 +192,9 @@ function modify_es_query_args( $es_query_args, $wp_query ) {
 }
 
 /**
- * Convert the query's author, ID and allowed blocks restrictions into Elasticsearch filter clauses.
+ * Convert the query's author and ID restrictions into Elasticsearch filter clauses.
  *
- * The MySQL query applies these through `author`, `post__in` and the `allowed_blocks` meta query, which an ES
- * search otherwise ignores.
+ * The MySQL query applies these through `author` and `post__in`, which an ES search otherwise ignores.
  *
  * @param array $query_vars The query's vars.
  *
@@ -233,12 +234,6 @@ function get_query_filters( $query_vars ) {
 		$clauses[] = $logins
 			? array( 'terms' => array( 'author_login' => $logins ) )
 			: array( 'terms' => array( 'post_id' => array( 0 ) ) );
-	}
-
-	// Lucene regular expressions are always anchored and treat `^` and `$` as literals, so drop the MySQL anchors.
-	$allowed_blocks = $query_vars['meta_query']['allowed_blocks']['value'] ?? '';
-	if ( $allowed_blocks ) {
-		$clauses[] = array( 'regexp' => array( 'meta.wpop_contains_block_types.value.raw' => trim( $allowed_blocks, '^$' ) ) );
 	}
 
 	return $clauses;

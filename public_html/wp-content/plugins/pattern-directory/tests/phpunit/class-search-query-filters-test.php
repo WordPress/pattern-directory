@@ -65,15 +65,14 @@ class Search_Query_Filters_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Catches a search returning other authors' patterns, patterns with blocks outside the list, or other IDs.
+	 * Catches a search returning other authors' patterns or other IDs.
 	 */
-	public function test_search_keeps_author_blocks_and_ids(): void {
+	public function test_search_keeps_author_and_ids(): void {
 		$args = $this->get_query_args(
 			array(
-				'search'         => 'image',
-				'author_name'    => 'pattern-author',
-				'allowed_blocks' => array( 'core/heading', 'core/gallery' ),
-				'include'        => array( 12, 34 ),
+				'search'      => 'image',
+				'author_name' => 'pattern-author',
+				'include'     => array( 12, 34 ),
 			)
 		);
 
@@ -81,7 +80,6 @@ class Search_Query_Filters_Test extends WP_UnitTestCase {
 			array(
 				array( 'terms' => array( 'post_id' => array( 12, 34 ) ) ),
 				array( 'terms' => array( 'author_login' => array( 'pattern-author' ) ) ),
-				array( 'regexp' => array( 'meta.wpop_contains_block_types.value.raw' => '((core/heading|core/gallery),?)+' ) ),
 			),
 			get_query_filters( $args )
 		);
@@ -122,6 +120,7 @@ class Search_Query_Filters_Test extends WP_UnitTestCase {
 				'date',
 			),
 			'by title'            => array( array( 'orderby' => 'title' ), 'title' ),
+			'searching for 0'     => array( array( 'search' => '0' ), 'relevance' ),
 		);
 	}
 }
