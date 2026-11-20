@@ -162,6 +162,37 @@ class Pattern_Translation_Lookup_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A trashed translation is still found, so the job keeps it down instead of creating a new one.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Translations\Pattern::find_existing_translation
+	 */
+	public function test_finds_a_trashed_translation(): void {
+		$translation_id = $this->create_child( self::$victim, self::LOCALE, true, 'publish' );
+		wp_trash_post( $translation_id );
+
+		$found = Translations_Pattern::find_existing_translation( self::$parent_id, self::LOCALE );
+
+		$this->assertNotNull( $found );
+		$this->assertSame( $translation_id, $found->ID );
+	}
+
+	/**
+	 * With a trashed translation and its live duplicate both present, the live one is found.
+	 *
+	 * @covers \WordPressdotorg\Pattern_Translations\Pattern::find_existing_translation
+	 */
+	public function test_prefers_a_live_translation_over_a_trashed_one(): void {
+		$trashed_id = $this->create_child( self::$victim, self::LOCALE, true, 'publish' );
+		wp_trash_post( $trashed_id );
+		$live_id = $this->create_child( self::$victim, self::LOCALE, true, 'publish' );
+
+		$found = Translations_Pattern::find_existing_translation( self::$parent_id, self::LOCALE );
+
+		$this->assertNotNull( $found );
+		$this->assertSame( $live_id, $found->ID );
+	}
+
+	/**
 	 * With both present, the pipeline's own translation wins regardless of which was created first.
 	 *
 	 * @covers \WordPressdotorg\Pattern_Translations\Pattern::find_existing_translation

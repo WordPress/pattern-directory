@@ -153,7 +153,8 @@ class Pattern {
 			array(
 				'post_parent' => $parent_id,
 				'post_type'   => POST_TYPE,
-				'post_status' => 'any',
+				// Not `any`, which leaves out trash, so a translation a moderator trashed would be recreated.
+				'post_status' => array_keys( get_post_stati() ),
 				'meta_query'  => array(
 					'relation' => 'AND',
 					array(
@@ -167,6 +168,13 @@ class Pattern {
 				),
 			)
 		);
+
+		// Earlier runs recreated trashed translations, so prefer the live duplicate.
+		foreach ( $children as $child ) {
+			if ( 'trash' !== $child->post_status ) {
+				return $child;
+			}
+		}
 
 		return $children ? array_shift( $children ) : null;
 	}
