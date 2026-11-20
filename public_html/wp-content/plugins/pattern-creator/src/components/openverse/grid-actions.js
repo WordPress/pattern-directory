@@ -4,6 +4,11 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 
+/**
+ * Internal dependencies
+ */
+import OpenverseThumbnail from './thumbnail';
+
 export default function OpenverseGridActions( { actions, items, onClear } ) {
 	return (
 		<div className="pattern-openverse__footer">
@@ -22,7 +27,7 @@ export default function OpenverseGridActions( { actions, items, onClear } ) {
 						</Button>
 					</div>
 					{ items.map( ( item ) => (
-						<img key={ `thumb-${ item.id }` } src={ item.thumbnail } alt={ item.title } />
+						<OpenverseThumbnail key={ `thumb-${ item.id }` } item={ item } />
 					) ) }
 				</div>
 			) : null }
