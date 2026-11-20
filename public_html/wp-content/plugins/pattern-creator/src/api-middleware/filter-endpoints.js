@@ -103,6 +103,22 @@ function maybeUpdateContext( path ) {
 	return path;
 }
 
+/**
+ * Fill in `content.raw` from the rendered content, which is all the `view` context returns.
+ *
+ * @param {Object|Array} data A post, or a list of posts.
+ * @return {Object|Array} The same data, with `content.raw` set.
+ */
+function addRawContent( data ) {
+	const posts = Array.isArray( data ) ? data : [ data ];
+	posts.forEach( ( post ) => {
+		if ( post?.content && ! post.content.raw ) {
+			post.content.raw = post.content.rendered || '';
+		}
+	} );
+	return data;
+}
+
 // Use a middleware provider to intercept and modify API calls.
 // Short-circuit POST requests, bound queries, allow media, etc.
 export default async function ( options, next ) {
@@ -160,13 +176,21 @@ export default async function ( options, next ) {
 				response[ 'wporg-pattern' ].viewable = false;
 			}
 		} else if ( options.path.includes( '/wp/v2/posts' ) ) {
-			response.forEach( ( post, index ) => {
-				if ( post.content && ! post.content.raw ) {
-					const content = post.content.rendered || '';
-					post.content.raw = content;
+			// Entity queries ask for the raw `Response` to read the totals, so
+			// rebuild it around the filtered body, keeping its headers.
+			if ( response instanceof Response ) {
+				if ( ! response.ok ) {
+					return response;
 				}
-				response[ index ] = post;
-			} );
+				const body = addRawContent( await response.json() );
+				return new Response( JSON.stringify( body ), {
+					status: response.status,
+					statusText: response.statusText,
+					headers: response.headers,
+				} );
+			}
+
+			return addRawContent( response );
 		}
 	}
 

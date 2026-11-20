@@ -52,3 +52,42 @@ describe( 'filterEndpoints navigation mocks', () => {
 		expect( response.headers.get( 'Allow' ) ).toBe( 'GET' );
 	} );
 } );
+
+describe( 'filterEndpoints post content', () => {
+	const posts = [
+		{ id: 1, content: { rendered: '<p>First</p>', protected: false } },
+		{ id: 2, content: { rendered: '<p>Second</p>', raw: 'Raw', protected: false } },
+	];
+
+	it( 'adds the raw content to a parsed list of posts', async () => {
+		const response = await filterEndpoints( { path: '/wp/v2/posts?context=view' }, async () =>
+			structuredClone( posts )
+		);
+
+		expect( response.map( ( post ) => post.content.raw ) ).toEqual( [ '<p>First</p>', 'Raw' ] );
+	} );
+
+	it( 'adds the raw content to a single post', async () => {
+		const response = await filterEndpoints( { path: '/wp/v2/posts/1?context=view' }, async () =>
+			structuredClone( posts[ 0 ] )
+		);
+
+		expect( response.content.raw ).toBe( '<p>First</p>' );
+	} );
+
+	it( 'keeps the headers of a raw response for paginated post queries', async () => {
+		const response = await filterEndpoints(
+			{ path: '/wp/v2/posts?context=edit&per_page=5', parse: false },
+			async () =>
+				new Response( JSON.stringify( posts ), {
+					headers: { 'Content-Type': 'application/json', 'X-WP-Total': '2', 'X-WP-TotalPages': '1' },
+				} )
+		);
+
+		expect( response ).toBeInstanceOf( Response );
+		expect( response.headers.get( 'X-WP-Total' ) ).toBe( '2' );
+		expect( response.headers.get( 'X-WP-TotalPages' ) ).toBe( '1' );
+		const body = await response.json();
+		expect( body.map( ( post ) => post.content.raw ) ).toEqual( [ '<p>First</p>', 'Raw' ] );
+	} );
+} );
